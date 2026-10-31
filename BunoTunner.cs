@@ -30,8 +30,8 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - codigo aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.23.1.0")]
-[assembly: AssemblyFileVersion("1.23.1.0")]
+[assembly: AssemblyVersion("1.24.0.0")]
+[assembly: AssemblyFileVersion("1.24.0.0")]
 
 namespace BunoTunner
 {
@@ -1821,7 +1821,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.23.1";
+        public const string Version = "v1.24.0";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -5089,6 +5089,31 @@ namespace BunoTunner
                 }
             }
             AlertText = txt;
+            OverheatBeep(now);
+        }
+
+        // aviso sonoro de superaquecimento: bipe de 1 s quando QUALQUER sensor de temperatura chega a 95 C.
+        // Para tocar de novo e preciso o sensor ter baixado de 95 C e subido outra vez, e ter passado ao menos 1 minuto do ultimo bipe.
+        const float OverheatC = 95f;
+        static readonly HashSet<string> overHot = new HashSet<string>();
+        static DateTime lastOverheat = DateTime.MinValue;
+        static void OverheatBeep(DateTime now)
+        {
+            bool fresh = false;
+            foreach (Sn s in all)
+            {
+                if (s.Type != "Temperature" || !s.IsRealTemp || !s.Seen || !s.Last.HasValue) continue;
+                float v = s.Last.Value; string k = s.Key;
+                if (v >= OverheatC && v < 200f) { if (overHot.Add(k)) fresh = true; }
+                else if (v < OverheatC) overHot.Remove(k);
+            }
+            if (!fresh || (now - lastOverheat).TotalSeconds < 60) return;
+            lastOverheat = now;
+            Th.ThreadPool.QueueUserWorkItem(delegate
+            {
+                try { Console.Beep(1000, 1000); }
+                catch (Exception) { try { System.Media.SystemSounds.Hand.Play(); } catch (Exception) { } }
+            });
         }
 
         static void LoadAlerts()

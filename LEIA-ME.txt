@@ -311,3 +311,6 @@ v1.23.1
 Licenca
 - O codigo do BunoTunner e distribuido sob a licenca MIT (arquivo LICENSE).
 - Bibliotecas de terceiros embutidas mantem as licencas originais: LibreHardwareMonitor (MPL-2.0) e suas dependencias.
+
+v1.24.0
+- Aviso sonoro de superaquecimento: bipe de 1 segundo quando qualquer sensor de temperatura chega a 95 C. So toca de novo se o sensor baixar de 95 C e subir outra vez, e no minimo 1 minuto depois do ultimo bipe.
