@@ -30,8 +30,8 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - codigo aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.28.0.0")]
-[assembly: AssemblyFileVersion("1.28.0.0")]
+[assembly: AssemblyVersion("1.28.1.0")]
+[assembly: AssemblyFileVersion("1.28.1.0")]
 
 namespace BunoTunner
 {
@@ -1853,7 +1853,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.28.0";
+        public const string Version = "v1.28.1";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -6329,7 +6329,6 @@ namespace BunoTunner
             chkOnly = UI.Opt(f, "So no grafico", 646, 8, 100, false);
             UI.Btn(f, "Essenciais", 756, 5, 84, delegate { Essentials(); });
             UI.Btn(f, "Desmarcar tudo", 846, 5, 110, delegate { ClearPlot(); });
-            UI.Btn(f, "?  Como usar", 962, 5, 96, delegate { ShowHelp(); });
             tip.SetToolTip(txSearch, "Digite parte do nome. Varias palavras = todas precisam aparecer (ex.: core temp). Ctrl+A seleciona tudo.");
             tip.SetToolTip(txSearch.Box, "Digite parte do nome. Varias palavras = todas precisam aparecer (ex.: core temp). Ctrl+A seleciona tudo.");
             tip.SetToolTip(cbType, "Filtrar por tipo de medida (temperatura, uso, clock...)");

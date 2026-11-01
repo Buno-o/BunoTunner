@@ -340,3 +340,6 @@ v1.28.0 (TESTE)
 - A lista da aba Memoria muda conforme a plataforma (Intel, Ryzen DDR4, Ryzen DDR5); o que nao for lido fica "-".
 - Os metodos antigos continuam: se o mapa novo falhar, o programa tenta a deteccao anterior e, por fim, o CPU-Z (se estiver na pasta).
 - Creditos: o mapa dos registradores UMC do Ryzen foi conferido com o projeto ZenTimings / ZenStates-Core (irusanov, GPL-3.0): https://github.com/irusanov/ZenTimings
+
+v1.28.1
+- Menu Sensores: removido o botao "Como usar".
