@@ -30,8 +30,8 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - codigo aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.31.0.0")]
-[assembly: AssemblyFileVersion("1.31.0.0")]
+[assembly: AssemblyVersion("1.32.0.0")]
+[assembly: AssemblyFileVersion("1.32.0.0")]
 
 namespace BunoTunner
 {
@@ -367,20 +367,18 @@ namespace BunoTunner
         static readonly string[] Pairs2 = {
             "Desfazer", "Undo", "Refazer", "Redo", "Limpar lista", "Clear list", "Restaurar padrao", "Restore defaults", "Exportar...", "Export...", "Importar...", "Import...",
             "Todos os grupos", "All groups", "Adicionar ao overlay", "Add to overlay", "Adicionar todos os resultados da busca", "Add all search results",
-            "Aplicar esta cor a todos os itens", "Apply this color to all items", "Escala do grafico de frametime:", "Frametime graph scale:",
+            "Aplicar esta cor a todos os itens", "Apply this color to all items",
             "Configuracao do overlay (*.bto)|*.bto|Todos os arquivos|*.*", "Overlay settings (*.bto)|*.bto|All files|*.*",
             "Exportar configuracao do overlay", "Export overlay settings", "Importar configuracao do overlay", "Import overlay settings",
             "Configuracao exportada.", "Settings exported.", "Configuracao importada. Use Ctrl+Z para voltar a anterior.", "Settings imported. Press Ctrl+Z to go back to the previous ones.",
             "Esse arquivo nao tem uma configuracao valida do overlay.", "This file does not contain a valid overlay configuration.",
             "Defina antes uma cor para o item selecionado.", "First set a color for the selected item.",
             "Restaurar todas as opcoes do overlay (itens, cores, nomes, tamanho, opacidade...) para o padrao?\nVoce pode desfazer com Ctrl+Z.", "Restore all overlay options (items, colors, names, size, opacity...) to the defaults?\nYou can undo with Ctrl+Z.",
-            "Frametime (ms)", "Frametime (ms)", "1% low (FPS)", "1% low (FPS)", "Grafico de frametime", "Frametime graph",
             "Cor...", "Color...", "Renomear...", "Rename...", "Renomear", "Rename", "Subir", "Move up", "Descer", "Move down", "Resetar", "Reset",
             "Resetar cor e nome", "Reset color and name", "Remover do overlay", "Remove from overlay",
             "Nome que aparece no overlay (deixe vazio para voltar ao nome original):", "Name shown in the overlay (leave empty to restore the original):",
             "Selecione antes um item na lista da direita (Ordem no overlay).", "First select an item in the right-hand list (Order in overlay).",
-            "Sup. centro", "Top center", "Inf. centro", "Bottom center", "Modelos:", "Presets:", "FPS + frametime", "FPS + frametime", "FPS + grafico", "FPS + graph",
-            "Compacto (so os valores, sem nomes)", "Compact (values only, no names)", "Aplicar a cor tambem ao nome", "Also apply the color to the name",
+                        "Compacto (so os valores, sem nomes)", "Compact (values only, no names)", "Aplicar a cor tambem ao nome", "Also apply the color to the name",
             "Temperatura em vermelho a partir de:", "Red temperature from:", "Desligado", "Off",
             "Ativado", "Enabled", "Desativado", "Disabled",
             "Interface fisica (PHY)", "Physical interface (PHY)",
@@ -1870,7 +1868,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.31.0";
+        public const string Version = "v1.32.0";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -5392,39 +5390,8 @@ namespace BunoTunner
         static ulong sess, trace;
         static volatile bool running;
         static readonly object lk = new object();
-        // Estatisticas de frametime calculadas a partir dos intervalos entre apresentacoes de quadro (Present)
-        public class FtInfo { public float AvgMs, Low1Fps; public float[] Graph = new float[0]; }
-        class FtRing
-        {
-            float[] a = new float[1200]; int n, h; long last;
-            public void Add(long ts)
-            {
-                if (last != 0)
-                {
-                    double ms = (ts - last) * 1000.0 / Stopwatch.Frequency;
-                    if (ms > 0 && ms < 2000) { a[h] = (float)ms; h = (h + 1) % a.Length; if (n < a.Length) n++; }
-                }
-                if (ts > last) last = ts;
-            }
-            float At(int back) { return a[(((h - 1 - back) % a.Length) + a.Length) % a.Length]; }
-            public FtInfo Stats()
-            {
-                FtInfo f = new FtInfo(); if (n == 0) return f;
-                double sum = 0; int c = 0;
-                for (int i = 0; i < n && sum < 1000; i++) { sum += At(i); c++; }             // media do ultimo segundo
-                f.AvgMs = c > 0 ? (float)(sum / c) : 0;
-                List<float> w = new List<float>(); sum = 0;
-                for (int i = 0; i < n && sum < 5000; i++) { float v = At(i); w.Add(v); sum += v; }   // ultimos 5 s
-                w.Sort();
-                int idx = Math.Max(0, (int)Math.Ceiling(w.Count * 0.99) - 1);
-                f.Low1Fps = w.Count > 0 && w[idx] > 0 ? 1000f / w[idx] : 0;                // 1% low = FPS do quadro no percentil 99 de duracao
-                int g = Math.Min(n, 150); f.Graph = new float[g];
-                for (int i = 0; i < g; i++) f.Graph[g - 1 - i] = At(i);
-                return f;
-            }
-        }
-        class Kq { public Queue<long> Q = new Queue<long>(); public long Last, Newest; public FtRing R = new FtRing(); }
-        class PidInfo { public Queue<long> Q = new Queue<long>(); public long Last, Newest, ApiAt; public bool D9; public string Api, ApiMode; public Dictionary<int, Kq> K = new Dictionary<int, Kq>(); public FtRing R = new FtRing(); }
+        class Kq { public Queue<long> Q = new Queue<long>(); public long Last, Newest; }
+        class PidInfo { public Queue<long> Q = new Queue<long>(); public long Last, Newest, ApiAt; public bool D9; public string Api, ApiMode; public Dictionary<int, Kq> K = new Dictionary<int, Kq>(); }
         static readonly int[] KIds = { 0xB8, 0xA8, 0xA6 };   // DxgKrnl: Present_Info, Flip_Info, Blit_Info (apps que nao usam DXGI: Vulkan/OpenGL)
         static readonly Dictionary<uint, PidInfo> pids = new Dictionary<uint, PidInfo>();
         public static string Error = "";
@@ -5521,7 +5488,7 @@ namespace BunoTunner
                     {
                         PidInfo pk; if (!pids.TryGetValue(pid, out pk)) { pk = new PidInfo(); pids[pid] = pk; }
                         Kq kq; if (!pk.K.TryGetValue(id, out kq)) { kq = new Kq(); pk.K[id] = kq; }
-                        kq.Q.Enqueue(ts); kq.Newest = ts; kq.Last = arrive; kq.R.Add(ts);
+                        kq.Q.Enqueue(ts); kq.Newest = ts; kq.Last = arrive;
                         long kc = ts - Stopwatch.Frequency * 2;
                         while (kq.Q.Count > 0 && kq.Q.Peek() < kc) kq.Q.Dequeue();
                     }
@@ -5530,7 +5497,7 @@ namespace BunoTunner
                 lock (lk)
                 {
                     PidInfo pi; if (!pids.TryGetValue(pid, out pi)) { pi = new PidInfo(); pids[pid] = pi; }
-                    pi.Q.Enqueue(ts); pi.Newest = ts; pi.Last = arrive; pi.R.Add(ts); if (d9) pi.D9 = true;
+                    pi.Q.Enqueue(ts); pi.Newest = ts; pi.Last = arrive; if (d9) pi.D9 = true;
                     long cut = ts - Stopwatch.Frequency * 2;
                     while (pi.Q.Count > 0 && pi.Q.Peek() < cut) pi.Q.Dequeue();
                 }
@@ -5539,28 +5506,27 @@ namespace BunoTunner
         }
 
         // quadros por segundo do processo (se ele esta apresentando quadros agora) e a API grafica
-        public static bool Get(uint pid, out int fps, out string api, out FtInfo ft)
+        public static bool Get(uint pid, out int fps, out string api)
         {
-            fps = 0; api = null; ft = null; PidInfo pi; FtRing ring = null; bool dk = false; long now = Stopwatch.GetTimestamp(), hz = Stopwatch.Frequency;
+            fps = 0; api = null; PidInfo pi; bool dk = false; long now = Stopwatch.GetTimestamp(), hz = Stopwatch.Frequency;
             lock (lk)
             {
                 if (pids.Count > 64) { List<uint> old = new List<uint>(); foreach (KeyValuePair<uint, PidInfo> k in pids) if (now - k.Value.Last > hz * 30) old.Add(k.Key); foreach (uint o in old) pids.Remove(o); }
                 if (!pids.TryGetValue(pid, out pi)) return false;
                 Queue<long> q; long newest;
-                if (pi.Last != 0 && now - pi.Last <= hz * 3) { q = pi.Q; newest = pi.Newest; ring = pi.R; }          // DXGI / D3D9
+                if (pi.Last != 0 && now - pi.Last <= hz * 3) { q = pi.Q; newest = pi.Newest; }          // DXGI / D3D9
                 else
                 {
                     q = null; newest = 0; dk = true;
                     foreach (int id in KIds)
                     {
-                        Kq kq; if (pi.K.TryGetValue(id, out kq) && now - kq.Last <= hz * 3) { q = kq.Q; newest = kq.Newest; ring = kq.R; break; }
+                        Kq kq; if (pi.K.TryGetValue(id, out kq) && now - kq.Last <= hz * 3) { q = kq.Q; newest = kq.Newest; break; }
                     }
                     if (q == null) return false;
                 }
                 long cut = newest - hz; int n = 0;
                 foreach (long t in q) if (t > cut) n++;
                 fps = n;
-                if (ring != null) ft = ring.Stats();
             }
             string mode = dk ? "k" : "d";
             if (pi.Api == null || pi.ApiMode != mode || now - pi.ApiAt > hz * 10) { pi.Api = DetectApi(pid, pi.D9, dk); pi.ApiMode = mode; pi.ApiAt = now; }
@@ -5609,15 +5575,13 @@ namespace BunoTunner
 
     static class Overlay
     {
-        public class Row { public string Key, Label, Value; public bool Hot, HasCol; public Color Col; public float[] Graph; }
+        public class Row { public string Key, Label, Value; public bool Hot, HasCol; public Color Col; }
         public static readonly string[][] Specials = {
-            new string[] { "@FPS", "FPS (API + quadros/s)" }, new string[] { "@FT", "Frametime (ms)" },
-            new string[] { "@LOW", "1% low (FPS)" }, new string[] { "@FTG", "Grafico de frametime" } };
+            new string[] { "@FPS", "FPS (API + quadros/s)" } };
         public static Dictionary<string, Color> Colors = new Dictionary<string, Color>();
         public static Dictionary<string, string> Names = new Dictionary<string, string>();
-        public static bool Compact, ColName; public static int HotTemp = 80, GraphMs = 33;
+        public static bool Compact, ColName; public static int HotTemp = 80;
         static readonly string[] Sep = { "~|~" };
-        static FpsMon.FtInfo fpsFt;
 
         [StructLayout(LayoutKind.Sequential)] struct RECT { public int L, T, R, B; }
         [DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
@@ -5644,8 +5608,9 @@ namespace BunoTunner
             Scale = Math.Max(50, Math.Min(200, (int)Math.Round(I("ov.size", 100) / 5.0) * 5)); Mode = Math.Max(0, Math.Min(2, I("ov.mode", 0))); Opac = Math.Max(50, Math.Min(100, (int)Math.Round(I("ov.op", 85) / 5.0) * 5));
             Fx = Math.Max(0, Math.Min(1, Dd("ov.fx", 0))); Fy = Math.Max(0, Math.Min(1, Dd("ov.fy", 0)));
             Items = new List<string>(Settings.Get("ov.items", "@FPS").Split(new string[] { "~|~" }, StringSplitOptions.RemoveEmptyEntries));
+            Items.RemoveAll(delegate(string it) { return it.StartsWith("@") && it != "@FPS"; });   // itens removidos em versoes anteriores (frametime etc.)
             KeyMods = I("ov.keymods", 3); KeyVk = I("ov.keyvk", (int)Keys.O);   // padrao: Ctrl+Shift+O
-            Compact = Settings.Get("ov.compact", "0") == "1"; ColName = Settings.Get("ov.colname", "0") == "1"; HotTemp = I("ov.hot", 80); GraphMs = Math.Max(10, Math.Min(200, I("ov.gms", 33)));
+            Compact = Settings.Get("ov.compact", "0") == "1"; ColName = Settings.Get("ov.colname", "0") == "1"; HotTemp = I("ov.hot", 80);
             Colors.Clear(); Names.Clear();
             foreach (string e in Settings.Get("ov.cols", "").Split(Sep, StringSplitOptions.RemoveEmptyEntries))
             {
@@ -5660,7 +5625,7 @@ namespace BunoTunner
         public static void SetColor(string key, Color? c) { if (c.HasValue) Colors[key] = c.Value; else Colors.Remove(key); Commit(); }
         public static void SetName(string key, string n) { if (string.IsNullOrEmpty(n)) Names.Remove(key); else Names[key] = n.Replace("~", "").Replace("\r", " ").Replace("\n", " "); Commit(); }
         // todas as chaves da configuracao (usadas para salvar, desfazer/refazer e exportar/importar)
-        static readonly string[] CfgKeys = { "ov.size", "ov.mode", "ov.op", "ov.fx", "ov.fy", "ov.items", "ov.compact", "ov.colname", "ov.hot", "ov.gms", "ov.cols", "ov.names", "ov.keymods", "ov.keyvk" };
+        static readonly string[] CfgKeys = { "ov.size", "ov.mode", "ov.op", "ov.fx", "ov.fy", "ov.items", "ov.compact", "ov.colname", "ov.hot", "ov.cols", "ov.names", "ov.keymods", "ov.keyvk" };
         static List<KeyValuePair<string, string>> Dump()
         {
             List<KeyValuePair<string, string>> d = new List<KeyValuePair<string, string>>();
@@ -5671,7 +5636,7 @@ namespace BunoTunner
             d.Add(new KeyValuePair<string, string>("ov.fx", Fx.ToString("0.####", CultureInfo.InvariantCulture))); d.Add(new KeyValuePair<string, string>("ov.fy", Fy.ToString("0.####", CultureInfo.InvariantCulture)));
             d.Add(new KeyValuePair<string, string>("ov.items", string.Join("~|~", Items.ToArray())));
             d.Add(new KeyValuePair<string, string>("ov.compact", Compact ? "1" : "0")); d.Add(new KeyValuePair<string, string>("ov.colname", ColName ? "1" : "0"));
-            d.Add(new KeyValuePair<string, string>("ov.hot", HotTemp.ToString())); d.Add(new KeyValuePair<string, string>("ov.gms", GraphMs.ToString()));
+            d.Add(new KeyValuePair<string, string>("ov.hot", HotTemp.ToString()));
             d.Add(new KeyValuePair<string, string>("ov.cols", string.Join("~|~", cl.ToArray()))); d.Add(new KeyValuePair<string, string>("ov.names", string.Join("~|~", nl.ToArray())));
             d.Add(new KeyValuePair<string, string>("ov.keymods", KeyMods.ToString())); d.Add(new KeyValuePair<string, string>("ov.keyvk", KeyVk.ToString()));
             return d;
@@ -5727,7 +5692,7 @@ namespace BunoTunner
         public static void ResetAll()
         {
             Scale = 100; Opac = 85; Mode = 0; Fx = 0; Fy = 0; Items = new List<string>(new string[] { "@FPS" }); Colors.Clear(); Names.Clear();
-            Compact = false; ColName = false; HotTemp = 80; GraphMs = 33; Commit();
+            Compact = false; ColName = false; HotTemp = 80; Commit();
         }
         public static string KeyName()
         {
@@ -5840,10 +5805,9 @@ namespace BunoTunner
             if (pid != fpsPid || (DateTime.UtcNow - fpsAt).TotalMilliseconds >= 480)
             {
                 fpsPid = pid; fpsAt = DateTime.UtcNow; fpsApi = null; fpsVal = 0;
-                fpsGame = pid != myPid && pid != 0 && FpsMon.Get(pid, out fpsVal, out fpsApi, out fpsFt);
-                if (!fpsGame) fpsFt = null;
+                fpsGame = pid != myPid && pid != 0 && FpsMon.Get(pid, out fpsVal, out fpsApi);
             }
-            int fps = fpsVal; string api = fpsApi; bool game = fpsGame; FpsMon.FtInfo ft = fpsFt;
+            int fps = fpsVal; string api = fpsApi; bool game = fpsGame;
             if (Hidden && !Editing) { if (win != null && win.Visible) win.Hide(); return; }
             bool show = Editing || Mode == 2 || (game && (Mode == 1 || Covers(fg)));
             if (!show) { if (win != null && win.Visible) win.Hide(); return; }
@@ -5853,9 +5817,6 @@ namespace BunoTunner
             {
                 Row r = new Row(); r.Key = k;
                 if (k == "@FPS") { r.Label = api ?? "FPS"; r.Value = game ? fps + " FPS" : "-- FPS"; }
-                else if (k == "@FT") { r.Label = "Frametime"; r.Value = game && ft != null && ft.AvgMs > 0 ? ft.AvgMs.ToString("0.0") + " ms" : "-- ms"; }
-                else if (k == "@LOW") { r.Label = "1% low"; r.Value = game && ft != null && ft.Low1Fps > 0 ? ft.Low1Fps.ToString("0") + " FPS" : "-- FPS"; }
-                else if (k == "@FTG") { r.Label = "Frametime"; r.Value = game && ft != null && ft.AvgMs > 0 ? ft.AvgMs.ToString("0.0") + " ms" : "-- ms"; r.Graph = game && ft != null ? ft.Graph : new float[0]; }
                 else
                 {
                     Sn s = Find(k); r.Label = LabelOf(k); r.Value = s != null ? ValueOf(s) : "-";
@@ -5978,22 +5939,20 @@ namespace BunoTunner
             rows = r; scale = sc; scr = screen; edit = ed;
             Fonts();
             float s = sc / 100f; int pad = (int)(9 * s), gap = Overlay.Compact ? 0 : (int)(16 * s), rh = fl.Height + (int)(5 * s);
-            int lw = 0, vw = 0; bool anyGraph = false;
+            int lw = 0, vw = 0;
             foreach (Overlay.Row x in r)
             {
-                if (x.Graph != null) anyGraph = true;
                 if (!Overlay.Compact) lw = Math.Max(lw, (int)Math.Ceiling(TW(x.Label, fl)));
                 vw = Math.Max(vw, (int)Math.Ceiling(TW(x.Value, fv)));
             }
             int grip = ed ? (int)(14 * s) : 0;
             int w = Math.Max((int)(110 * s), pad * 2 + grip + lw + gap + vw);
             if (ed) w = Math.Max(w, (int)(250 * s));
-            if (anyGraph) w = Math.Max(w, (int)(190 * s));
             int y = pad - (int)(2 * s);
             hdrR = Rectangle.Empty; btnR = Rectangle.Empty;
             if (ed) { hdrR = new Rectangle(0, 0, w, (int)(22 * s)); y = hdrR.Height + (int)(4 * s); }
             rowR.Clear();
-            for (int i = 0; i < r.Count; i++) { int hh = r[i].Graph != null ? rh * 3 : rh; rowR.Add(new Rectangle(pad, y, w - pad * 2, hh)); y += hh; }
+            for (int i = 0; i < r.Count; i++) { rowR.Add(new Rectangle(pad, y, w - pad * 2, rh)); y += rh; }
             if (r.Count == 0) y += rh;
             if (ed)
             {
@@ -6050,13 +6009,11 @@ namespace BunoTunner
                     using (SolidBrush gb = new SolidBrush(cGrip))
                         for (int k = 0; k < 3; k++) g.FillRectangle(gb, rr.Left + 1, rr.Top + rr.Height / 2 - (int)(4 * s) + k * (int)(4 * s), (int)(8 * s), Math.Max(1, (int)(2 * s)));
                 }
-                int th = x.Graph != null ? fl.Height + (int)(5 * s) : rr.Height;
-                Rectangle lr = new Rectangle(rr.Left + grip, rr.Top, rr.Width - grip, th);
+                Rectangle lr = new Rectangle(rr.Left + grip, rr.Top, rr.Width - grip, rr.Height);
                 Color vc = x.Hot ? cHot : (x.HasCol ? x.Col : cValue);
                 Color lc = (Overlay.ColName && x.HasCol && !x.Hot) ? x.Col : cLabel;
                 if (!Overlay.Compact) DT(g, x.Label, fl, lr, lc, StringAlignment.Near);
                 DT(g, x.Value, fv, lr, vc, Overlay.Compact ? StringAlignment.Near : StringAlignment.Far);
-                if (x.Graph != null) DrawGraph(g, x.Graph, new Rectangle(lr.Left, rr.Top + th, lr.Width, rr.Height - th - 2), x.HasCol ? x.Col : cGood, s);
             }
             if (edit)
             {
@@ -6072,24 +6029,6 @@ namespace BunoTunner
                 }
                 DT(g, Lang.T("Concluir"), fv, btnR, Color.White, StringAlignment.Center);
             }
-        }
-
-        void DrawGraph(Graphics g, float[] d, Rectangle gr, Color line, float s)
-        {
-            if (gr.Width < 4 || gr.Height < 4) return;
-            using (SolidBrush gb = new SolidBrush(Color.FromArgb(Math.Min(bgAlpha, 150), 0, 0, 0))) g.FillRectangle(gb, gr);
-            float max = Overlay.GraphMs;                                              // escala fixa: picos acima dela saem do grafico
-            float yg = gr.Bottom - gr.Height * 16.7f / max;                           // referencia: 16,7 ms = 60 FPS
-            g.SetClip(gr);
-            if (yg > gr.Top) using (Pen gp = new Pen(Color.FromArgb(70, 255, 255, 255), 1f)) { gp.DashStyle = DashStyle.Dot; g.DrawLine(gp, gr.Left, yg, gr.Right, yg); }
-            if (d.Length >= 2)
-            {
-                PointF[] pts = new PointF[d.Length];
-                for (int i = 0; i < d.Length; i++)
-                    pts[i] = new PointF(gr.Left + (float)i / (d.Length - 1) * (gr.Width - 1), gr.Bottom - 1 - Math.Min(d[i] / max, 50f) * (gr.Height - 2));
-                using (Pen pl = new Pen(line, Math.Max(1f, 1.4f * s))) { pl.LineJoin = LineJoin.Round; g.DrawLines(pl, pts); }
-            }
-            g.ResetClip();
         }
 
         int RowAt(Point p) { for (int i = 0; i < rowR.Count; i++) if (p.Y >= rowR[i].Top && p.Y < rowR[i].Bottom) return i; return -1; }
@@ -6149,10 +6088,9 @@ namespace BunoTunner
             inst = new OverlayConfigForm(); inst.Show(owner);
         }
 
-        XpOption chkOn, chkCompact, chkColName; ComboBox cbMode, cbSize, cbOp, cbHot, cbGraph, cbGrp; XpText txSearch; ListView lvAv; ListBox lbSel; XpButton btnEdit, btnKey; Label hint; Timer tm = new Timer(); bool capturing;
+        XpOption chkOn, chkCompact, chkColName; ComboBox cbMode, cbSize, cbOp, cbHot, cbGrp; XpText txSearch; ListView lvAv; ListBox lbSel; XpButton btnEdit, btnKey; Label hint; Timer tm = new Timer(); bool capturing;
         int dropIdx = -1, downIdx = -1; Point downPt; bool building;
         static int[] Seq(int a, int b) { List<int> l = new List<int>(); for (int v = a; v <= b; v += 5) l.Add(v); return l.ToArray(); }
-        static readonly int[] GraphScales = { 17, 25, 33, 50, 100 };
         static readonly int[] Sizes = Seq(50, 200), Ops = Seq(50, 100);
 
         public OverlayConfigForm()
@@ -6214,9 +6152,6 @@ namespace BunoTunner
             UI.Lbl(body, "Temperatura em vermelho a partir de:", 8, 568);
             cbHot = Combo(body, 238, 564, 90);
             cbHot.Items.Add("Desligado"); for (int t = 70; t <= 95; t += 5) cbHot.Items.Add(t + " °C");
-            UI.Lbl(body, "Escala do grafico de frametime:", 350, 568);
-            cbGraph = Combo(body, 548, 564, 90);
-            foreach (int v in GraphScales) cbGraph.Items.Add(v + " ms");
 
             hint = UI.Lbl(body, "", 8, 600, Xp.Ui, Xp.Dim); hint.AutoSize = false; hint.SetBounds(8, 598, 768, 46);
             hint.Text = "Dica: Esc fecha esta janela; Ctrl+Z desfaz e Ctrl+Y refaz. Clique com o botao direito num item da lista para mudar cor, nome, ordem ou remover; duplo clique abre a cor. Em \"Editar na tela\" arraste o overlay pelo topo e as linhas para reordenar. Jogos em tela cheia exclusiva (nao a sem borda) podem esconder o overlay. O atalho Mostrar/ocultar nao bloqueia a tecla nos outros programas.";
@@ -6227,7 +6162,6 @@ namespace BunoTunner
             cbOp.SelectedIndex = Math.Max(0, Array.IndexOf(Ops, Overlay.Opac));
             cbMode.SelectedIndex = Overlay.Mode;
             chkCompact.Checked = Overlay.Compact; chkColName.Checked = Overlay.ColName;
-            cbGraph.SelectedIndex = Math.Max(0, Array.IndexOf(GraphScales, Overlay.GraphMs));
             cbGrp.Items.Add("Todos os grupos"); cbGrp.SelectedIndex = 0;
             cbHot.SelectedIndex = Overlay.HotTemp <= 0 ? 0 : Math.Max(1, Math.Min(cbHot.Items.Count - 1, (Overlay.HotTemp - 70) / 5 + 1));
             building = false;
@@ -6237,7 +6171,6 @@ namespace BunoTunner
             cbSize.SelectedIndexChanged += delegate { if (building || cbSize.SelectedIndex < 0) return; Overlay.Scale = Sizes[cbSize.SelectedIndex]; Overlay.Commit(); };
             cbOp.SelectedIndexChanged += delegate { if (building || cbOp.SelectedIndex < 0) return; Overlay.Opac = Ops[cbOp.SelectedIndex]; Overlay.Commit(); };
             cbMode.SelectedIndexChanged += delegate { if (building || cbMode.SelectedIndex < 0) return; Overlay.Mode = cbMode.SelectedIndex; Overlay.Commit(); };
-            cbGraph.SelectedIndexChanged += delegate { if (building || cbGraph.SelectedIndex < 0) return; Overlay.GraphMs = GraphScales[cbGraph.SelectedIndex]; Overlay.Commit(); };
             cbGrp.SelectedIndexChanged += delegate { if (!building) FillAvail(); };
             ContextMenuStrip cma = new ContextMenuStrip();
             cma.Items.Add(Lang.T("Adicionar ao overlay"), null, delegate { AddSel(); });
@@ -6379,7 +6312,7 @@ namespace BunoTunner
                     {
                         building = true;
                         cbSize.SelectedIndex = Math.Max(0, Array.IndexOf(Sizes, Overlay.Scale)); cbOp.SelectedIndex = Math.Max(0, Array.IndexOf(Ops, Overlay.Opac)); cbMode.SelectedIndex = Overlay.Mode;
-                        chkCompact.Checked = Overlay.Compact; chkColName.Checked = Overlay.ColName; cbGraph.SelectedIndex = Math.Max(0, Array.IndexOf(GraphScales, Overlay.GraphMs));
+                        chkCompact.Checked = Overlay.Compact; chkColName.Checked = Overlay.ColName;
                         cbHot.SelectedIndex = Overlay.HotTemp <= 0 ? 0 : Math.Max(1, Math.Min(cbHot.Items.Count - 1, (Overlay.HotTemp - 70) / 5 + 1));
                         building = false;
                         btnKey.Text = "Mostrar/ocultar: " + Overlay.KeyName();
@@ -6444,8 +6377,8 @@ namespace BunoTunner
             btnEdit.Text = Overlay.Editing ? "Concluir edicao" : "Editar na tela";
             if (!capturing) btnKey.Text = "Mostrar/ocultar: " + Overlay.KeyName();
             building = true;
-            int si = Array.IndexOf(Sizes, Overlay.Scale), oi = Array.IndexOf(Ops, Overlay.Opac), gi = Array.IndexOf(GraphScales, Overlay.GraphMs);
-            if (si >= 0) cbSize.SelectedIndex = si; if (oi >= 0) cbOp.SelectedIndex = oi; if (gi >= 0) cbGraph.SelectedIndex = gi;
+            int si = Array.IndexOf(Sizes, Overlay.Scale), oi = Array.IndexOf(Ops, Overlay.Opac);
+            if (si >= 0) cbSize.SelectedIndex = si; if (oi >= 0) cbOp.SelectedIndex = oi;
             cbMode.SelectedIndex = Overlay.Mode; chkCompact.Checked = Overlay.Compact; chkColName.Checked = Overlay.ColName;
             cbHot.SelectedIndex = Overlay.HotTemp <= 0 ? 0 : Math.Max(1, Math.Min(cbHot.Items.Count - 1, (Overlay.HotTemp - 70) / 5 + 1));
             building = false;
@@ -6493,7 +6426,7 @@ namespace BunoTunner
             {
                 string sl = Lang.T(sp[1]);
                 if (grp != null && grp != Lang.T("Jogo")) continue;
-                if (q.Length > 0 && (sl + " fps api quadros frametime frame time low grafico").ToLowerInvariant().IndexOf(q) < 0) continue;
+                if (q.Length > 0 && (sl + " fps api quadros").ToLowerInvariant().IndexOf(q) < 0) continue;
                 ListViewItem f = new ListViewItem(sl); f.SubItems.Add(Lang.T("Jogo")); f.SubItems.Add(""); f.Tag = sp[0];
                 lvAv.Items.Add(f);
             }

@@ -356,3 +356,6 @@ v1.31.0 (TESTE)
 - Menu do overlay: Ctrl+Z desfaz e Ctrl+Y (ou Ctrl+Shift+Z) refaz qualquer alteracao (itens, cores, nomes, opcoes e posicao); botoes Desfazer/Refazer, Limpar lista e Restaurar padrao; filtro por grupo na lista de sensores; botao direito adiciona todos os resultados da busca; "aplicar esta cor a todos"; exportar e importar a configuracao (arquivo .bto).
 - Removidos os botoes de posicao (use "Editar na tela") e os modelos prontos.
 - Intervalo padrao de atualizacao dos sensores agora e 500 ms (quem ja tinha salvo outro valor mantem o seu).
+
+v1.32.0 (TESTE)
+- Overlay: removidos por completo o Frametime, o 1% low e o grafico de frametime (e a opcao de escala). Ficam apenas o FPS e a API. Itens desses tipos salvos em versoes anteriores sao ignorados.
