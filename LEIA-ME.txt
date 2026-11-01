@@ -346,3 +346,7 @@ v1.28.1
 
 v1.29.0 (TESTE)
 - Overlay: tamanho de 50% a 200% e opacidade de 50% a 100%, ambos de 5% em 5%. A opacidade agora afeta so o fundo; textos e valores ficam sempre 100% opacos.
+
+v1.30.0 (TESTE)
+- Overlay: novas linhas "Frametime (ms)", "1% low (FPS)" e "Grafico de frametime" (grafico dos ultimos ~150 quadros, linha pontilhada em 16,7 ms = 60 FPS).
+- Menu do overlay: Esc fecha a janela; cor por sensor (botao Cor, duplo clique ou botao direito), renomear, subir/descer, resetar; modelos prontos (So FPS, FPS + frametime, FPS + grafico); posicoes centro superior/inferior; modo compacto (so valores); opcao de aplicar a cor tambem ao nome; limite configuravel (ou desligado) para a temperatura ficar vermelha.
