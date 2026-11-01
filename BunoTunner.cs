@@ -30,8 +30,8 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - codigo aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.24.0.0")]
-[assembly: AssemblyFileVersion("1.24.0.0")]
+[assembly: AssemblyVersion("1.25.0.0")]
+[assembly: AssemblyFileVersion("1.25.0.0")]
 
 namespace BunoTunner
 {
@@ -365,6 +365,25 @@ namespace BunoTunner
             "Travar clock da memoria (MHz):  min", "Lock memory clock (MHz):  min",
             "Atualizar a cada:", "Update every:" };
         static readonly string[] Pairs2 = {
+            "Overlay em jogos...", "In-game overlay...",
+            "Overlay em jogos", "In-game overlay",
+            "Ativar overlay em jogos", "Enable in-game overlay",
+            "Tamanho:", "Size:",
+            "Opacidade:", "Opacity:",
+            "Mostrar:", "Show:",
+            "Somente em jogos (tela cheia ou janela sem borda)", "Only in games (fullscreen or borderless)",
+            "Em qualquer programa que desenhe com DirectX", "In any program that renders with DirectX",
+            "Sempre (para testar)", "Always (for testing)",
+            "Sensores disponiveis  (duplo clique ou arraste para a direita)", "Available sensors  (double-click or drag to the right)",
+            "Ordem no overlay  (arraste para reordenar)", "Order in the overlay  (drag to reorder)",
+            "Posicao:", "Position:",
+            "Sup. esq.", "Top left", "Sup. dir.", "Top right", "Inf. esq.", "Bottom left", "Inf. dir.", "Bottom right",
+            "Editar na tela", "Edit on screen", "Concluir edicao", "Finish editing", "Concluir", "Done",
+            "So FPS", "FPS only",
+            "Arraste aqui para mover", "Drag here to move",
+            "(vazio - adicione sensores no menu)", "(empty - add sensors in the menu)",
+            "FPS (API + quadros/s)", "FPS (API + frames/s)", "Jogo", "Game",
+            "Dica: em \"Editar na tela\" o overlay aparece no desktop - arraste pelo topo para mover, arraste as linhas para reordenar e use o botao direito numa linha para remover. O FPS mostra a API grafica do jogo e os quadros por segundo. Jogos em tela cheia exclusiva (nao a sem borda) podem esconder o overlay.", "Tip: with \"Edit on screen\" the overlay appears on the desktop - drag the top to move it, drag the rows to reorder and right-click a row to remove it. FPS shows the game's graphics API and frames per second. Exclusive-fullscreen games (not borderless) may hide the overlay.",
             "Procurando atualizacoes...", "Looking for updates...",
             "Baixando atualizacao...", "Downloading update...",
             "Verificar atualizacoes\nProcura uma versao mais nova do BunoTunner e, se voce quiser, baixa e instala.", "Check for updates\nLooks for a newer BunoTunner version and, if you want, downloads and installs it.",
@@ -1821,7 +1840,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.24.0";
+        public const string Version = "v1.25.0";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -4808,6 +4827,7 @@ namespace BunoTunner
         public static List<Gpu> Gpus = new List<Gpu>();
         public static List<Sn> GpuSensors = new List<Sn>();
         public static List<Sn> PcSensors = new List<Sn>();
+        public static List<Sn> AllSensors { get { return all; } }
         public static string Error;
 
         static List<LHM.IHardware> hwList = new List<LHM.IHardware>();
@@ -5320,6 +5340,718 @@ namespace BunoTunner
         }
     }
 
+    // ------------------------------------------------------------------
+    //  Overlay em jogos: janela transparente por cima do jogo (tema do app) + FPS/API via ETW (como o PresentMon)
+    // ------------------------------------------------------------------
+    static class FpsMon
+    {
+        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)] static extern int StartTraceW(out ulong h, string name, IntPtr props);
+        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)] static extern int ControlTraceW(ulong h, string name, IntPtr props, uint code);
+        [DllImport("advapi32.dll", ExactSpelling = true)] static extern int EnableTraceEx2(ulong h, ref Guid provider, uint control, byte level, ulong any, ulong all, uint timeout, IntPtr parms);
+        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)] static extern ulong OpenTraceW(IntPtr logfile);
+        [DllImport("advapi32.dll", ExactSpelling = true)] static extern int ProcessTrace(ulong[] handles, uint count, IntPtr start, IntPtr end);
+        [DllImport("advapi32.dll", ExactSpelling = true)] static extern int CloseTrace(ulong h);
+        [DllImport("kernel32.dll")] static extern IntPtr OpenProcess(uint acc, bool inh, uint pid);
+        [DllImport("kernel32.dll")] static extern bool CloseHandle(IntPtr h);
+        [DllImport("psapi.dll", ExactSpelling = true)] static extern bool EnumProcessModulesEx(IntPtr h, IntPtr[] mods, int cb, out int need, uint filter);
+        [DllImport("psapi.dll", CharSet = CharSet.Unicode, ExactSpelling = true)] static extern int GetModuleBaseNameW(IntPtr h, IntPtr mod, StringBuilder sb, int n);
+
+        delegate void EtCb(IntPtr rec);
+        static EtCb cb = OnEvent;
+        const string SessName = "BunoTunnerFps";
+        static ulong sess, trace;
+        static volatile bool running;
+        static readonly object lk = new object();
+        class PidInfo { public Queue<long> Q = new Queue<long>(); public long Last, Newest, ApiAt; public bool D9; public string Api; }
+        static readonly Dictionary<uint, PidInfo> pids = new Dictionary<uint, PidInfo>();
+        public static string Error = "";
+        public static bool Running { get { return running; } }
+
+        static IntPtr MakeProps()
+        {
+            int sz = IntPtr.Size == 8 ? 120 : 116, total = 1024;
+            IntPtr p = Marshal.AllocHGlobal(total);
+            for (int i = 0; i < total; i += 8) Marshal.WriteInt64(p, i, 0);
+            Marshal.WriteInt32(p, 0, total);          // Wnode.BufferSize
+            Marshal.WriteInt32(p, 40, 1);             // Wnode.ClientContext = 1 (relogio QPC)
+            Marshal.WriteInt32(p, 44, 0x20000);       // WNODE_FLAG_TRACED_GUID
+            Marshal.WriteInt32(p, 48, 16);            // BufferSize (KB)
+            Marshal.WriteInt32(p, 64, 0x100);         // LogFileMode = REAL_TIME
+            Marshal.WriteInt32(p, 68, 1);             // FlushTimer (s): entrega os eventos a cada 1 s
+            Marshal.WriteInt32(p, IntPtr.Size == 8 ? 116 : 112, sz);   // LoggerNameOffset
+            byte[] nm = Encoding.Unicode.GetBytes(SessName + "\0");
+            Marshal.Copy(nm, 0, (IntPtr)((long)p + sz), nm.Length);
+            return p;
+        }
+
+        public static bool Start()
+        {
+            if (running) return true;
+            try
+            {
+                if (IntPtr.Size != 8) { Error = "FPS so funciona na versao de 64 bits."; return false; }
+                IntPtr p0 = MakeProps(); ControlTraceW(0, SessName, p0, 1); Marshal.FreeHGlobal(p0);   // sessao velha (se o programa fechou sem parar)
+                IntPtr p = MakeProps(); int r = StartTraceW(out sess, SessName, p); Marshal.FreeHGlobal(p);
+                if (r != 0) { Error = "ETW erro " + r + (r == 5 ? " (acesso negado: execute como administrador)" : ""); return false; }
+                Guid g1 = new Guid("CA11C036-0102-4A2D-A6AD-F03CFED5D3C9");   // Microsoft-Windows-DXGI (D3D10/11/12)
+                Guid g2 = new Guid("783ACA0A-790E-4D7F-8451-AA850511C6B9");   // Microsoft-Windows-D3D9
+                EnableTraceEx2(sess, ref g1, 1, 5, ulong.MaxValue, 0, 0, IntPtr.Zero);
+                EnableTraceEx2(sess, ref g2, 1, 5, ulong.MaxValue, 0, 0, IntPtr.Zero);
+                IntPtr lf = Marshal.AllocHGlobal(448);
+                for (int i = 0; i < 448; i += 8) Marshal.WriteInt64(lf, i, 0);
+                Marshal.WriteIntPtr(lf, 8, Marshal.StringToHGlobalUni(SessName));      // LoggerName
+                Marshal.WriteInt32(lf, 28, 0x10000100);                                // REAL_TIME | EVENT_RECORD
+                Marshal.WriteIntPtr(lf, 424, Marshal.GetFunctionPointerForDelegate(cb)); // EventRecordCallback
+                trace = OpenTraceW(lf);
+                if (trace == ulong.MaxValue) { Error = "OpenTrace falhou"; Stop(); return false; }
+                running = true;
+                Th.Thread t = new Th.Thread(delegate() { try { ProcessTrace(new ulong[] { trace }, 1, IntPtr.Zero, IntPtr.Zero); } catch (Exception) { } running = false; });
+                t.IsBackground = true; t.Name = "BunoFps"; t.Start();
+                Error = "";
+                return true;
+            }
+            catch (Exception ex) { Error = ex.Message; return false; }
+        }
+
+        public static void Stop()
+        {
+            try
+            {
+                IntPtr p = MakeProps(); ControlTraceW(0, SessName, p, 1); Marshal.FreeHGlobal(p);
+                if (trace != 0 && trace != ulong.MaxValue) CloseTrace(trace);
+            }
+            catch (Exception) { }
+            trace = 0; running = false;
+        }
+
+        static void OnEvent(IntPtr rec)
+        {
+            try
+            {
+                int id = Marshal.ReadInt16(rec, 40) & 0xFFFF;
+                int g0 = Marshal.ReadInt32(rec, 24);
+                bool dxgi = id == 42 && g0 == unchecked((int)0xCA11C036);
+                bool d9 = id == 1 && g0 == 0x783ACA0A;
+                if (!dxgi && !d9) return;
+                uint pid = (uint)Marshal.ReadInt32(rec, 12);
+                long ts = Marshal.ReadInt64(rec, 16), arrive = Stopwatch.GetTimestamp();
+                lock (lk)
+                {
+                    PidInfo pi; if (!pids.TryGetValue(pid, out pi)) { pi = new PidInfo(); pids[pid] = pi; }
+                    pi.Q.Enqueue(ts); pi.Newest = ts; pi.Last = arrive; if (d9) pi.D9 = true;
+                    long cut = ts - Stopwatch.Frequency * 2;
+                    while (pi.Q.Count > 0 && pi.Q.Peek() < cut) pi.Q.Dequeue();
+                }
+            }
+            catch (Exception) { }
+        }
+
+        // quadros por segundo do processo (se ele esta apresentando quadros agora) e a API grafica
+        public static bool Get(uint pid, out int fps, out string api)
+        {
+            fps = 0; api = null; PidInfo pi; long now = Stopwatch.GetTimestamp(), hz = Stopwatch.Frequency;
+            lock (lk)
+            {
+                if (pids.Count > 64) { List<uint> old = new List<uint>(); foreach (KeyValuePair<uint, PidInfo> k in pids) if (now - k.Value.Last > hz * 30) old.Add(k.Key); foreach (uint o in old) pids.Remove(o); }
+                if (!pids.TryGetValue(pid, out pi) || now - pi.Last > hz * 3) return false;
+                long cut = pi.Newest - hz; int n = 0;
+                foreach (long t in pi.Q) if (t > cut) n++;
+                fps = n;
+            }
+            if (pi.Api == null || now - pi.ApiAt > hz * 10) { pi.Api = DetectApi(pid, pi.D9); pi.ApiAt = now; }
+            api = pi.Api;
+            return fps > 0;
+        }
+
+        static string DetectApi(uint pid, bool d9prov)
+        {
+            string r = d9prov ? "DX9" : "DX11";
+            IntPtr h = OpenProcess(0x0410, false, pid);
+            if (h == IntPtr.Zero) return r;
+            try
+            {
+                IntPtr[] m = new IntPtr[2048]; int need;
+                if (!EnumProcessModulesEx(h, m, m.Length * IntPtr.Size, out need, 3)) return r;
+                int n = Math.Min(m.Length, need / IntPtr.Size);
+                bool d12 = false, d11 = false, d10 = false, d9 = false, vk = false, gl = false;
+                StringBuilder sb = new StringBuilder(260);
+                for (int i = 0; i < n; i++)
+                {
+                    sb.Length = 0;
+                    if (GetModuleBaseNameW(h, m[i], sb, 260) <= 0) continue;
+                    string s = sb.ToString().ToLowerInvariant();
+                    if (s == "d3d12.dll" || s == "d3d12core.dll") d12 = true;
+                    else if (s == "d3d11.dll") d11 = true;
+                    else if (s == "d3d10.dll" || s == "d3d10_1.dll" || s == "d3d10core.dll") d10 = true;
+                    else if (s == "d3d9.dll") d9 = true;
+                    else if (s == "vulkan-1.dll") vk = true;
+                    else if (s == "opengl32.dll") gl = true;
+                }
+                if (d9prov) return "DX9";
+                if (d12) return "DX12";
+                if (d11) return "DX11";
+                if (d10) return "DX10";
+                if (vk) return "Vulkan";
+                if (d9) return "DX9";
+                if (gl) return "OpenGL";
+            }
+            catch (Exception) { }
+            finally { CloseHandle(h); }
+            return r;
+        }
+    }
+
+    static class Overlay
+    {
+        public class Row { public string Key, Label, Value; public bool Hot; }
+
+        [StructLayout(LayoutKind.Sequential)] struct RECT { public int L, T, R, B; }
+        [DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
+        [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
+        [DllImport("user32.dll")] static extern bool GetWindowRect(IntPtr h, out RECT r);
+
+        public static bool On, Editing;
+        public static int Scale = 100, Mode, Opac = 85;
+        public static double Fx, Fy;
+        public static List<string> Items = new List<string>();
+        public static event Action StateChanged;
+        static OverlayForm win; static Timer tm; static Screen editScreen;
+        static DateTime lastTry = DateTime.MinValue;
+        static List<Sn> cacheSrc; static int cacheCount = -1; static Dictionary<string, Sn> cache = new Dictionary<string, Sn>();
+        static readonly uint myPid = (uint)Process.GetCurrentProcess().Id;
+
+        static int I(string k, int d) { int v; return int.TryParse(Settings.Get(k, d.ToString()), out v) ? v : d; }
+        static double Dd(string k, double d) { double v; return double.TryParse(Settings.Get(k, d.ToString(CultureInfo.InvariantCulture)), NumberStyles.Float, CultureInfo.InvariantCulture, out v) ? v : d; }
+        public static void Load()
+        {
+            On = Settings.Get("ov.on", "0") == "1";
+            Scale = Math.Max(50, Math.Min(250, I("ov.size", 100))); Mode = Math.Max(0, Math.Min(2, I("ov.mode", 0))); Opac = Math.Max(30, Math.Min(100, I("ov.op", 85)));
+            Fx = Math.Max(0, Math.Min(1, Dd("ov.fx", 0))); Fy = Math.Max(0, Math.Min(1, Dd("ov.fy", 0)));
+            Items = new List<string>(Settings.Get("ov.items", "@FPS").Split(new string[] { "~|~" }, StringSplitOptions.RemoveEmptyEntries));
+        }
+        public static void Save()
+        {
+            Settings.Set("ov.on", On ? "1" : "0"); Settings.Set("ov.size", Scale.ToString()); Settings.Set("ov.mode", Mode.ToString()); Settings.Set("ov.op", Opac.ToString());
+            Settings.Set("ov.fx", Fx.ToString("0.####", CultureInfo.InvariantCulture)); Settings.Set("ov.fy", Fy.ToString("0.####", CultureInfo.InvariantCulture));
+            Settings.Set("ov.items", string.Join("~|~", Items.ToArray()));
+        }
+        public static void Init()
+        {
+            if (tm != null) return;
+            Load();
+            tm = new Timer(); tm.Interval = 500; tm.Tick += delegate { try { Tick(); } catch (Exception) { } };
+            tm.Start();
+            Application.ApplicationExit += delegate { FpsMon.Stop(); };
+        }
+        public static void Commit() { Save(); Notify(); Tick(); }
+        public static void Notify() { if (StateChanged != null) StateChanged(); }
+        public static void SetEditing(bool v, Screen sc)
+        {
+            Editing = v; if (sc != null) editScreen = sc;
+            if (!v) Save();
+            Notify(); Tick();
+        }
+        public static void Corner(int fx, int fy) { Fx = fx; Fy = fy; Commit(); }
+        public static void MoveItem(int from, int to)
+        {
+            if (from < 0 || from >= Items.Count) return;
+            string it = Items[from]; Items.RemoveAt(from);
+            if (to > from) to--;
+            to = Math.Max(0, Math.Min(Items.Count, to));
+            Items.Insert(to, it); Commit();
+        }
+        public static void RemoveAt(int i) { if (i >= 0 && i < Items.Count) { Items.RemoveAt(i); Commit(); } }
+
+        // ---- sensores ----
+        public static string OvKey(Sn s) { return s.Type + "~;~" + s.Key; }
+        public static Sn Find(string key)
+        {
+            List<Sn> src = SensorHub.AllSensors;
+            if (src != cacheSrc || src.Count != cacheCount)
+            {
+                cache.Clear(); cacheSrc = src; cacheCount = src.Count;
+                foreach (Sn s in src.ToArray()) cache[OvKey(s)] = s;
+            }
+            Sn r; return cache.TryGetValue(key, out r) ? r : null;
+        }
+        static string Short(string t)
+        {
+            switch (t)
+            {
+                case "Temperature": return "Temp"; case "Load": return "Uso"; case "Clock": return "Clock"; case "Power": return "Pot.";
+                case "Fan": return "Fan"; case "Voltage": return "Tensao"; case "Control": return "Ctrl"; default: return "";
+            }
+        }
+        public static string LabelOf(Sn s)
+        {
+            string n = s.Name, a = s.Area;
+            if (a != "Outros" && a != "Coolers" && n.ToUpperInvariant().IndexOf(a.ToUpperInvariant()) < 0) n = a + " " + n;
+            string sh = Short(s.Type);
+            if (sh.Length > 0 && n.IndexOf(sh, StringComparison.OrdinalIgnoreCase) < 0 && !(sh == "Uso" && n.IndexOf("Load", StringComparison.OrdinalIgnoreCase) >= 0)) n += " " + sh;
+            return n.Length > 30 ? n.Substring(0, 29) + "…" : n;
+        }
+        public static string LabelOf(string key)
+        {
+            if (key == "@FPS") return "FPS (API + quadros/s)";
+            Sn s = Find(key);
+            if (s != null) return LabelOf(s);
+            int i = key.LastIndexOf("~:~");
+            return (i >= 0 ? key.Substring(i + 3) : key) + " (indisponivel)";
+        }
+        public static string ValueOf(Sn s)
+        {
+            float? v = s.Last; if (!v.HasValue) return "-";
+            string f = "0";
+            if (s.Type == "Voltage" || s.Type == "Current") f = "0.00"; else if (s.Type == "Power" || s.Type == "Data" || s.Type == "SmallData") f = "0.#";
+            return v.Value.ToString(f, CultureInfo.InvariantCulture) + " " + Sn.Unit(s.Type);
+        }
+
+        static bool Covers(IntPtr fg)
+        {
+            RECT r; if (!GetWindowRect(fg, out r)) return false;
+            Rectangle b = Screen.FromHandle(fg).Bounds;
+            return r.L <= b.Left + 2 && r.T <= b.Top + 2 && r.R >= b.Right - 2 && r.B >= b.Bottom - 2;
+        }
+
+        static void Tick()
+        {
+            if (!On && !Editing) { if (win != null && win.Visible) win.Hide(); if (FpsMon.Running) FpsMon.Stop(); return; }
+            if (!FpsMon.Running && (DateTime.UtcNow - lastTry).TotalSeconds > 10) { lastTry = DateTime.UtcNow; FpsMon.Start(); }
+            IntPtr fg = GetForegroundWindow(); uint pid = 0; GetWindowThreadProcessId(fg, out pid);
+            int fps = 0; string api = null;
+            bool game = pid != myPid && pid != 0 && FpsMon.Get(pid, out fps, out api);
+            bool show = Editing || Mode == 2 || (game && (Mode == 1 || Covers(fg)));
+            if (!show) { if (win != null && win.Visible) win.Hide(); return; }
+            Screen sc = Editing ? (editScreen ?? Screen.PrimaryScreen) : (game ? Screen.FromHandle(fg) : Screen.PrimaryScreen);
+            List<Row> rows = new List<Row>();
+            foreach (string k in Items)
+            {
+                Row r = new Row(); r.Key = k;
+                if (k == "@FPS") { r.Label = api ?? "FPS"; r.Value = game ? fps + " FPS" : "-- FPS"; }
+                else
+                {
+                    Sn s = Find(k); r.Label = LabelOf(k); r.Value = s != null ? ValueOf(s) : "-";
+                    r.Hot = s != null && s.Type == "Temperature" && s.Last.HasValue && s.Last.Value >= 80f;
+                }
+                rows.Add(r);
+            }
+            if (win == null || win.IsDisposed) win = new OverlayForm();
+            win.SetState(rows, Scale, Opac, sc.Bounds, Editing);
+            if (!win.Visible) win.Show();
+            win.KeepOnTop();
+        }
+    }
+
+    class OverlayForm : Form
+    {
+        [DllImport("user32.dll")] static extern int GetWindowLong(IntPtr h, int i);
+        [DllImport("user32.dll")] static extern int SetWindowLong(IntPtr h, int i, int v);
+        [DllImport("user32.dll")] static extern bool SetWindowPos(IntPtr h, IntPtr after, int x, int y, int cx, int cy, uint flags);
+        const int GWL_EXSTYLE = -20, WS_EX_TRANSPARENT = 0x20;
+
+        List<Overlay.Row> rows = new List<Overlay.Row>(); List<Rectangle> rowR = new List<Rectangle>();
+        Rectangle hdrR, btnR, scr; bool edit, clickThru = true;
+        Font fl, fv; string fkey = "";
+        int scale = 100, margin = 8;
+        // arrastar
+        bool winDrag; Point dragCur, dragLoc; int rowDrag = -1, dropIdx = -1; Point downPt;
+
+        public OverlayForm()
+        {
+            FormBorderStyle = FormBorderStyle.None; ShowInTaskbar = false; StartPosition = FormStartPosition.Manual; TopMost = true;
+            SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, true);
+            BackColor = Xp.Face; Size = new Size(120, 40);
+        }
+        protected override bool ShowWithoutActivation { get { return true; } }
+        protected override CreateParams CreateParams
+        {
+            get { CreateParams cp = base.CreateParams; cp.ExStyle |= 0x80 | 0x08000000; return cp; }   // TOOLWINDOW | NOACTIVATE
+        }
+        protected override void OnHandleCreated(EventArgs e) { base.OnHandleCreated(e); ApplyClickThru(); }
+        void ApplyClickThru()
+        {
+            if (!IsHandleCreated) return;
+            int ex = GetWindowLong(Handle, GWL_EXSTYLE);
+            ex = clickThru ? (ex | WS_EX_TRANSPARENT) : (ex & ~WS_EX_TRANSPARENT);
+            SetWindowLong(Handle, GWL_EXSTYLE, ex);
+        }
+        public void KeepOnTop() { if (IsHandleCreated) SetWindowPos(Handle, (IntPtr)(-1), 0, 0, 0, 0, 0x13); }
+
+        void Fonts()
+        {
+            string k = Xp.Ui.FontFamily.Name + "|" + scale;
+            if (k == fkey && fl != null) return;
+            fkey = k; if (fl != null) { fl.Dispose(); fv.Dispose(); }
+            float sz = 9.5f * scale / 100f;
+            fl = new Font(Xp.Ui.FontFamily, sz, FontStyle.Regular); fv = new Font(Xp.Ui.FontFamily, sz, FontStyle.Bold);
+        }
+        static readonly TextFormatFlags TF = TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine;
+
+        public void SetState(List<Overlay.Row> r, int sc, int op, Rectangle screen, bool ed)
+        {
+            rows = r; scale = sc; scr = screen; edit = ed;
+            Fonts();
+            float s = sc / 100f; int pad = (int)(9 * s), gap = (int)(16 * s), rh = fl.Height + (int)(5 * s);
+            int lw = 0, vw = 0;
+            foreach (Overlay.Row x in r)
+            {
+                lw = Math.Max(lw, TextRenderer.MeasureText(x.Label, fl, new Size(1000, 100), TextFormatFlags.NoPadding).Width);
+                vw = Math.Max(vw, TextRenderer.MeasureText(x.Value, fv, new Size(1000, 100), TextFormatFlags.NoPadding).Width);
+            }
+            int grip = ed ? (int)(14 * s) : 0;
+            int w = Math.Max((int)(110 * s), pad * 2 + grip + lw + gap + vw);
+            if (ed) w = Math.Max(w, (int)(250 * s));
+            int y = pad - (int)(2 * s);
+            hdrR = Rectangle.Empty; btnR = Rectangle.Empty;
+            if (ed) { hdrR = new Rectangle(0, 0, w, (int)(22 * s)); y = hdrR.Height + (int)(4 * s); }
+            rowR.Clear();
+            for (int i = 0; i < r.Count; i++) { rowR.Add(new Rectangle(pad, y, w - pad * 2, rh)); y += rh; }
+            if (r.Count == 0) y += rh;
+            if (ed)
+            {
+                y += (int)(4 * s);
+                btnR = new Rectangle(pad, y, w - pad * 2, (int)(24 * s)); y += btnR.Height + (int)(4 * s);
+            }
+            else y += pad - (int)(2 * s);
+            Opacity = Math.Max(30, Math.Min(99, op)) / 100.0;
+            if (clickThru == ed) { clickThru = !ed; ApplyClickThru(); }
+            if (!winDrag)
+            {
+                int rx = Math.Max(0, scr.Width - w - 2 * margin), ry = Math.Max(0, scr.Height - y - 2 * margin);
+                int nx = scr.Left + margin + (int)Math.Round(Overlay.Fx * rx), ny = scr.Top + margin + (int)Math.Round(Overlay.Fy * ry);
+                if (Left != nx || Top != ny || Width != w || Height != y) SetBounds(nx, ny, w, y);
+            }
+            Invalidate();
+        }
+
+        static GraphicsPath Round(Rectangle r, int d)
+        {
+            GraphicsPath p = new GraphicsPath();
+            if (d < 1) { p.AddRectangle(r); return p; }
+            p.AddArc(r.X, r.Y, d, d, 180, 90); p.AddArc(r.Right - d, r.Y, d, d, 270, 90);
+            p.AddArc(r.Right - d, r.Bottom - d, d, d, 0, 90); p.AddArc(r.X, r.Bottom - d, d, d, 90, 90);
+            p.CloseFigure(); return p;
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            Graphics g = e.Graphics; g.SmoothingMode = SmoothingMode.AntiAlias;
+            Fonts(); float s = scale / 100f;
+            g.Clear(Xp.Face);
+            Rectangle r = new Rectangle(0, 0, Width - 1, Height - 1);
+            using (GraphicsPath gp = Round(r, (Xp.Rad + 2) * 2))
+            using (Pen p = new Pen(edit ? Xp.Sel : Xp.Border, edit ? 2f : 1f))
+            {
+                if (edit) p.DashStyle = DashStyle.Dash;
+                g.DrawPath(p, gp);
+            }
+            int grip = edit ? (int)(14 * s) : 0;
+            if (edit)
+            {
+                using (SolidBrush b = new SolidBrush(Xp.Sel)) g.FillRectangle(b, 1, 1, Width - 2, hdrR.Height);
+                TextRenderer.DrawText(g, Lang.T("Arraste aqui para mover"), fl, hdrR, Xp.Hi, TextFormatFlags.HorizontalCenter | TF);
+            }
+            for (int i = 0; i < rows.Count && i < rowR.Count; i++)
+            {
+                Rectangle rr = rowR[i]; Overlay.Row x = rows[i];
+                if (edit)
+                {
+                    using (Pen sp = new Pen(Color.FromArgb(70, Xp.Dim))) g.DrawLine(sp, rr.Left, rr.Bottom, rr.Right, rr.Bottom);
+                    using (SolidBrush gb = new SolidBrush(Xp.Dim))
+                        for (int k = 0; k < 3; k++) g.FillRectangle(gb, rr.Left + 1, rr.Top + rr.Height / 2 - (int)(4 * s) + k * (int)(4 * s), (int)(8 * s), Math.Max(1, (int)(2 * s)));
+                }
+                Rectangle lr = new Rectangle(rr.Left + grip, rr.Top, rr.Width - grip, rr.Height);
+                TextRenderer.DrawText(g, x.Label, fl, lr, Xp.Dim, TF | TextFormatFlags.Left);
+                TextRenderer.DrawText(g, x.Value, fv, lr, x.Hot ? Xp.Bad : Xp.Text, TF | TextFormatFlags.Right);
+            }
+            if (edit)
+            {
+                if (rows.Count == 0) TextRenderer.DrawText(g, Lang.T("(vazio - adicione sensores no menu)"), fl, new Rectangle(8, hdrR.Height + 4, Width - 16, (int)(20 * s)), Xp.Dim, TF);
+                if (dropIdx >= 0 && rowDrag >= 0 && rowR.Count > 0)
+                {
+                    int yy = dropIdx < rowR.Count ? rowR[dropIdx].Top : rowR[rowR.Count - 1].Bottom;
+                    using (Pen dp = new Pen(Xp.Bad, 2f)) g.DrawLine(dp, 6, yy, Width - 6, yy);
+                }
+                using (GraphicsPath bp = Round(btnR, 6))
+                {
+                    using (SolidBrush bb = new SolidBrush(Xp.Good)) g.FillPath(bb, bp);
+                }
+                TextRenderer.DrawText(g, Lang.T("Concluir"), fv, btnR, Color.White, TextFormatFlags.HorizontalCenter | TF);
+            }
+        }
+
+        int RowAt(Point p) { for (int i = 0; i < rowR.Count; i++) if (p.Y >= rowR[i].Top && p.Y < rowR[i].Bottom) return i; return -1; }
+        int DropAt(Point p)
+        {
+            for (int i = 0; i < rowR.Count; i++) if (p.Y < rowR[i].Top + rowR[i].Height / 2) return i;
+            return rowR.Count;
+        }
+        protected override void OnMouseDown(MouseEventArgs e)
+        {
+            base.OnMouseDown(e);
+            if (!edit) return;
+            if (e.Button == MouseButtons.Right) { int i = RowAt(e.Location); if (i >= 0) Overlay.RemoveAt(i); return; }
+            if (e.Button != MouseButtons.Left) return;
+            if (btnR.Contains(e.Location)) { Overlay.SetEditing(false, null); return; }
+            downPt = e.Location;
+            int ri = RowAt(e.Location);
+            if (ri >= 0) { rowDrag = ri; dropIdx = ri; }
+            else { winDrag = true; dragCur = Cursor.Position; dragLoc = Location; }
+        }
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            base.OnMouseMove(e);
+            if (!edit) return;
+            if (winDrag)
+            {
+                Point c = Cursor.Position;
+                int nx = Math.Max(scr.Left + margin, Math.Min(scr.Right - Width - margin, dragLoc.X + c.X - dragCur.X));
+                int ny = Math.Max(scr.Top + margin, Math.Min(scr.Bottom - Height - margin, dragLoc.Y + c.Y - dragCur.Y));
+                Location = new Point(nx, ny);
+                int rx = scr.Width - Width - 2 * margin, ry = scr.Height - Height - 2 * margin;
+                Overlay.Fx = rx > 0 ? Math.Max(0, Math.Min(1, (double)(nx - scr.Left - margin) / rx)) : 0;
+                Overlay.Fy = ry > 0 ? Math.Max(0, Math.Min(1, (double)(ny - scr.Top - margin) / ry)) : 0;
+            }
+            else if (rowDrag >= 0) { dropIdx = DropAt(e.Location); Cursor = Cursors.Hand; Invalidate(); }
+            else Cursor = (RowAt(e.Location) < 0 && !btnR.Contains(e.Location)) ? Cursors.SizeAll : Cursors.Hand;
+        }
+        protected override void OnMouseUp(MouseEventArgs e)
+        {
+            base.OnMouseUp(e);
+            if (winDrag) { winDrag = false; Overlay.Save(); Overlay.Notify(); }
+            if (rowDrag >= 0)
+            {
+                int from = rowDrag, to = dropIdx; rowDrag = -1; dropIdx = -1;
+                if (Math.Abs(e.Y - downPt.Y) > 3 && to >= 0 && to != from && to != from + 1) Overlay.MoveItem(from, to);
+                else Invalidate();
+            }
+        }
+    }
+
+    class OverlayConfigForm : XpForm
+    {
+        static OverlayConfigForm inst;
+        public static void Open(Form owner)
+        {
+            if (inst != null && !inst.IsDisposed) { if (inst.WindowState == FormWindowState.Minimized) inst.WindowState = FormWindowState.Normal; inst.BringToFront(); return; }
+            inst = new OverlayConfigForm(); inst.Show(owner);
+        }
+
+        XpOption chkOn; ComboBox cbMode, cbSize, cbOp; XpText txSearch; ListView lvAv; ListBox lbSel; XpButton btnEdit; Label hint; Timer tm = new Timer();
+        int dropIdx = -1, downIdx = -1; Point downPt; bool building;
+        static readonly int[] Sizes = { 70, 85, 100, 125, 150, 200 };
+        static readonly int[] Ops = { 100, 90, 80, 70, 60, 50 };
+
+        public OverlayConfigForm()
+        {
+            Text = "Overlay em jogos";
+            Size = new Size(796, 598); KeyPreview = true;
+            Panel body = new Panel(); body.Dock = DockStyle.Fill; Controls.Add(body);
+
+            chkOn = UI.Opt(body, "Ativar overlay em jogos", 8, 8, 260, false);
+            UI.Lbl(body, "Tamanho:", 300, 9); cbSize = Combo(body, 362, 5, 70);
+            foreach (int v in Sizes) cbSize.Items.Add(v + "%");
+            UI.Lbl(body, "Opacidade:", 450, 9); cbOp = Combo(body, 520, 5, 70);
+            foreach (int v in Ops) cbOp.Items.Add(v + "%");
+            UI.Lbl(body, "Mostrar:", 8, 40); cbMode = Combo(body, 66, 36, 420);
+            cbMode.Items.Add("Somente em jogos (tela cheia ou janela sem borda)");
+            cbMode.Items.Add("Em qualquer programa que desenhe com DirectX");
+            cbMode.Items.Add("Sempre (para testar)");
+
+            UI.Lbl(body, "Sensores disponiveis  (duplo clique ou arraste para a direita)", 8, 72, Xp.UiBold);
+            txSearch = UI.Txt(body, 8, 94, 372, "");
+            lvAv = new ListView(); lvAv.SetBounds(8, 124, 372, 332); lvAv.View = View.Details; lvAv.FullRowSelect = true; lvAv.HideSelection = false; lvAv.GridLines = true;
+            lvAv.Columns.Add("Sensor", 190); lvAv.Columns.Add("Grupo", 100); lvAv.Columns.Add("Valor", 62);
+            lvAv.BackColor = Xp.EditBg; lvAv.Font = Xp.Ui; lvAv.AllowDrop = true; UI.DoubleBuffer(lvAv);
+            body.Controls.Add(lvAv);
+
+            UI.Btn(body, "+", 388, 250, 34, delegate { AddSel(); });
+            UI.Btn(body, "-", 388, 280, 34, delegate { RemSel(); });
+
+            UI.Lbl(body, "Ordem no overlay  (arraste para reordenar)", 430, 72, Xp.UiBold);
+            lbSel = new ListBox(); lbSel.SetBounds(430, 94, 346, 362); lbSel.DrawMode = DrawMode.OwnerDrawFixed; lbSel.ItemHeight = 24; lbSel.IntegralHeight = false;
+            lbSel.BackColor = Xp.EditBg; lbSel.Font = Xp.Ui; lbSel.AllowDrop = true; UI.DoubleBuffer(lbSel);
+            body.Controls.Add(lbSel);
+
+            UI.Lbl(body, "Posicao:", 8, 468);
+            UI.Btn(body, "Sup. esq.", 70, 463, 80, delegate { Overlay.Corner(0, 0); });
+            UI.Btn(body, "Sup. dir.", 156, 463, 80, delegate { Overlay.Corner(1, 0); });
+            UI.Btn(body, "Inf. esq.", 242, 463, 80, delegate { Overlay.Corner(0, 1); });
+            UI.Btn(body, "Inf. dir.", 328, 463, 80, delegate { Overlay.Corner(1, 1); });
+            btnEdit = UI.Btn(body, "Editar na tela", 430, 463, 124, delegate { Overlay.SetEditing(!Overlay.Editing, Screen.FromControl(this)); });
+            UI.Btn(body, "So FPS", 560, 463, 70, delegate { Overlay.Items = new List<string>(new string[] { "@FPS" }); Overlay.Commit(); });
+            UI.Btn(body, "Fechar", 686, 463, 90, delegate { Close(); });
+            hint = UI.Lbl(body, "", 8, 498, Xp.Ui, Xp.Dim); hint.AutoSize = false; hint.SetBounds(8, 496, 768, 52);
+            hint.Text = "Dica: em \"Editar na tela\" o overlay aparece no desktop - arraste pelo topo para mover, arraste as linhas para reordenar e use o botao direito numa linha para remover. O FPS mostra a API grafica do jogo e os quadros por segundo. Jogos em tela cheia exclusiva (nao a sem borda) podem esconder o overlay.";
+
+            building = true;
+            chkOn.Checked = Overlay.On;
+            cbSize.SelectedIndex = Math.Max(0, Array.IndexOf(Sizes, Overlay.Scale)); if (cbSize.SelectedIndex < 0) cbSize.SelectedIndex = 2;
+            cbOp.SelectedIndex = Math.Max(0, Array.IndexOf(Ops, Overlay.Opac)); if (cbOp.SelectedIndex < 0) cbOp.SelectedIndex = 2;
+            cbMode.SelectedIndex = Overlay.Mode;
+            building = false;
+            FillAvail(); FillSel();
+
+            chkOn.CheckedChanged += delegate { if (building) return; Overlay.On = chkOn.Checked; Overlay.Commit(); };
+            cbSize.SelectedIndexChanged += delegate { if (building || cbSize.SelectedIndex < 0) return; Overlay.Scale = Sizes[cbSize.SelectedIndex]; Overlay.Commit(); };
+            cbOp.SelectedIndexChanged += delegate { if (building || cbOp.SelectedIndex < 0) return; Overlay.Opac = Ops[cbOp.SelectedIndex]; Overlay.Commit(); };
+            cbMode.SelectedIndexChanged += delegate { if (building || cbMode.SelectedIndex < 0) return; Overlay.Mode = cbMode.SelectedIndex; Overlay.Commit(); };
+            txSearch.Box.TextChanged += delegate { FillAvail(); };
+            lvAv.ItemActivate += delegate { ToggleSel(); };
+            lvAv.ItemDrag += delegate
+            {
+                List<string> ks = new List<string>(); foreach (ListViewItem it in lvAv.SelectedItems) ks.Add((string)it.Tag);
+                if (ks.Count > 0) lvAv.DoDragDrop(new DataObject("buno.ovkey", string.Join("\n", ks.ToArray())), DragDropEffects.Copy);
+            };
+            lvAv.DragEnter += delegate(object o, DragEventArgs e) { e.Effect = e.Data.GetDataPresent("buno.ovkey") ? DragDropEffects.Move : DragDropEffects.None; };
+            lvAv.DragDrop += delegate(object o, DragEventArgs e)
+            {
+                if (!e.Data.GetDataPresent("buno.ovkey")) return;
+                foreach (string k in ((string)e.Data.GetData("buno.ovkey")).Split('\n')) Overlay.Items.Remove(k);   // soltar de volta na lista = remover
+                Overlay.Commit();
+            };
+            lbSel.DrawItem += DrawSel;
+            lbSel.MouseDown += delegate(object o, MouseEventArgs e) { downIdx = lbSel.IndexFromPoint(e.Location); downPt = e.Location; };
+            lbSel.MouseMove += delegate(object o, MouseEventArgs e)
+            {
+                if (e.Button != MouseButtons.Left || downIdx < 0 || downIdx >= Overlay.Items.Count) return;
+                if (Math.Abs(e.X - downPt.X) + Math.Abs(e.Y - downPt.Y) < 6) return;
+                int d = downIdx; downIdx = -1;
+                lbSel.DoDragDrop(new DataObject("buno.ovkey", Overlay.Items[d]), DragDropEffects.Move | DragDropEffects.Copy);
+                dropIdx = -1; lbSel.Invalidate();
+            };
+            lbSel.DragEnter += delegate(object o, DragEventArgs e) { e.Effect = e.Data.GetDataPresent("buno.ovkey") ? DragDropEffects.Move : DragDropEffects.None; };
+            lbSel.DragOver += delegate(object o, DragEventArgs e)
+            {
+                if (!e.Data.GetDataPresent("buno.ovkey")) return;
+                e.Effect = (e.AllowedEffect & DragDropEffects.Move) != 0 ? DragDropEffects.Move : DragDropEffects.Copy;
+                dropIdx = DropIndex(lbSel.PointToClient(new Point(e.X, e.Y))); lbSel.Invalidate();
+            };
+            lbSel.DragLeave += delegate { dropIdx = -1; lbSel.Invalidate(); };
+            lbSel.DragDrop += delegate(object o, DragEventArgs e)
+            {
+                if (!e.Data.GetDataPresent("buno.ovkey")) return;
+                int to = DropIndex(lbSel.PointToClient(new Point(e.X, e.Y))); dropIdx = -1;
+                foreach (string k in ((string)e.Data.GetData("buno.ovkey")).Split('\n'))
+                {
+                    if (k.Length == 0) continue;
+                    int old = Overlay.Items.IndexOf(k);
+                    if (old >= 0) { Overlay.Items.RemoveAt(old); if (old < to) to--; }
+                    to = Math.Max(0, Math.Min(Overlay.Items.Count, to));
+                    Overlay.Items.Insert(to, k); to++;
+                }
+                Overlay.Commit();
+            };
+            lbSel.KeyDown += delegate(object o, KeyEventArgs e) { if (e.KeyCode == Keys.Delete) { RemSel(); e.Handled = true; } };
+            lbSel.DoubleClick += delegate { RemSel(); };
+
+            Overlay.StateChanged += OnState;
+            FormClosed += delegate { Overlay.StateChanged -= OnState; tm.Stop(); if (Overlay.Editing) Overlay.SetEditing(false, null); };
+            tm.Interval = 1000; tm.Tick += delegate { RefreshValues(); }; tm.Start();
+            OnState();
+        }
+
+        static ComboBox Combo(Control p, int x, int y, int w)
+        {
+            ComboBox c = new ComboBox(); c.DropDownStyle = ComboBoxStyle.DropDownList; c.SetBounds(x, y, w, 24); c.Font = Xp.Ui; p.Controls.Add(c); return c;
+        }
+        int DropIndex(Point p)
+        {
+            int i = lbSel.IndexFromPoint(p);
+            if (i < 0) return Overlay.Items.Count;
+            Rectangle r = lbSel.GetItemRectangle(i);
+            return p.Y > r.Top + r.Height / 2 ? i + 1 : i;
+        }
+        void OnState()
+        {
+            if (IsDisposed) return;
+            btnEdit.Text = Overlay.Editing ? "Concluir edicao" : "Editar na tela";
+            FillSel(); FillAvailMarks();
+        }
+        void FillSel()
+        {
+            int top = lbSel.TopIndex;
+            lbSel.BeginUpdate(); lbSel.Items.Clear();
+            foreach (string k in Overlay.Items) lbSel.Items.Add(k);
+            lbSel.EndUpdate();
+            if (top >= 0 && top < lbSel.Items.Count) lbSel.TopIndex = top;
+        }
+        void DrawSel(object o, DrawItemEventArgs e)
+        {
+            if (e.Index < 0 || e.Index >= lbSel.Items.Count) return;
+            Graphics g = e.Graphics; bool sel = (e.State & DrawItemState.Selected) != 0;
+            using (SolidBrush b = new SolidBrush(sel ? Xp.Sel : Xp.EditBg)) g.FillRectangle(b, e.Bounds);
+            Color fg = sel ? Xp.Hi : Xp.Text;
+            using (SolidBrush gb = new SolidBrush(sel ? Xp.Hi : Xp.Dim))
+                for (int k = 0; k < 3; k++) g.FillRectangle(gb, e.Bounds.Left + 6, e.Bounds.Top + 7 + k * 4, 10, 2);
+            string key = (string)lbSel.Items[e.Index];
+            Sn s = key == "@FPS" ? null : Overlay.Find(key);
+            string val = key == "@FPS" ? "" : (s != null ? Overlay.ValueOf(s) : "-");
+            Rectangle tr = new Rectangle(e.Bounds.Left + 24, e.Bounds.Top, e.Bounds.Width - 100, e.Bounds.Height);
+            TextRenderer.DrawText(g, Lang.T(Overlay.LabelOf(key)), Xp.Ui, tr, fg, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
+            TextRenderer.DrawText(g, val, Xp.UiBold, new Rectangle(e.Bounds.Right - 80, e.Bounds.Top, 74, e.Bounds.Height), sel ? Xp.Hi : Xp.Dim, TextFormatFlags.Right | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
+            if (dropIdx >= 0 && (dropIdx == e.Index || (dropIdx == lbSel.Items.Count && e.Index == lbSel.Items.Count - 1)))
+                using (Pen p = new Pen(Xp.Bad, 2f)) { int yy = dropIdx == e.Index ? e.Bounds.Top + 1 : e.Bounds.Bottom - 2; g.DrawLine(p, e.Bounds.Left, yy, e.Bounds.Right, yy); }
+        }
+
+        void FillAvail()
+        {
+            string q = txSearch.Text.Trim().ToLowerInvariant();
+            lvAv.BeginUpdate(); lvAv.Items.Clear();
+            ListViewItem f = new ListViewItem(Lang.T("FPS (API + quadros/s)")); f.SubItems.Add(Lang.T("Jogo")); f.SubItems.Add(""); f.Tag = "@FPS";
+            if (q.Length == 0 || "fps api quadros".Contains(q)) lvAv.Items.Add(f);
+            foreach (Sn s in SensorHub.AllSensors.ToArray())
+            {
+                if (s.Type == "Temperature" && !s.IsRealTemp) continue;
+                if (!s.Seen && !s.Last.HasValue) continue;
+                string lab = Overlay.LabelOf(s);
+                if (q.Length > 0 && (lab + " " + s.Group + " " + s.Type).ToLowerInvariant().IndexOf(q) < 0) continue;
+                ListViewItem it = new ListViewItem(lab); it.SubItems.Add(s.Area); it.SubItems.Add(Overlay.ValueOf(s)); it.Tag = Overlay.OvKey(s);
+                lvAv.Items.Add(it);
+            }
+            lvAv.EndUpdate();
+            FillAvailMarks();
+        }
+        void FillAvailMarks()
+        {
+            foreach (ListViewItem it in lvAv.Items)
+            {
+                bool inUse = Overlay.Items.Contains((string)it.Tag);
+                it.ForeColor = inUse ? Xp.Good : Xp.Text; it.Font = inUse ? Xp.UiBold : Xp.Ui;
+            }
+        }
+        void RefreshValues()
+        {
+            lbSel.Invalidate();
+            foreach (ListViewItem it in lvAv.Items)
+            {
+                string k = (string)it.Tag; if (k == "@FPS") continue;
+                Sn s = Overlay.Find(k); if (s != null && it.SubItems.Count > 2) it.SubItems[2].Text = Overlay.ValueOf(s);
+            }
+        }
+        void AddSel()
+        {
+            foreach (ListViewItem it in lvAv.SelectedItems) { string k = (string)it.Tag; if (!Overlay.Items.Contains(k)) Overlay.Items.Add(k); }
+            Overlay.Commit();
+        }
+        void ToggleSel()
+        {
+            foreach (ListViewItem it in lvAv.SelectedItems)
+            {
+                string k = (string)it.Tag;
+                if (Overlay.Items.Contains(k)) Overlay.Items.Remove(k); else Overlay.Items.Add(k);
+            }
+            Overlay.Commit();
+        }
+        void RemSel()
+        {
+            List<string> rm = new List<string>();
+            foreach (int i in lbSel.SelectedIndices) if (i < Overlay.Items.Count) rm.Add(Overlay.Items[i]);
+            foreach (string k in rm) Overlay.Items.Remove(k);
+            Overlay.Commit();
+        }
+    }
+
     class SensorForm : XpForm
     {
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
@@ -5530,7 +6262,8 @@ namespace BunoTunner
             UI.Btn(b, "OK", 412, 6, 40, delegate { CommitInterval(); });
             txInt.Box.KeyDown += delegate(object o, KeyEventArgs e) { if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; CommitInterval(); } };
             tip.SetToolTip(txInt, "Tempo entre as leituras dos sensores (100 a 10000 ms). Menos = mais fluido, mas usa mais CPU.");
-            lblInfo = UI.Lbl(b, "", 466, 12, Xp.Ui, Xp.Dim);
+            UI.Btn(b, "Overlay em jogos...", 466, 6, 150, delegate { OverlayConfigForm.Open(this); });
+            lblInfo = UI.Lbl(b, "", 626, 12, Xp.Ui, Xp.Dim);
             XpButton close = UI.Btn(b, "Fechar", 0, 6, 90, delegate { Close(); });
             close.Left = b.Width - 96;
             b.Resize += delegate { close.Left = b.Width - 96; };
@@ -11422,6 +12155,7 @@ namespace BunoTunner
                 Startup.CloseSplash();
                 Startup.Save();
                 RefreshAutoBtn();
+                Overlay.Init();
                 try { File.Delete(Application.ExecutablePath + ".old"); } catch (Exception) { }
                 bool trayStart = false;
                 foreach (string a in Environment.GetCommandLineArgs()) if (a == "--tray") trayStart = true;
