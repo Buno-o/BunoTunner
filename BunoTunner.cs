@@ -30,8 +30,8 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - codigo aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.30.0.0")]
-[assembly: AssemblyFileVersion("1.30.0.0")]
+[assembly: AssemblyVersion("1.31.0.0")]
+[assembly: AssemblyFileVersion("1.31.0.0")]
 
 namespace BunoTunner
 {
@@ -365,6 +365,15 @@ namespace BunoTunner
             "Travar clock da memoria (MHz):  min", "Lock memory clock (MHz):  min",
             "Atualizar a cada:", "Update every:" };
         static readonly string[] Pairs2 = {
+            "Desfazer", "Undo", "Refazer", "Redo", "Limpar lista", "Clear list", "Restaurar padrao", "Restore defaults", "Exportar...", "Export...", "Importar...", "Import...",
+            "Todos os grupos", "All groups", "Adicionar ao overlay", "Add to overlay", "Adicionar todos os resultados da busca", "Add all search results",
+            "Aplicar esta cor a todos os itens", "Apply this color to all items", "Escala do grafico de frametime:", "Frametime graph scale:",
+            "Configuracao do overlay (*.bto)|*.bto|Todos os arquivos|*.*", "Overlay settings (*.bto)|*.bto|All files|*.*",
+            "Exportar configuracao do overlay", "Export overlay settings", "Importar configuracao do overlay", "Import overlay settings",
+            "Configuracao exportada.", "Settings exported.", "Configuracao importada. Use Ctrl+Z para voltar a anterior.", "Settings imported. Press Ctrl+Z to go back to the previous ones.",
+            "Esse arquivo nao tem uma configuracao valida do overlay.", "This file does not contain a valid overlay configuration.",
+            "Defina antes uma cor para o item selecionado.", "First set a color for the selected item.",
+            "Restaurar todas as opcoes do overlay (itens, cores, nomes, tamanho, opacidade...) para o padrao?\nVoce pode desfazer com Ctrl+Z.", "Restore all overlay options (items, colors, names, size, opacity...) to the defaults?\nYou can undo with Ctrl+Z.",
             "Frametime (ms)", "Frametime (ms)", "1% low (FPS)", "1% low (FPS)", "Grafico de frametime", "Frametime graph",
             "Cor...", "Color...", "Renomear...", "Rename...", "Renomear", "Rename", "Subir", "Move up", "Descer", "Move down", "Resetar", "Reset",
             "Resetar cor e nome", "Reset color and name", "Remover do overlay", "Remove from overlay",
@@ -1861,7 +1870,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.30.0";
+        public const string Version = "v1.31.0";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -4856,7 +4865,7 @@ namespace BunoTunner
         static volatile bool running;
         static int tickNo;
         public static volatile string AlertText;
-        public static volatile int IntervalMs = 1000;
+        public static volatile int IntervalMs = 500;
         static DateTime lastSlow = DateTime.MinValue;
         public static void SetInterval(int ms)
         {
@@ -4866,7 +4875,7 @@ namespace BunoTunner
         static void LoadInterval()
         {
             int v;
-            if (int.TryParse(Settings.Get("interval", "1000"), out v)) IntervalMs = Math.Max(100, Math.Min(10000, v));
+            if (int.TryParse(Settings.Get("interval", "500"), out v)) IntervalMs = Math.Max(100, Math.Min(10000, v));
         }
 
         public static Sn Pick(string groupPrefix, string type, params string[] names)
@@ -5606,7 +5615,7 @@ namespace BunoTunner
             new string[] { "@LOW", "1% low (FPS)" }, new string[] { "@FTG", "Grafico de frametime" } };
         public static Dictionary<string, Color> Colors = new Dictionary<string, Color>();
         public static Dictionary<string, string> Names = new Dictionary<string, string>();
-        public static bool Compact, ColName; public static int HotTemp = 80;
+        public static bool Compact, ColName; public static int HotTemp = 80, GraphMs = 33;
         static readonly string[] Sep = { "~|~" };
         static FpsMon.FtInfo fpsFt;
 
@@ -5636,7 +5645,7 @@ namespace BunoTunner
             Fx = Math.Max(0, Math.Min(1, Dd("ov.fx", 0))); Fy = Math.Max(0, Math.Min(1, Dd("ov.fy", 0)));
             Items = new List<string>(Settings.Get("ov.items", "@FPS").Split(new string[] { "~|~" }, StringSplitOptions.RemoveEmptyEntries));
             KeyMods = I("ov.keymods", 3); KeyVk = I("ov.keyvk", (int)Keys.O);   // padrao: Ctrl+Shift+O
-            Compact = Settings.Get("ov.compact", "0") == "1"; ColName = Settings.Get("ov.colname", "0") == "1"; HotTemp = I("ov.hot", 80);
+            Compact = Settings.Get("ov.compact", "0") == "1"; ColName = Settings.Get("ov.colname", "0") == "1"; HotTemp = I("ov.hot", 80); GraphMs = Math.Max(10, Math.Min(200, I("ov.gms", 33)));
             Colors.Clear(); Names.Clear();
             foreach (string e in Settings.Get("ov.cols", "").Split(Sep, StringSplitOptions.RemoveEmptyEntries))
             {
@@ -5650,17 +5659,75 @@ namespace BunoTunner
         }
         public static void SetColor(string key, Color? c) { if (c.HasValue) Colors[key] = c.Value; else Colors.Remove(key); Commit(); }
         public static void SetName(string key, string n) { if (string.IsNullOrEmpty(n)) Names.Remove(key); else Names[key] = n.Replace("~", "").Replace("\r", " ").Replace("\n", " "); Commit(); }
+        // todas as chaves da configuracao (usadas para salvar, desfazer/refazer e exportar/importar)
+        static readonly string[] CfgKeys = { "ov.size", "ov.mode", "ov.op", "ov.fx", "ov.fy", "ov.items", "ov.compact", "ov.colname", "ov.hot", "ov.gms", "ov.cols", "ov.names", "ov.keymods", "ov.keyvk" };
+        static List<KeyValuePair<string, string>> Dump()
+        {
+            List<KeyValuePair<string, string>> d = new List<KeyValuePair<string, string>>();
+            List<string> cl = new List<string>(); foreach (KeyValuePair<string, Color> kv in Colors) cl.Add(kv.Key + "~=~" + (kv.Value.R << 16 | kv.Value.G << 8 | kv.Value.B).ToString("X6"));
+            List<string> nl = new List<string>(); foreach (KeyValuePair<string, string> kv in Names) nl.Add(kv.Key + "~=~" + kv.Value);
+            d.Add(new KeyValuePair<string, string>("ov.size", Scale.ToString())); d.Add(new KeyValuePair<string, string>("ov.mode", Mode.ToString()));
+            d.Add(new KeyValuePair<string, string>("ov.op", Opac.ToString()));
+            d.Add(new KeyValuePair<string, string>("ov.fx", Fx.ToString("0.####", CultureInfo.InvariantCulture))); d.Add(new KeyValuePair<string, string>("ov.fy", Fy.ToString("0.####", CultureInfo.InvariantCulture)));
+            d.Add(new KeyValuePair<string, string>("ov.items", string.Join("~|~", Items.ToArray())));
+            d.Add(new KeyValuePair<string, string>("ov.compact", Compact ? "1" : "0")); d.Add(new KeyValuePair<string, string>("ov.colname", ColName ? "1" : "0"));
+            d.Add(new KeyValuePair<string, string>("ov.hot", HotTemp.ToString())); d.Add(new KeyValuePair<string, string>("ov.gms", GraphMs.ToString()));
+            d.Add(new KeyValuePair<string, string>("ov.cols", string.Join("~|~", cl.ToArray()))); d.Add(new KeyValuePair<string, string>("ov.names", string.Join("~|~", nl.ToArray())));
+            d.Add(new KeyValuePair<string, string>("ov.keymods", KeyMods.ToString())); d.Add(new KeyValuePair<string, string>("ov.keyvk", KeyVk.ToString()));
+            return d;
+        }
         public static void Save()
         {
-            Settings.Set("ov.on", On ? "1" : "0"); Settings.Set("ov.size", Scale.ToString()); Settings.Set("ov.mode", Mode.ToString()); Settings.Set("ov.op", Opac.ToString());
-            Settings.Set("ov.fx", Fx.ToString("0.####", CultureInfo.InvariantCulture)); Settings.Set("ov.fy", Fy.ToString("0.####", CultureInfo.InvariantCulture));
-            Settings.Set("ov.items", string.Join("~|~", Items.ToArray()));
-            Settings.Set("ov.keymods", KeyMods.ToString()); Settings.Set("ov.keyvk", KeyVk.ToString());
-            Settings.Set("ov.compact", Compact ? "1" : "0"); Settings.Set("ov.colname", ColName ? "1" : "0"); Settings.Set("ov.hot", HotTemp.ToString());
-            List<string> cl = new List<string>(); foreach (KeyValuePair<string, Color> kv in Colors) cl.Add(kv.Key + "~=~" + (kv.Value.R << 16 | kv.Value.G << 8 | kv.Value.B).ToString("X6"));
-            Settings.Set("ov.cols", string.Join("~|~", cl.ToArray()));
-            List<string> nl = new List<string>(); foreach (KeyValuePair<string, string> kv in Names) nl.Add(kv.Key + "~=~" + kv.Value);
-            Settings.Set("ov.names", string.Join("~|~", nl.ToArray()));
+            Settings.Set("ov.on", On ? "1" : "0");
+            foreach (KeyValuePair<string, string> kv in Dump()) Settings.Set(kv.Key, kv.Value);
+        }
+        static string Snap() { StringBuilder sb = new StringBuilder(); foreach (KeyValuePair<string, string> kv in Dump()) sb.Append(kv.Key).Append('=').Append(kv.Value).Append('\n'); return sb.ToString(); }
+        static void ApplyText(string text)
+        {
+            foreach (string line in text.Replace("\r", "").Split('\n'))
+            {
+                int i = line.IndexOf('='); if (i <= 0) continue;
+                string k = line.Substring(0, i).Trim();
+                if (Array.IndexOf(CfgKeys, k) >= 0) Settings.Set(k, line.Substring(i + 1));
+            }
+            bool on = On; Load(); On = on;
+        }
+        // desfazer / refazer: cada alteracao confirmada (Commit) guarda o estado anterior
+        static string lastSnap; static readonly Stack<string> undo = new Stack<string>(), redo = new Stack<string>();
+        public static bool CanUndo { get { return undo.Count > 0; } }
+        public static bool CanRedo { get { return redo.Count > 0; } }
+        static void Record()
+        {
+            string n = Snap();
+            if (lastSnap == null) { lastSnap = n; return; }
+            if (n == lastSnap) return;
+            undo.Push(lastSnap); if (undo.Count > 100) { Stack<string> t = new Stack<string>(); foreach (string x in undo) t.Push(x); undo.Clear(); string[] arr = t.ToArray(); for (int i = 1; i < arr.Length; i++) undo.Push(arr[i]); }
+            redo.Clear(); lastSnap = n;
+        }
+        public static void Undo()
+        {
+            if (undo.Count == 0) return;
+            redo.Push(lastSnap ?? Snap()); lastSnap = undo.Pop();
+            ApplyText(lastSnap); Save(); Notify(); Tick();
+        }
+        public static void Redo()
+        {
+            if (redo.Count == 0) return;
+            undo.Push(lastSnap ?? Snap()); lastSnap = redo.Pop();
+            ApplyText(lastSnap); Save(); Notify(); Tick();
+        }
+        public static string Export() { StringBuilder sb = new StringBuilder("# BunoTunner - configuracao do overlay\n"); sb.Append(Snap()); return sb.ToString(); }
+        public static int Import(string text)
+        {
+            Record();                                  // garante que o estado atual possa ser desfeito
+            int n = 0; foreach (string line in text.Replace("\r", "").Split('\n')) { int i = line.IndexOf('='); if (i > 0 && Array.IndexOf(CfgKeys, line.Substring(0, i).Trim()) >= 0) n++; }
+            if (n == 0) return 0;
+            ApplyText(text); Commit(); return n;
+        }
+        public static void ResetAll()
+        {
+            Scale = 100; Opac = 85; Mode = 0; Fx = 0; Fy = 0; Items = new List<string>(new string[] { "@FPS" }); Colors.Clear(); Names.Clear();
+            Compact = false; ColName = false; HotTemp = 80; GraphMs = 33; Commit();
         }
         public static string KeyName()
         {
@@ -5686,14 +5753,14 @@ namespace BunoTunner
         public static void Init()
         {
             if (tm != null) return;
-            Load();
+            Load(); lastSnap = Snap();
             tm = new Timer(); tm.Interval = 500; tm.Tick += delegate { try { Tick(); } catch (Exception) { } };
             tm.Start();
             kt = new Timer(); kt.Interval = 40; kt.Tick += delegate { try { KeyPoll(); } catch (Exception) { } };
             kt.Start();
             Application.ApplicationExit += delegate { FpsMon.Stop(); };
         }
-        public static void Commit() { Save(); Notify(); Tick(); }
+        public static void Commit() { Record(); Save(); Notify(); Tick(); }
         public static void Notify() { if (StateChanged != null) StateChanged(); }
         public static void SetEditing(bool v, Screen sc)
         {
@@ -6011,18 +6078,18 @@ namespace BunoTunner
         {
             if (gr.Width < 4 || gr.Height < 4) return;
             using (SolidBrush gb = new SolidBrush(Color.FromArgb(Math.Min(bgAlpha, 150), 0, 0, 0))) g.FillRectangle(gb, gr);
-            float max = 33.4f;
-            foreach (float v in d) if (v > max) max = v;
-            if (max > 33.4f) max = Math.Min(200f, (float)Math.Ceiling(max / 10f) * 10f);
+            float max = Overlay.GraphMs;                                              // escala fixa: picos acima dela saem do grafico
             float yg = gr.Bottom - gr.Height * 16.7f / max;                           // referencia: 16,7 ms = 60 FPS
-            using (Pen gp = new Pen(Color.FromArgb(70, 255, 255, 255), 1f)) { gp.DashStyle = DashStyle.Dot; g.DrawLine(gp, gr.Left, yg, gr.Right, yg); }
+            g.SetClip(gr);
+            if (yg > gr.Top) using (Pen gp = new Pen(Color.FromArgb(70, 255, 255, 255), 1f)) { gp.DashStyle = DashStyle.Dot; g.DrawLine(gp, gr.Left, yg, gr.Right, yg); }
             if (d.Length >= 2)
             {
                 PointF[] pts = new PointF[d.Length];
                 for (int i = 0; i < d.Length; i++)
-                    pts[i] = new PointF(gr.Left + (float)i / (d.Length - 1) * (gr.Width - 1), gr.Bottom - 1 - Math.Min(1f, d[i] / max) * (gr.Height - 2));
+                    pts[i] = new PointF(gr.Left + (float)i / (d.Length - 1) * (gr.Width - 1), gr.Bottom - 1 - Math.Min(d[i] / max, 50f) * (gr.Height - 2));
                 using (Pen pl = new Pen(line, Math.Max(1f, 1.4f * s))) { pl.LineJoin = LineJoin.Round; g.DrawLines(pl, pts); }
             }
+            g.ResetClip();
         }
 
         int RowAt(Point p) { for (int i = 0; i < rowR.Count; i++) if (p.Y >= rowR[i].Top && p.Y < rowR[i].Bottom) return i; return -1; }
@@ -6063,7 +6130,7 @@ namespace BunoTunner
         protected override void OnMouseUp(MouseEventArgs e)
         {
             base.OnMouseUp(e);
-            if (winDrag) { winDrag = false; Overlay.Save(); Overlay.Notify(); }
+            if (winDrag) { winDrag = false; Overlay.Commit(); }
             if (rowDrag >= 0)
             {
                 int from = rowDrag, to = dropIdx; rowDrag = -1; dropIdx = -1;
@@ -6082,15 +6149,16 @@ namespace BunoTunner
             inst = new OverlayConfigForm(); inst.Show(owner);
         }
 
-        XpOption chkOn, chkCompact, chkColName; ComboBox cbMode, cbSize, cbOp, cbHot; XpText txSearch; ListView lvAv; ListBox lbSel; XpButton btnEdit, btnKey; Label hint; Timer tm = new Timer(); bool capturing;
+        XpOption chkOn, chkCompact, chkColName; ComboBox cbMode, cbSize, cbOp, cbHot, cbGraph, cbGrp; XpText txSearch; ListView lvAv; ListBox lbSel; XpButton btnEdit, btnKey; Label hint; Timer tm = new Timer(); bool capturing;
         int dropIdx = -1, downIdx = -1; Point downPt; bool building;
         static int[] Seq(int a, int b) { List<int> l = new List<int>(); for (int v = a; v <= b; v += 5) l.Add(v); return l.ToArray(); }
+        static readonly int[] GraphScales = { 17, 25, 33, 50, 100 };
         static readonly int[] Sizes = Seq(50, 200), Ops = Seq(50, 100);
 
         public OverlayConfigForm()
         {
             Text = "Overlay em jogos";
-            Size = new Size(796, 704); KeyPreview = true;
+            Size = new Size(796, 690); KeyPreview = true;
             Panel body = new Panel(); body.Dock = DockStyle.Fill; Controls.Add(body);
 
             chkOn = UI.Opt(body, "Ativar overlay em jogos", 8, 8, 260, false);
@@ -6107,7 +6175,8 @@ namespace BunoTunner
             btnKey.Text = "Mostrar/ocultar: " + Overlay.KeyName();
 
             UI.Lbl(body, "Sensores disponiveis  (duplo clique ou arraste para a direita)", 8, 72, Xp.UiBold);
-            txSearch = UI.Txt(body, 8, 94, 372, "");
+            txSearch = UI.Txt(body, 8, 94, 220, "");
+            cbGrp = Combo(body, 234, 94, 146);
             lvAv = new ListView(); lvAv.SetBounds(8, 124, 372, 332); lvAv.View = View.Details; lvAv.FullRowSelect = true; lvAv.HideSelection = false; lvAv.GridLines = true;
             lvAv.Columns.Add("Sensor", 190); lvAv.Columns.Add("Grupo", 100); lvAv.Columns.Add("Valor", 62);
             lvAv.BackColor = Xp.EditBg; lvAv.Font = Xp.Ui; lvAv.AllowDrop = true; UI.DoubleBuffer(lvAv);
@@ -6128,28 +6197,29 @@ namespace BunoTunner
             UI.Btn(body, "Descer", 648, 463, 58, delegate { MoveSel(1); });
             UI.Btn(body, "Resetar", 710, 463, 66, delegate { ResetSel(); });
 
-            UI.Lbl(body, "Posicao:", 8, 502);
-            UI.Btn(body, "Sup. esq.", 70, 497, 80, delegate { Overlay.Corner(0, 0); });
-            UI.Btn(body, "Sup. centro", 156, 497, 86, delegate { Overlay.Corner(0.5, 0); });
-            UI.Btn(body, "Sup. dir.", 248, 497, 80, delegate { Overlay.Corner(1, 0); });
-            UI.Btn(body, "Inf. esq.", 70, 527, 80, delegate { Overlay.Corner(0, 1); });
-            UI.Btn(body, "Inf. centro", 156, 527, 86, delegate { Overlay.Corner(0.5, 1); });
-            UI.Btn(body, "Inf. dir.", 248, 527, 80, delegate { Overlay.Corner(1, 1); });
+            UI.Btn(body, "Desfazer", 8, 497, 76, delegate { Overlay.Undo(); });
+            UI.Btn(body, "Refazer", 88, 497, 70, delegate { Overlay.Redo(); });
+            UI.Btn(body, "Limpar lista", 162, 497, 96, delegate { if (Overlay.Items.Count == 0) return; Overlay.Items.Clear(); Overlay.Commit(); });
+            UI.Btn(body, "Restaurar padrao", 262, 497, 118, delegate
+            {
+                if (Dlg.Show(this, "Restaurar todas as opcoes do overlay (itens, cores, nomes, tamanho, opacidade...) para o padrao?\nVoce pode desfazer com Ctrl+Z.", "Overlay em jogos", MessageBoxButtons.YesNo) == DialogResult.Yes) Overlay.ResetAll();
+            });
             btnEdit = UI.Btn(body, "Editar na tela", 430, 497, 124, delegate { Overlay.SetEditing(!Overlay.Editing, Screen.FromControl(this)); });
-            UI.Btn(body, "Fechar", 686, 497, 90, delegate { Close(); });
-            UI.Lbl(body, "Modelos:", 430, 532);
-            UI.Btn(body, "So FPS", 490, 527, 64, delegate { Overlay.Items = new List<string>(new string[] { "@FPS" }); Overlay.Commit(); });
-            UI.Btn(body, "FPS + frametime", 558, 527, 112, delegate { Overlay.Items = new List<string>(new string[] { "@FPS", "@FT", "@LOW" }); Overlay.Commit(); });
-            UI.Btn(body, "FPS + grafico", 674, 527, 102, delegate { Overlay.Items = new List<string>(new string[] { "@FPS", "@FTG", "@LOW" }); Overlay.Commit(); });
+            UI.Btn(body, "Exportar...", 558, 497, 104, delegate { DoExport(); });
+            UI.Btn(body, "Importar...", 666, 497, 110, delegate { DoImport(); });
 
-            chkCompact = UI.Opt(body, "Compacto (so os valores, sem nomes)", 8, 563, 270, false);
-            chkColName = UI.Opt(body, "Aplicar a cor tambem ao nome", 290, 563, 230, false);
-            UI.Lbl(body, "Temperatura em vermelho a partir de:", 8, 592);
-            cbHot = Combo(body, 238, 588, 90);
+            chkCompact = UI.Opt(body, "Compacto (so os valores, sem nomes)", 8, 535, 270, false);
+            chkColName = UI.Opt(body, "Aplicar a cor tambem ao nome", 290, 535, 230, false);
+            UI.Btn(body, "Fechar", 686, 531, 90, delegate { Close(); });
+            UI.Lbl(body, "Temperatura em vermelho a partir de:", 8, 568);
+            cbHot = Combo(body, 238, 564, 90);
             cbHot.Items.Add("Desligado"); for (int t = 70; t <= 95; t += 5) cbHot.Items.Add(t + " °C");
+            UI.Lbl(body, "Escala do grafico de frametime:", 350, 568);
+            cbGraph = Combo(body, 548, 564, 90);
+            foreach (int v in GraphScales) cbGraph.Items.Add(v + " ms");
 
-            hint = UI.Lbl(body, "", 8, 622, Xp.Ui, Xp.Dim); hint.AutoSize = false; hint.SetBounds(8, 620, 768, 46);
-            hint.Text = "Dica: Esc fecha esta janela. Clique com o botao direito num item da lista para mudar cor, nome, ordem ou remover; duplo clique abre a cor. Em \"Editar na tela\" arraste o overlay pelo topo e as linhas para reordenar. Jogos em tela cheia exclusiva (nao a sem borda) podem esconder o overlay. O atalho Mostrar/ocultar nao bloqueia a tecla nos outros programas.";
+            hint = UI.Lbl(body, "", 8, 600, Xp.Ui, Xp.Dim); hint.AutoSize = false; hint.SetBounds(8, 598, 768, 46);
+            hint.Text = "Dica: Esc fecha esta janela; Ctrl+Z desfaz e Ctrl+Y refaz. Clique com o botao direito num item da lista para mudar cor, nome, ordem ou remover; duplo clique abre a cor. Em \"Editar na tela\" arraste o overlay pelo topo e as linhas para reordenar. Jogos em tela cheia exclusiva (nao a sem borda) podem esconder o overlay. O atalho Mostrar/ocultar nao bloqueia a tecla nos outros programas.";
 
             building = true;
             chkOn.Checked = Overlay.On;
@@ -6157,6 +6227,8 @@ namespace BunoTunner
             cbOp.SelectedIndex = Math.Max(0, Array.IndexOf(Ops, Overlay.Opac));
             cbMode.SelectedIndex = Overlay.Mode;
             chkCompact.Checked = Overlay.Compact; chkColName.Checked = Overlay.ColName;
+            cbGraph.SelectedIndex = Math.Max(0, Array.IndexOf(GraphScales, Overlay.GraphMs));
+            cbGrp.Items.Add("Todos os grupos"); cbGrp.SelectedIndex = 0;
             cbHot.SelectedIndex = Overlay.HotTemp <= 0 ? 0 : Math.Max(1, Math.Min(cbHot.Items.Count - 1, (Overlay.HotTemp - 70) / 5 + 1));
             building = false;
             FillAvail(); FillSel();
@@ -6165,6 +6237,13 @@ namespace BunoTunner
             cbSize.SelectedIndexChanged += delegate { if (building || cbSize.SelectedIndex < 0) return; Overlay.Scale = Sizes[cbSize.SelectedIndex]; Overlay.Commit(); };
             cbOp.SelectedIndexChanged += delegate { if (building || cbOp.SelectedIndex < 0) return; Overlay.Opac = Ops[cbOp.SelectedIndex]; Overlay.Commit(); };
             cbMode.SelectedIndexChanged += delegate { if (building || cbMode.SelectedIndex < 0) return; Overlay.Mode = cbMode.SelectedIndex; Overlay.Commit(); };
+            cbGraph.SelectedIndexChanged += delegate { if (building || cbGraph.SelectedIndex < 0) return; Overlay.GraphMs = GraphScales[cbGraph.SelectedIndex]; Overlay.Commit(); };
+            cbGrp.SelectedIndexChanged += delegate { if (!building) FillAvail(); };
+            ContextMenuStrip cma = new ContextMenuStrip();
+            cma.Items.Add(Lang.T("Adicionar ao overlay"), null, delegate { AddSel(); });
+            cma.Items.Add(Lang.T("Adicionar todos os resultados da busca"), null, delegate { foreach (ListViewItem it in lvAv.Items) { string k = (string)it.Tag; if (!Overlay.Items.Contains(k)) Overlay.Items.Add(k); } Overlay.Commit(); });
+            lvAv.ContextMenuStrip = cma;
+            lvAv.KeyDown += delegate(object o, KeyEventArgs e) { if (e.KeyCode == Keys.A && e.Control) { foreach (ListViewItem it in lvAv.Items) it.Selected = true; e.Handled = true; } };
             chkCompact.CheckedChanged += delegate { if (building) return; Overlay.Compact = chkCompact.Checked; Overlay.Commit(); };
             chkColName.CheckedChanged += delegate { if (building) return; Overlay.ColName = chkColName.Checked; Overlay.Commit(); };
             cbHot.SelectedIndexChanged += delegate { if (building || cbHot.SelectedIndex < 0) return; Overlay.HotTemp = cbHot.SelectedIndex == 0 ? 0 : 70 + (cbHot.SelectedIndex - 1) * 5; Overlay.Commit(); };
@@ -6186,6 +6265,11 @@ namespace BunoTunner
             ContextMenuStrip cm = new ContextMenuStrip();
             cm.Items.Add(Lang.T("Cor..."), null, delegate { PickColor(); });
             cm.Items.Add(Lang.T("Renomear..."), null, delegate { RenameSel(); });
+            cm.Items.Add(Lang.T("Aplicar esta cor a todos os itens"), null, delegate
+            {
+                int i = SelIdx(); Color c; if (i < 0 || !Overlay.Colors.TryGetValue(Overlay.Items[i], out c)) { Dlg.Show(this, "Defina antes uma cor para o item selecionado.", "Overlay em jogos"); return; }
+                foreach (string k in Overlay.Items) Overlay.Colors[k] = c; Overlay.Commit();
+            });
             cm.Items.Add(Lang.T("Resetar cor e nome"), null, delegate { ResetSel(); });
             cm.Items.Add(new ToolStripSeparator());
             cm.Items.Add(Lang.T("Subir"), null, delegate { MoveSel(-1); });
@@ -6253,12 +6337,57 @@ namespace BunoTunner
                 Overlay.Commit();
                 return true;
             }
+            if (keyData == (Keys.Control | Keys.Z) || keyData == (Keys.Control | Keys.Y) || keyData == (Keys.Control | Keys.Shift | Keys.Z))
+            {
+                if (!(ActiveControl is TextBoxBase) && !(ActiveControl is XpText))   // em caixas de texto, Ctrl+Z continua desfazendo o texto
+                {
+                    if (keyData == (Keys.Control | Keys.Z)) Overlay.Undo(); else Overlay.Redo();
+                    return true;
+                }
+            }
             if (keyData == Keys.Escape)
             {
                 ComboBox open = ActiveControl as ComboBox;
                 if (open == null || !open.DroppedDown) { Close(); return true; }
             }
             return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        void DoExport()
+        {
+            using (SaveFileDialog sd = new SaveFileDialog())
+            {
+                sd.Filter = Lang.T("Configuracao do overlay (*.bto)|*.bto|Todos os arquivos|*.*"); sd.FileName = "BunoTunner-overlay.bto"; sd.Title = Lang.T("Exportar configuracao do overlay");
+                if (sd.ShowDialog(this) != DialogResult.OK) return;
+                try { File.WriteAllText(sd.FileName, Overlay.Export(), new UTF8Encoding(false)); Dlg.Show(this, "Configuracao exportada.", "Overlay em jogos"); }
+                catch (Exception ex) { Dlg.Show(this, "Nao consegui salvar: " + ex.Message, "Overlay em jogos"); }
+            }
+        }
+        void DoImport()
+        {
+            using (OpenFileDialog od = new OpenFileDialog())
+            {
+                od.Filter = Lang.T("Configuracao do overlay (*.bto)|*.bto|Todos os arquivos|*.*"); od.Title = Lang.T("Importar configuracao do overlay");
+                if (od.ShowDialog(this) != DialogResult.OK) return;
+                try
+                {
+                    FileInfo fi = new FileInfo(od.FileName);
+                    if (fi.Length > 1024 * 1024) { Dlg.Show(this, "Arquivo grande demais para ser uma configuracao do overlay.", "Overlay em jogos"); return; }
+                    int n = Overlay.Import(File.ReadAllText(od.FileName));
+                    if (n == 0) Dlg.Show(this, "Esse arquivo nao tem uma configuracao valida do overlay.", "Overlay em jogos");
+                    else
+                    {
+                        building = true;
+                        cbSize.SelectedIndex = Math.Max(0, Array.IndexOf(Sizes, Overlay.Scale)); cbOp.SelectedIndex = Math.Max(0, Array.IndexOf(Ops, Overlay.Opac)); cbMode.SelectedIndex = Overlay.Mode;
+                        chkCompact.Checked = Overlay.Compact; chkColName.Checked = Overlay.ColName; cbGraph.SelectedIndex = Math.Max(0, Array.IndexOf(GraphScales, Overlay.GraphMs));
+                        cbHot.SelectedIndex = Overlay.HotTemp <= 0 ? 0 : Math.Max(1, Math.Min(cbHot.Items.Count - 1, (Overlay.HotTemp - 70) / 5 + 1));
+                        building = false;
+                        btnKey.Text = "Mostrar/ocultar: " + Overlay.KeyName();
+                        Dlg.Show(this, "Configuracao importada. Use Ctrl+Z para voltar a anterior.", "Overlay em jogos");
+                    }
+                }
+                catch (Exception ex) { Dlg.Show(this, "Nao consegui ler o arquivo: " + ex.Message, "Overlay em jogos"); }
+            }
         }
 
         // ---- ferramentas do item selecionado ----
@@ -6314,6 +6443,12 @@ namespace BunoTunner
             if (IsDisposed) return;
             btnEdit.Text = Overlay.Editing ? "Concluir edicao" : "Editar na tela";
             if (!capturing) btnKey.Text = "Mostrar/ocultar: " + Overlay.KeyName();
+            building = true;
+            int si = Array.IndexOf(Sizes, Overlay.Scale), oi = Array.IndexOf(Ops, Overlay.Opac), gi = Array.IndexOf(GraphScales, Overlay.GraphMs);
+            if (si >= 0) cbSize.SelectedIndex = si; if (oi >= 0) cbOp.SelectedIndex = oi; if (gi >= 0) cbGraph.SelectedIndex = gi;
+            cbMode.SelectedIndex = Overlay.Mode; chkCompact.Checked = Overlay.Compact; chkColName.Checked = Overlay.ColName;
+            cbHot.SelectedIndex = Overlay.HotTemp <= 0 ? 0 : Math.Max(1, Math.Min(cbHot.Items.Count - 1, (Overlay.HotTemp - 70) / 5 + 1));
+            building = false;
             FillSel(); FillAvailMarks();
         }
         void FillSel()
@@ -6352,10 +6487,12 @@ namespace BunoTunner
         void FillAvail()
         {
             string q = txSearch.Text.Trim().ToLowerInvariant();
+            string grp = cbGrp.SelectedIndex > 0 ? (string)cbGrp.SelectedItem : null;
             lvAv.BeginUpdate(); lvAv.Items.Clear();
             foreach (string[] sp in Overlay.Specials)
             {
                 string sl = Lang.T(sp[1]);
+                if (grp != null && grp != Lang.T("Jogo")) continue;
                 if (q.Length > 0 && (sl + " fps api quadros frametime frame time low grafico").ToLowerInvariant().IndexOf(q) < 0) continue;
                 ListViewItem f = new ListViewItem(sl); f.SubItems.Add(Lang.T("Jogo")); f.SubItems.Add(""); f.Tag = sp[0];
                 lvAv.Items.Add(f);
@@ -6364,6 +6501,7 @@ namespace BunoTunner
             {
                 if (s.Type == "Temperature" && !s.IsRealTemp) continue;
                 if (!s.Seen && !s.Last.HasValue) continue;
+                if (grp != null && s.Area != grp) continue;
                 string lab = Overlay.LabelOf(s);
                 if (q.Length > 0 && (lab + " " + s.Group + " " + s.Type).ToLowerInvariant().IndexOf(q) < 0) continue;
                 ListViewItem it = new ListViewItem(lab); it.SubItems.Add(s.Area); it.SubItems.Add(Overlay.ValueOf(s)); it.Tag = Overlay.OvKey(s);
@@ -6371,6 +6509,16 @@ namespace BunoTunner
             }
             lvAv.EndUpdate();
             FillAvailMarks();
+            if (cbGrp.Items.Count <= 1 || cbGrp.Tag == null || (int)cbGrp.Tag != SensorHub.AllSensors.Count)
+            {
+                List<string> areas = new List<string>(); areas.Add(Lang.T("Jogo"));
+                foreach (Sn s in SensorHub.AllSensors.ToArray()) if (s.Area != null && !areas.Contains(s.Area)) areas.Add(s.Area);
+                string cur = cbGrp.SelectedIndex > 0 ? (string)cbGrp.SelectedItem : null;
+                building = true; cbGrp.Items.Clear(); cbGrp.Items.Add(Lang.T("Todos os grupos"));
+                foreach (string a in areas) cbGrp.Items.Add(a);
+                cbGrp.SelectedIndex = cur != null && cbGrp.Items.Contains(cur) ? cbGrp.Items.IndexOf(cur) : 0;
+                cbGrp.Tag = SensorHub.AllSensors.Count; building = false;
+            }
         }
         void FillAvailMarks()
         {

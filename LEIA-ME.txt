@@ -350,3 +350,9 @@ v1.29.0 (TESTE)
 v1.30.0 (TESTE)
 - Overlay: novas linhas "Frametime (ms)", "1% low (FPS)" e "Grafico de frametime" (grafico dos ultimos ~150 quadros, linha pontilhada em 16,7 ms = 60 FPS).
 - Menu do overlay: Esc fecha a janela; cor por sensor (botao Cor, duplo clique ou botao direito), renomear, subir/descer, resetar; modelos prontos (So FPS, FPS + frametime, FPS + grafico); posicoes centro superior/inferior; modo compacto (so valores); opcao de aplicar a cor tambem ao nome; limite configuravel (ou desligado) para a temperatura ficar vermelha.
+
+v1.31.0 (TESTE)
+- Grafico de frametime com escala FIXA (padrao 33 ms; configuravel: 17, 25, 33, 50 ou 100 ms). Picos acima da escala saem do grafico em vez de redimensiona-lo.
+- Menu do overlay: Ctrl+Z desfaz e Ctrl+Y (ou Ctrl+Shift+Z) refaz qualquer alteracao (itens, cores, nomes, opcoes e posicao); botoes Desfazer/Refazer, Limpar lista e Restaurar padrao; filtro por grupo na lista de sensores; botao direito adiciona todos os resultados da busca; "aplicar esta cor a todos"; exportar e importar a configuracao (arquivo .bto).
+- Removidos os botoes de posicao (use "Editar na tela") e os modelos prontos.
+- Intervalo padrao de atualizacao dos sensores agora e 500 ms (quem ja tinha salvo outro valor mantem o seu).
