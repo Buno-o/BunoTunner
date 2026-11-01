@@ -30,8 +30,8 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - codigo aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.27.0.0")]
-[assembly: AssemblyFileVersion("1.27.0.0")]
+[assembly: AssemblyVersion("1.27.1.0")]
+[assembly: AssemblyFileVersion("1.27.1.0")]
 
 namespace BunoTunner
 {
@@ -580,7 +580,7 @@ namespace BunoTunner
             "--- Overclock / controle (", "--- Overclock / control (",
             "--- Recursos (ligado / desligado) ---", "--- Features (on / off) ---",
             "--- Recursos e seguranca (ligado / desligado) ---", "--- Features and security (on / off) ---",
-            ". Alternativa: baixe o CPU-Z (versão ZIP), extraia ao lado do programa ou use \"Indicar CPU-Z\"; o programa o usa só para ler os timings.", ". Alternative: download CPU-Z (ZIP version), extract it next to the program or use \"Set CPU-Z\"; the program only uses it to read the timings.",
+            ". Clique em Diagnóstico e envie o texto para análise.", ". Alternative: download CPU-Z (ZIP version), extract it next to the program or use \"Set CPU-Z\"; the program only uses it to read the timings.",
             ". Esta placa/driver nao aceitou controle manual.", ". This card/driver did not accept manual control.",
             ". Use 'Remocao forcada' ou 'So procurar restos'.", ". Use 'Forced removal' or 'Only scan for leftovers'.",
             "2a thread", "2nd thread",
@@ -1850,7 +1850,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.27.0";
+        public const string Version = "v1.27.1";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -9971,24 +9971,26 @@ namespace BunoTunner
         void BuildTimings()
         {
             XpGroup g = new XpGroup(); g.Title = "Timings atuais (leitura automática)";
-            int y = 26, col = 0;
-            for (int i = 0; i < TSpec.Length; i += 2)
+            int y = 26;
+            int pos = 0;
+            while (pos < TSpec.Length)
             {
-                if (TSpec[i] == "#")
+                y += 4;
+                UI.Lbl(g, TSpec[pos + 1], 14, y, Xp.UiBold);
+                y += 22; pos += 2;
+                int start = pos;
+                while (pos < TSpec.Length && TSpec[pos] != "#") pos += 2;
+                int n = (pos - start) / 2, rows = (n + 2) / 3;   // ordem vertical: preenche a coluna 1, depois a 2, depois a 3
+                for (int k = 0; k < n; k++)
                 {
-                    if (col != 0) { y += 22; col = 0; }
-                    y += 4;
-                    UI.Lbl(g, TSpec[i + 1], 14, y, Xp.UiBold);
-                    y += 22; continue;
+                    int col = k / rows, row = k % rows, x = 14 + col * 214, yy = y + row * 20;
+                    UI.Lbl(g, TSpec[start + k * 2 + 1], x, yy);
+                    Label v = UI.Lbl(g, "-", x + 112, yy, Xp.UiBold, Xp.GroupText);
+                    v.AutoSize = false; v.AutoEllipsis = true; v.SetBounds(x + 112, yy, 96, 18);
+                    tl[TSpec[start + k * 2]] = v;
                 }
-                int x = 14 + col * 214;
-                UI.Lbl(g, TSpec[i + 1], x, y);
-                Label v = UI.Lbl(g, "-", x + 112, y, Xp.UiBold, Xp.GroupText);
-                v.AutoSize = false; v.AutoEllipsis = true; v.SetBounds(x + 112, y, 96, 18);
-                tl[TSpec[i]] = v;
-                if (++col == 3) { col = 0; y += 20; }
+                y += rows * 20;
             }
-            if (col != 0) y += 20;
             lblLat = UI.Lbl(g, "", 14, y + 6, Xp.Ui, Xp.Dim);
             lblLat.AutoSize = false; lblLat.AutoEllipsis = true; lblLat.SetBounds(14, y + 6, 630, 20);
             lblSrc = UI.Lbl(g, "Lendo os timings...", 14, y + 28, Xp.Ui, Xp.Dim);
@@ -10004,17 +10006,6 @@ namespace BunoTunner
                     try { BeginInvoke(new Action(delegate { try { Clipboard.SetText(d); } catch (Exception) { } Dlg.Show(this, d + "\n(copiado para a area de transferencia)", "BunoTunner - diagnostico dos timings"); })); } catch (Exception) { }
                 });
             });
-            UI.Btn(g, "Indicar CPU-Z...", 236, by, 110, delegate
-            {
-                using (OpenFileDialog od = new OpenFileDialog())
-                {
-                    od.Filter = Lang.T("CPU-Z (cpuz*.exe)|cpuz*.exe|Programas|*.exe"); od.Title = Lang.T("Escolha o cpuz.exe (versao portatil ou instalada)");
-                    if (od.ShowDialog(this) != DialogResult.OK) return;
-                    Settings.Set("cpuzpath", od.FileName);
-                }
-                ReadAsync();
-            });
-            UI.Btn(g, "Baixar CPU-Z", 352, by, 100, delegate { try { Process.Start("https://www.cpuid.com/softwares/cpu-z.html"); } catch (Exception) { } });
             g.SetBounds(0, 384, 656, by + 44);
             Controls.Add(g);
         }
@@ -10042,7 +10033,7 @@ namespace BunoTunner
                 kv.Value.Text = v == null ? "-" : v;
             }
             if (r.V.Count > 0) { lblSrc.ForeColor = Xp.Good; lblSrc.Text = "Fonte: " + r.Source + "."; }
-            else { lblSrc.ForeColor = Xp.Bad; lblSrc.Text = "Não consegui ler: " + r.Note + ". Alternativa: baixe o CPU-Z (versão ZIP), extraia ao lado do programa ou use \"Indicar CPU-Z\"; o programa o usa só para ler os timings."; }
+            else { lblSrc.ForeColor = Xp.Bad; lblSrc.Text = "Não consegui ler: " + r.Note + ". Clique em Diagnóstico e envie o texto."; }
             Recalc();
         }
 

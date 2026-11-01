@@ -331,3 +331,6 @@ v1.27.0 (TESTE)
 - Timings completos em CPUs Intel (Skylake, Kaby, Coffee e Comet Lake, ex.: i7-7700HQ): tCL, tRCD, tRP, tRAS, tRC, tRFC, Command Rate, tRRD, tFAW, tWR, tWTR, tREFI, tRDRD/tRDWR/tWRRD/tWRWR, energia, RTL/IOL etc. O que nao for lido fica "-".
 - A leitura usa o modulo oficial e assinado "IntelMCHBAR" do PawnIO (so leitura). Precisa do PawnIO instalado e de administrador. Nenhum driver vulneravel e usado.
 - Aviso: o modulo IntelMCHBAR (PawnIO.Modules, de Gen Li / namazso) e licenciado sob LGPL-2.1 ou superior: https://github.com/namazso/PawnIO.Modules
+
+v1.27.1 (TESTE)
+- Aba Memoria: removidos os botoes "Indicar CPU-Z" e "Baixar CPU-Z"; timings agora em ordem vertical dentro de cada uma das 3 colunas.
