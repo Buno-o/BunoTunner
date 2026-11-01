@@ -30,8 +30,8 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - codigo aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.26.0.0")]
-[assembly: AssemblyFileVersion("1.26.0.0")]
+[assembly: AssemblyVersion("1.27.0.0")]
+[assembly: AssemblyFileVersion("1.27.0.0")]
 
 namespace BunoTunner
 {
@@ -178,7 +178,7 @@ namespace BunoTunner
             "Especificacoes da GPU\nTodos os dados da placa de video", "GPU specifications\nAll graphics card data",
             "Especificacoes da CPU\nProcessador, nucleos, cache, clocks e conjuntos de instrucoes", "CPU specifications\nProcessor, cores, cache, clocks and instruction sets",
             "Benchmark / Estresse\nGPU, CPU, FPU, RAM e SSD com verificacao de erros e limite de temperatura", "Benchmark / Stress test\nGPU, CPU, FPU, RAM and SSD with error checking and temperature limit",
-            "Memoria RAM\nVelocidade, canais, voltagem, modulos e timings basicos (tCAS, tRCD, tRP, tRAS, tRC, tRFC, Command Rate)", "RAM\nSpeed, channels, voltage, modules and basic timings (tCAS, tRCD, tRP, tRAS, tRC, tRFC, Command Rate)",
+            "Memoria RAM\nVelocidade, canais, voltagem, modulos e todos os timings que o controlador expuser (tCAS, tRCD, tRP, tRAS, tRFC, Command Rate, tRRD, tFAW, tREFI...)", "RAM\nSpeed, channels, voltage, modules and basic timings (tCAS, tRCD, tRP, tRAS, tRC, tRFC, Command Rate)",
             "Saude do armazenamento\nVida util restante, temperatura e S.M.A.R.T. de SSDs NVMe/SATA e HDs", "Storage health\nRemaining life, temperature and S.M.A.R.T. of NVMe/SATA SSDs and HDDs",
             "Internet\nTeste de velocidade (ping, download, upload) e informacoes da rede", "Internet\nSpeed test (ping, download, upload) and network information",
             "Afinidade de processos\nEscolha em quais nucleos cada programa roda; presets e regras automaticas", "Process affinity\nChoose which cores each program runs on; presets and automatic rules",
@@ -365,6 +365,16 @@ namespace BunoTunner
             "Travar clock da memoria (MHz):  min", "Lock memory clock (MHz):  min",
             "Atualizar a cada:", "Update every:" };
         static readonly string[] Pairs2 = {
+            "Principais", "Main",
+            "Ativacao e escrita", "Activation and write",
+            "Refresh e calibracao", "Refresh and calibration",
+            "Leitura / escrita entre bancos e ranks", "Read / write between banks and ranks",
+            "Economia de energia", "Power saving",
+            "Treino do controlador (RTL / IOL)", "Controller training (RTL / IOL)",
+            "RTL canal A / DIMM0:", "RTL channel A / DIMM0:", "RTL canal A / DIMM1:", "RTL channel A / DIMM1:",
+            "RTL canal B / DIMM0:", "RTL channel B / DIMM0:", "RTL canal B / DIMM1:", "RTL channel B / DIMM1:",
+            "IOL canal A / DIMM0:", "IOL channel A / DIMM0:", "IOL canal A / DIMM1:", "IOL channel A / DIMM1:",
+            "IOL canal B / DIMM0:", "IOL channel B / DIMM0:", "IOL canal B / DIMM1:", "IOL channel B / DIMM1:",
             "Overlay em jogos...", "In-game overlay...",
             "Overlay em jogos", "In-game overlay",
             "Ativar overlay em jogos", "Enable in-game overlay",
@@ -1840,7 +1850,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.26.0";
+        public const string Version = "v1.27.0";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -9133,7 +9143,7 @@ namespace BunoTunner
     static class CpuId
     {
         public static string Name = "", Vendor = "", Socket = "";
-        public static int Cores, Threads;
+        public static int Cores, Threads, Family, Model;
         static CpuId()
         {
             try
@@ -9144,6 +9154,8 @@ namespace BunoTunner
                     {
                         Name = Convert.ToString(k.GetValue("ProcessorNameString")).Trim();
                         string v = Convert.ToString(k.GetValue("VendorIdentifier"));
+                        Match fm = Regex.Match(Convert.ToString(k.GetValue("Identifier")), @"Family\s+(\d+)\s+Model\s+(\d+)", RegexOptions.IgnoreCase);
+                        if (fm.Success) { Family = int.Parse(fm.Groups[1].Value); Model = int.Parse(fm.Groups[2].Value); }
                         if (v.IndexOf("AMD", StringComparison.OrdinalIgnoreCase) >= 0) Vendor = "AMD";
                         else if (v.IndexOf("Intel", StringComparison.OrdinalIgnoreCase) >= 0) Vendor = "Intel";
                         else Vendor = v;
@@ -9414,6 +9426,154 @@ namespace BunoTunner
             catch (Exception ex) { DiagWhy += ex.Message + "; "; return false; }
         }
 
+        // ---------- Intel Skylake/Kaby/Coffee/Comet Lake: registradores do controlador (MCHBAR) via modulo PawnIO "IntelMCHBAR" ----------
+        // Modulo oficial e assinado do projeto PawnIO.Modules (LGPL-2.1+), so leitura. Os offsets abaixo vem da analise do
+        // ASRock Timing Configurator (que usa um driver proprio vulneravel, NAO usado aqui).
+        class PawnMod { public IntPtr H; public DPExec Ex; }
+        static PawnMod OpenMod(byte[] blob, ref string why)
+        {
+            string dll = null;
+            foreach (string e in new string[] { Environment.GetEnvironmentVariable("ProgramW6432"), Environment.GetEnvironmentVariable("ProgramFiles") })
+                if (!string.IsNullOrEmpty(e) && File.Exists(Path.Combine(Path.Combine(e, "PawnIO"), "PawnIOLib.dll"))) { dll = Path.Combine(Path.Combine(e, "PawnIO"), "PawnIOLib.dll"); break; }
+            if (dll == null) { why += "PawnIOLib.dll nao encontrada (instale o PawnIO); "; return null; }
+            IntPtr lib = LoadLibraryW(dll);
+            if (lib == IntPtr.Zero) { why += "falha ao carregar PawnIOLib.dll; "; return null; }
+            IntPtr po = GetProcAddress(lib, "pawnio_open"), pl = GetProcAddress(lib, "pawnio_load"), px = GetProcAddress(lib, "pawnio_execute");
+            if (po == IntPtr.Zero || pl == IntPtr.Zero || px == IntPtr.Zero) { why += "PawnIOLib.dll sem as funcoes esperadas; "; return null; }
+            DPOpen fo = (DPOpen)Marshal.GetDelegateForFunctionPointer(po, typeof(DPOpen));
+            DPLoad fl = (DPLoad)Marshal.GetDelegateForFunctionPointer(pl, typeof(DPLoad));
+            IntPtr h;
+            int hr = fo(out h);
+            if (hr < 0) { why += "pawnio_open falhou (0x" + hr.ToString("X8") + "; rode como administrador); "; return null; }
+            hr = fl(h, blob, (UIntPtr)(uint)blob.Length);
+            if (hr < 0) { why += "pawnio_load do modulo falhou (0x" + hr.ToString("X8") + "; CPU nao suportada ou MCHBAR desativado); "; return null; }
+            PawnMod m = new PawnMod(); m.H = h; m.Ex = (DPExec)Marshal.GetDelegateForFunctionPointer(px, typeof(DPExec));
+            return m;
+        }
+
+        static byte[] FindBlob(string file)
+        {
+            try
+            {
+                Assembly asm = Assembly.GetExecutingAssembly();
+                foreach (string rn in asm.GetManifestResourceNames())
+                    if (rn.EndsWith(file, StringComparison.OrdinalIgnoreCase))
+                        using (Stream st = asm.GetManifestResourceStream(rn)) { MemoryStream ms = new MemoryStream(); st.CopyTo(ms); return ms.ToArray(); }
+                string b = AppDomain.CurrentDomain.BaseDirectory;
+                foreach (string d in new string[] { b, Path.Combine(b, "libs") })
+                { string f = Path.Combine(d, file); if (File.Exists(f)) return File.ReadAllBytes(f); }
+            }
+            catch (Exception) { }
+            return null;
+        }
+
+        static PawnMod mch; static bool mchTried; public static string MchWhy = "";
+        static bool Mch(uint off, out uint val)
+        {
+            val = 0;
+            try
+            {
+                if (!mchTried)
+                {
+                    mchTried = true;
+                    byte[] blob = FindBlob("IntelMCHBAR.bin");
+                    if (blob == null) { MchWhy += "modulo IntelMCHBAR.bin ausente nesta compilacao; "; return false; }
+                    mch = OpenMod(blob, ref MchWhy);
+                }
+                if (mch == null) return false;
+                long[] o = new long[1]; UIntPtr ret;
+                int r = mch.Ex(mch.H, "ioctl_read_dword", new long[] { off }, (UIntPtr)1u, o, (UIntPtr)1u, out ret);
+                if (r < 0) return false;
+                val = (uint)o[0];
+                return true;
+            }
+            catch (Exception ex) { MchWhy += ex.Message + "; "; return false; }
+        }
+
+        static string I(uint v) { return v.ToString(); }
+
+        static Result NativeIntel()
+        {
+            Result r = new Result();
+            int m = CpuId.Model;
+            bool blockA = CpuId.Family == 6 && (m == 0x4E || m == 0x5E || m == 0x8E || m == 0x9E || m == 0xA5 || m == 0xA6);
+            if (!blockA)
+            {
+                r.Note = "esta CPU Intel (familia " + CpuId.Family + ", modelo 0x" + m.ToString("X") + ") ainda não tem mapa de registradores no programa (suportadas: Skylake, Kaby, Coffee e Comet Lake)";
+                return r;
+            }
+            uint t70 = 0, ch = 0; bool found = false;
+            foreach (uint c in new uint[] { 0u, 0x400u })
+            {
+                uint v;
+                if (!Mch(c + 0x4070, out v) || v == 0 || v == 0xFFFFFFFFu) continue;
+                uint cl = (v >> 16) & 0x1F;
+                if (cl < 4 || cl > 40) continue;
+                t70 = v; ch = c; found = true; break;
+            }
+            if (!found)
+            {
+                r.Note = "não consegui ler o controlador de memória (MCHBAR): " + (PawnIo.Installed() ? "" : "PawnIO não instalado; ") + MchWhy + "rode como Administrador";
+                return r;
+            }
+            Dictionary<string, string> V = r.V;
+            uint tcl = (t70 >> 16) & 0x1F, tcwl = (t70 >> 21) & 0x1F;
+            V["tCAS"] = I(tcl); V["tCWL"] = I(tcwl); V["WEODT"] = I((t70 >> 15) & 1); V["tAONPD"] = I((t70 >> 26) & 0x1F);
+            uint x;
+            uint tras = 0, trp = 0;
+            if (Mch(ch + 0x4000, out x) && x != 0 && x != 0xFFFFFFFFu)
+            {
+                V["tRCD"] = I(x & 0x3F); trp = x & 0x3F; V["tRP"] = I(trp); tras = (x >> 8) & 0x7F; V["tRAS"] = I(tras);
+                V["tRTP"] = I((x >> 16) & 0xF); uint wrpre = (x >> 24) & 0x7F; V["tWRPRE"] = I(wrpre);
+                if (wrpre > 4 + tcwl) V["tWR"] = I(wrpre - 4 - tcwl);
+                V["tRC"] = I(tras + trp);
+            }
+            if (Mch(ch + 0x4004, out x) && x != 0 && x != 0xFFFFFFFFu) { V["tFAW"] = I(x & 0x3F); V["tRRD_L"] = I((x >> 8) & 0xF); V["tRRD_S"] = I((x >> 12) & 0xF); }
+            if (Mch(ch + 0x4008, out x) && x != 0 && x != 0xFFFFFFFFu)
+            {
+                V["tCKE"] = I(x & 0xF); V["tXP"] = I((x >> 4) & 0xF); V["tXPDLL"] = I((x >> 8) & 0x3F); V["tPRPDEN"] = I((x >> 14) & 3);
+                V["tRDPDEN"] = I((x >> 16) & 0x7F); V["tWRPDEN"] = I((x >> 24) & 0x7F);
+            }
+            string[] sfx = { "sg", "dg", "dr", "dd" };
+            string[] grp = { "tRDRD", "tRDWR", "tWRRD", "tWRWR" };
+            for (uint g = 0; g < 4; g++)
+            {
+                if (!Mch(ch + 0x400C + g * 4, out x) || x == 0 || x == 0xFFFFFFFFu) continue;
+                for (int b = 0; b < 4; b++)
+                {
+                    uint mask = (g == 2 && b == 0) ? 0x7Fu : 0x3Fu;
+                    V[grp[g] + "_" + sfx[b]] = I((x >> (8 * b)) & mask);
+                }
+                if (g == 2)
+                {
+                    uint sg = x & 0x7F, dg = (x >> 8) & 0x3F;
+                    if (sg > 6 + tcwl) V["tWTR_L"] = I(sg - 6 - tcwl);
+                    if (dg > 6 + tcwl) V["tWTR_S"] = I(dg - 6 - tcwl);
+                }
+            }
+            if (Mch(ch + 0x401C, out x) && x != 0xFFFFFFFFu) { uint c = (x & 0xC) >> 2; V["CR"] = (c == 3 ? 1 : c + 1) + "T"; }
+            if (Mch(ch + 0x423C, out x) && x != 0 && x != 0xFFFFFFFFu) { V["tREFI"] = I(x & 0xFFFF); V["tRFC"] = I((x >> 16) & 0x3FF); }
+            if (Mch(ch + 0x4238, out x) && x != 0xFFFFFFFFu) { V["OREF_RI"] = I(x & 0xFF); V["tREFIx9"] = I((x >> 25) & 0x7F); }
+            if (Mch(ch + 0x4240, out x) && x != 0 && x != 0xFFFFFFFFu)
+            { V["tXSDLL"] = I(x & 0xFFF); V["tXS_Offset"] = I((x >> 12) & 0xF); V["tZQOPER"] = I((x >> 16) & 0x3FF); V["tMOD"] = I((x >> 26) & 0x1F); }
+            if (Mch(ch + 0x4248, out x) && x != 0 && x != 0xFFFFFFFFu) { V["ZQCS_period"] = I(x & 0x3FF); V["tZQCS"] = I((x >> 10) & 0x3FF); }
+            // treino do controlador: RTL / IOL por canal (A = 0x4000.., B = 0x4400..)
+            string[] cn = { "A", "B" };
+            for (uint k = 0; k < 2; k++)
+            {
+                uint w;
+                if (!Mch(0x5004 + k * 4, out w) || (w & 0xFFFF) == 0 || w == 0xFFFFFFFFu) continue;
+                if (Mch(0x4020 + k * 0x400, out x) && x != 0xFFFFFFFFu) { V["RTL_" + cn[k] + "0"] = I(x & 0x7F); V["RTL_" + cn[k] + "1"] = I((x >> 16) & 0x7F); }
+                if (Mch(0x4024 + k * 0x400, out x) && x != 0xFFFFFFFFu)
+                {
+                    V["IOL_" + cn[k] + "0"] = I(x & 0xF); V["IOL_" + cn[k] + "1"] = I((x >> 8) & 0xF);
+                    if (k == 0) { V["IOL_off"] = I((x >> 16) & 0x7F); V["RFR_delay"] = I((x >> 24) & 0x7F); }
+                }
+            }
+            r.Source = "controlador de memória da CPU (Intel, canal " + (ch == 0 ? "A" : "B") + ", via PawnIO IntelMCHBAR)";
+            return r;
+        }
+
         static bool Smn(uint addr, out uint val)
         {
             val = 0;
@@ -9451,7 +9611,8 @@ namespace BunoTunner
         static Result Native()
         {
             Result r = new Result();
-            if (!CpuId.Amd) { r.Note = "leitura direta do controlador: só CPUs AMD Ryzen nesta versão"; return r; }
+            if (CpuId.Vendor == "Intel") return NativeIntel();
+            if (!CpuId.Amd) { r.Note = "leitura direta do controlador: só CPUs AMD Ryzen e Intel nesta versão"; return r; }
             Init();
             bool anyRead = false;
             for (int ch = 0; ch < 4; ch++)
@@ -9564,6 +9725,13 @@ namespace BunoTunner
             sb.AppendLine("CPU: " + CpuId.Vendor);
             sb.AppendLine("PawnIO instalado: " + PawnIo.Installed());
             sb.AppendLine("Ring0 (LHM) com PCI: " + okRing);
+            sb.AppendLine("CPU familia " + CpuId.Family + " modelo 0x" + CpuId.Model.ToString("X") + "  modulo IntelMCHBAR.bin embutido: " + (FindBlob("IntelMCHBAR.bin") != null));
+            if (CpuId.Vendor == "Intel")
+            {
+                foreach (uint a in new uint[] { 0x4000, 0x4004, 0x4008, 0x400C, 0x4010, 0x4014, 0x4018, 0x401C, 0x4070, 0x4238, 0x423C, 0x4240, 0x4248, 0x4020, 0x4024, 0x5004, 0x5008 })
+                { uint v; sb.AppendLine("MCHBAR+0x" + a.ToString("X") + ": " + (Mch(a, out v) ? "0x" + v.ToString("X8") : "falhou")); }
+                sb.AppendLine("Motivos MCHBAR: " + MchWhy);
+            }
             try
             {
                 Assembly asm = typeof(LHM.Computer).Assembly;
@@ -9615,9 +9783,27 @@ namespace BunoTunner
     class RamPage : Panel
     {
         Label lblType, lblCap, lblSpeed, lblChan, lblVolt, lblRank, lblBw, lblSrc, lblLat;
-        Label[] tv = new Label[7];
-        static readonly string[] TKeys = { "tCAS", "tRCD", "tRP", "tRAS", "tRC", "tRFC", "CR" };
-        static readonly string[] TNames = { "tCAS (CL):", "tRCD:", "tRP:", "tRAS:", "tRC:", "tRFC:", "Command Rate:" };
+        Dictionary<string, Label> tl = new Dictionary<string, Label>();
+        // "#titulo" abre uma secao; os demais sao pares chave / nome. Chave sem leitura fica "-".
+        static readonly string[] TSpec = {
+            "#", "Principais",
+            "tCAS", "tCL (CAS):", "tRCD", "tRCD:", "tRP", "tRP:", "tRAS", "tRAS:", "tRC", "tRC:", "tRFC", "tRFC:", "CR", "Command Rate:", "tCWL", "tCWL:", "tFAW", "tFAW:",
+            "#", "Ativacao e escrita",
+            "tRRD_S", "tRRD_S:", "tRRD_L", "tRRD_L:", "tWR", "tWR:", "tRTP", "tRTP:", "tWTR_S", "tWTR_S:", "tWTR_L", "tWTR_L:", "tWRPRE", "tWRPRE:",
+            "#", "Refresh e calibracao",
+            "tREFI", "tREFI:", "tREFIx9", "tREFIx9:", "OREF_RI", "OREF_RI:", "tXSDLL", "tXSDLL:", "tXS_Offset", "tXS Offset:", "tZQOPER", "tZQOPER:",
+            "tZQCS", "tZQCS:", "ZQCS_period", "ZQCS period:", "tMOD", "tMOD:",
+            "#", "Leitura / escrita entre bancos e ranks",
+            "tRDRD_sg", "tRDRD_sg:", "tRDRD_dg", "tRDRD_dg:", "tRDRD_dr", "tRDRD_dr:", "tRDRD_dd", "tRDRD_dd:",
+            "tRDWR_sg", "tRDWR_sg:", "tRDWR_dg", "tRDWR_dg:", "tRDWR_dr", "tRDWR_dr:", "tRDWR_dd", "tRDWR_dd:",
+            "tWRRD_sg", "tWRRD_sg:", "tWRRD_dg", "tWRRD_dg:", "tWRRD_dr", "tWRRD_dr:", "tWRRD_dd", "tWRRD_dd:",
+            "tWRWR_sg", "tWRWR_sg:", "tWRWR_dg", "tWRWR_dg:", "tWRWR_dr", "tWRWR_dr:", "tWRWR_dd", "tWRWR_dd:",
+            "#", "Economia de energia",
+            "tCKE", "tCKE:", "tXP", "tXP:", "tXPDLL", "tXPDLL:", "tPRPDEN", "tPRPDEN:", "tRDPDEN", "tRDPDEN:", "tWRPDEN", "tWRPDEN:", "tAONPD", "tAONPD:", "WEODT", "Write Early ODT:",
+            "#", "Treino do controlador (RTL / IOL)",
+            "RTL_A0", "RTL canal A / DIMM0:", "RTL_A1", "RTL canal A / DIMM1:", "RTL_B0", "RTL canal B / DIMM0:", "RTL_B1", "RTL canal B / DIMM1:",
+            "IOL_A0", "IOL canal A / DIMM0:", "IOL_A1", "IOL canal A / DIMM1:", "IOL_B0", "IOL canal B / DIMM0:", "IOL_B1", "IOL canal B / DIMM1:",
+            "IOL_off", "IOL offset:", "RFR_delay", "RFR delay:" };
         ListView lvMod = new ListView();
         int speed, channels = 1;
         bool reading, readOnce;
@@ -9626,7 +9812,8 @@ namespace BunoTunner
         public RamPage()
         {
             Dock = DockStyle.Fill;
-            BuildSummary(); BuildMods(); BuildTimings(); BuildLatency();
+            AutoScroll = true;
+            BuildLatency(); BuildSummary(); BuildMods(); BuildTimings();
             VisibleChanged += delegate { if (Visible && !readOnce) { readOnce = true; ReadAsync(); } };
         }
 
@@ -9644,7 +9831,7 @@ namespace BunoTunner
 
         void BuildLatency()
         {
-            XpGroup g = new XpGroup(); g.Title = "Latencia da memoria (ns)"; g.SetBounds(0, 442, 676, 142);
+            XpGroup g = new XpGroup(); g.Title = "Latencia da memoria (ns)"; g.SetBounds(0, 0, 656, 142);
             lblLatBig = UI.Lbl(g, "- ns", 14, 28, Xp.Big, Xp.GroupText);
             lblLatBig.Font = new Font(Xp.Big.FontFamily, 22f, FontStyle.Bold);
             lblLatSub = UI.Lbl(g, "Latencia da RAM (bloco de 256 MB)", 14, 66, Xp.Ui, Xp.Dim);
@@ -9652,9 +9839,9 @@ namespace BunoTunner
             bLat = UI.Btn(g, "Medir latencia", 14, 102, 130, delegate { ToggleLat(); });
             bLat.Height = 28;
             pbLat = new XpProgress(); pbLat.SetBounds(150, 108, 64, 14); g.Controls.Add(pbLat);
-            latGraph.SetBounds(222, 24, 444, 82); g.Controls.Add(latGraph);
+            latGraph.SetBounds(222, 24, 424, 82); g.Controls.Add(latGraph);
             lblLatSteps = UI.Lbl(g, "", 222, 108, Xp.Ui, Xp.Dim);
-            lblLatSteps.AutoSize = false; lblLatSteps.SetBounds(222, 108, 444, 30);
+            lblLatSteps.AutoSize = false; lblLatSteps.SetBounds(222, 108, 424, 30);
             Controls.Add(g);
         }
 
@@ -9763,17 +9950,17 @@ namespace BunoTunner
 
         void BuildSummary()
         {
-            XpGroup g = new XpGroup(); g.Title = "Resumo da memória"; g.SetBounds(0, 0, 676, 120);
+            XpGroup g = new XpGroup(); g.Title = "Resumo da memória"; g.SetBounds(0, 148, 656, 120);
             lblType = Val(g, "Tipo:", 14, 24, 190); lblCap = Val(g, "Capacidade total:", 14, 46, 190); lblSpeed = Val(g, "Velocidade:", 14, 68, 190);
             lblChan = Val(g, "Canais:", 350, 24, 180); lblVolt = Val(g, "Voltagem:", 350, 46, 180); lblRank = Val(g, "Ranks / ECC:", 350, 68, 180);
             lblBw = UI.Lbl(g, "", 14, 92, Xp.Ui, Xp.Dim);
-            lblBw.AutoSize = false; lblBw.AutoEllipsis = true; lblBw.SetBounds(14, 92, 650, 20);
+            lblBw.AutoSize = false; lblBw.AutoEllipsis = true; lblBw.SetBounds(14, 92, 630, 20);
             Controls.Add(g);
         }
 
         void BuildMods()
         {
-            lvMod.SetBounds(0, 126, 676, 104); lvMod.View = View.Details; lvMod.FullRowSelect = true; lvMod.GridLines = true;
+            lvMod.SetBounds(0, 274, 656, 104); lvMod.View = View.Details; lvMod.FullRowSelect = true; lvMod.GridLines = true;
             lvMod.BackColor = Xp.EditBg; lvMod.Font = Xp.Ui;
             lvMod.Columns.Add("Slot", 140); lvMod.Columns.Add("Cap.", 55); lvMod.Columns.Add("Fabricante", 90); lvMod.Columns.Add("Part number", 150);
             lvMod.Columns.Add("MT/s", 50); lvMod.Columns.Add("Volt", 55); lvMod.Columns.Add("Tipo", 50); lvMod.Columns.Add("Ranks", 50);
@@ -9783,19 +9970,41 @@ namespace BunoTunner
 
         void BuildTimings()
         {
-            XpGroup g = new XpGroup(); g.Title = "Timings atuais (leitura automática)"; g.SetBounds(0, 238, 676, 196);
-            for (int i = 0; i < 7; i++)
+            XpGroup g = new XpGroup(); g.Title = "Timings atuais (leitura automática)";
+            int y = 26, col = 0;
+            for (int i = 0; i < TSpec.Length; i += 2)
             {
-                int col = i < 4 ? 0 : 1, row = i < 4 ? i : i - 4;
-                UI.Lbl(g, TNames[i], 20 + col * 330, 32 + row * 28, Xp.UiBold);
-                Label v = UI.Lbl(g, "-", 160 + col * 330, 28 + row * 28, Xp.UiBold, Xp.GroupText);
-                v.AutoSize = false; v.SetBounds(160 + col * 330, 28 + row * 28, 150, 22);
-                v.Font = Xp.Big; v.AutoEllipsis = true;
-                tv[i] = v;
+                if (TSpec[i] == "#")
+                {
+                    if (col != 0) { y += 22; col = 0; }
+                    y += 4;
+                    UI.Lbl(g, TSpec[i + 1], 14, y, Xp.UiBold);
+                    y += 22; continue;
+                }
+                int x = 14 + col * 214;
+                UI.Lbl(g, TSpec[i + 1], x, y);
+                Label v = UI.Lbl(g, "-", x + 112, y, Xp.UiBold, Xp.GroupText);
+                v.AutoSize = false; v.AutoEllipsis = true; v.SetBounds(x + 112, y, 96, 18);
+                tl[TSpec[i]] = v;
+                if (++col == 3) { col = 0; y += 20; }
             }
-            lblLat = UI.Lbl(g, "", 350, 116, Xp.Ui, Xp.Dim);
-            lblLat.AutoSize = false; lblLat.AutoEllipsis = true; lblLat.SetBounds(350, 116, 316, 20);
-            UI.Btn(g, "Indicar CPU-Z...", 456, 138, 100, delegate
+            if (col != 0) y += 20;
+            lblLat = UI.Lbl(g, "", 14, y + 6, Xp.Ui, Xp.Dim);
+            lblLat.AutoSize = false; lblLat.AutoEllipsis = true; lblLat.SetBounds(14, y + 6, 630, 20);
+            lblSrc = UI.Lbl(g, "Lendo os timings...", 14, y + 28, Xp.Ui, Xp.Dim);
+            lblSrc.AutoSize = false; lblSrc.SetBounds(14, y + 28, 630, 36);
+            int by = y + 68;
+            UI.Btn(g, "Ler novamente", 14, by, 110, delegate { ReadAsync(); });
+            UI.Btn(g, "Diagnostico", 130, by, 100, delegate
+            {
+                System.Threading.ThreadPool.QueueUserWorkItem(delegate
+                {
+                    string d;
+                    try { d = MemRead.Diagnose(); } catch (Exception ex) { d = ex.ToString(); }
+                    try { BeginInvoke(new Action(delegate { try { Clipboard.SetText(d); } catch (Exception) { } Dlg.Show(this, d + "\n(copiado para a area de transferencia)", "BunoTunner - diagnostico dos timings"); })); } catch (Exception) { }
+                });
+            });
+            UI.Btn(g, "Indicar CPU-Z...", 236, by, 110, delegate
             {
                 using (OpenFileDialog od = new OpenFileDialog())
                 {
@@ -9805,19 +10014,8 @@ namespace BunoTunner
                 }
                 ReadAsync();
             });
-            UI.Btn(g, "Baixar CPU-Z", 566, 138, 100, delegate { try { Process.Start("https://www.cpuid.com/softwares/cpu-z.html"); } catch (Exception) { } });
-            lblSrc = UI.Lbl(g, "Lendo os timings...", 20, 144, Xp.Ui, Xp.Dim);
-            lblSrc.AutoSize = false; lblSrc.SetBounds(20, 144, 320, 44);
-            UI.Btn(g, "Ler novamente", 566, 164, 100, delegate { ReadAsync(); });
-            UI.Btn(g, "Diagnostico", 456, 164, 100, delegate
-            {
-                System.Threading.ThreadPool.QueueUserWorkItem(delegate
-                {
-                    string d;
-                    try { d = MemRead.Diagnose(); } catch (Exception ex) { d = ex.ToString(); }
-                    try { BeginInvoke(new Action(delegate { try { Clipboard.SetText(d); } catch (Exception) { } Dlg.Show(this, d + "\n(copiado para a area de transferencia)", "BunoTunner - diagnostico dos timings"); })); } catch (Exception) { }
-                });
-            });
+            UI.Btn(g, "Baixar CPU-Z", 352, by, 100, delegate { try { Process.Start("https://www.cpuid.com/softwares/cpu-z.html"); } catch (Exception) { } });
+            g.SetBounds(0, 384, 656, by + 44);
             Controls.Add(g);
         }
 
@@ -9838,10 +10036,10 @@ namespace BunoTunner
         {
             reading = false;
             tim = r.V;
-            for (int i = 0; i < 7; i++)
+            foreach (KeyValuePair<string, Label> kv in tl)
             {
-                string v; tim.TryGetValue(TKeys[i], out v);
-                tv[i].Text = v == null ? "-" : v;
+                string v; tim.TryGetValue(kv.Key, out v);
+                kv.Value.Text = v == null ? "-" : v;
             }
             if (r.V.Count > 0) { lblSrc.ForeColor = Xp.Good; lblSrc.Text = "Fonte: " + r.Source + "."; }
             else { lblSrc.ForeColor = Xp.Bad; lblSrc.Text = "Não consegui ler: " + r.Note + ". Alternativa: baixe o CPU-Z (versão ZIP), extraia ao lado do programa ou use \"Indicar CPU-Z\"; o programa o usa só para ler os timings."; }

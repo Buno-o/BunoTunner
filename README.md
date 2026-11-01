@@ -43,3 +43,8 @@ Full details and version history in `LEIA-ME.txt`.
 ## License
 
 [MIT](LICENSE). Bundled third-party libraries (LibreHardwareMonitor, MPL-2.0) keep their original licenses.
+
+## Third-party components
+
+- [LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) (MPL-2.0) for sensors.
+- [PawnIO](https://pawnio.eu) driver and the `IntelMCHBAR` module from [PawnIO.Modules](https://github.com/namazso/PawnIO.Modules) (LGPL-2.1-or-later), used read-only to show Intel memory timings.

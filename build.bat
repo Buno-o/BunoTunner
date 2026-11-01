@@ -21,6 +21,7 @@ set ICON=
 if exist BunoTunner.ico set ICON=/win32icon:BunoTunner.ico
 set RES=
 for %%f in (libs\*.dll) do set RES=!RES! /resource:%%f,%%~nxf
+if exist libs\IntelMCHBAR.bin set RES=!RES! /resource:libs\IntelMCHBAR.bin,IntelMCHBAR.bin
 echo Compilando para %PLAT% ...
 "%CSC%" /nologo /target:winexe /platform:%PLAT% /optimize+ /codepage:65001 /out:BunoTunner.exe /win32manifest:app.manifest !ICON! /lib:libs /r:System.Windows.Forms.dll /r:System.Drawing.dll /r:System.Core.dll /r:System.Management.dll /r:Microsoft.VisualBasic.dll /r:LibreHardwareMonitorLib.dll !RES! BunoTunner.cs
 if errorlevel 1 (

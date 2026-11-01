@@ -325,3 +325,9 @@ v1.26.0 (TESTE)
 - FPS tambem para Vulkan e OpenGL (eventos do DxgKrnl). Teste: se o seu jogo nao mostrar FPS, me diga qual API ele usa.
 - FPS recalculado a cada 500 ms; os demais sensores seguem o intervalo do menu Sensores.
 - Atalho para mostrar/ocultar o overlay (padrao Ctrl+Shift+O, configuravel no menu). O atalho nao e bloqueado: a tecla continua funcionando nos outros programas.
+
+v1.27.0 (TESTE)
+- Aba Memoria: o teste de latencia agora fica no topo; resumo, modulos e timings ficam abaixo, com barra de rolagem.
+- Timings completos em CPUs Intel (Skylake, Kaby, Coffee e Comet Lake, ex.: i7-7700HQ): tCL, tRCD, tRP, tRAS, tRC, tRFC, Command Rate, tRRD, tFAW, tWR, tWTR, tREFI, tRDRD/tRDWR/tWRRD/tWRWR, energia, RTL/IOL etc. O que nao for lido fica "-".
+- A leitura usa o modulo oficial e assinado "IntelMCHBAR" do PawnIO (so leitura). Precisa do PawnIO instalado e de administrador. Nenhum driver vulneravel e usado.
+- Aviso: o modulo IntelMCHBAR (PawnIO.Modules, de Gen Li / namazso) e licenciado sob LGPL-2.1 ou superior: https://github.com/namazso/PawnIO.Modules

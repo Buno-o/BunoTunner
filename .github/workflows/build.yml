@@ -43,6 +43,24 @@ jobs:
           Write-Host "::notice::LIBS=$((Get-ChildItem libs | ForEach-Object { $_.Name }) -join ' | ')"
           if (-not (Test-Path libs/LibreHardwareMonitorLib.dll)) { Write-Host "::error::LibreHardwareMonitorLib.dll nao foi copiado"; exit 1 }
 
+      # baixa o modulo oficial e assinado IntelMCHBAR do PawnIO.Modules (LGPL-2.1+) para ler os timings em CPUs Intel
+      - name: Baixar modulo PawnIO IntelMCHBAR
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        continue-on-error: true
+        run: |
+          New-Item -ItemType Directory -Force -Path pio | Out-Null
+          $rel = gh api repos/namazso/PawnIO.Modules/releases/latest | ConvertFrom-Json
+          Write-Host "::notice::PawnIO.Modules $($rel.tag_name): $(($rel.assets | ForEach-Object { $_.name }) -join ' | ')"
+          foreach ($a in $rel.assets) {
+            Invoke-WebRequest -Uri $a.browser_download_url -OutFile (Join-Path pio $a.name)
+          }
+          Get-ChildItem pio -Filter *.zip | ForEach-Object { Expand-Archive $_.FullName -DestinationPath (Join-Path pio ($_.BaseName)) -Force }
+          $f = Get-ChildItem pio -Recurse -Filter IntelMCHBAR.bin | Select-Object -First 1
+          if ($f) { Copy-Item $f.FullName libs/IntelMCHBAR.bin -Force; Write-Host "::notice::IntelMCHBAR.bin copiado ($($f.Length) bytes)" }
+          else { Write-Host "::warning::IntelMCHBAR.bin nao encontrado no release; timings Intel ficarao indisponiveis" }
+
       - name: Compilar
         shell: pwsh
         run: |
