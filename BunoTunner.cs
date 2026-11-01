@@ -30,8 +30,8 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - codigo aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.27.1.0")]
-[assembly: AssemblyFileVersion("1.27.1.0")]
+[assembly: AssemblyVersion("1.28.0.0")]
+[assembly: AssemblyFileVersion("1.28.0.0")]
 
 namespace BunoTunner
 {
@@ -365,6 +365,9 @@ namespace BunoTunner
             "Travar clock da memoria (MHz):  min", "Lock memory clock (MHz):  min",
             "Atualizar a cada:", "Update every:" };
         static readonly string[] Pairs2 = {
+            "Ativado", "Enabled", "Desativado", "Disabled",
+            "Interface fisica (PHY)", "Physical interface (PHY)",
+            "Velocidade (MT/s):", "Speed (MT/s):", "Gear Down Mode:", "Gear Down Mode:", "Burst length:", "Burst length:",
             "Principais", "Main",
             "Ativacao e escrita", "Activation and write",
             "Refresh e calibracao", "Refresh and calibration",
@@ -1850,7 +1853,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.27.1";
+        public const string Version = "v1.28.0";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -9315,7 +9318,7 @@ namespace BunoTunner
         public class Result
         {
             public Dictionary<string, string> V = new Dictionary<string, string>();
-            public string Source = "", Note = "";
+            public string Source = "", Note = "", Kind = "";
         }
 
         // ---------- AMD Zen: registradores UMC via SMN (porta indice/dado 0x60/0x64 da ponte host) ----------
@@ -9570,6 +9573,7 @@ namespace BunoTunner
                     if (k == 0) { V["IOL_off"] = I((x >> 16) & 0x7F); V["RFR_delay"] = I((x >> 24) & 0x7F); }
                 }
             }
+            r.Kind = "Intel";
             r.Source = "controlador de memória da CPU (Intel, canal " + (ch == 0 ? "A" : "B") + ", via PawnIO IntelMCHBAR)";
             return r;
         }
@@ -9608,12 +9612,125 @@ namespace BunoTunner
             return (r & 0xC0) == 0 && cl >= 6 && cl <= 70 && rcd >= 6 && rcd <= 70 && wr >= 6 && wr <= 70 && ras >= 15 && ras <= 140 && ras >= rcd;
         }
 
+        // ---------- AMD Ryzen (Zen 2/3/4/5, DDR4 e DDR5): mapa completo dos registradores UMC lidos via SMN ----------
+        // Formato: endereco(hex, relativo ao UMC) chave bitAlto/bitBaixo em DDR4 e bitAlto/bitBaixo em DDR5 ("-" = nao existe).
+        // Os enderecos e campos seguem a documentacao publica dos registradores (PPR da AMD), como catalogados pelo ZenTimings/ZenStates-Core.
+        static readonly string[] AmdMap = {
+            "100 ECC 12 12 12 12", "100 BurstLength 9 8 9 8",
+            "12C AggrPD 30 30 30 30", "12C PowerDown 28 28 28 28",
+            "200 Preamble2t 12 12 - -", "200 GDM 11 11 18 18", "200 Cmd2T 10 10 17 17", "200 BankGroupEn 8 8 16 16",
+            "204 tRCDWR 29 24 29 24", "204 tRCD 21 16 21 16", "204 tRAS 14 8 14 8", "204 tCAS 5 0 5 0",
+            "208 tRC 7 0 7 0", "208 tRP 21 16 21 16", "208 tRPpb - - 29 24", "208 tRCpb - - 15 8",
+            "20C tRTP 28 24 28 24", "20C tRRD_L 12 8 12 8", "20C tRRD_S 4 0 4 0",
+            "210 tFAW 6 0 7 0",
+            "214 tWTR_L 22 16 22 16", "214 tWTR_S 12 8 12 8", "214 tCWL 5 0 5 0",
+            "218 tWR 6 0 7 0",
+            "21C TRCPAGE 31 20 31 20", "21C tPPD - - 2 0",
+            "220 RDRDBan 31 30 31 30", "220 tRDRDSCL 27 24 29 24", "220 tRDRDSC 19 16 19 16", "220 tRDRDSD 11 8 11 8", "220 tRDRDDD 3 0 3 0",
+            "224 WRWRBan 31 30 31 30", "224 tWRWRSCL 29 24 29 24", "224 tWRWRSC 19 16 19 16", "224 tWRWRSD 11 8 11 8", "224 tWRWRDD 3 0 3 0",
+            "228 tMW - - 28 24", "228 tRDWR 12 8 13 8", "228 tWRRD 3 0 3 0",
+            "22C ZqcsInterval 29 20 29 20", "22C tZQOPER 19 8 19 8", "22C tZQCS 7 0 7 0",
+            "230 tREFI 15 0 15 0",
+            "234 tMODPDA 29 24 29 24", "234 tMRDPDA 21 16 21 16", "234 tMOD 13 8 13 8", "234 tMRD 5 0 5 0",
+            "238 tDLLK 26 16 27 16", "238 tXS 10 0 11 0",
+            "240 tMRRI - - 26 24", "240 tMRR - - 21 16", "240 tMRW - - 13 8",
+            "244 AggrPwrDownDly 30 25 31 26", "244 PwrDownDly 24 17 19 8", "244 tPD 4 0 4 0",
+            "248 tSRX2SRX - - 15 10", "248 tSTAB - - 9 0",
+            "250 tSTAG 23 16 26 16", "250 tSTAGsb - - 8 0",
+            "254 tCKE 28 24 28 24", "254 tCPDED 19 16 20 16", "254 tXP 5 0 5 0",
+            "258 tPHYWRD 26 24 26 24", "258 tPHYRDL 21 16 23 16", "258 tPHYWRL 12 8 15 8", "258 RDDATAEN 6 0 6 0",
+            "25C LpExitDly 13 8 13 8", "25C LpDly 5 0 5 0",
+            "28C CmdStgCnt 21 11 21 11", "28C RcvrWait 10 0 10 0",
+            "2A4 tWRPRE 10 8 10 8", "2A4 tRDPRE 2 0 2 0",
+            "2A8 tECSc - - 8 0" };
+        static readonly HashSet<string> AmdBool = new HashSet<string> { "ECC", "AggrPD", "PowerDown", "GDM", "BankGroupEn", "Preamble2t" };
+
+        static Result NativeAmdFull()
+        {
+            Result r = new Result();
+            Init();
+            Dictionary<uint, uint> cache = new Dictionary<uint, uint>();
+            uint off = 0; bool five = false, found = false;
+            for (int pass = 0; pass < 2 && !found; pass++)
+                for (uint i = 0; i < 8 && !found; i++)
+                {
+                    uint o = i << 20, r200, r204, df0, d0, d1;
+                    if (!Smn(o + 0x50200u, out r200) || !Smn(o + 0x50204u, out r204)) continue;
+                    if (r200 == 0 || r200 == 0xFFFFFFFFu || r204 == 0 || r204 == 0xFFFFFFFFu) continue;
+                    if (pass == 0)
+                    {
+                        Smn(o + 0x50DF0u, out df0); Smn(o + 0x50000u, out d0); Smn(o + 0x50008u, out d1);
+                        if (((df0 >> 19) & 1) != 0 || ((d0 & 1) == 0 && (d1 & 1) == 0)) continue;   // canal desativado ou sem pente
+                    }
+                    uint cl = r204 & 0x3F, rcd = (r204 >> 16) & 0x3F, ras = (r204 >> 8) & 0x7F;
+                    if (cl < 6 || rcd < 4 || ras < rcd || ras > 127) continue;
+                    off = o; five = (r200 & 0xFFFF) >= 1000; found = true;
+                    cache[0x200] = r200;
+                }
+            if (!found) return r;
+            Dictionary<string, string> V = r.V;
+            foreach (string line in AmdMap)
+            {
+                string[] f = line.Split(' ');
+                int hi = five ? (f[4] == "-" ? -1 : int.Parse(f[4])) : (f[2] == "-" ? -1 : int.Parse(f[2]));
+                int lo = five ? (f[5] == "-" ? -1 : int.Parse(f[5])) : (f[3] == "-" ? -1 : int.Parse(f[3]));
+                if (hi < 0) continue;
+                uint a = Convert.ToUInt32(f[0], 16), reg;
+                if (!cache.TryGetValue(a, out reg))
+                {
+                    if (!Smn(off + 0x50000u + a, out reg)) reg = 0xFFFFFFFFu;
+                    cache[a] = reg;
+                }
+                if (reg == 0xFFFFFFFFu) continue;
+                uint v = (reg >> lo) & (uint)((1UL << (hi - lo + 1)) - 1);
+                string k = f[1], t;
+                if (AmdBool.Contains(k)) t = v == 1 ? Lang.T("Ativado") : (v == 0 ? Lang.T("Desativado") : "-");
+                else if (k == "Cmd2T") { k = "CR"; t = v == 1 ? "2T" : "1T"; }
+                else if (k == "BurstLength") t = "BL" + (2 << (int)Math.Min(v, 3u));
+                else if (k == "tWRPRE") t = I(v + 1);
+                else if (k == "tRDPRE") t = I(v < 2 ? v + 1 : v);
+                else t = I(v);
+                V[k] = t;
+            }
+            // tRFC: registradores 0x50260.. (DDR4: 3 campos no mesmo registrador; DDR5: pares)
+            uint[] rf = new uint[4];
+            for (uint q = 0; q < 4; q++) if (!Smn(off + 0x50260u + q * 4, out rf[q])) rf[q] = 0;
+            if (!five)
+            {
+                uint t0 = rf[0], t1 = rf[1], reg = t0 != t1 ? (t0 != 0x21060138u ? t0 : t1) : t0;
+                if (reg != 0) { V["tRFC"] = I(reg & 0x7FF); V["tRFC2"] = I((reg >> 11) & 0x7FF); V["tRFC4"] = I((reg >> 22) & 0x3FF); }
+            }
+            else
+            {
+                foreach (uint reg in rf)
+                    if (reg > 0 && reg != 0x00C00138u) { V["tRFC"] = I(reg & 0xFFFF); V["tRFC2"] = I(reg >> 16); break; }
+                for (uint q = 0; q < 4; q++)
+                {
+                    uint x;
+                    if (Smn(off + 0x502C0u + q * 4, out x) && (x & 0x7FF) != 0) { V["tRFCsb"] = I(x & 0x7FF); break; }
+                }
+            }
+            if (!V.ContainsKey("tRC") && V.ContainsKey("tRAS") && V.ContainsKey("tRP")) V["tRC"] = I(uint.Parse(V["tRAS"]) + uint.Parse(V["tRP"]));
+            // velocidade (BCLK 100 MHz): DDR4 = razao/3 x 200, DDR5 = valor x 2
+            uint rr = cache[0x200];
+            V["MTs"] = five ? I((rr & 0xFFFF) * 2) : ((rr & 0x7F) / 3.0 * 200.0).ToString("0");
+            // troca de grupos de banco
+            uint b0, b1, a0, a1;
+            if (Smn(off + 0x50050u, out b0) && Smn(off + 0x50058u, out b1)) V["BGS"] = (b0 == 0x87654321u && b1 == 0x87654321u) ? Lang.T("Desativado") : Lang.T("Ativado");
+            if (Smn(off + 0x500D0u, out a0) && Smn(off + 0x500D4u, out a1)) V["BGSAlt"] = (((a0 >> 4) & 0x7F) > 0 || ((a1 >> 4) & 0x7F) > 0) ? Lang.T("Ativado") : Lang.T("Desativado");
+            if (!V.ContainsKey("tCAS") || !V.ContainsKey("tRCD")) { V.Clear(); return r; }
+            r.Kind = five ? "AMD5" : "AMD4";
+            r.Source = "controlador de memória da CPU (AMD Ryzen, " + (five ? "DDR5" : "DDR4") + ", canal " + (char)('A' + (int)(off >> 20)) + ")";
+            return r;
+        }
+
         static Result Native()
         {
             Result r = new Result();
             if (CpuId.Vendor == "Intel") return NativeIntel();
             if (!CpuId.Amd) { r.Note = "leitura direta do controlador: só CPUs AMD Ryzen e Intel nesta versão"; return r; }
             Init();
+            try { Result full = NativeAmdFull(); if (full.V.Count >= 8) return full; } catch (Exception) { }
             bool anyRead = false;
             for (int ch = 0; ch < 4; ch++)
             {
@@ -9752,7 +9869,7 @@ namespace BunoTunner
                     if (rn.IndexOf("Pawn", StringComparison.OrdinalIgnoreCase) >= 0) { if (n++ > 10) break; sb.AppendLine("  recurso " + rn); }
             }
             catch (Exception ex) { sb.AppendLine("erro ao inspecionar a DLL: " + ex.Message); }
-            uint[] addrs = { 0x50200, 0x50204, 0x50208, 0x5020C, 0x50210, 0x50214, 0x50218, 0x5021C, 0x50220, 0x50224, 0x50228, 0x5025C, 0x50260, 0x50264, 0x50268, 0x50100 };
+            uint[] addrs = { 0x50200, 0x50204, 0x50208, 0x5020C, 0x50210, 0x50214, 0x50218, 0x5021C, 0x50220, 0x50224, 0x50228, 0x5025C, 0x50260, 0x50264, 0x50268, 0x50100, 0x50230, 0x50000, 0x50008, 0x50DF0 };
             foreach (uint a in addrs)
             {
                 uint v1 = 0, v2 = 0, v3 = 0;
@@ -9785,7 +9902,7 @@ namespace BunoTunner
         Label lblType, lblCap, lblSpeed, lblChan, lblVolt, lblRank, lblBw, lblSrc, lblLat;
         Dictionary<string, Label> tl = new Dictionary<string, Label>();
         // "#titulo" abre uma secao; os demais sao pares chave / nome. Chave sem leitura fica "-".
-        static readonly string[] TSpec = {
+        static readonly string[] SpecIntel = {
             "#", "Principais",
             "tCAS", "tCL (CAS):", "tRCD", "tRCD:", "tRP", "tRP:", "tRAS", "tRAS:", "tRC", "tRC:", "tRFC", "tRFC:", "CR", "Command Rate:", "tCWL", "tCWL:", "tFAW", "tFAW:",
             "#", "Ativacao e escrita",
@@ -9804,6 +9921,49 @@ namespace BunoTunner
             "RTL_A0", "RTL canal A / DIMM0:", "RTL_A1", "RTL canal A / DIMM1:", "RTL_B0", "RTL canal B / DIMM0:", "RTL_B1", "RTL canal B / DIMM1:",
             "IOL_A0", "IOL canal A / DIMM0:", "IOL_A1", "IOL canal A / DIMM1:", "IOL_B0", "IOL canal B / DIMM0:", "IOL_B1", "IOL canal B / DIMM1:",
             "IOL_off", "IOL offset:", "RFR_delay", "RFR delay:" };
+        static readonly string[] SpecBasic = {
+            "#", "Principais",
+            "tCAS", "tCL (CAS):", "tRCD", "tRCD:", "tRP", "tRP:", "tRAS", "tRAS:", "tRC", "tRC:", "tRFC", "tRFC:", "CR", "Command Rate:" };
+        // prefixo "4|" = so DDR4, "5|" = so DDR5
+        static readonly string[] SpecAmd = {
+            "#", "Principais",
+            "MTs", "Velocidade (MT/s):", "tCAS", "tCL (CAS):", "tRCD", "tRCDRD:", "tRCDWR", "tRCDWR:", "tRP", "tRP:", "tRAS", "tRAS:", "tRC", "tRC:", "tRFC", "tRFC:", "CR", "Command Rate:",
+            "tCWL", "tCWL:", "tFAW", "tFAW:", "GDM", "Gear Down Mode:", "BGS", "Bank Group Swap:", "BGSAlt", "BGS Alt:", "ECC", "ECC:", "BurstLength", "Burst length:",
+            "#", "Ativacao e escrita",
+            "tRRD_S", "tRRD_S:", "tRRD_L", "tRRD_L:", "tWR", "tWR:", "tRTP", "tRTP:", "tWTR_S", "tWTR_S:", "tWTR_L", "tWTR_L:", "tWRPRE", "tWRPRE:", "tRDPRE", "tRDPRE:",
+            "5|tRPpb", "tRPpb:", "5|tRCpb", "tRCpb:", "5|tPPD", "tPPD:", "TRCPAGE", "tRCPAGE:", "5|tMW", "tMW:", "4|Preamble2t", "Preamble 2T:",
+            "#", "Refresh e calibracao",
+            "tREFI", "tREFI:", "tRFC2", "tRFC2:", "4|tRFC4", "tRFC4:", "5|tRFCsb", "tRFCsb:", "tSTAG", "tSTAG:", "5|tSTAGsb", "tSTAGsb:", "tXS", "tXS:", "tDLLK", "tDLLK:",
+            "tMOD", "tMOD:", "tMODPDA", "tMODPDA:", "tMRD", "tMRD:", "tMRDPDA", "tMRDPDA:", "tZQOPER", "tZQOPER:", "tZQCS", "tZQCS:", "ZqcsInterval", "ZQCS interval:",
+            "5|tMRR", "tMRR:", "5|tMRW", "tMRW:", "5|tMRRI", "tMRRI:", "5|tSRX2SRX", "tSRX2SRX:", "5|tSTAB", "tSTAB:", "5|tECSc", "tECSc:",
+            "#", "Leitura / escrita entre bancos e ranks",
+            "tRDRDSCL", "tRDRDSCL:", "tRDRDSC", "tRDRDSC:", "tRDRDSD", "tRDRDSD:", "tRDRDDD", "tRDRDDD:",
+            "tWRWRSCL", "tWRWRSCL:", "tWRWRSC", "tWRWRSC:", "tWRWRSD", "tWRWRSD:", "tWRWRDD", "tWRWRDD:",
+            "tRDWR", "tRDWR:", "tWRRD", "tWRRD:", "RDRDBan", "RDRD Ban:", "WRWRBan", "WRWR Ban:",
+            "#", "Economia de energia",
+            "tCKE", "tCKE:", "tXP", "tXP:", "tPD", "tPD:", "tCPDED", "tCPDED:", "PowerDown", "Power Down:", "AggrPD", "Aggressive PD:",
+            "AggrPwrDownDly", "Aggr PD delay:", "PwrDownDly", "PD delay:", "LpExitDly", "LP exit delay:", "LpDly", "LP delay:",
+            "#", "Interface fisica (PHY)",
+            "tPHYWRD", "tPHYWRD:", "tPHYWRL", "tPHYWRL:", "tPHYRDL", "tPHYRDL:", "RDDATAEN", "RdDataEn:", "CmdStgCnt", "CmdStgCnt:", "RcvrWait", "RcvrWait:" };
+        string[] curSpec; string lastKind = "";
+        XpGroup grpTim;
+        static string[] FilterSpec(string[] spec, string kind)
+        {
+            List<string> o = new List<string>();
+            for (int i = 0; i < spec.Length; i += 2)
+            {
+                string k = spec[i];
+                if (k.Length > 2 && k[1] == '|') { if ((k[0] == '5') != (kind == "AMD5")) continue; k = k.Substring(2); }
+                o.Add(k); o.Add(spec[i + 1]);
+            }
+            return o.ToArray();
+        }
+        static string[] SpecFor(string kind)
+        {
+            if (kind == "Intel") return SpecIntel;
+            if (kind == "AMD4" || kind == "AMD5") return FilterSpec(SpecAmd, kind);
+            return SpecBasic;
+        }
         ListView lvMod = new ListView();
         int speed, channels = 1;
         bool reading, readOnce;
@@ -9813,7 +9973,7 @@ namespace BunoTunner
         {
             Dock = DockStyle.Fill;
             AutoScroll = true;
-            BuildLatency(); BuildSummary(); BuildMods(); BuildTimings();
+            BuildLatency(); BuildSummary(); BuildMods(); BuildTimings(SpecBasic);
             VisibleChanged += delegate { if (Visible && !readOnce) { readOnce = true; ReadAsync(); } };
         }
 
@@ -9968,9 +10128,11 @@ namespace BunoTunner
             Controls.Add(lvMod);
         }
 
-        void BuildTimings()
+        void BuildTimings(string[] TSpec)
         {
-            XpGroup g = new XpGroup(); g.Title = "Timings atuais (leitura automática)";
+            curSpec = TSpec; tl.Clear();
+            if (grpTim != null) { Controls.Remove(grpTim); grpTim.Dispose(); }
+            XpGroup g = new XpGroup(); g.Title = "Timings atuais (leitura automática)"; grpTim = g;
             int y = 26;
             int pos = 0;
             while (pos < TSpec.Length)
@@ -10027,6 +10189,9 @@ namespace BunoTunner
         {
             reading = false;
             tim = r.V;
+            string[] want = SpecFor(r.Kind);
+            if (r.Kind != lastKind) BuildTimings(want);
+            lastKind = r.Kind;
             foreach (KeyValuePair<string, Label> kv in tl)
             {
                 string v; tim.TryGetValue(kv.Key, out v);

@@ -48,3 +48,4 @@ Full details and version history in `LEIA-ME.txt`.
 
 - [LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) (MPL-2.0) for sensors.
 - [PawnIO](https://pawnio.eu) driver and the `IntelMCHBAR` module from [PawnIO.Modules](https://github.com/namazso/PawnIO.Modules) (LGPL-2.1-or-later), used read-only to show Intel memory timings.
+- Ryzen memory-controller (UMC) register layout cross-checked against [ZenTimings](https://github.com/irusanov/ZenTimings) / [ZenStates-Core](https://github.com/irusanov/ZenStates-Core) (GPL-3.0) by irusanov. Only register addresses and bit positions were used; no code was copied.

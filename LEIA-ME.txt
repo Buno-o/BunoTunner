@@ -334,3 +334,9 @@ v1.27.0 (TESTE)
 
 v1.27.1 (TESTE)
 - Aba Memoria: removidos os botoes "Indicar CPU-Z" e "Baixar CPU-Z"; timings agora em ordem vertical dentro de cada uma das 3 colunas.
+
+v1.28.0 (TESTE)
+- Timings completos tambem em CPUs AMD Ryzen (Zen 2/3/4/5, DDR4 e DDR5): tCL, tRCD, tRCDWR, tRP, tRAS, tRC, tRFC (e tRFC2/4/sb), tRRD, tFAW, tWR, tWTR, tREFI, tRDRD/tWRWR, tRDWR/tWRRD, energia, PHY etc. Leitura pelo mesmo caminho que ja era usado para AMD (SMN).
+- A lista da aba Memoria muda conforme a plataforma (Intel, Ryzen DDR4, Ryzen DDR5); o que nao for lido fica "-".
+- Os metodos antigos continuam: se o mapa novo falhar, o programa tenta a deteccao anterior e, por fim, o CPU-Z (se estiver na pasta).
+- Creditos: o mapa dos registradores UMC do Ryzen foi conferido com o projeto ZenTimings / ZenStates-Core (irusanov, GPL-3.0): https://github.com/irusanov/ZenTimings
