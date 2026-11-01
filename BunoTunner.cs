@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - codigo aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.32.2.0")]
-[assembly: AssemblyFileVersion("1.32.2.0")]
-[assembly: AssemblyInformationalVersion("1.32.2")]
+[assembly: AssemblyVersion("1.33.0.0")]
+[assembly: AssemblyFileVersion("1.33.0.0")]
+[assembly: AssemblyInformationalVersion("1.33.0")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -417,7 +417,7 @@ namespace BunoTunner
             "Arraste aqui para mover", "Drag here to move",
             "(vazio - adicione sensores no menu)", "(empty - add sensors in the menu)",
             "FPS (API + quadros/s)", "FPS (API + frames/s)", "Jogo", "Game",
-            "Dica: em \"Editar na tela\" o overlay aparece no desktop - arraste pelo topo para mover, arraste as linhas para reordenar e use o botao direito numa linha para remover. O FPS mostra a API grafica do jogo e os quadros por segundo. Jogos em tela cheia exclusiva (nao a sem borda) podem esconder o overlay. O atalho Mostrar/ocultar nao e bloqueado: a tecla continua funcionando nos outros programas.", "Tip: with \"Edit on screen\" the overlay appears on the desktop - drag the top to move it, drag the rows to reorder and right-click a row to remove it. FPS shows the game's graphics API and frames per second. Exclusive-fullscreen games (not borderless) may hide the overlay. The Show/hide hotkey is not blocked: the key keeps working in other programs.",
+            "Dica: em \"Editar na tela\" o overlay aparece no desktop - arraste pelo topo para mover, arraste as linhas para reordenar e use o botao direito numa linha para remover. O FPS mostra a API grafica do jogo e os quadros por segundo. Jogos em tela cheia exclusiva (nao a sem borda) podem esconder o overlay. O atalho Mostrar/ocultar e global e fica reservado para o BunoTunner.", "Tip: with \"Edit on screen\" the overlay appears on the desktop - drag the top to move it, drag the rows to reorder and right-click a row to remove it. FPS shows the game's graphics API and frames per second. Exclusive-fullscreen games (not borderless) may hide the overlay. The Show/hide hotkey is global and reserved for BunoTunner.",
             "Procurando atualizacoes...", "Looking for updates...",
             "Baixando atualizacao...", "Downloading update...",
             "Verificar atualizacoes\nProcura uma versao mais nova do BunoTunner e, se voce quiser, baixa e instala.", "Check for updates\nLooks for a newer BunoTunner version and, if you want, downloads and installs it.",
@@ -1874,7 +1874,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.32.2";
+        public const string Version = "v1.33.0";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -5705,17 +5705,37 @@ namespace BunoTunner
             if (KeyVk == 0) return "(nenhum)";
             return ((KeyMods & 1) != 0 ? "Ctrl+" : "") + ((KeyMods & 2) != 0 ? "Shift+" : "") + ((KeyMods & 4) != 0 ? "Alt+" : "") + ((Keys)KeyVk).ToString();
         }
-        // O atalho NAO e registrado como hotkey global: apenas observamos o teclado (GetAsyncKeyState), entao a tecla continua funcionando nos outros programas.
-        [DllImport("user32.dll")] static extern short GetAsyncKeyState(int vk);
-        static bool keyPrev; static Timer kt;
-        static bool Down(int vk) { return (GetAsyncKeyState(vk) & 0x8000) != 0; }
-        static void KeyPoll()
+        // Atalho global registrado no Windows (RegisterHotKey): a combinacao fica reservada para o BunoTunner e NAO chega aos outros programas.
+        [DllImport("user32.dll", SetLastError = true)] static extern bool RegisterHotKey(IntPtr h, int id, uint mods, uint vk);
+        [DllImport("user32.dll")] static extern bool UnregisterHotKey(IntPtr h, int id);
+        class HotWnd : NativeWindow
         {
-            if (KeyVk == 0) { keyPrev = false; return; }
-            bool m = Down(KeyVk) && Down(0x11) == ((KeyMods & 1) != 0) && Down(0x10) == ((KeyMods & 2) != 0) && Down(0x12) == ((KeyMods & 4) != 0);
-            if (m && !keyPrev) ToggleVisible();
-            keyPrev = m;
+            public HotWnd() { CreateParams cp = new CreateParams(); cp.Parent = (IntPtr)(-3); CreateHandle(cp); }   // janela so de mensagens (HWND_MESSAGE)
+            protected override void WndProc(ref Message m)
+            {
+                if (m.Msg == 0x312 && m.WParam.ToInt32() == 0x4254) { try { ToggleVisible(); } catch (Exception) { } return; }
+                base.WndProc(ref m);
+            }
         }
+        static HotWnd hw; static int regMods = -1, regVk = -1; public static bool KeyOk = true; static bool keyPaused;
+        // registra (ou re-registra) o atalho conforme a configuracao atual; chamado a cada mudanca
+        public static void ApplyKey()
+        {
+            try
+            {
+                int vk = keyPaused ? 0 : KeyVk, mods = keyPaused ? 0 : KeyMods;
+                if (hw == null) hw = new HotWnd();
+                if (vk == regVk && mods == regMods) return;
+                if (regVk > 0) UnregisterHotKey(hw.Handle, 0x4254);
+                regVk = vk; regMods = mods; KeyOk = true;
+                if (vk == 0) return;
+                uint m = 0x4000 | ((mods & 1) != 0 ? 2u : 0u) | ((mods & 2) != 0 ? 4u : 0u) | ((mods & 4) != 0 ? 1u : 0u);   // NOREPEAT | CTRL | SHIFT | ALT
+                KeyOk = RegisterHotKey(hw.Handle, 0x4254, m, (uint)vk);
+            }
+            catch (Exception) { KeyOk = false; }
+        }
+        // durante a captura de um novo atalho, o antigo e liberado para que a combinacao chegue ate a janela de configuracao
+        public static void PauseKey(bool p) { keyPaused = p; ApplyKey(); }
         public static void ToggleVisible()
         {
             if (!On) { On = true; Hidden = false; } else Hidden = !Hidden;
@@ -5727,12 +5747,11 @@ namespace BunoTunner
             Load(); lastSnap = Snap();
             tm = new Timer(); tm.Interval = 500; tm.Tick += delegate { try { Tick(); } catch (Exception) { } };
             tm.Start();
-            kt = new Timer(); kt.Interval = 40; kt.Tick += delegate { try { KeyPoll(); } catch (Exception) { } };
-            kt.Start();
+            ApplyKey();
             Application.ApplicationExit += delegate { FpsMon.Stop(); };
         }
         public static void Commit() { Record(); Save(); Notify(); Tick(); }
-        public static void Notify() { if (StateChanged != null) StateChanged(); }
+        public static void Notify() { ApplyKey(); if (StateChanged != null) StateChanged(); }
         public static void SetEditing(bool v, Screen sc)
         {
             Editing = v; if (sc != null) editScreen = sc;
@@ -6123,8 +6142,8 @@ namespace BunoTunner
             cbMode.Items.Add("Em qualquer programa que desenhe com DirectX");
             cbMode.Items.Add("Sempre (para testar)");
             UI.Lbl(body, "Atalho:", 500, 40);
-            btnKey = UI.Btn(body, "", 556, 36, 220, delegate { capturing = true; btnKey.Text = "Pressione o atalho...  (Esc cancela, Del limpa)"; });
-            btnKey.Text = "Mostrar/ocultar: " + Overlay.KeyName();
+            btnKey = UI.Btn(body, "", 556, 36, 220, delegate { capturing = true; Overlay.PauseKey(true); btnKey.Text = "Pressione o atalho...  (Esc cancela, Del limpa)"; });
+            btnKey.Text = "Mostrar/ocultar: " + Overlay.KeyName() + (Overlay.KeyOk ? "" : " (em uso!)");
 
             UI.Lbl(body, "Sensores disponiveis  (duplo clique ou arraste para a direita)", 8, 72, Xp.UiBold);
             txSearch = UI.Txt(body, 8, 94, 220, "");
@@ -6168,7 +6187,7 @@ namespace BunoTunner
             cbHot.Items.Add("Desligado"); for (int t = 70; t <= 95; t += 5) cbHot.Items.Add(t + " °C");
 
             hint = UI.Lbl(body, "", 8, 600, Xp.Ui, Xp.Dim); hint.AutoSize = false; hint.SetBounds(8, 598, 768, 46);
-            hint.Text = "Dica: Esc fecha esta janela; Ctrl+Z desfaz e Ctrl+Y refaz. Clique com o botao direito num item da lista para mudar cor, nome, ordem ou remover; duplo clique abre a cor. Em \"Editar na tela\" arraste o overlay pelo topo e as linhas para reordenar. Jogos em tela cheia exclusiva (nao a sem borda) podem esconder o overlay. O atalho Mostrar/ocultar nao bloqueia a tecla nos outros programas.";
+            hint.Text = "Dica: Esc fecha esta janela; Ctrl+Z desfaz e Ctrl+Y refaz. Clique com o botao direito num item da lista para mudar cor, nome, ordem ou remover; duplo clique abre a cor. Em \"Editar na tela\" arraste o overlay pelo topo e as linhas para reordenar. Jogos em tela cheia exclusiva (nao a sem borda) podem esconder o overlay. O atalho Mostrar/ocultar e global: a combinacao escolhida fica reservada para o BunoTunner e nao chega aos outros programas (se aparecer \"em uso!\", outro programa ja a usa - escolha outra).";
 
             building = true;
             chkOn.Checked = Overlay.On;
@@ -6262,7 +6281,7 @@ namespace BunoTunner
             lbSel.DoubleClick += delegate { PickColor(); };
 
             Overlay.StateChanged += OnState;
-            FormClosed += delegate { Overlay.StateChanged -= OnState; tm.Stop(); if (Overlay.Editing) Overlay.SetEditing(false, null); };
+            FormClosed += delegate { Overlay.StateChanged -= OnState; tm.Stop(); Overlay.PauseKey(false); if (Overlay.Editing) Overlay.SetEditing(false, null); };
             tm.Interval = 1000; tm.Tick += delegate { RefreshValues(); }; tm.Start();
             OnState();
         }
@@ -6273,7 +6292,7 @@ namespace BunoTunner
             {
                 Keys code = keyData & Keys.KeyCode;
                 if (code == Keys.ControlKey || code == Keys.ShiftKey || code == Keys.Menu) return true;   // so modificadores: espera a tecla
-                capturing = false;
+                capturing = false; Overlay.PauseKey(false);
                 if (code == Keys.Escape) { }
                 else if (code == Keys.Delete || code == Keys.Back) { Overlay.KeyVk = 0; Overlay.KeyMods = 0; }
                 else
@@ -6389,7 +6408,7 @@ namespace BunoTunner
         {
             if (IsDisposed) return;
             btnEdit.Text = Overlay.Editing ? "Concluir edicao" : "Editar na tela";
-            if (!capturing) btnKey.Text = "Mostrar/ocultar: " + Overlay.KeyName();
+            if (!capturing) btnKey.Text = "Mostrar/ocultar: " + Overlay.KeyName() + (Overlay.KeyOk ? "" : " (em uso!)");
             building = true;
             int si = Array.IndexOf(Sizes, Overlay.Scale), oi = Array.IndexOf(Ops, Overlay.Opac);
             if (si >= 0) cbSize.SelectedIndex = si; if (oi >= 0) cbOp.SelectedIndex = oi;

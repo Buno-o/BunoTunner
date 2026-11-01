@@ -365,3 +365,6 @@ v1.32.1 (TESTE)
 
 v1.32.2
 - Reducao de padroes que antivirus costumam estranhar, sem mudar nenhuma funcao: PowerShell sem -EncodedCommand (base64), metadados do assembly e manifesto mais completos.
+
+v1.33.0 (TESTE)
+- Overlay: o atalho de mostrar/ocultar agora e um atalho global do Windows (RegisterHotKey): a combinacao fica reservada para o BunoTunner e nao chega aos outros programas. Se a combinacao ja estiver em uso por outro programa, o botao mostra "(em uso!)". Isso tambem elimina a leitura continua de teclado (GetAsyncKeyState).
