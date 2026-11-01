@@ -30,8 +30,8 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - codigo aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.28.1.0")]
-[assembly: AssemblyFileVersion("1.28.1.0")]
+[assembly: AssemblyVersion("1.29.0.0")]
+[assembly: AssemblyFileVersion("1.29.0.0")]
 
 namespace BunoTunner
 {
@@ -1853,7 +1853,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.28.1";
+        public const string Version = "v1.29.0";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -5584,7 +5584,7 @@ namespace BunoTunner
         public static void Load()
         {
             On = Settings.Get("ov.on", "0") == "1";
-            Scale = Math.Max(50, Math.Min(250, I("ov.size", 100))); Mode = Math.Max(0, Math.Min(2, I("ov.mode", 0))); Opac = Math.Max(30, Math.Min(100, I("ov.op", 85)));
+            Scale = Math.Max(50, Math.Min(200, (int)Math.Round(I("ov.size", 100) / 5.0) * 5)); Mode = Math.Max(0, Math.Min(2, I("ov.mode", 0))); Opac = Math.Max(50, Math.Min(100, (int)Math.Round(I("ov.op", 85) / 5.0) * 5));
             Fx = Math.Max(0, Math.Min(1, Dd("ov.fx", 0))); Fy = Math.Max(0, Math.Min(1, Dd("ov.fy", 0)));
             Items = new List<string>(Settings.Get("ov.items", "@FPS").Split(new string[] { "~|~" }, StringSplitOptions.RemoveEmptyEntries));
             KeyMods = I("ov.keymods", 3); KeyVk = I("ov.keyvk", (int)Keys.O);   // padrao: Ctrl+Shift+O
@@ -5739,6 +5739,60 @@ namespace BunoTunner
         [DllImport("user32.dll")] static extern int SetWindowLong(IntPtr h, int i, int v);
         [DllImport("user32.dll")] static extern bool SetWindowPos(IntPtr h, IntPtr after, int x, int y, int cx, int cy, uint flags);
         const int GWL_EXSTYLE = -20, WS_EX_TRANSPARENT = 0x20;
+        [StructLayout(LayoutKind.Sequential)] struct PT { public int x, y; }
+        [StructLayout(LayoutKind.Sequential)] struct SZ { public int cx, cy; }
+        [StructLayout(LayoutKind.Sequential)] struct BLEND { public byte Op, Flags, Alpha, Fmt; }
+        [DllImport("user32.dll", SetLastError = true)] static extern bool UpdateLayeredWindow(IntPtr h, IntPtr hdcDst, ref PT pDst, ref SZ size, IntPtr hdcSrc, ref PT pSrc, int key, ref BLEND bl, int flags);
+        [DllImport("user32.dll")] static extern IntPtr GetDC(IntPtr h);
+        [DllImport("user32.dll")] static extern int ReleaseDC(IntPtr h, IntPtr dc);
+        [DllImport("gdi32.dll")] static extern IntPtr CreateCompatibleDC(IntPtr dc);
+        [DllImport("gdi32.dll")] static extern IntPtr SelectObject(IntPtr dc, IntPtr o);
+        [DllImport("gdi32.dll")] static extern bool DeleteObject(IntPtr o);
+        [DllImport("gdi32.dll")] static extern bool DeleteDC(IntPtr dc);
+        int bgAlpha = 217;
+        static Bitmap measBmp = new Bitmap(1, 1); static Graphics measG;
+        static float TW(string t, Font f)
+        {
+            if (measG == null) { measG = Graphics.FromImage(measBmp); measG.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit; }
+            using (StringFormat sf = new StringFormat(StringFormat.GenericTypographic)) { sf.FormatFlags |= StringFormatFlags.NoWrap | StringFormatFlags.MeasureTrailingSpaces; return measG.MeasureString(t ?? "", f, 4000, sf).Width + 2; }
+        }
+        static void DT(Graphics g, string t, Font f, Rectangle r, Color c, StringAlignment al)
+        {
+            using (StringFormat sf = new StringFormat(StringFormat.GenericTypographic))
+            using (SolidBrush b = new SolidBrush(c))
+            {
+                sf.Alignment = al; sf.LineAlignment = StringAlignment.Center; sf.FormatFlags |= StringFormatFlags.NoWrap; sf.Trimming = StringTrimming.None;
+                g.DrawString(t ?? "", f, b, r, sf);
+            }
+        }
+        // o fundo e translucido (por pixel); os textos ficam sempre 100% opacos
+        void Render()
+        {
+            if (!IsHandleCreated || !Visible || Width < 2 || Height < 2) return;
+            IntPtr scr0 = IntPtr.Zero, mem = IntPtr.Zero, hb = IntPtr.Zero, old = IntPtr.Zero;
+            try
+            {
+                using (Bitmap bmp = new Bitmap(Width, Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
+                {
+                    using (Graphics g = Graphics.FromImage(bmp)) Draw(g);
+                    scr0 = GetDC(IntPtr.Zero); mem = CreateCompatibleDC(scr0);
+                    hb = bmp.GetHbitmap(Color.FromArgb(0));
+                    old = SelectObject(mem, hb);
+                    PT dst = new PT(); dst.x = Left; dst.y = Top; PT src = new PT(); SZ sz = new SZ(); sz.cx = Width; sz.cy = Height;
+                    BLEND bl = new BLEND(); bl.Op = 0; bl.Flags = 0; bl.Alpha = 255; bl.Fmt = 1;   // AC_SRC_OVER, AC_SRC_ALPHA
+                    UpdateLayeredWindow(Handle, scr0, ref dst, ref sz, mem, ref src, 0, ref bl, 2);
+                }
+            }
+            catch (Exception) { }
+            finally
+            {
+                if (mem != IntPtr.Zero && old != IntPtr.Zero) SelectObject(mem, old);
+                if (hb != IntPtr.Zero) DeleteObject(hb);
+                if (mem != IntPtr.Zero) DeleteDC(mem);
+                if (scr0 != IntPtr.Zero) ReleaseDC(IntPtr.Zero, scr0);
+            }
+        }
+        protected override void OnVisibleChanged(EventArgs e) { base.OnVisibleChanged(e); if (Visible) Render(); }
 
         List<Overlay.Row> rows = new List<Overlay.Row>(); List<Rectangle> rowR = new List<Rectangle>();
         Rectangle hdrR, btnR, scr; bool edit, clickThru = true;
@@ -5759,7 +5813,7 @@ namespace BunoTunner
         protected override bool ShowWithoutActivation { get { return true; } }
         protected override CreateParams CreateParams
         {
-            get { CreateParams cp = base.CreateParams; cp.ExStyle |= 0x80 | 0x08000000; return cp; }   // TOOLWINDOW | NOACTIVATE
+            get { CreateParams cp = base.CreateParams; cp.ExStyle |= 0x80 | 0x08000000 | 0x80000; return cp; }   // TOOLWINDOW | NOACTIVATE | LAYERED
         }
         protected override void OnHandleCreated(EventArgs e) { base.OnHandleCreated(e); ApplyClickThru(); }
         void ApplyClickThru()
@@ -5779,7 +5833,6 @@ namespace BunoTunner
             float sz = 9.5f * scale / 100f;
             fl = new Font("Segoe UI", sz, FontStyle.Regular); fv = new Font("Segoe UI", sz, FontStyle.Bold);
         }
-        static readonly TextFormatFlags TF = TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine;
 
         public void SetState(List<Overlay.Row> r, int sc, int op, Rectangle screen, bool ed)
         {
@@ -5789,8 +5842,8 @@ namespace BunoTunner
             int lw = 0, vw = 0;
             foreach (Overlay.Row x in r)
             {
-                lw = Math.Max(lw, TextRenderer.MeasureText(x.Label, fl, new Size(1000, 100), TextFormatFlags.NoPadding).Width);
-                vw = Math.Max(vw, TextRenderer.MeasureText(x.Value, fv, new Size(1000, 100), TextFormatFlags.NoPadding).Width);
+                lw = Math.Max(lw, (int)Math.Ceiling(TW(x.Label, fl)));
+                vw = Math.Max(vw, (int)Math.Ceiling(TW(x.Value, fv)));
             }
             int grip = ed ? (int)(14 * s) : 0;
             int w = Math.Max((int)(110 * s), pad * 2 + grip + lw + gap + vw);
@@ -5807,7 +5860,7 @@ namespace BunoTunner
                 btnR = new Rectangle(pad, y, w - pad * 2, (int)(24 * s)); y += btnR.Height + (int)(4 * s);
             }
             else y += pad - (int)(2 * s);
-            Opacity = Math.Max(30, Math.Min(99, op)) / 100.0;
+            bgAlpha = Math.Max(50, Math.Min(100, op)) * 255 / 100;
             if (clickThru == ed) { clickThru = !ed; ApplyClickThru(); }
             if (!winDrag)
             {
@@ -5815,7 +5868,7 @@ namespace BunoTunner
                 int nx = scr.Left + margin + (int)Math.Round(Overlay.Fx * rx), ny = scr.Top + margin + (int)Math.Round(Overlay.Fy * ry);
                 if (Left != nx || Top != ny || Width != w || Height != y) SetBounds(nx, ny, w, y);
             }
-            Invalidate();
+            Render();
         }
 
         static GraphicsPath Round(Rectangle r, int d)
@@ -5827,23 +5880,25 @@ namespace BunoTunner
             p.CloseFigure(); return p;
         }
 
-        protected override void OnPaint(PaintEventArgs e)
+        void Draw(Graphics g)
         {
-            Graphics g = e.Graphics; g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.SmoothingMode = SmoothingMode.AntiAlias; g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
             Fonts(); float s = scale / 100f;
-            g.Clear(cBg);
+            g.Clear(Color.Transparent);
             Rectangle r = new Rectangle(0, 0, Width - 1, Height - 1);
             using (GraphicsPath gp = Round(r, (Xp.Rad + 2) * 2))
-            using (Pen p = new Pen(edit ? cAccent : cBorder, edit ? 2f : 1f))
+            using (SolidBrush fb = new SolidBrush(Color.FromArgb(bgAlpha, cBg)))
+            using (Pen p = new Pen(edit ? cAccent : Color.FromArgb(bgAlpha, cBorder), edit ? 2f : 1f))
             {
                 if (edit) p.DashStyle = DashStyle.Dash;
+                g.FillPath(fb, gp);
                 g.DrawPath(p, gp);
             }
             int grip = edit ? (int)(14 * s) : 0;
             if (edit)
             {
                 using (SolidBrush b = new SolidBrush(cAccent)) g.FillRectangle(b, 1, 1, Width - 2, hdrR.Height);
-                TextRenderer.DrawText(g, Lang.T("Arraste aqui para mover"), fl, hdrR, Color.White, TextFormatFlags.HorizontalCenter | TF);
+                DT(g, Lang.T("Arraste aqui para mover"), fl, hdrR, Color.White, StringAlignment.Center);
             }
             for (int i = 0; i < rows.Count && i < rowR.Count; i++)
             {
@@ -5855,12 +5910,12 @@ namespace BunoTunner
                         for (int k = 0; k < 3; k++) g.FillRectangle(gb, rr.Left + 1, rr.Top + rr.Height / 2 - (int)(4 * s) + k * (int)(4 * s), (int)(8 * s), Math.Max(1, (int)(2 * s)));
                 }
                 Rectangle lr = new Rectangle(rr.Left + grip, rr.Top, rr.Width - grip, rr.Height);
-                TextRenderer.DrawText(g, x.Label, fl, lr, cLabel, TF | TextFormatFlags.Left);
-                TextRenderer.DrawText(g, x.Value, fv, lr, x.Hot ? cHot : cValue, TF | TextFormatFlags.Right);
+                DT(g, x.Label, fl, lr, cLabel, StringAlignment.Near);
+                DT(g, x.Value, fv, lr, x.Hot ? cHot : cValue, StringAlignment.Far);
             }
             if (edit)
             {
-                if (rows.Count == 0) TextRenderer.DrawText(g, Lang.T("(vazio - adicione sensores no menu)"), fl, new Rectangle(8, hdrR.Height + 4, Width - 16, (int)(20 * s)), cLabel, TF);
+                if (rows.Count == 0) DT(g, Lang.T("(vazio - adicione sensores no menu)"), fl, new Rectangle(8, hdrR.Height + 4, Width - 16, (int)(20 * s)), cLabel, StringAlignment.Near);
                 if (dropIdx >= 0 && rowDrag >= 0 && rowR.Count > 0)
                 {
                     int yy = dropIdx < rowR.Count ? rowR[dropIdx].Top : rowR[rowR.Count - 1].Bottom;
@@ -5870,7 +5925,7 @@ namespace BunoTunner
                 {
                     using (SolidBrush bb = new SolidBrush(cGood)) g.FillPath(bb, bp);
                 }
-                TextRenderer.DrawText(g, Lang.T("Concluir"), fv, btnR, Color.White, TextFormatFlags.HorizontalCenter | TF);
+                DT(g, Lang.T("Concluir"), fv, btnR, Color.White, StringAlignment.Center);
             }
         }
 
@@ -5906,7 +5961,7 @@ namespace BunoTunner
                 Overlay.Fx = rx > 0 ? Math.Max(0, Math.Min(1, (double)(nx - scr.Left - margin) / rx)) : 0;
                 Overlay.Fy = ry > 0 ? Math.Max(0, Math.Min(1, (double)(ny - scr.Top - margin) / ry)) : 0;
             }
-            else if (rowDrag >= 0) { dropIdx = DropAt(e.Location); Cursor = Cursors.Hand; Invalidate(); }
+            else if (rowDrag >= 0) { dropIdx = DropAt(e.Location); Cursor = Cursors.Hand; Render(); }
             else Cursor = (RowAt(e.Location) < 0 && !btnR.Contains(e.Location)) ? Cursors.SizeAll : Cursors.Hand;
         }
         protected override void OnMouseUp(MouseEventArgs e)
@@ -5917,7 +5972,7 @@ namespace BunoTunner
             {
                 int from = rowDrag, to = dropIdx; rowDrag = -1; dropIdx = -1;
                 if (Math.Abs(e.Y - downPt.Y) > 3 && to >= 0 && to != from && to != from + 1) Overlay.MoveItem(from, to);
-                else Invalidate();
+                else Render();
             }
         }
     }
@@ -5933,8 +5988,8 @@ namespace BunoTunner
 
         XpOption chkOn; ComboBox cbMode, cbSize, cbOp; XpText txSearch; ListView lvAv; ListBox lbSel; XpButton btnEdit, btnKey; Label hint; Timer tm = new Timer(); bool capturing;
         int dropIdx = -1, downIdx = -1; Point downPt; bool building;
-        static readonly int[] Sizes = { 70, 85, 100, 125, 150, 200 };
-        static readonly int[] Ops = { 100, 90, 80, 70, 60, 50 };
+        static int[] Seq(int a, int b) { List<int> l = new List<int>(); for (int v = a; v <= b; v += 5) l.Add(v); return l.ToArray(); }
+        static readonly int[] Sizes = Seq(50, 200), Ops = Seq(50, 100);
 
         public OverlayConfigForm()
         {
@@ -5983,8 +6038,8 @@ namespace BunoTunner
 
             building = true;
             chkOn.Checked = Overlay.On;
-            cbSize.SelectedIndex = Math.Max(0, Array.IndexOf(Sizes, Overlay.Scale)); if (cbSize.SelectedIndex < 0) cbSize.SelectedIndex = 2;
-            cbOp.SelectedIndex = Math.Max(0, Array.IndexOf(Ops, Overlay.Opac)); if (cbOp.SelectedIndex < 0) cbOp.SelectedIndex = 2;
+            cbSize.SelectedIndex = Math.Max(0, Array.IndexOf(Sizes, Overlay.Scale));
+            cbOp.SelectedIndex = Math.Max(0, Array.IndexOf(Ops, Overlay.Opac));
             cbMode.SelectedIndex = Overlay.Mode;
             building = false;
             FillAvail(); FillSel();

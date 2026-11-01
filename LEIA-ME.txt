@@ -343,3 +343,6 @@ v1.28.0 (TESTE)
 
 v1.28.1
 - Menu Sensores: removido o botao "Como usar".
+
+v1.29.0 (TESTE)
+- Overlay: tamanho de 50% a 200% e opacidade de 50% a 100%, ambos de 5% em 5%. A opacidade agora afeta so o fundo; textos e valores ficam sempre 100% opacos.
