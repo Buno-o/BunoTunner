@@ -319,3 +319,9 @@ v1.25.0 (TESTE)
 - Overlay em jogos: janela transparente por cima do jogo, com o tema selecionado no app. Configure em Sensores > "Overlay em jogos...": escolha os sensores (duplo clique ou arraste), a ordem (arraste na lista) e a posicao (cantos ou "Editar na tela": o overlay aparece no desktop e voce arrasta pelo topo; arraste as linhas para reordenar; botao direito remove).
 - FPS padrao: mostra a API grafica do jogo (DX9/DX10/DX11/DX12/Vulkan/OpenGL) e os quadros por segundo, medidos pelo rastreamento de eventos do Windows (ETW, como o PresentMon). Precisa de administrador. Vulkan/OpenGL puros podem nao ter contagem de FPS nesta versao de teste.
 - Funciona em jogos em tela cheia sem borda/janela. Tela cheia exclusiva pode esconder o overlay (limitacao de qualquer overlay que nao injeta no jogo).
+
+v1.26.0 (TESTE)
+- Overlay sempre no tema escuro, independente do tema do app.
+- FPS tambem para Vulkan e OpenGL (eventos do DxgKrnl). Teste: se o seu jogo nao mostrar FPS, me diga qual API ele usa.
+- FPS recalculado a cada 500 ms; os demais sensores seguem o intervalo do menu Sensores.
+- Atalho para mostrar/ocultar o overlay (padrao Ctrl+Shift+O, configuravel no menu). O atalho nao e bloqueado: a tecla continua funcionando nos outros programas.

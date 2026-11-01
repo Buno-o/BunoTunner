@@ -30,8 +30,8 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - codigo aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.25.0.0")]
-[assembly: AssemblyFileVersion("1.25.0.0")]
+[assembly: AssemblyVersion("1.26.0.0")]
+[assembly: AssemblyFileVersion("1.26.0.0")]
 
 namespace BunoTunner
 {
@@ -376,14 +376,14 @@ namespace BunoTunner
             "Sempre (para testar)", "Always (for testing)",
             "Sensores disponiveis  (duplo clique ou arraste para a direita)", "Available sensors  (double-click or drag to the right)",
             "Ordem no overlay  (arraste para reordenar)", "Order in the overlay  (drag to reorder)",
-            "Posicao:", "Position:",
+            "Posicao:", "Position:", "Atalho:", "Hotkey:", "Mostrar/ocultar: ", "Show/hide: ", "(nenhum)", "(none)", "Pressione o atalho...  (Esc cancela, Del limpa)", "Press the hotkey...  (Esc cancels, Del clears)",
             "Sup. esq.", "Top left", "Sup. dir.", "Top right", "Inf. esq.", "Bottom left", "Inf. dir.", "Bottom right",
             "Editar na tela", "Edit on screen", "Concluir edicao", "Finish editing", "Concluir", "Done",
             "So FPS", "FPS only",
             "Arraste aqui para mover", "Drag here to move",
             "(vazio - adicione sensores no menu)", "(empty - add sensors in the menu)",
             "FPS (API + quadros/s)", "FPS (API + frames/s)", "Jogo", "Game",
-            "Dica: em \"Editar na tela\" o overlay aparece no desktop - arraste pelo topo para mover, arraste as linhas para reordenar e use o botao direito numa linha para remover. O FPS mostra a API grafica do jogo e os quadros por segundo. Jogos em tela cheia exclusiva (nao a sem borda) podem esconder o overlay.", "Tip: with \"Edit on screen\" the overlay appears on the desktop - drag the top to move it, drag the rows to reorder and right-click a row to remove it. FPS shows the game's graphics API and frames per second. Exclusive-fullscreen games (not borderless) may hide the overlay.",
+            "Dica: em \"Editar na tela\" o overlay aparece no desktop - arraste pelo topo para mover, arraste as linhas para reordenar e use o botao direito numa linha para remover. O FPS mostra a API grafica do jogo e os quadros por segundo. Jogos em tela cheia exclusiva (nao a sem borda) podem esconder o overlay. O atalho Mostrar/ocultar nao e bloqueado: a tecla continua funcionando nos outros programas.", "Tip: with \"Edit on screen\" the overlay appears on the desktop - drag the top to move it, drag the rows to reorder and right-click a row to remove it. FPS shows the game's graphics API and frames per second. Exclusive-fullscreen games (not borderless) may hide the overlay. The Show/hide hotkey is not blocked: the key keeps working in other programs.",
             "Procurando atualizacoes...", "Looking for updates...",
             "Baixando atualizacao...", "Downloading update...",
             "Verificar atualizacoes\nProcura uma versao mais nova do BunoTunner e, se voce quiser, baixa e instala.", "Check for updates\nLooks for a newer BunoTunner version and, if you want, downloads and installs it.",
@@ -1840,7 +1840,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.25.0";
+        public const string Version = "v1.26.0";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -5362,7 +5362,9 @@ namespace BunoTunner
         static ulong sess, trace;
         static volatile bool running;
         static readonly object lk = new object();
-        class PidInfo { public Queue<long> Q = new Queue<long>(); public long Last, Newest, ApiAt; public bool D9; public string Api; }
+        class Kq { public Queue<long> Q = new Queue<long>(); public long Last, Newest; }
+        class PidInfo { public Queue<long> Q = new Queue<long>(); public long Last, Newest, ApiAt; public bool D9; public string Api, ApiMode; public Dictionary<int, Kq> K = new Dictionary<int, Kq>(); }
+        static readonly int[] KIds = { 0xB8, 0xA8, 0xA6 };   // DxgKrnl: Present_Info, Flip_Info, Blit_Info (apps que nao usam DXGI: Vulkan/OpenGL)
         static readonly Dictionary<uint, PidInfo> pids = new Dictionary<uint, PidInfo>();
         public static string Error = "";
         public static bool Running { get { return running; } }
@@ -5375,7 +5377,7 @@ namespace BunoTunner
             Marshal.WriteInt32(p, 0, total);          // Wnode.BufferSize
             Marshal.WriteInt32(p, 40, 1);             // Wnode.ClientContext = 1 (relogio QPC)
             Marshal.WriteInt32(p, 44, 0x20000);       // WNODE_FLAG_TRACED_GUID
-            Marshal.WriteInt32(p, 48, 16);            // BufferSize (KB)
+            Marshal.WriteInt32(p, 48, 4);             // BufferSize (KB): buffers pequenos = eventos entregues mais rapido
             Marshal.WriteInt32(p, 64, 0x100);         // LogFileMode = REAL_TIME
             Marshal.WriteInt32(p, 68, 1);             // FlushTimer (s): entrega os eventos a cada 1 s
             Marshal.WriteInt32(p, IntPtr.Size == 8 ? 116 : 112, sz);   // LoggerNameOffset
@@ -5397,6 +5399,22 @@ namespace BunoTunner
                 Guid g2 = new Guid("783ACA0A-790E-4D7F-8451-AA850511C6B9");   // Microsoft-Windows-D3D9
                 EnableTraceEx2(sess, ref g1, 1, 5, ulong.MaxValue, 0, 0, IntPtr.Zero);
                 EnableTraceEx2(sess, ref g2, 1, 5, ulong.MaxValue, 0, 0, IntPtr.Zero);
+                // DxgKrnl (Vulkan/OpenGL nao passam pelo DXGI): so alguns eventos, filtrados por ID no proprio kernel
+                try
+                {
+                    Guid g3 = new Guid("802EC45A-1E99-4B83-9920-87C98277BA9D");
+                    int fsz = 4 + KIds.Length * 2;
+                    IntPtr fp = Marshal.AllocHGlobal(fsz);
+                    Marshal.WriteByte(fp, 0, 1); Marshal.WriteByte(fp, 1, 0); Marshal.WriteInt16(fp, 2, (short)KIds.Length);
+                    for (int i = 0; i < KIds.Length; i++) Marshal.WriteInt16(fp, 4 + i * 2, (short)KIds[i]);
+                    IntPtr fd = Marshal.AllocHGlobal(16);
+                    Marshal.WriteInt64(fd, 0, (long)fp); Marshal.WriteInt32(fd, 8, fsz); Marshal.WriteInt32(fd, 12, unchecked((int)0x80000200));   // EVENT_FILTER_TYPE_EVENT_ID
+                    IntPtr ep = Marshal.AllocHGlobal(48);
+                    for (int i = 0; i < 48; i += 8) Marshal.WriteInt64(ep, i, 0);
+                    Marshal.WriteInt32(ep, 0, 2); Marshal.WriteIntPtr(ep, 32, fd); Marshal.WriteInt32(ep, 40, 1);
+                    EnableTraceEx2(sess, ref g3, 1, 4, ulong.MaxValue, 0, 0, ep);
+                }
+                catch (Exception) { }
                 IntPtr lf = Marshal.AllocHGlobal(448);
                 for (int i = 0; i < 448; i += 8) Marshal.WriteInt64(lf, i, 0);
                 Marshal.WriteIntPtr(lf, 8, Marshal.StringToHGlobalUni(SessName));      // LoggerName
@@ -5432,9 +5450,22 @@ namespace BunoTunner
                 int g0 = Marshal.ReadInt32(rec, 24);
                 bool dxgi = id == 42 && g0 == unchecked((int)0xCA11C036);
                 bool d9 = id == 1 && g0 == 0x783ACA0A;
-                if (!dxgi && !d9) return;
+                bool dk = g0 == unchecked((int)0x802EC45A) && Array.IndexOf(KIds, id) >= 0;
+                if (!dxgi && !d9 && !dk) return;
                 uint pid = (uint)Marshal.ReadInt32(rec, 12);
                 long ts = Marshal.ReadInt64(rec, 16), arrive = Stopwatch.GetTimestamp();
+                if (dk)
+                {
+                    lock (lk)
+                    {
+                        PidInfo pk; if (!pids.TryGetValue(pid, out pk)) { pk = new PidInfo(); pids[pid] = pk; }
+                        Kq kq; if (!pk.K.TryGetValue(id, out kq)) { kq = new Kq(); pk.K[id] = kq; }
+                        kq.Q.Enqueue(ts); kq.Newest = ts; kq.Last = arrive;
+                        long kc = ts - Stopwatch.Frequency * 2;
+                        while (kq.Q.Count > 0 && kq.Q.Peek() < kc) kq.Q.Dequeue();
+                    }
+                    return;
+                }
                 lock (lk)
                 {
                     PidInfo pi; if (!pids.TryGetValue(pid, out pi)) { pi = new PidInfo(); pids[pid] = pi; }
@@ -5449,21 +5480,33 @@ namespace BunoTunner
         // quadros por segundo do processo (se ele esta apresentando quadros agora) e a API grafica
         public static bool Get(uint pid, out int fps, out string api)
         {
-            fps = 0; api = null; PidInfo pi; long now = Stopwatch.GetTimestamp(), hz = Stopwatch.Frequency;
+            fps = 0; api = null; PidInfo pi; bool dk = false; long now = Stopwatch.GetTimestamp(), hz = Stopwatch.Frequency;
             lock (lk)
             {
                 if (pids.Count > 64) { List<uint> old = new List<uint>(); foreach (KeyValuePair<uint, PidInfo> k in pids) if (now - k.Value.Last > hz * 30) old.Add(k.Key); foreach (uint o in old) pids.Remove(o); }
-                if (!pids.TryGetValue(pid, out pi) || now - pi.Last > hz * 3) return false;
-                long cut = pi.Newest - hz; int n = 0;
-                foreach (long t in pi.Q) if (t > cut) n++;
+                if (!pids.TryGetValue(pid, out pi)) return false;
+                Queue<long> q; long newest;
+                if (pi.Last != 0 && now - pi.Last <= hz * 3) { q = pi.Q; newest = pi.Newest; }          // DXGI / D3D9
+                else
+                {
+                    q = null; newest = 0; dk = true;
+                    foreach (int id in KIds)
+                    {
+                        Kq kq; if (pi.K.TryGetValue(id, out kq) && now - kq.Last <= hz * 3) { q = kq.Q; newest = kq.Newest; break; }
+                    }
+                    if (q == null) return false;
+                }
+                long cut = newest - hz; int n = 0;
+                foreach (long t in q) if (t > cut) n++;
                 fps = n;
             }
-            if (pi.Api == null || now - pi.ApiAt > hz * 10) { pi.Api = DetectApi(pid, pi.D9); pi.ApiAt = now; }
+            string mode = dk ? "k" : "d";
+            if (pi.Api == null || pi.ApiMode != mode || now - pi.ApiAt > hz * 10) { pi.Api = DetectApi(pid, pi.D9, dk); pi.ApiMode = mode; pi.ApiAt = now; }
             api = pi.Api;
             return fps > 0;
         }
 
-        static string DetectApi(uint pid, bool d9prov)
+        static string DetectApi(uint pid, bool d9prov, bool dkOnly)
         {
             string r = d9prov ? "DX9" : "DX11";
             IntPtr h = OpenProcess(0x0410, false, pid);
@@ -5487,6 +5530,7 @@ namespace BunoTunner
                     else if (s == "vulkan-1.dll") vk = true;
                     else if (s == "opengl32.dll") gl = true;
                 }
+                if (dkOnly) { if (vk) return "Vulkan"; if (gl) return "OpenGL"; }   // sem eventos do DXGI: nao e DirectX
                 if (d9prov) return "DX9";
                 if (d12) return "DX12";
                 if (d11) return "DX11";
@@ -5510,13 +5554,15 @@ namespace BunoTunner
         [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
         [DllImport("user32.dll")] static extern bool GetWindowRect(IntPtr h, out RECT r);
 
-        public static bool On, Editing;
+        public static bool On, Editing, Hidden;
+        public static int KeyMods, KeyVk;      // atalho para mostrar/ocultar (mods: 1=Ctrl 2=Shift 4=Alt)
         public static int Scale = 100, Mode, Opac = 85;
         public static double Fx, Fy;
         public static List<string> Items = new List<string>();
         public static event Action StateChanged;
         static OverlayForm win; static Timer tm; static Screen editScreen;
-        static DateTime lastTry = DateTime.MinValue;
+        static DateTime lastTry = DateTime.MinValue, fpsAt = DateTime.MinValue;
+        static uint fpsPid; static int fpsVal; static string fpsApi; static bool fpsGame;
         static List<Sn> cacheSrc; static int cacheCount = -1; static Dictionary<string, Sn> cache = new Dictionary<string, Sn>();
         static readonly uint myPid = (uint)Process.GetCurrentProcess().Id;
 
@@ -5528,12 +5574,35 @@ namespace BunoTunner
             Scale = Math.Max(50, Math.Min(250, I("ov.size", 100))); Mode = Math.Max(0, Math.Min(2, I("ov.mode", 0))); Opac = Math.Max(30, Math.Min(100, I("ov.op", 85)));
             Fx = Math.Max(0, Math.Min(1, Dd("ov.fx", 0))); Fy = Math.Max(0, Math.Min(1, Dd("ov.fy", 0)));
             Items = new List<string>(Settings.Get("ov.items", "@FPS").Split(new string[] { "~|~" }, StringSplitOptions.RemoveEmptyEntries));
+            KeyMods = I("ov.keymods", 3); KeyVk = I("ov.keyvk", (int)Keys.O);   // padrao: Ctrl+Shift+O
         }
         public static void Save()
         {
             Settings.Set("ov.on", On ? "1" : "0"); Settings.Set("ov.size", Scale.ToString()); Settings.Set("ov.mode", Mode.ToString()); Settings.Set("ov.op", Opac.ToString());
             Settings.Set("ov.fx", Fx.ToString("0.####", CultureInfo.InvariantCulture)); Settings.Set("ov.fy", Fy.ToString("0.####", CultureInfo.InvariantCulture));
             Settings.Set("ov.items", string.Join("~|~", Items.ToArray()));
+            Settings.Set("ov.keymods", KeyMods.ToString()); Settings.Set("ov.keyvk", KeyVk.ToString());
+        }
+        public static string KeyName()
+        {
+            if (KeyVk == 0) return "(nenhum)";
+            return ((KeyMods & 1) != 0 ? "Ctrl+" : "") + ((KeyMods & 2) != 0 ? "Shift+" : "") + ((KeyMods & 4) != 0 ? "Alt+" : "") + ((Keys)KeyVk).ToString();
+        }
+        // O atalho NAO e registrado como hotkey global: apenas observamos o teclado (GetAsyncKeyState), entao a tecla continua funcionando nos outros programas.
+        [DllImport("user32.dll")] static extern short GetAsyncKeyState(int vk);
+        static bool keyPrev; static Timer kt;
+        static bool Down(int vk) { return (GetAsyncKeyState(vk) & 0x8000) != 0; }
+        static void KeyPoll()
+        {
+            if (KeyVk == 0) { keyPrev = false; return; }
+            bool m = Down(KeyVk) && Down(0x11) == ((KeyMods & 1) != 0) && Down(0x10) == ((KeyMods & 2) != 0) && Down(0x12) == ((KeyMods & 4) != 0);
+            if (m && !keyPrev) ToggleVisible();
+            keyPrev = m;
+        }
+        public static void ToggleVisible()
+        {
+            if (!On) { On = true; Hidden = false; } else Hidden = !Hidden;
+            Save(); Notify(); Tick();
         }
         public static void Init()
         {
@@ -5541,6 +5610,8 @@ namespace BunoTunner
             Load();
             tm = new Timer(); tm.Interval = 500; tm.Tick += delegate { try { Tick(); } catch (Exception) { } };
             tm.Start();
+            kt = new Timer(); kt.Interval = 40; kt.Tick += delegate { try { KeyPoll(); } catch (Exception) { } };
+            kt.Start();
             Application.ApplicationExit += delegate { FpsMon.Stop(); };
         }
         public static void Commit() { Save(); Notify(); Tick(); }
@@ -5617,9 +5688,16 @@ namespace BunoTunner
         {
             if (!On && !Editing) { if (win != null && win.Visible) win.Hide(); if (FpsMon.Running) FpsMon.Stop(); return; }
             if (!FpsMon.Running && (DateTime.UtcNow - lastTry).TotalSeconds > 10) { lastTry = DateTime.UtcNow; FpsMon.Start(); }
+            // sensores seguem o intervalo do menu Sensores; o FPS e recalculado a cada 500 ms
+            if (tm != null) tm.Interval = Math.Max(100, Math.Min(500, SensorHub.IntervalMs));
             IntPtr fg = GetForegroundWindow(); uint pid = 0; GetWindowThreadProcessId(fg, out pid);
-            int fps = 0; string api = null;
-            bool game = pid != myPid && pid != 0 && FpsMon.Get(pid, out fps, out api);
+            if (pid != fpsPid || (DateTime.UtcNow - fpsAt).TotalMilliseconds >= 480)
+            {
+                fpsPid = pid; fpsAt = DateTime.UtcNow; fpsApi = null; fpsVal = 0;
+                fpsGame = pid != myPid && pid != 0 && FpsMon.Get(pid, out fpsVal, out fpsApi);
+            }
+            int fps = fpsVal; string api = fpsApi; bool game = fpsGame;
+            if (Hidden && !Editing) { if (win != null && win.Visible) win.Hide(); return; }
             bool show = Editing || Mode == 2 || (game && (Mode == 1 || Covers(fg)));
             if (!show) { if (win != null && win.Visible) win.Hide(); return; }
             Screen sc = Editing ? (editScreen ?? Screen.PrimaryScreen) : (game ? Screen.FromHandle(fg) : Screen.PrimaryScreen);
@@ -5660,8 +5738,11 @@ namespace BunoTunner
         {
             FormBorderStyle = FormBorderStyle.None; ShowInTaskbar = false; StartPosition = FormStartPosition.Manual; TopMost = true;
             SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, true);
-            BackColor = Xp.Face; Size = new Size(120, 40);
+            BackColor = cBg; Size = new Size(120, 40);
         }
+        // o overlay e sempre escuro, independente do tema do app
+        static readonly Color cBg = Color.FromArgb(18, 18, 22), cBorder = Color.FromArgb(70, 74, 84), cLabel = Color.FromArgb(165, 171, 184), cValue = Color.FromArgb(240, 242, 246),
+            cHot = Color.FromArgb(255, 90, 80), cAccent = Color.FromArgb(40, 95, 185), cGood = Color.FromArgb(35, 160, 70), cGrip = Color.FromArgb(120, 126, 138), cDrop = Color.FromArgb(255, 200, 60);
         protected override bool ShowWithoutActivation { get { return true; } }
         protected override CreateParams CreateParams
         {
@@ -5679,11 +5760,11 @@ namespace BunoTunner
 
         void Fonts()
         {
-            string k = Xp.Ui.FontFamily.Name + "|" + scale;
+            string k = "Segoe UI|" + scale;
             if (k == fkey && fl != null) return;
             fkey = k; if (fl != null) { fl.Dispose(); fv.Dispose(); }
             float sz = 9.5f * scale / 100f;
-            fl = new Font(Xp.Ui.FontFamily, sz, FontStyle.Regular); fv = new Font(Xp.Ui.FontFamily, sz, FontStyle.Bold);
+            fl = new Font("Segoe UI", sz, FontStyle.Regular); fv = new Font("Segoe UI", sz, FontStyle.Bold);
         }
         static readonly TextFormatFlags TF = TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine;
 
@@ -5737,10 +5818,10 @@ namespace BunoTunner
         {
             Graphics g = e.Graphics; g.SmoothingMode = SmoothingMode.AntiAlias;
             Fonts(); float s = scale / 100f;
-            g.Clear(Xp.Face);
+            g.Clear(cBg);
             Rectangle r = new Rectangle(0, 0, Width - 1, Height - 1);
             using (GraphicsPath gp = Round(r, (Xp.Rad + 2) * 2))
-            using (Pen p = new Pen(edit ? Xp.Sel : Xp.Border, edit ? 2f : 1f))
+            using (Pen p = new Pen(edit ? cAccent : cBorder, edit ? 2f : 1f))
             {
                 if (edit) p.DashStyle = DashStyle.Dash;
                 g.DrawPath(p, gp);
@@ -5748,33 +5829,33 @@ namespace BunoTunner
             int grip = edit ? (int)(14 * s) : 0;
             if (edit)
             {
-                using (SolidBrush b = new SolidBrush(Xp.Sel)) g.FillRectangle(b, 1, 1, Width - 2, hdrR.Height);
-                TextRenderer.DrawText(g, Lang.T("Arraste aqui para mover"), fl, hdrR, Xp.Hi, TextFormatFlags.HorizontalCenter | TF);
+                using (SolidBrush b = new SolidBrush(cAccent)) g.FillRectangle(b, 1, 1, Width - 2, hdrR.Height);
+                TextRenderer.DrawText(g, Lang.T("Arraste aqui para mover"), fl, hdrR, Color.White, TextFormatFlags.HorizontalCenter | TF);
             }
             for (int i = 0; i < rows.Count && i < rowR.Count; i++)
             {
                 Rectangle rr = rowR[i]; Overlay.Row x = rows[i];
                 if (edit)
                 {
-                    using (Pen sp = new Pen(Color.FromArgb(70, Xp.Dim))) g.DrawLine(sp, rr.Left, rr.Bottom, rr.Right, rr.Bottom);
-                    using (SolidBrush gb = new SolidBrush(Xp.Dim))
+                    using (Pen sp = new Pen(Color.FromArgb(60, 70, 80))) g.DrawLine(sp, rr.Left, rr.Bottom, rr.Right, rr.Bottom);
+                    using (SolidBrush gb = new SolidBrush(cGrip))
                         for (int k = 0; k < 3; k++) g.FillRectangle(gb, rr.Left + 1, rr.Top + rr.Height / 2 - (int)(4 * s) + k * (int)(4 * s), (int)(8 * s), Math.Max(1, (int)(2 * s)));
                 }
                 Rectangle lr = new Rectangle(rr.Left + grip, rr.Top, rr.Width - grip, rr.Height);
-                TextRenderer.DrawText(g, x.Label, fl, lr, Xp.Dim, TF | TextFormatFlags.Left);
-                TextRenderer.DrawText(g, x.Value, fv, lr, x.Hot ? Xp.Bad : Xp.Text, TF | TextFormatFlags.Right);
+                TextRenderer.DrawText(g, x.Label, fl, lr, cLabel, TF | TextFormatFlags.Left);
+                TextRenderer.DrawText(g, x.Value, fv, lr, x.Hot ? cHot : cValue, TF | TextFormatFlags.Right);
             }
             if (edit)
             {
-                if (rows.Count == 0) TextRenderer.DrawText(g, Lang.T("(vazio - adicione sensores no menu)"), fl, new Rectangle(8, hdrR.Height + 4, Width - 16, (int)(20 * s)), Xp.Dim, TF);
+                if (rows.Count == 0) TextRenderer.DrawText(g, Lang.T("(vazio - adicione sensores no menu)"), fl, new Rectangle(8, hdrR.Height + 4, Width - 16, (int)(20 * s)), cLabel, TF);
                 if (dropIdx >= 0 && rowDrag >= 0 && rowR.Count > 0)
                 {
                     int yy = dropIdx < rowR.Count ? rowR[dropIdx].Top : rowR[rowR.Count - 1].Bottom;
-                    using (Pen dp = new Pen(Xp.Bad, 2f)) g.DrawLine(dp, 6, yy, Width - 6, yy);
+                    using (Pen dp = new Pen(cDrop, 2f)) g.DrawLine(dp, 6, yy, Width - 6, yy);
                 }
                 using (GraphicsPath bp = Round(btnR, 6))
                 {
-                    using (SolidBrush bb = new SolidBrush(Xp.Good)) g.FillPath(bb, bp);
+                    using (SolidBrush bb = new SolidBrush(cGood)) g.FillPath(bb, bp);
                 }
                 TextRenderer.DrawText(g, Lang.T("Concluir"), fv, btnR, Color.White, TextFormatFlags.HorizontalCenter | TF);
             }
@@ -5837,7 +5918,7 @@ namespace BunoTunner
             inst = new OverlayConfigForm(); inst.Show(owner);
         }
 
-        XpOption chkOn; ComboBox cbMode, cbSize, cbOp; XpText txSearch; ListView lvAv; ListBox lbSel; XpButton btnEdit; Label hint; Timer tm = new Timer();
+        XpOption chkOn; ComboBox cbMode, cbSize, cbOp; XpText txSearch; ListView lvAv; ListBox lbSel; XpButton btnEdit, btnKey; Label hint; Timer tm = new Timer(); bool capturing;
         int dropIdx = -1, downIdx = -1; Point downPt; bool building;
         static readonly int[] Sizes = { 70, 85, 100, 125, 150, 200 };
         static readonly int[] Ops = { 100, 90, 80, 70, 60, 50 };
@@ -5857,6 +5938,9 @@ namespace BunoTunner
             cbMode.Items.Add("Somente em jogos (tela cheia ou janela sem borda)");
             cbMode.Items.Add("Em qualquer programa que desenhe com DirectX");
             cbMode.Items.Add("Sempre (para testar)");
+            UI.Lbl(body, "Atalho:", 500, 40);
+            btnKey = UI.Btn(body, "", 556, 36, 220, delegate { capturing = true; btnKey.Text = "Pressione o atalho...  (Esc cancela, Del limpa)"; });
+            btnKey.Text = "Mostrar/ocultar: " + Overlay.KeyName();
 
             UI.Lbl(body, "Sensores disponiveis  (duplo clique ou arraste para a direita)", 8, 72, Xp.UiBold);
             txSearch = UI.Txt(body, 8, 94, 372, "");
@@ -5882,7 +5966,7 @@ namespace BunoTunner
             UI.Btn(body, "So FPS", 560, 463, 70, delegate { Overlay.Items = new List<string>(new string[] { "@FPS" }); Overlay.Commit(); });
             UI.Btn(body, "Fechar", 686, 463, 90, delegate { Close(); });
             hint = UI.Lbl(body, "", 8, 498, Xp.Ui, Xp.Dim); hint.AutoSize = false; hint.SetBounds(8, 496, 768, 52);
-            hint.Text = "Dica: em \"Editar na tela\" o overlay aparece no desktop - arraste pelo topo para mover, arraste as linhas para reordenar e use o botao direito numa linha para remover. O FPS mostra a API grafica do jogo e os quadros por segundo. Jogos em tela cheia exclusiva (nao a sem borda) podem esconder o overlay.";
+            hint.Text = "Dica: em \"Editar na tela\" o overlay aparece no desktop - arraste pelo topo para mover, arraste as linhas para reordenar e use o botao direito numa linha para remover. O FPS mostra a API grafica do jogo e os quadros por segundo. Jogos em tela cheia exclusiva (nao a sem borda) podem esconder o overlay. O atalho Mostrar/ocultar nao e bloqueado: a tecla continua funcionando nos outros programas.";
 
             building = true;
             chkOn.Checked = Overlay.On;
@@ -5951,6 +6035,26 @@ namespace BunoTunner
             OnState();
         }
 
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (capturing)
+            {
+                Keys code = keyData & Keys.KeyCode;
+                if (code == Keys.ControlKey || code == Keys.ShiftKey || code == Keys.Menu) return true;   // so modificadores: espera a tecla
+                capturing = false;
+                if (code == Keys.Escape) { }
+                else if (code == Keys.Delete || code == Keys.Back) { Overlay.KeyVk = 0; Overlay.KeyMods = 0; }
+                else
+                {
+                    Overlay.KeyVk = (int)code;
+                    Overlay.KeyMods = ((keyData & Keys.Control) != 0 ? 1 : 0) | ((keyData & Keys.Shift) != 0 ? 2 : 0) | ((keyData & Keys.Alt) != 0 ? 4 : 0);
+                }
+                Overlay.Commit();
+                return true;
+            }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
         static ComboBox Combo(Control p, int x, int y, int w)
         {
             ComboBox c = new ComboBox(); c.DropDownStyle = ComboBoxStyle.DropDownList; c.SetBounds(x, y, w, 24); c.Font = Xp.Ui; p.Controls.Add(c); return c;
@@ -5966,6 +6070,7 @@ namespace BunoTunner
         {
             if (IsDisposed) return;
             btnEdit.Text = Overlay.Editing ? "Concluir edicao" : "Editar na tela";
+            if (!capturing) btnKey.Text = "Mostrar/ocultar: " + Overlay.KeyName();
             FillSel(); FillAvailMarks();
         }
         void FillSel()
