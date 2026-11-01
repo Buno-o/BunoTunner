@@ -30,8 +30,8 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - codigo aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.32.0.0")]
-[assembly: AssemblyFileVersion("1.32.0.0")]
+[assembly: AssemblyVersion("1.32.1.0")]
+[assembly: AssemblyFileVersion("1.32.1.0")]
 
 namespace BunoTunner
 {
@@ -1868,7 +1868,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.32.0";
+        public const string Version = "v1.32.1";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -5892,7 +5892,7 @@ namespace BunoTunner
                 if (scr0 != IntPtr.Zero) ReleaseDC(IntPtr.Zero, scr0);
             }
         }
-        protected override void OnVisibleChanged(EventArgs e) { base.OnVisibleChanged(e); if (Visible) Render(); }
+        protected override void OnVisibleChanged(EventArgs e) { base.OnVisibleChanged(e); if (Visible) { ApplyClickThru(); Render(); } }
 
         List<Overlay.Row> rows = new List<Overlay.Row>(); List<Rectangle> rowR = new List<Rectangle>();
         Rectangle hdrR, btnR, scr; bool edit, clickThru = true;
@@ -5920,10 +5920,18 @@ namespace BunoTunner
         {
             if (!IsHandleCreated) return;
             int ex = GetWindowLong(Handle, GWL_EXSTYLE);
-            ex = clickThru ? (ex | WS_EX_TRANSPARENT) : (ex & ~WS_EX_TRANSPARENT);
-            SetWindowLong(Handle, GWL_EXSTYLE, ex);
+            int want = clickThru ? (ex | WS_EX_TRANSPARENT | 0x80000) : (ex & ~WS_EX_TRANSPARENT);
+            if (want == ex) return;
+            SetWindowLong(Handle, GWL_EXSTYLE, want);
+            SetWindowPos(Handle, IntPtr.Zero, 0, 0, 0, 0, 0x37);   // NOMOVE | NOSIZE | NOZORDER | NOACTIVATE | FRAMECHANGED: o Windows relê o estilo
         }
-        public void KeepOnTop() { if (IsHandleCreated) SetWindowPos(Handle, (IntPtr)(-1), 0, 0, 0, 0, 0x13); }
+        public void KeepOnTop() { if (IsHandleCreated) { SetWindowPos(Handle, (IntPtr)(-1), 0, 0, 0, 0, 0x13); ApplyClickThru(); } }
+        // fora do modo de edicao a janela nunca deve capturar o mouse (vale tambem para janelas do proprio programa)
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == 0x84 && !edit) { m.Result = (IntPtr)(-1); return; }   // WM_NCHITTEST -> HTTRANSPARENT
+            base.WndProc(ref m);
+        }
 
         void Fonts()
         {
@@ -5961,7 +5969,7 @@ namespace BunoTunner
             }
             else y += pad - (int)(2 * s);
             bgAlpha = Math.Max(50, Math.Min(100, op)) * 255 / 100;
-            if (clickThru == ed) { clickThru = !ed; ApplyClickThru(); }
+            clickThru = !ed; ApplyClickThru();   // reafirmado a cada atualizacao: o estado nunca fica desencontrado
             if (!winDrag)
             {
                 int rx = Math.Max(0, scr.Width - w - 2 * margin), ry = Math.Max(0, scr.Height - y - 2 * margin);

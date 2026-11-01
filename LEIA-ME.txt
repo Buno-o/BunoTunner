@@ -359,3 +359,6 @@ v1.31.0 (TESTE)
 
 v1.32.0 (TESTE)
 - Overlay: removidos por completo o Frametime, o 1% low e o grafico de frametime (e a opcao de escala). Ficam apenas o FPS e a API. Itens desses tipos salvos em versoes anteriores sao ignorados.
+
+v1.32.1 (TESTE)
+- Overlay: o modo "clicar atraves" agora e reafirmado a cada atualizacao e a janela responde HTTRANSPARENT fora do modo de edicao, para o overlay nunca interceptar cliques.
