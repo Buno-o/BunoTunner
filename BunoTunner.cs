@@ -30,8 +30,14 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - codigo aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.32.1.0")]
-[assembly: AssemblyFileVersion("1.32.1.0")]
+[assembly: AssemblyVersion("1.32.2.0")]
+[assembly: AssemblyFileVersion("1.32.2.0")]
+[assembly: AssemblyInformationalVersion("1.32.2")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+[assembly: System.Runtime.InteropServices.ComVisible(false)]
+[assembly: System.Runtime.InteropServices.Guid("6f1b7c1e-3d0a-4c55-9a43-2f7b0f9d4e11")]
+[assembly: System.Resources.NeutralResourcesLanguage("pt-BR")]
 
 namespace BunoTunner
 {
@@ -1868,7 +1874,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.32.1";
+        public const string Version = "v1.32.2";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -12381,9 +12387,8 @@ namespace BunoTunner
 
         static string Ps(string script, int ms)
         {
-            string enc = Convert.ToBase64String(Encoding.Unicode.GetBytes(script));
             int c;
-            return Proc.Run("powershell.exe", "-NoProfile -NonInteractive -EncodedCommand " + enc, ms, out c);
+            return Proc.Run("powershell.exe", "-NoProfile -NonInteractive -Command \"" + script.Replace("\"", "\\\"") + "\"", ms, out c);
         }
 
         // inventario: todos os dispositivos com driver e os que estao com problema

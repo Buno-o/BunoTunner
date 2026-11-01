@@ -362,3 +362,6 @@ v1.32.0 (TESTE)
 
 v1.32.1 (TESTE)
 - Overlay: o modo "clicar atraves" agora e reafirmado a cada atualizacao e a janela responde HTTRANSPARENT fora do modo de edicao, para o overlay nunca interceptar cliques.
+
+v1.32.2
+- Reducao de padroes que antivirus costumam estranhar, sem mudar nenhuma funcao: PowerShell sem -EncodedCommand (base64), metadados do assembly e manifesto mais completos.
