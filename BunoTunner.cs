@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - codigo aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.34.0.0")]
-[assembly: AssemblyFileVersion("1.34.0.0")]
-[assembly: AssemblyInformationalVersion("1.34.0")]
+[assembly: AssemblyVersion("1.35.0.0")]
+[assembly: AssemblyFileVersion("1.35.0.0")]
+[assembly: AssemblyInformationalVersion("1.35.0")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -413,7 +413,8 @@ namespace BunoTunner
             "Overlay em jogos", "In-game overlay",
             "Ativar overlay em jogos", "Enable in-game overlay",
             "Tamanho:", "Size:",
-            "Opacidade:", "Opacity:",
+            "Opacidade:", "Opacity:", "Layout:", "Layout:", "Padrao (fundo + contorno)", "Default (background + border)", "Sem fundo nem contorno", "No background or border",
+            "So contorno (sem fundo)", "Border only (no background)", "Barra lateral", "Side bar", "Neon", "Neon", "Terminal (verde)", "Terminal (green)",
             "Mostrar:", "Show:",
             "Somente em jogos (tela cheia ou janela sem borda)", "Only in games (fullscreen or borderless)",
             "Em qualquer programa que desenhe com DirectX", "In any program that renders with DirectX",
@@ -1884,7 +1885,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.34.0";
+        public const string Version = "v1.35.0";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -5606,7 +5607,7 @@ namespace BunoTunner
 
         public static bool On, Editing, Hidden;
         public static int KeyMods, KeyVk;      // atalho para mostrar/ocultar (mods: 1=Ctrl 2=Shift 4=Alt)
-        public static int Scale = 100, Mode, Opac = 85;
+        public static int Scale = 100, Mode, Opac = 85, Layout;   // Layout: 0 padrao, 1 sem fundo nem contorno, 2 so contorno, 3 barra lateral, 4 neon, 5 terminal
         public static double Fx, Fy;
         public static List<string> Items = new List<string>();
         public static event Action StateChanged;
@@ -5621,7 +5622,7 @@ namespace BunoTunner
         public static void Load()
         {
             On = Settings.Get("ov.on", "0") == "1";
-            Scale = Math.Max(50, Math.Min(200, (int)Math.Round(I("ov.size", 100) / 5.0) * 5)); Mode = Math.Max(0, Math.Min(2, I("ov.mode", 0))); Opac = Math.Max(50, Math.Min(100, (int)Math.Round(I("ov.op", 85) / 5.0) * 5));
+            Scale = Math.Max(50, Math.Min(200, (int)Math.Round(I("ov.size", 100) / 5.0) * 5)); Mode = Math.Max(0, Math.Min(2, I("ov.mode", 0))); Opac = Math.Max(50, Math.Min(100, (int)Math.Round(I("ov.op", 85) / 5.0) * 5)); Layout = Math.Max(0, Math.Min(5, I("ov.lay", 0)));
             Fx = Math.Max(0, Math.Min(1, Dd("ov.fx", 0))); Fy = Math.Max(0, Math.Min(1, Dd("ov.fy", 0)));
             Items = new List<string>(Settings.Get("ov.items", "@FPS").Split(new string[] { "~|~" }, StringSplitOptions.RemoveEmptyEntries));
             Items.RemoveAll(delegate(string it) { return it.StartsWith("@") && it != "@FPS"; });   // itens removidos em versoes anteriores (frametime etc.)
@@ -5641,14 +5642,14 @@ namespace BunoTunner
         public static void SetColor(string key, Color? c) { if (c.HasValue) Colors[key] = c.Value; else Colors.Remove(key); Commit(); }
         public static void SetName(string key, string n) { if (string.IsNullOrEmpty(n)) Names.Remove(key); else Names[key] = n.Replace("~", "").Replace("\r", " ").Replace("\n", " "); Commit(); }
         // todas as chaves da configuracao (usadas para salvar, desfazer/refazer e exportar/importar)
-        static readonly string[] CfgKeys = { "ov.size", "ov.mode", "ov.op", "ov.fx", "ov.fy", "ov.items", "ov.compact", "ov.colname", "ov.hot", "ov.cols", "ov.names", "ov.keymods", "ov.keyvk" };
+        static readonly string[] CfgKeys = { "ov.size", "ov.mode", "ov.op", "ov.lay", "ov.fx", "ov.fy", "ov.items", "ov.compact", "ov.colname", "ov.hot", "ov.cols", "ov.names", "ov.keymods", "ov.keyvk" };
         static List<KeyValuePair<string, string>> Dump()
         {
             List<KeyValuePair<string, string>> d = new List<KeyValuePair<string, string>>();
             List<string> cl = new List<string>(); foreach (KeyValuePair<string, Color> kv in Colors) cl.Add(kv.Key + "~=~" + (kv.Value.R << 16 | kv.Value.G << 8 | kv.Value.B).ToString("X6"));
             List<string> nl = new List<string>(); foreach (KeyValuePair<string, string> kv in Names) nl.Add(kv.Key + "~=~" + kv.Value);
             d.Add(new KeyValuePair<string, string>("ov.size", Scale.ToString())); d.Add(new KeyValuePair<string, string>("ov.mode", Mode.ToString()));
-            d.Add(new KeyValuePair<string, string>("ov.op", Opac.ToString()));
+            d.Add(new KeyValuePair<string, string>("ov.op", Opac.ToString())); d.Add(new KeyValuePair<string, string>("ov.lay", Layout.ToString()));
             d.Add(new KeyValuePair<string, string>("ov.fx", Fx.ToString("0.####", CultureInfo.InvariantCulture))); d.Add(new KeyValuePair<string, string>("ov.fy", Fy.ToString("0.####", CultureInfo.InvariantCulture)));
             d.Add(new KeyValuePair<string, string>("ov.items", string.Join("~|~", Items.ToArray())));
             d.Add(new KeyValuePair<string, string>("ov.compact", Compact ? "1" : "0")); d.Add(new KeyValuePair<string, string>("ov.colname", ColName ? "1" : "0"));
@@ -5707,7 +5708,7 @@ namespace BunoTunner
         }
         public static void ResetAll()
         {
-            Scale = 100; Opac = 85; Mode = 0; Fx = 0; Fy = 0; Items = new List<string>(new string[] { "@FPS" }); Colors.Clear(); Names.Clear();
+            Scale = 100; Opac = 85; Layout = 0; Mode = 0; Fx = 0; Fy = 0; Items = new List<string>(new string[] { "@FPS" }); Colors.Clear(); Names.Clear();
             Compact = false; ColName = false; HotTemp = 80; Commit();
         }
         public static string KeyName()
@@ -5891,12 +5892,16 @@ namespace BunoTunner
             if (measG == null) { measG = Graphics.FromImage(measBmp); measG.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit; }
             using (StringFormat sf = new StringFormat(StringFormat.GenericTypographic)) { sf.FormatFlags |= StringFormatFlags.NoWrap | StringFormatFlags.MeasureTrailingSpaces; return measG.MeasureString(t ?? "", f, 4000, sf).Width + 2; }
         }
+        static bool shd;
         static void DT(Graphics g, string t, Font f, Rectangle r, Color c, StringAlignment al)
         {
             using (StringFormat sf = new StringFormat(StringFormat.GenericTypographic))
             using (SolidBrush b = new SolidBrush(c))
             {
                 sf.Alignment = al; sf.LineAlignment = StringAlignment.Center; sf.FormatFlags |= StringFormatFlags.NoWrap; sf.Trimming = StringTrimming.None;
+                if (shd)   // sem fundo: contorno escuro fino em volta do texto para continuar legivel sobre qualquer imagem
+                    using (SolidBrush sb = new SolidBrush(Color.FromArgb(190, 0, 0, 0)))
+                        for (int dx = -1; dx <= 1; dx += 2) for (int dy = -1; dy <= 1; dy += 2) g.DrawString(t ?? "", f, sb, new Rectangle(r.X + dx, r.Y + dy, r.Width, r.Height), sf);
                 g.DrawString(t ?? "", f, b, r, sf);
             }
         }
@@ -6029,13 +6034,20 @@ namespace BunoTunner
             Fonts(); float s = scale / 100f;
             g.Clear(Color.Transparent);
             Rectangle r = new Rectangle(0, 0, Width - 1, Height - 1);
-            using (GraphicsPath gp = Round(r, (Xp.Rad + 2) * 2))
-            using (SolidBrush fb = new SolidBrush(Color.FromArgb(bgAlpha, cBg)))
-            using (Pen p = new Pen(edit ? cAccent : Color.FromArgb(bgAlpha, cBorder), edit ? 2f : 1f))
+            int lay = edit ? 0 : Overlay.Layout;   // na edicao sempre mostra a caixa padrao para dar para arrastar
+            shd = lay == 1;
+            int fa = (lay == 1 || lay == 2) ? 0 : bgAlpha;
+            Color fc = lay == 5 ? Color.Black : cBg;
+            Color bc = lay == 4 ? Color.FromArgb(0, 229, 255) : lay == 5 ? Color.FromArgb(0, 200, 70) : cBorder;
+            using (GraphicsPath gp = Round(r, (lay == 3 || lay == 5) ? 0 : (Xp.Rad + 2) * 2))
+            using (SolidBrush fb = new SolidBrush(Color.FromArgb(fa, fc)))
+            using (Pen p = new Pen(edit ? cAccent : Color.FromArgb((lay == 2 || lay == 4 || lay == 5) ? 255 : bgAlpha, bc), edit ? 2f : 1f))
             {
                 if (edit) p.DashStyle = DashStyle.Dash;
-                g.FillPath(fb, gp);
-                g.DrawPath(p, gp);
+                if (fa > 0) g.FillPath(fb, gp);
+                if (lay == 4) using (Pen gl = new Pen(Color.FromArgb(70, bc), 5f)) g.DrawPath(gl, gp);
+                if (lay != 1 && lay != 3) g.DrawPath(p, gp);
+                if (lay == 3) using (SolidBrush ab = new SolidBrush(Color.FromArgb(0, 160, 255))) g.FillRectangle(ab, 0, 0, Math.Max(3, (int)(4 * s)), Height - 1);
             }
             int grip = edit ? (int)(14 * s) : 0;
             if (edit)
@@ -6053,8 +6065,8 @@ namespace BunoTunner
                         for (int k = 0; k < 3; k++) g.FillRectangle(gb, rr.Left + 1, rr.Top + rr.Height / 2 - (int)(4 * s) + k * (int)(4 * s), (int)(8 * s), Math.Max(1, (int)(2 * s)));
                 }
                 Rectangle lr = new Rectangle(rr.Left + grip, rr.Top, rr.Width - grip, rr.Height);
-                Color vc = x.Hot ? cHot : (x.HasCol ? x.Col : cValue);
-                Color lc = (Overlay.ColName && x.HasCol && !x.Hot) ? x.Col : cLabel;
+                Color vc = x.Hot ? cHot : (x.HasCol ? x.Col : (lay == 5 ? Color.FromArgb(110, 255, 140) : cValue));
+                Color lc = (Overlay.ColName && x.HasCol && !x.Hot) ? x.Col : (lay == 5 ? Color.FromArgb(50, 170, 80) : cLabel);
                 if (!Overlay.Compact) DT(g, x.Label, fl, lr, lc, StringAlignment.Near);
                 DT(g, x.Value, fv, lr, vc, Overlay.Compact ? StringAlignment.Near : StringAlignment.Far);
             }
@@ -6131,7 +6143,7 @@ namespace BunoTunner
             inst = new OverlayConfigForm(); inst.Show(owner);
         }
 
-        XpOption chkOn, chkCompact, chkColName; ComboBox cbMode, cbSize, cbOp, cbHot, cbGrp; XpText txSearch; ListView lvAv; ListBox lbSel; XpButton btnEdit, btnKey; Label hint; Timer tm = new Timer(); bool capturing;
+        XpOption chkOn, chkCompact, chkColName; ComboBox cbMode, cbSize, cbOp, cbLay, cbHot, cbGrp; XpText txSearch; ListView lvAv; ListBox lbSel; XpButton btnEdit, btnKey; Label hint; Timer tm = new Timer(); bool capturing;
         int dropIdx = -1, downIdx = -1; Point downPt; bool building;
         static int[] Seq(int a, int b) { List<int> l = new List<int>(); for (int v = a; v <= b; v += 5) l.Add(v); return l.ToArray(); }
         static readonly int[] Sizes = Seq(50, 200), Ops = Seq(50, 100);
@@ -6147,6 +6159,9 @@ namespace BunoTunner
             foreach (int v in Sizes) cbSize.Items.Add(v + "%");
             UI.Lbl(body, "Opacidade:", 450, 9); cbOp = Combo(body, 520, 5, 70);
             foreach (int v in Ops) cbOp.Items.Add(v + "%");
+            UI.Lbl(body, "Layout:", 600, 9); cbLay = Combo(body, 650, 5, 126); cbLay.DropDownWidth = 230;
+            cbLay.Items.Add("Padrao (fundo + contorno)"); cbLay.Items.Add("Sem fundo nem contorno"); cbLay.Items.Add("So contorno (sem fundo)");
+            cbLay.Items.Add("Barra lateral"); cbLay.Items.Add("Neon"); cbLay.Items.Add("Terminal (verde)");
             UI.Lbl(body, "Mostrar:", 8, 40); cbMode = Combo(body, 66, 36, 420);
             cbMode.Items.Add("Somente em jogos (tela cheia ou janela sem borda)");
             cbMode.Items.Add("Em qualquer programa que desenhe com DirectX");
@@ -6203,7 +6218,7 @@ namespace BunoTunner
             chkOn.Checked = Overlay.On;
             cbSize.SelectedIndex = Math.Max(0, Array.IndexOf(Sizes, Overlay.Scale));
             cbOp.SelectedIndex = Math.Max(0, Array.IndexOf(Ops, Overlay.Opac));
-            cbMode.SelectedIndex = Overlay.Mode;
+            cbMode.SelectedIndex = Overlay.Mode; cbLay.SelectedIndex = Overlay.Layout;
             chkCompact.Checked = Overlay.Compact; chkColName.Checked = Overlay.ColName;
             cbGrp.Items.Add("Todos os grupos"); cbGrp.SelectedIndex = 0;
             cbHot.SelectedIndex = Overlay.HotTemp <= 0 ? 0 : Math.Max(1, Math.Min(cbHot.Items.Count - 1, (Overlay.HotTemp - 70) / 5 + 1));
@@ -6213,6 +6228,7 @@ namespace BunoTunner
             chkOn.CheckedChanged += delegate { if (building) return; Overlay.On = chkOn.Checked; Overlay.Commit(); };
             cbSize.SelectedIndexChanged += delegate { if (building || cbSize.SelectedIndex < 0) return; Overlay.Scale = Sizes[cbSize.SelectedIndex]; Overlay.Commit(); };
             cbOp.SelectedIndexChanged += delegate { if (building || cbOp.SelectedIndex < 0) return; Overlay.Opac = Ops[cbOp.SelectedIndex]; Overlay.Commit(); };
+            cbLay.SelectedIndexChanged += delegate { if (building || cbLay.SelectedIndex < 0) return; Overlay.Layout = cbLay.SelectedIndex; Overlay.Commit(); };
             cbMode.SelectedIndexChanged += delegate { if (building || cbMode.SelectedIndex < 0) return; Overlay.Mode = cbMode.SelectedIndex; Overlay.Commit(); };
             cbGrp.SelectedIndexChanged += delegate { if (!building) FillAvail(); };
             ContextMenuStrip cma = new ContextMenuStrip();
@@ -6354,7 +6370,7 @@ namespace BunoTunner
                     else
                     {
                         building = true;
-                        cbSize.SelectedIndex = Math.Max(0, Array.IndexOf(Sizes, Overlay.Scale)); cbOp.SelectedIndex = Math.Max(0, Array.IndexOf(Ops, Overlay.Opac)); cbMode.SelectedIndex = Overlay.Mode;
+                        cbSize.SelectedIndex = Math.Max(0, Array.IndexOf(Sizes, Overlay.Scale)); cbOp.SelectedIndex = Math.Max(0, Array.IndexOf(Ops, Overlay.Opac)); cbMode.SelectedIndex = Overlay.Mode; cbLay.SelectedIndex = Overlay.Layout;
                         chkCompact.Checked = Overlay.Compact; chkColName.Checked = Overlay.ColName;
                         cbHot.SelectedIndex = Overlay.HotTemp <= 0 ? 0 : Math.Max(1, Math.Min(cbHot.Items.Count - 1, (Overlay.HotTemp - 70) / 5 + 1));
                         building = false;
@@ -6422,7 +6438,7 @@ namespace BunoTunner
             building = true;
             int si = Array.IndexOf(Sizes, Overlay.Scale), oi = Array.IndexOf(Ops, Overlay.Opac);
             if (si >= 0) cbSize.SelectedIndex = si; if (oi >= 0) cbOp.SelectedIndex = oi;
-            cbMode.SelectedIndex = Overlay.Mode; chkCompact.Checked = Overlay.Compact; chkColName.Checked = Overlay.ColName;
+            cbMode.SelectedIndex = Overlay.Mode; cbLay.SelectedIndex = Overlay.Layout; chkCompact.Checked = Overlay.Compact; chkColName.Checked = Overlay.ColName;
             cbHot.SelectedIndex = Overlay.HotTemp <= 0 ? 0 : Math.Max(1, Math.Min(cbHot.Items.Count - 1, (Overlay.HotTemp - 70) / 5 + 1));
             building = false;
             FillSel(); FillAvailMarks();

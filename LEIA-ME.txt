@@ -371,3 +371,6 @@ v1.33.0 (TESTE)
 
 v1.34.0 (TESTE)
 - Otimizar: novo item "Drivers de GPU e Chipset direto da fabricante". Consulta o site da NVIDIA (placas GeForce) e da AMD (placas Radeon RX e chipset Ryzen), compara com o driver instalado e, se houver versao mais nova, pergunta, baixa o instalador oficial, confere a assinatura digital (Authenticode) e abre a instalacao normal para voce concluir. Para Intel (video/chipset) abre o Assistente de Drivers e Suporte da Intel. O botao "Atualizar drivers" (Windows Update) continua igual.
+
+v1.35.0 (TESTE)
+- Overlay: nova opcao "Layout" ao lado da opacidade, com 6 estilos: Padrao (fundo + contorno), Sem fundo nem contorno (texto com borda escura fina para ler sobre qualquer imagem), So contorno, Barra lateral, Neon e Terminal (verde sobre preto). Entra no desfazer/refazer e no exportar/importar. Na edicao na tela o overlay sempre aparece com a caixa padrao para poder arrastar.
