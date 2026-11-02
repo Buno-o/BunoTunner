@@ -374,3 +374,6 @@ v1.34.0 (TESTE)
 
 v1.35.0 (TESTE)
 - Overlay: nova opcao "Layout" ao lado da opacidade, com 6 estilos: Padrao (fundo + contorno), Sem fundo nem contorno (texto com borda escura fina para ler sobre qualquer imagem), So contorno, Barra lateral, Neon e Terminal (verde sobre preto). Entra no desfazer/refazer e no exportar/importar. Na edicao na tela o overlay sempre aparece com a caixa padrao para poder arrastar.
+
+v1.36.0 (TESTE)
+- Overlay: o Layout agora tem 25 estilos. Alem dos 6 anteriores, entram um para cada tema do programa (Luna, Frutiger Aero, Dark/AMOLED, Neon/Cyberpunk, Steampunk, Vintage Win 95 e GTA VI) e 12 novos (Vidro, Pilula, Claro minimalista, Barra superior, Barra inferior, Ambar, HUD ciano, Oceano, Floresta, Rosa, Papel e Faixa escura). O layout do overlay e o tema do programa sao escolhidos de forma independente.

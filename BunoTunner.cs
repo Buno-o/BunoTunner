@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - codigo aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.35.0.0")]
-[assembly: AssemblyFileVersion("1.35.0.0")]
-[assembly: AssemblyInformationalVersion("1.35.0")]
+[assembly: AssemblyVersion("1.36.0.0")]
+[assembly: AssemblyFileVersion("1.36.0.0")]
+[assembly: AssemblyInformationalVersion("1.36.0")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -414,7 +414,7 @@ namespace BunoTunner
             "Ativar overlay em jogos", "Enable in-game overlay",
             "Tamanho:", "Size:",
             "Opacidade:", "Opacity:", "Layout:", "Layout:", "Padrao (fundo + contorno)", "Default (background + border)", "Sem fundo nem contorno", "No background or border",
-            "So contorno (sem fundo)", "Border only (no background)", "Barra lateral", "Side bar", "Neon", "Neon", "Terminal (verde)", "Terminal (green)",
+            "So contorno (sem fundo)", "Border only (no background)", "Barra lateral", "Side bar", "Neon", "Neon", "Terminal (verde)", "Terminal (green)", "Tema: Luna (XP)", "Theme: Luna (XP)", "Tema: Frutiger Aero (Win 7)", "Theme: Frutiger Aero (Win 7)", "Tema: Dark / AMOLED", "Theme: Dark / AMOLED", "Tema: Neon / Cyberpunk", "Theme: Neon / Cyberpunk", "Tema: Steampunk", "Theme: Steampunk", "Tema: Vintage (Win 95)", "Theme: Vintage (Win 95)", "Tema: GTA VI (Vice City)", "Theme: GTA VI (Vice City)", "Vidro (translucido)", "Glass (translucent)", "Pilula", "Pill", "Claro minimalista", "Light minimal", "Barra superior", "Top bar", "Barra inferior", "Bottom bar", "Ambar (monitor antigo)", "Amber (old monitor)", "HUD ciano", "Cyan HUD", "Oceano", "Ocean", "Floresta", "Forest", "Rosa", "Pink", "Papel", "Paper", "Faixa escura (sem borda)", "Dark strip (no border)", 
             "Mostrar:", "Show:",
             "Somente em jogos (tela cheia ou janela sem borda)", "Only in games (fullscreen or borderless)",
             "Em qualquer programa que desenhe com DirectX", "In any program that renders with DirectX",
@@ -1885,7 +1885,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.35.0";
+        public const string Version = "v1.36.0";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -5622,7 +5622,7 @@ namespace BunoTunner
         public static void Load()
         {
             On = Settings.Get("ov.on", "0") == "1";
-            Scale = Math.Max(50, Math.Min(200, (int)Math.Round(I("ov.size", 100) / 5.0) * 5)); Mode = Math.Max(0, Math.Min(2, I("ov.mode", 0))); Opac = Math.Max(50, Math.Min(100, (int)Math.Round(I("ov.op", 85) / 5.0) * 5)); Layout = Math.Max(0, Math.Min(5, I("ov.lay", 0)));
+            Scale = Math.Max(50, Math.Min(200, (int)Math.Round(I("ov.size", 100) / 5.0) * 5)); Mode = Math.Max(0, Math.Min(2, I("ov.mode", 0))); Opac = Math.Max(50, Math.Min(100, (int)Math.Round(I("ov.op", 85) / 5.0) * 5)); Layout = Math.Max(0, Math.Min(24, I("ov.lay", 0)));
             Fx = Math.Max(0, Math.Min(1, Dd("ov.fx", 0))); Fy = Math.Max(0, Math.Min(1, Dd("ov.fy", 0)));
             Items = new List<string>(Settings.Get("ov.items", "@FPS").Split(new string[] { "~|~" }, StringSplitOptions.RemoveEmptyEntries));
             Items.RemoveAll(delegate(string it) { return it.StartsWith("@") && it != "@FPS"; });   // itens removidos em versoes anteriores (frametime etc.)
@@ -6028,26 +6028,89 @@ namespace BunoTunner
             p.CloseFigure(); return p;
         }
 
+        // ---- layouts do overlay (independentes do tema do programa; os 7 "Tema:" usam a paleta de cada tema) ----
+        public class LD { public string Name; public int Rad = -1; public Color Top, Bot, Bd, Bar, Bar2, Lab, Val, Glow; public float BW = 1f; public int BarPos; public bool Shadow, Bevel, Soft; }
+        static Color K(int r, int g, int b) { return Color.FromArgb(r, g, b); }
+        static Color KA(int a, int r, int g, int b) { return Color.FromArgb(a, r, g, b); }
+        static LD N(List<LD> l, string n) { LD d = new LD(); d.Name = n; l.Add(d); return d; }
+        static void BevelBox(Graphics g, Rectangle r)
+        {
+            SmoothingMode sm = g.SmoothingMode; g.SmoothingMode = SmoothingMode.None;
+            using (Pen w = new Pen(Color.White)) using (Pen k = new Pen(Color.Black)) using (Pen gr = new Pen(Color.FromArgb(128, 128, 128)))
+            {
+                g.DrawLine(w, 0, 0, r.Right, 0); g.DrawLine(w, 0, 0, 0, r.Bottom);
+                g.DrawLine(k, 0, r.Bottom, r.Right, r.Bottom); g.DrawLine(k, r.Right, 0, r.Right, r.Bottom);
+                g.DrawLine(w, 1, 1, r.Right - 1, 1); g.DrawLine(w, 1, 1, 1, r.Bottom - 1);
+                g.DrawLine(gr, 1, r.Bottom - 1, r.Right - 1, r.Bottom - 1); g.DrawLine(gr, r.Right - 1, 1, r.Right - 1, r.Bottom - 1);
+            }
+            g.SmoothingMode = sm;
+        }
+        public static readonly LD[] Layouts = BuildLayouts();
+        static LD[] BuildLayouts()
+        {
+            List<LD> l = new List<LD>(); LD d; Pal p;
+            d = N(l, "Padrao (fundo + contorno)"); d.Top = d.Bot = cBg; d.Bd = cBorder; d.Soft = true;
+            d = N(l, "Sem fundo nem contorno"); d.Shadow = true;
+            d = N(l, "So contorno (sem fundo)"); d.Bd = cBorder;
+            d = N(l, "Barra lateral"); d.Top = d.Bot = cBg; d.Rad = 0; d.Bar = K(0, 160, 255); d.BarPos = 1;
+            d = N(l, "Neon"); d.Top = d.Bot = cBg; d.Bd = K(0, 229, 255); d.Glow = K(0, 229, 255);
+            d = N(l, "Terminal (verde)"); d.Top = d.Bot = K(0, 0, 0); d.Rad = 0; d.Bd = K(0, 200, 70); d.Lab = K(50, 170, 80); d.Val = K(110, 255, 140);
+            // temas do programa (cores vindas da paleta de cada tema, nao do tema ativo)
+            p = Pal.Make(0); d = N(l, "Tema: Luna (XP)"); d.Top = d.Bot = p.Face; d.Bd = p.CapFrame; d.BW = 2f; d.Bar = p.CapA; d.Bar2 = p.CapB; d.BarPos = 2; d.Lab = K(70, 70, 70); d.Val = p.Text;
+            p = Pal.Make(1); d = N(l, "Tema: Frutiger Aero (Win 7)"); d.Top = K(250, 252, 255); d.Bot = p.PaneTop; d.Bd = p.Border; d.Rad = 16; d.Lab = K(60, 80, 110); d.Val = p.GroupText;
+            p = Pal.Make(2); d = N(l, "Tema: Dark / AMOLED"); d.Top = d.Bot = p.Face; d.Bd = p.Border; d.Rad = 10; d.Bar = p.GroupText; d.BarPos = 1; d.Lab = p.Dim; d.Val = p.Text;
+            p = Pal.Make(3); d = N(l, "Tema: Neon / Cyberpunk"); d.Top = d.Bot = p.Face; d.Bd = p.Border; d.Glow = p.GroupText; d.Rad = 6; d.Bar = p.CapA; d.BarPos = 3; d.Lab = p.Dim; d.Val = p.Text;
+            p = Pal.Make(4); d = N(l, "Tema: Steampunk"); d.Top = p.Face; d.Bot = K(170, 118, 64); d.Bd = p.CapFrame; d.BW = 2f; d.Rad = 8; d.Lab = p.Dim; d.Val = p.Text;
+            p = Pal.Make(5); d = N(l, "Tema: Vintage (Win 95)"); d.Top = d.Bot = p.Face; d.Rad = 0; d.Bevel = true; d.Lab = K(64, 64, 64); d.Val = Color.Black;
+            p = Pal.Make(6); d = N(l, "Tema: GTA VI (Vice City)"); d.Top = K(120, 30, 110); d.Bot = K(210, 70, 100); d.Bd = p.Border; d.BW = 2f; d.Bar = p.Hot; d.BarPos = 3; d.Shadow = true; d.Lab = p.Dim; d.Val = p.Text;
+            // outros estilos
+            d = N(l, "Vidro (translucido)"); d.Top = d.Bot = KA(110, 255, 255, 255); d.Bd = KA(150, 255, 255, 255); d.Rad = 14; d.Shadow = true; d.Lab = K(225, 230, 240); d.Val = Color.White;
+            d = N(l, "Pilula"); d.Top = d.Bot = cBg; d.Rad = 60; d.Bd = K(120, 126, 140);
+            d = N(l, "Claro minimalista"); d.Top = d.Bot = K(244, 245, 248); d.Bd = K(190, 194, 204); d.Lab = K(100, 106, 120); d.Val = K(25, 28, 36);
+            d = N(l, "Barra superior"); d.Top = d.Bot = cBg; d.Rad = 8; d.Bar = K(255, 140, 0); d.BarPos = 2;
+            d = N(l, "Barra inferior"); d.Top = d.Bot = cBg; d.Rad = 8; d.Bar = K(60, 200, 110); d.BarPos = 3;
+            d = N(l, "Ambar (monitor antigo)"); d.Top = d.Bot = K(0, 0, 0); d.Rad = 0; d.Bd = K(255, 176, 0); d.Lab = K(190, 120, 0); d.Val = K(255, 190, 40);
+            d = N(l, "HUD ciano"); d.Top = d.Bot = K(2, 22, 32); d.Rad = 0; d.Bd = K(0, 170, 200); d.Bar = K(0, 229, 255); d.BarPos = 1; d.Lab = K(90, 170, 190); d.Val = K(200, 250, 255);
+            d = N(l, "Oceano"); d.Top = K(0, 70, 120); d.Bot = K(0, 20, 50); d.Bd = K(0, 170, 230); d.Rad = 24; d.Lab = K(150, 200, 230); d.Val = Color.White;
+            d = N(l, "Floresta"); d.Top = K(26, 70, 36); d.Bot = K(8, 26, 14); d.Bd = K(100, 190, 110); d.Lab = K(160, 200, 165); d.Val = K(235, 250, 235);
+            d = N(l, "Rosa"); d.Top = K(100, 24, 70); d.Bot = K(36, 8, 28); d.Bd = K(255, 120, 180); d.Lab = K(230, 170, 200); d.Val = Color.White;
+            d = N(l, "Papel"); d.Top = d.Bot = K(250, 244, 225); d.Bd = K(150, 125, 85); d.Rad = 8; d.Lab = K(120, 100, 70); d.Val = K(50, 34, 16);
+            d = N(l, "Faixa escura (sem borda)"); d.Top = d.Bot = K(0, 0, 0); d.Rad = 0;
+            return l.ToArray();
+        }
+
         void Draw(Graphics g)
         {
             g.SmoothingMode = SmoothingMode.AntiAlias; g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
             Fonts(); float s = scale / 100f;
             g.Clear(Color.Transparent);
             Rectangle r = new Rectangle(0, 0, Width - 1, Height - 1);
-            int lay = edit ? 0 : Overlay.Layout;   // na edicao sempre mostra a caixa padrao para dar para arrastar
-            shd = lay == 1;
-            int fa = (lay == 1 || lay == 2) ? 0 : bgAlpha;
-            Color fc = lay == 5 ? Color.Black : cBg;
-            Color bc = lay == 4 ? Color.FromArgb(0, 229, 255) : lay == 5 ? Color.FromArgb(0, 200, 70) : cBorder;
-            using (GraphicsPath gp = Round(r, (lay == 3 || lay == 5) ? 0 : (Xp.Rad + 2) * 2))
-            using (SolidBrush fb = new SolidBrush(Color.FromArgb(fa, fc)))
-            using (Pen p = new Pen(edit ? cAccent : Color.FromArgb((lay == 2 || lay == 4 || lay == 5) ? 255 : bgAlpha, bc), edit ? 2f : 1f))
+            LD d = Layouts[edit ? 0 : Math.Max(0, Math.Min(Layouts.Length - 1, Overlay.Layout))];   // na edicao sempre mostra a caixa padrao para dar para arrastar
+            shd = d.Shadow && !edit;
+            int rad = d.Rad < 0 ? (Xp.Rad + 2) * 2 : Math.Min(d.Rad, Math.Min(Width, Height) - 1);
+            using (GraphicsPath gp = Round(r, rad))
             {
-                if (edit) p.DashStyle = DashStyle.Dash;
-                if (fa > 0) g.FillPath(fb, gp);
-                if (lay == 4) using (Pen gl = new Pen(Color.FromArgb(70, bc), 5f)) g.DrawPath(gl, gp);
-                if (lay != 1 && lay != 3) g.DrawPath(p, gp);
-                if (lay == 3) using (SolidBrush ab = new SolidBrush(Color.FromArgb(0, 160, 255))) g.FillRectangle(ab, 0, 0, Math.Max(3, (int)(4 * s)), Height - 1);
+                if (!d.Top.IsEmpty)
+                {
+                    int fa = Math.Max(0, Math.Min(255, d.Top.A * bgAlpha / 255)), fb = Math.Max(0, Math.Min(255, d.Bot.A * bgAlpha / 255));
+                    using (LinearGradientBrush lb = new LinearGradientBrush(new Rectangle(0, 0, Width, Height), Color.FromArgb(fa, d.Top), Color.FromArgb(fb, d.Bot), 90f)) g.FillPath(lb, gp);
+                }
+                if (!edit)
+                {
+                    if (d.Bevel) BevelBox(g, r);
+                    if (!d.Glow.IsEmpty) using (Pen gl = new Pen(Color.FromArgb(70, d.Glow), 5f)) g.DrawPath(gl, gp);
+                    if (d.BarPos > 0)
+                    {
+                        int t = Math.Max(3, (int)(4 * s));
+                        Rectangle br = d.BarPos == 1 ? new Rectangle(0, 0, t, Height) : d.BarPos == 2 ? new Rectangle(0, 0, Width, t) : new Rectangle(0, Height - t - 1, Width, t + 1);
+                        g.SetClip(gp);
+                        if (d.Bar2.IsEmpty) using (SolidBrush ab = new SolidBrush(d.Bar)) g.FillRectangle(ab, br);
+                        else using (LinearGradientBrush ab = new LinearGradientBrush(br, d.Bar, d.Bar2, d.BarPos == 1 ? 90f : 0f)) g.FillRectangle(ab, br);
+                        g.ResetClip();
+                    }
+                }
+                if (edit) using (Pen ep = new Pen(cAccent, 2f)) { ep.DashStyle = DashStyle.Dash; g.DrawPath(ep, gp); }
+                else if (!d.Bd.IsEmpty) using (Pen bp = new Pen(Color.FromArgb(d.Soft ? bgAlpha : 255, d.Bd), d.BW)) g.DrawPath(bp, gp);
             }
             int grip = edit ? (int)(14 * s) : 0;
             if (edit)
@@ -6065,8 +6128,8 @@ namespace BunoTunner
                         for (int k = 0; k < 3; k++) g.FillRectangle(gb, rr.Left + 1, rr.Top + rr.Height / 2 - (int)(4 * s) + k * (int)(4 * s), (int)(8 * s), Math.Max(1, (int)(2 * s)));
                 }
                 Rectangle lr = new Rectangle(rr.Left + grip, rr.Top, rr.Width - grip, rr.Height);
-                Color vc = x.Hot ? cHot : (x.HasCol ? x.Col : (lay == 5 ? Color.FromArgb(110, 255, 140) : cValue));
-                Color lc = (Overlay.ColName && x.HasCol && !x.Hot) ? x.Col : (lay == 5 ? Color.FromArgb(50, 170, 80) : cLabel);
+                Color vc = x.Hot ? cHot : (x.HasCol ? x.Col : (d.Val.IsEmpty ? cValue : d.Val));
+                Color lc = (Overlay.ColName && x.HasCol && !x.Hot) ? x.Col : (d.Lab.IsEmpty ? cLabel : d.Lab);
                 if (!Overlay.Compact) DT(g, x.Label, fl, lr, lc, StringAlignment.Near);
                 DT(g, x.Value, fv, lr, vc, Overlay.Compact ? StringAlignment.Near : StringAlignment.Far);
             }
@@ -6160,8 +6223,8 @@ namespace BunoTunner
             UI.Lbl(body, "Opacidade:", 450, 9); cbOp = Combo(body, 520, 5, 70);
             foreach (int v in Ops) cbOp.Items.Add(v + "%");
             UI.Lbl(body, "Layout:", 600, 9); cbLay = Combo(body, 650, 5, 126); cbLay.DropDownWidth = 230;
-            cbLay.Items.Add("Padrao (fundo + contorno)"); cbLay.Items.Add("Sem fundo nem contorno"); cbLay.Items.Add("So contorno (sem fundo)");
-            cbLay.Items.Add("Barra lateral"); cbLay.Items.Add("Neon"); cbLay.Items.Add("Terminal (verde)");
+            foreach (OverlayForm.LD x in OverlayForm.Layouts) cbLay.Items.Add(x.Name);
+            cbLay.MaxDropDownItems = 25;
             UI.Lbl(body, "Mostrar:", 8, 40); cbMode = Combo(body, 66, 36, 420);
             cbMode.Items.Add("Somente em jogos (tela cheia ou janela sem borda)");
             cbMode.Items.Add("Em qualquer programa que desenhe com DirectX");
