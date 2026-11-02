@@ -377,3 +377,6 @@ v1.35.0 (TESTE)
 
 v1.36.0 (TESTE)
 - Overlay: o Layout agora tem 25 estilos. Alem dos 6 anteriores, entram um para cada tema do programa (Luna, Frutiger Aero, Dark/AMOLED, Neon/Cyberpunk, Steampunk, Vintage Win 95 e GTA VI) e 12 novos (Vidro, Pilula, Claro minimalista, Barra superior, Barra inferior, Ambar, HUD ciano, Oceano, Floresta, Rosa, Papel e Faixa escura). O layout do overlay e o tema do programa sao escolhidos de forma independente.
+
+v1.36.1 (TESTE)
+- Overlay: todos os textos agora tem contorno preto em volta, em todos os layouts (a espessura acompanha o tamanho do overlay).

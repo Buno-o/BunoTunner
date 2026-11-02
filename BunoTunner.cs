@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - codigo aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.36.0.0")]
-[assembly: AssemblyFileVersion("1.36.0.0")]
-[assembly: AssemblyInformationalVersion("1.36.0")]
+[assembly: AssemblyVersion("1.36.1.0")]
+[assembly: AssemblyFileVersion("1.36.1.0")]
+[assembly: AssemblyInformationalVersion("1.36.1")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1885,7 +1885,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.36.0";
+        public const string Version = "v1.36.1";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -5892,16 +5892,17 @@ namespace BunoTunner
             if (measG == null) { measG = Graphics.FromImage(measBmp); measG.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit; }
             using (StringFormat sf = new StringFormat(StringFormat.GenericTypographic)) { sf.FormatFlags |= StringFormatFlags.NoWrap | StringFormatFlags.MeasureTrailingSpaces; return measG.MeasureString(t ?? "", f, 4000, sf).Width + 2; }
         }
-        static bool shd;
+        static int shdOff = 1;
         static void DT(Graphics g, string t, Font f, Rectangle r, Color c, StringAlignment al)
         {
             using (StringFormat sf = new StringFormat(StringFormat.GenericTypographic))
             using (SolidBrush b = new SolidBrush(c))
             {
                 sf.Alignment = al; sf.LineAlignment = StringAlignment.Center; sf.FormatFlags |= StringFormatFlags.NoWrap; sf.Trimming = StringTrimming.None;
-                if (shd)   // sem fundo: contorno escuro fino em volta do texto para continuar legivel sobre qualquer imagem
-                    using (SolidBrush sb = new SolidBrush(Color.FromArgb(190, 0, 0, 0)))
-                        for (int dx = -1; dx <= 1; dx += 2) for (int dy = -1; dy <= 1; dy += 2) g.DrawString(t ?? "", f, sb, new Rectangle(r.X + dx, r.Y + dy, r.Width, r.Height), sf);
+                // contorno preto em volta de todos os textos do overlay (legivel sobre qualquer fundo)
+                using (SolidBrush sb = new SolidBrush(Color.Black))
+                    for (int dx = -shdOff; dx <= shdOff; dx++) for (int dy = -shdOff; dy <= shdOff; dy++)
+                        if ((dx != 0 || dy != 0) && (Math.Abs(dx) == shdOff || Math.Abs(dy) == shdOff)) g.DrawString(t ?? "", f, sb, new Rectangle(r.X + dx, r.Y + dy, r.Width, r.Height), sf);
                 g.DrawString(t ?? "", f, b, r, sf);
             }
         }
@@ -6086,7 +6087,7 @@ namespace BunoTunner
             g.Clear(Color.Transparent);
             Rectangle r = new Rectangle(0, 0, Width - 1, Height - 1);
             LD d = Layouts[edit ? 0 : Math.Max(0, Math.Min(Layouts.Length - 1, Overlay.Layout))];   // na edicao sempre mostra a caixa padrao para dar para arrastar
-            shd = d.Shadow && !edit;
+            shdOff = Math.Max(1, (int)Math.Round(s));
             int rad = d.Rad < 0 ? (Xp.Rad + 2) * 2 : Math.Min(d.Rad, Math.Min(Width, Height) - 1);
             using (GraphicsPath gp = Round(r, rad))
             {
