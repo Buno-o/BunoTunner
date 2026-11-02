@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - codigo aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.33.0.0")]
-[assembly: AssemblyFileVersion("1.33.0.0")]
-[assembly: AssemblyInformationalVersion("1.33.0")]
+[assembly: AssemblyVersion("1.34.0.0")]
+[assembly: AssemblyFileVersion("1.34.0.0")]
+[assembly: AssemblyInformationalVersion("1.34.0")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -371,6 +371,16 @@ namespace BunoTunner
             "Travar clock da memoria (MHz):  min", "Lock memory clock (MHz):  min",
             "Atualizar a cada:", "Update every:" };
         static readonly string[] Pairs2 = {
+            "Drivers de GPU e Chipset direto da fabricante", "GPU and Chipset drivers straight from the manufacturer",
+            "Consulta o site da NVIDIA / AMD e compara com o driver instalado. Se houver versao mais nova, baixa o instalador oficial, confere a assinatura digital e abre a instalacao normal para voce concluir. Para Intel, abre o Assistente de Drivers da Intel.", "Checks the NVIDIA / AMD website and compares with the installed driver. If a newer version exists, it downloads the official installer, checks its digital signature and opens the normal installation for you to finish. For Intel, it opens Intel's Driver & Support Assistant.",
+            "Verificar GPU e Chipset", "Check GPU and Chipset",
+            "Consultando os sites das fabricantes...", "Checking the manufacturers' websites...",
+            "Concluido.", "Done.", "Ignorado.", "Skipped.",
+            "Instalador fechado.", "Installer closed.",
+            "Abrindo o instalador. Conclua a instalacao na janela da fabricante...", "Opening the installer. Finish the installation in the manufacturer's window...",
+            "Instalador apagado por seguranca. Nada foi executado.", "Installer deleted for safety. Nothing was run.",
+            "Nenhuma placa de video NVIDIA/AMD ou chipset AMD identificado.", "No NVIDIA/AMD graphics card or AMD chipset identified.",
+            "Intel: a Intel nao oferece consulta publica confiavel de versoes; o Assistente de Drivers e Suporte da Intel faz isso.", "Intel: Intel offers no reliable public version lookup; Intel's Driver & Support Assistant does that.",
             "Desfazer", "Undo", "Refazer", "Redo", "Limpar lista", "Clear list", "Restaurar padrao", "Restore defaults", "Exportar...", "Export...", "Importar...", "Import...",
             "Todos os grupos", "All groups", "Adicionar ao overlay", "Add to overlay", "Adicionar todos os resultados da busca", "Add all search results",
             "Aplicar esta cor a todos os itens", "Apply this color to all items",
@@ -1874,7 +1884,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.33.0";
+        public const string Version = "v1.34.0";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -12558,6 +12568,371 @@ namespace BunoTunner
     // ------------------------------------------------------------------
     //  Otimizacoes do Windows: limpeza de temporarios (CacheCleaner)
     // ------------------------------------------------------------------
+    // ------------------------------------------------------------------
+    //  Drivers direto da fabricante: GPU (NVIDIA / AMD) e chipset (AMD). Intel abre o assistente oficial.
+    //  Consulta o site da fabricante, compara com a versao instalada, baixa, confere a assinatura e abre o instalador normal.
+    // ------------------------------------------------------------------
+    class VItem { public string Title, Inst, Latest, Url, Referer, Pub, Page; }
+    class VGpu { public string Name, Drv, Ven; }
+
+    static class VendorDrivers
+    {
+        const string UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
+        const string IntelPage = "https://www.intel.com/content/www/us/en/support/detect.html";
+        const string NvApi = "https://www.nvidia.com/Download/API/lookupValueSearch.aspx";
+
+        static HttpWebRequest Req(string url, string referer)
+        {
+            ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072 | (SecurityProtocolType)768;
+            HttpWebRequest rq = (HttpWebRequest)WebRequest.Create(url);
+            rq.UserAgent = UA; rq.Timeout = 30000; rq.ReadWriteTimeout = 60000; rq.AllowAutoRedirect = true;
+            rq.Accept = "text/html,application/xml,application/json,*/*";
+            rq.Headers["Accept-Language"] = "en-US,en;q=0.9";
+            rq.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+            if (referer != null) rq.Referer = referer;
+            return rq;
+        }
+
+        static string Http(string url, string referer)
+        {
+            using (WebResponse rs = Req(url, referer).GetResponse())
+            using (StreamReader sr = new StreamReader(rs.GetResponseStream(), Encoding.UTF8)) return sr.ReadToEnd();
+        }
+
+        static int[] Ver(string s)
+        {
+            List<int> l = new List<int>();
+            foreach (Match m in Regex.Matches(s ?? "", "\\d+")) { int v; if (int.TryParse(m.Value, out v)) l.Add(v); }
+            return l.ToArray();
+        }
+
+        static int Cmp(string a, string b)
+        {
+            int[] x = Ver(a), y = Ver(b);
+            for (int i = 0; i < Math.Max(x.Length, y.Length); i++)
+            {
+                int p = i < x.Length ? x[i] : 0, q = i < y.Length ? y[i] : 0;
+                if (p != q) return p < q ? -1 : 1;
+            }
+            return 0;
+        }
+
+        static string Norm(string s)
+        {
+            s = (s ?? "").ToLowerInvariant().Replace("(tm)", "").Replace("(r)", "").Replace("nvidia ", "");
+            return Regex.Replace(s, "\\s+", " ").Trim();
+        }
+
+        static bool Win11()
+        {
+            try
+            {
+                using (RegistryKey k = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion"))
+                {
+                    int b; if (k != null && int.TryParse(Convert.ToString(k.GetValue("CurrentBuild")), out b)) return b >= 22000;
+                }
+            }
+            catch (Exception) { }
+            return false;
+        }
+
+        // versao de um programa instalado (lista de desinstalacao do Windows)
+        static string InstalledVer(string nameContains)
+        {
+            string[] paths = { @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall", @"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall" };
+            foreach (string p in paths)
+            {
+                try
+                {
+                    using (RegistryKey k = Registry.LocalMachine.OpenSubKey(p))
+                    {
+                        if (k == null) continue;
+                        foreach (string sn in k.GetSubKeyNames())
+                            using (RegistryKey s = k.OpenSubKey(sn))
+                            {
+                                if (s == null) continue;
+                                string dn = s.GetValue("DisplayName") as string;
+                                if (dn != null && dn.IndexOf(nameContains, StringComparison.OrdinalIgnoreCase) >= 0)
+                                {
+                                    string v = s.GetValue("DisplayVersion") as string;
+                                    if (!string.IsNullOrEmpty(v)) return v;
+                                }
+                            }
+                    }
+                }
+                catch (Exception) { }
+            }
+            return null;
+        }
+
+        static List<VGpu> Gpus()
+        {
+            List<VGpu> l = new List<VGpu>();
+            try
+            {
+                using (ManagementObjectSearcher s = new ManagementObjectSearcher("SELECT Name, DriverVersion, PNPDeviceID FROM Win32_VideoController"))
+                    foreach (ManagementObject m in s.Get())
+                    {
+                        string pnp = Convert.ToString(m["PNPDeviceID"]);
+                        Match v = Regex.Match(pnp ?? "", "VEN_([0-9A-Fa-f]{4})");
+                        if (!v.Success) continue;
+                        VGpu g = new VGpu(); g.Name = Convert.ToString(m["Name"]); g.Drv = Convert.ToString(m["DriverVersion"]); g.Ven = v.Groups[1].Value.ToUpperInvariant();
+                        l.Add(g);
+                    }
+            }
+            catch (Exception) { }
+            return l;
+        }
+
+        static string CpuVendor()
+        {
+            try
+            {
+                using (ManagementObjectSearcher s = new ManagementObjectSearcher("SELECT Manufacturer FROM Win32_Processor"))
+                    foreach (ManagementObject m in s.Get()) return Convert.ToString(m["Manufacturer"]) ?? "";
+            }
+            catch (Exception) { }
+            return "";
+        }
+
+        static bool HasBattery()
+        {
+            try { using (ManagementObjectSearcher s = new ManagementObjectSearcher("SELECT * FROM Win32_Battery")) foreach (ManagementObject m in s.Get()) return true; }
+            catch (Exception) { }
+            return false;
+        }
+
+        // ---------------- NVIDIA ----------------
+        static string NvVer(string drv)
+        {
+            string d = (drv ?? "").Replace(".", "");
+            if (d.Length < 5) return null;
+            d = d.Substring(d.Length - 5);
+            return d.Substring(0, 3) + "." + d.Substring(3);
+        }
+
+        static List<string[]> NvList(int type, string parent)
+        {
+            List<string[]> l = new List<string[]>();
+            string x = Http(NvApi + "?TypeID=" + type + "&ParentID=" + parent, null);
+            foreach (Match m in Regex.Matches(x, "<Name>(.*?)</Name>\\s*<Value>(\\d+)</Value>", RegexOptions.Singleline))
+                l.Add(new string[] { WebUtility.HtmlDecode(m.Groups[1].Value), m.Groups[2].Value });
+            return l;
+        }
+
+        static bool NvIds(string gpu, out string ps, out string pf)
+        {
+            ps = pf = null;
+            string want = Norm(gpu);
+            foreach (string[] ser in NvList(2, "1"))
+                foreach (string[] prod in NvList(3, ser[1]))
+                    if (Norm(prod[0]) == want) { ps = ser[1]; pf = prod[1]; return true; }
+            return false;
+        }
+
+        static VItem Nvidia(VGpu g, Action<string> log)
+        {
+            VItem it = new VItem(); it.Title = "Driver de video NVIDIA (" + g.Name + ")"; it.Pub = "NVIDIA"; it.Page = "https://www.nvidia.com/Download/index.aspx";
+            it.Inst = NvVer(g.Drv);
+            string ps, pf;
+            if (!NvIds(g.Name, out ps, out pf)) { log("NVIDIA: nao encontrei '" + g.Name + "' na lista de produtos do site da NVIDIA."); return it; }
+            string j = Http("https://gfwsl.geforce.com/services_toolkit/services/com/nvidia/services/AjaxDriverService.php?func=DriverManualLookup&psid=" + ps + "&pfid=" + pf +
+                "&osID=" + (Win11() ? "135" : "57") + "&languageCode=1033&beta=0&isWHQL=0&dltype=-1&dch=1&upCRD=0&qnf=0&sort1=0&numberOfResults=1", null);
+            Match v = Regex.Match(j, "\"Version\"\\s*:\\s*\"([0-9.]+)\"");
+            Match u = Regex.Match(j, "\"DownloadURL\"\\s*:\\s*\"([^\"]+)\"");
+            if (!v.Success || !u.Success) { log("NVIDIA: o site nao devolveu nenhum driver para esta placa."); return it; }
+            it.Latest = v.Groups[1].Value;
+            it.Url = u.Groups[1].Value.Replace("\\/", "/");
+            if (it.Url.StartsWith("http:", StringComparison.OrdinalIgnoreCase)) it.Url = "https:" + it.Url.Substring(5);
+            return it;
+        }
+
+        // ---------------- AMD ----------------
+        // pega o maior numero de versao entre os links de instalador encontrados na pagina
+        static void AmdPick(string html, string pattern, VItem it, string preferWin)
+        {
+            string bestV = null, bestU = null;
+            foreach (Match m in Regex.Matches(html, pattern, RegexOptions.IgnoreCase))
+            {
+                string v = m.Groups[1].Value, u = m.Value;
+                int c = bestV == null ? 1 : Cmp(v, bestV);
+                if (c > 0 || (c == 0 && preferWin != null && u.IndexOf(preferWin, StringComparison.OrdinalIgnoreCase) >= 0 && bestU.IndexOf(preferWin, StringComparison.OrdinalIgnoreCase) < 0))
+                { bestV = v; bestU = u; }
+            }
+            if (bestV != null) { it.Latest = bestV; it.Url = bestU; }
+        }
+
+        static VItem AmdGpu(VGpu g, Action<string> log)
+        {
+            VItem it = new VItem(); it.Title = "Driver de video AMD Radeon (" + g.Name + ")"; it.Pub = "Advanced Micro Devices"; it.Referer = "https://www.amd.com/";
+            it.Page = "https://www.amd.com/en/support/download/drivers.html";
+            string v = InstalledVer("AMD Software");
+            if (v != null && !Regex.IsMatch(v, "^\\d+\\.\\d+\\.\\d+$")) v = null;
+            it.Inst = v;
+            Match m = Regex.Match(g.Name ?? "", "RX\\s*(\\d{3,4})\\s*(XTX|XT|GRE)?", RegexOptions.IgnoreCase);
+            if (!m.Success) { log("AMD: nao reconheci o modelo '" + g.Name + "' (GPU integrada?). Use o site da AMD."); return it; }
+            string num = m.Groups[1].Value, suf = m.Groups[2].Value.ToLowerInvariant();
+            string slug = "amd-radeon-rx-" + num + (suf.Length > 0 ? "-" + suf : "");
+            string ser = num.Substring(0, 1) + (num.Length == 4 ? "000" : "00");
+            string grp = num.Substring(0, num.Length - 2) + "00";
+            string[] pages = {
+                "https://www.amd.com/en/support/downloads/drivers.html/graphics/radeon-rx/radeon-rx-" + ser + "-series/" + slug + ".html",
+                "https://www.amd.com/en/support/graphics/amd-radeon-rx-" + ser + "-series/amd-radeon-rx-" + grp + "-series/" + slug };
+            foreach (string p in pages)
+            {
+                try
+                {
+                    string h = Http(p, "https://www.amd.com/");
+                    AmdPick(h, "https://drivers\\.amd\\.com/drivers/[A-Za-z0-9.\\-]*?adrenalin-edition-(\\d+\\.\\d+\\.\\d+)[A-Za-z0-9.\\-]*\\.exe", it, Win11() ? "win11" : "win10");
+                    if (it.Latest != null) { it.Page = p; break; }
+                }
+                catch (Exception) { }
+            }
+            if (it.Latest == null) log("AMD: nao consegui ler a pagina de drivers do modelo '" + g.Name + "'.");
+            return it;
+        }
+
+        static VItem AmdChipset(Action<string> log)
+        {
+            VItem it = new VItem(); it.Title = "Driver de chipset AMD"; it.Pub = "Advanced Micro Devices"; it.Referer = "https://www.amd.com/";
+            it.Page = "https://www.amd.com/en/support/download/drivers.html";
+            it.Inst = InstalledVer("AMD Chipset Software");
+            string[] mob = { "https://www.amd.com/en/support/chipsets/socket-fp5-mobile/amd-ryzen-and-athlon-mobile-chipset" };
+            string[] desk = {
+                "https://www.amd.com/en/support/chipsets/amd-socket-am5/x670", "https://www.amd.com/en/support/downloads/drivers.html/chipsets/am5/x670.html",
+                "https://www.amd.com/en/support/chipsets/amd-socket-am4/x570", "https://www.amd.com/en/support/downloads/drivers.html/chipsets/am4/x570.html" };
+            List<string> pages = new List<string>();
+            if (HasBattery()) { pages.AddRange(mob); pages.AddRange(desk); } else { pages.AddRange(desk); pages.AddRange(mob); }
+            foreach (string p in pages)
+            {
+                try
+                {
+                    string h = Http(p, "https://www.amd.com/");
+                    AmdPick(h, "https://drivers\\.amd\\.com/drivers/amd_chipset_software_([0-9.]+?)\\.exe", it, null);
+                    if (it.Latest != null) { it.Page = p; break; }
+                }
+                catch (Exception) { }
+            }
+            if (it.Latest == null) log("AMD: nao consegui ler a pagina do driver de chipset.");
+            return it;
+        }
+
+        // ---------------- download, assinatura e instalacao ----------------
+        static string Download(VItem it, Action<string> log)
+        {
+            string dir = Path.Combine(Path.GetTempPath(), "BunoTunner_Drivers");
+            Directory.CreateDirectory(dir);
+            string dst = Path.Combine(dir, Path.GetFileName(new Uri(it.Url).AbsolutePath));
+            HttpWebRequest rq = Req(it.Url, it.Referer);
+            rq.AutomaticDecompression = DecompressionMethods.None; rq.Timeout = 60000;
+            long total, got = 0; int lastPct = -10;
+            using (WebResponse rs = rq.GetResponse())
+            {
+                total = rs.ContentLength;
+                log("Baixando " + Path.GetFileName(dst) + (total > 0 ? " (" + (total / 1048576) + " MB)..." : "..."));
+                using (Stream src = rs.GetResponseStream())
+                using (FileStream fs = new FileStream(dst, FileMode.Create, FileAccess.Write))
+                {
+                    byte[] buf = new byte[262144]; int n;
+                    while ((n = src.Read(buf, 0, buf.Length)) > 0)
+                    {
+                        fs.Write(buf, 0, n); got += n;
+                        if (total > 0)
+                        {
+                            int pct = (int)(got * 100 / total);
+                            if (pct >= lastPct + 10) { lastPct = pct; log("  " + pct + "%"); }
+                        }
+                    }
+                }
+            }
+            if (got < 1048576 || (total > 0 && got != total)) { try { File.Delete(dst); } catch (Exception) { } throw new Exception("download incompleto ou invalido");
+            }
+            return dst;
+        }
+
+        // assinatura digital do instalador (Get-AuthenticodeSignature confere tambem o hash do arquivo)
+        static bool Signed(string file, string publisher, Action<string> log)
+        {
+            int c;
+            string o = Proc.Run("powershell.exe", "-NoProfile -NonInteractive -Command \"$s = Get-AuthenticodeSignature -LiteralPath '" + file.Replace("'", "''") +
+                "'; $s.Status.ToString() + '|' + $s.SignerCertificate.Subject\"", 600000, out c).Trim();
+            string[] p = o.Split(new char[] { '|' }, 2);
+            bool ok = p.Length == 2 && p[0] == "Valid" && p[1].IndexOf(publisher, StringComparison.OrdinalIgnoreCase) >= 0;
+            log(ok ? "Assinatura digital valida: " + publisher + "." : "Assinatura digital NAO confere (" + o + ").");
+            return ok;
+        }
+
+        static void OpenPage(string url)
+        {
+            try { ProcessStartInfo psi = new ProcessStartInfo(url); psi.UseShellExecute = true; Process.Start(psi); } catch (Exception) { }
+        }
+
+        static void Offer(VItem it, Action<string> log, Func<string, bool> confirm)
+        {
+            if (it.Latest == null || it.Url == null)
+            {
+                log(it.Title + ": nao foi possivel consultar a versao automaticamente.");
+                if (it.Page != null && confirm("Nao consegui consultar a versao mais recente de:\n" + it.Title + "\n\nAbrir a pagina oficial de downloads no navegador?")) OpenPage(it.Page);
+                return;
+            }
+            bool known = it.Inst != null;
+            if (known && Cmp(it.Inst, it.Latest) >= 0) { log(it.Title + ": ja esta atualizado (" + it.Inst + ")."); return; }
+            log(it.Title + ": instalada " + (known ? it.Inst : "(nao identificada)") + " -> mais recente " + it.Latest + ".");
+            if (!confirm(it.Title + "\n\nVersao instalada: " + (known ? it.Inst : "nao identificada") + "\nVersao mais recente no site da fabricante: " + it.Latest +
+                "\n\nBaixar o instalador oficial e abrir a instalacao normal para voce concluir?")) { log("Ignorado."); return; }
+            string file = Download(it, log);
+            if (!Signed(file, it.Pub, log)) { try { File.Delete(file); } catch (Exception) { } log("Instalador apagado por seguranca. Nada foi executado."); return; }
+            log("Abrindo o instalador. Conclua a instalacao na janela da fabricante...");
+            try
+            {
+                ProcessStartInfo psi = new ProcessStartInfo(file); psi.UseShellExecute = true; psi.Verb = "runas";
+                using (Process p = Process.Start(psi)) { if (p != null) p.WaitForExit(); }
+                log("Instalador fechado.");
+            }
+            catch (Exception ex) { log("Nao foi possivel abrir o instalador: " + ex.Message); }
+        }
+
+        public static void Run(Action<string> log, Func<string, bool> confirm, Action done)
+        {
+            try
+            {
+                log("Consultando os sites das fabricantes...");
+                List<VItem> items = new List<VItem>();
+                bool intel = false, nv = false, amdGpu = false;
+                foreach (VGpu g in Gpus())
+                {
+                    try
+                    {
+                        if (g.Ven == "10DE" && !nv) { nv = true; items.Add(Nvidia(g, log)); }
+                        else if (g.Ven == "1002" && !amdGpu && Regex.IsMatch(g.Name ?? "", "RX", RegexOptions.IgnoreCase)) { amdGpu = true; items.Add(AmdGpu(g, log)); }
+                        else if (g.Ven == "8086") intel = true;
+                    }
+                    catch (Exception ex) { log("Falha ao consultar " + g.Name + ": " + ex.Message); }
+                }
+                string cpu = CpuVendor();
+                if (cpu.IndexOf("AMD", StringComparison.OrdinalIgnoreCase) >= 0 || cpu.IndexOf("Advanced Micro", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    try { items.Add(AmdChipset(log)); } catch (Exception ex) { log("Falha ao consultar o chipset AMD: " + ex.Message); }
+                }
+                else if (cpu.IndexOf("Intel", StringComparison.OrdinalIgnoreCase) >= 0) intel = true;
+                if (items.Count == 0 && !intel) log("Nenhuma placa de video NVIDIA/AMD ou chipset AMD identificado.");
+                foreach (VItem it in items)
+                {
+                    try { Offer(it, log, confirm); }
+                    catch (Exception ex) { log(it.Title + ": falhou (" + ex.Message + ")."); }
+                }
+                if (intel)
+                {
+                    log("Intel: a Intel nao oferece consulta publica confiavel de versoes; o Assistente de Drivers e Suporte da Intel faz isso.");
+                    if (confirm("Foi detectado hardware Intel (video e/ou chipset).\n\nA Intel nao permite consultar a versao mais recente automaticamente. Abrir a pagina oficial do Assistente de Drivers e Suporte da Intel, que detecta e instala os drivers?")) OpenPage(IntelPage);
+                }
+                log("Concluido.");
+            }
+            catch (Exception ex) { log("Erro: " + ex.Message); }
+            finally { done(); }
+        }
+    }
+
     class OptPage : Panel
     {
         // cada otimizacao e uma linha padrao: titulo, descricao, botao principal (e opcional de desfazer) e o resultado
@@ -12569,6 +12944,7 @@ namespace BunoTunner
             Dock = DockStyle.Fill;
             box.Dock = DockStyle.Fill; box.AutoScroll = true; Controls.Add(box);
             AddDrivers();
+            AddVendor();
             Add("Limpar arquivos temporarios", "Apaga C:\\Windows\\Temp, Prefetch e a pasta %temp% do usuario (itens em uso sao ignorados). Nenhum documento pessoal e tocado.",
                 "Limpar", delegate { return Clean(); }, null, null, null, null);
             Add("Desativar compressao de memoria", "Executa Disable-MMAgent -mc: o Windows deixa de comprimir a RAM (usa um pouco menos de CPU, um pouco mais de RAM). Vale apos reiniciar o PC.",
@@ -12657,6 +13033,38 @@ namespace BunoTunner
             bScan.Click += delegate { start(false); };
             box.Controls.Add(g);
             top = 254;
+        }
+
+        // segundo item: drivers de GPU e chipset direto do site da fabricante
+        void AddVendor()
+        {
+            XpGroup g = new XpGroup(); g.Title = "Drivers de GPU e Chipset direto da fabricante"; g.SetBounds(0, 254, 650, 196);
+            Label d = UI.Lbl(g, "Consulta o site da NVIDIA / AMD e compara com o driver instalado. Se houver versao mais nova, baixa o instalador oficial, confere a assinatura digital e abre a instalacao normal para voce concluir. Para Intel, abre o Assistente de Drivers da Intel.", 12, 22, Xp.Ui, Xp.Dim);
+            d.AutoSize = false; d.SetBounds(12, 22, 624, 44);
+            XpButton bGo = UI.Btn(g, "Verificar GPU e Chipset", 12, 70, 190, null);
+            bGo.Height = 24;
+            TextBox log = new TextBox(); log.Multiline = true; log.ReadOnly = true; log.ScrollBars = ScrollBars.Vertical; log.WordWrap = true;
+            log.Font = Xp.Ui; log.BackColor = Xp.EditBg; log.ForeColor = Xp.Text; log.SetBounds(12, 100, 624, 88);
+            g.Controls.Add(log);
+            bGo.Click += delegate
+            {
+                bGo.Enabled = false; log.Text = "";
+                Action<string> add = delegate(string s) { try { BeginInvoke(new Action(delegate { log.AppendText(Lang.T(s) + "\r\n"); })); } catch (Exception) { } };
+                System.Threading.ThreadPool.QueueUserWorkItem(delegate
+                {
+                    VendorDrivers.Run(add,
+                        delegate(string msg)
+                        {
+                            bool yes = false;
+                            try { Invoke(new Action(delegate { yes = Dlg.Show(this, msg, "BunoTunner - Drivers", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes; })); }
+                            catch (Exception) { }
+                            return yes;
+                        },
+                        delegate { try { BeginInvoke(new Action(delegate { bGo.Enabled = true; })); } catch (Exception) { } });
+                });
+            };
+            box.Controls.Add(g);
+            top = 458;
         }
 
         static RegistryKey Root(bool machine) { return RegistryKey.OpenBaseKey(machine ? RegistryHive.LocalMachine : RegistryHive.CurrentUser, RegistryView.Registry64); }

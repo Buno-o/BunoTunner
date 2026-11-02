@@ -368,3 +368,6 @@ v1.32.2
 
 v1.33.0 (TESTE)
 - Overlay: o atalho de mostrar/ocultar agora e um atalho global do Windows (RegisterHotKey): a combinacao fica reservada para o BunoTunner e nao chega aos outros programas. Se a combinacao ja estiver em uso por outro programa, o botao mostra "(em uso!)". Isso tambem elimina a leitura continua de teclado (GetAsyncKeyState).
+
+v1.34.0 (TESTE)
+- Otimizar: novo item "Drivers de GPU e Chipset direto da fabricante". Consulta o site da NVIDIA (placas GeForce) e da AMD (placas Radeon RX e chipset Ryzen), compara com o driver instalado e, se houver versao mais nova, pergunta, baixa o instalador oficial, confere a assinatura digital (Authenticode) e abre a instalacao normal para voce concluir. Para Intel (video/chipset) abre o Assistente de Drivers e Suporte da Intel. O botao "Atualizar drivers" (Windows Update) continua igual.
