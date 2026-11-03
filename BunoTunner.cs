@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.41.2.0")]
-[assembly: AssemblyFileVersion("1.41.2.0")]
-[assembly: AssemblyInformationalVersion("1.41.2")]
+[assembly: AssemblyVersion("1.42.0.0")]
+[assembly: AssemblyFileVersion("1.42.0.0")]
+[assembly: AssemblyInformationalVersion("1.42.0")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -377,7 +377,7 @@ namespace BunoTunner
             "Consultando os sites das fabricantes...", "Checking the manufacturers' websites...",
             "Atualizar drivers (todos os dispositivos, GPU e Chipset)", "Update drivers (all devices, GPU and Chipset)", "Windows Update (todos os dispositivos)", "Windows Update (all devices)", "Site da fabricante (GPU NVIDIA/AMD e chipset AMD)", "Manufacturer website (NVIDIA/AMD GPU and AMD chipset)",
             "Marque pelo menos uma das origens (Windows Update ou site da fabricante).", "Tick at least one source (Windows Update or manufacturer website).", "---- Windows Update ----", "---- Windows Update ----", "---- Site da fabricante ----", "---- Manufacturer website ----",
-            "Concluído.", "Done.", "Ignorado.", "Skipped.", "gravando", "writing", "conferindo", "verifying", "conferido sem erro", "verified, no error", "erro", "error", "Padrão", "Pattern", "Passagem", "Pass", "Blocos", "Blocks", "Reservando a memória do teste...", "Reserving the test memory...", "Escrita sequencial (1 MB)", "Sequential write (1 MB)", "Leitura sequencial + conferência", "Sequential read + verification", "Leitura aleatória 4K", "Random 4K read", "Histórico de testes", "Test history", "Data e hora", "Date and time", "Avaliação da conexão", "Connection rating", "Faça um teste para ver se a sua conexão serve para jogos, streaming e chamadas.", "Run a test to see whether your connection suits gaming, streaming and calls.", "Medindo...", "Measuring...", "Controle, segurança e resultado ao vivo", "Controls, safety and live results", "Taxa atual", "Current rate", "Copiar relatório", "Copy report", "Salvar relatório...", "Save report...", "Mostrar só alertas", "Show alerts only", "Filtrar:", "Filter:", "Situação", "Status", "Selecione um disco primeiro.", "Select a disk first.", "Relatório copiado para a área de transferência.", "Report copied to the clipboard.", "Relatório salvo.", "Report saved.", "Inverter seleção", "Invert selection", "Dica: Enter nos campos de % ou RPM também aplica.", "Tip: Enter in the % or RPM boxes also applies.", "Identificar = liga as selecionadas a 100% por 5 s para você descobrir qual é qual.  Botão direito na lista: selecionar por tipo ou renomear (inclua CPU, Bomba ou Gabinete no nome). Atalhos: Ctrl+A seleciona tudo, F2 ou duplo clique renomeia.", "Identify = runs the selected fans at 100% for 5 s so you can tell which is which.  Right-click the list: select by type or rename (include CPU, Pump or Case in the name). Shortcuts: Ctrl+A selects all, F2 or double-click renames.", "Limpeza e manutenção", "Cleanup and maintenance", "Libera espaço no disco.", "Frees disk space.", "Desempenho em jogos", "Gaming performance", "Ajustes que podem melhorar FPS, tremidas e resposta do mouse.", "Tweaks that can improve FPS, stutter and mouse response.", "Interface do Windows", "Windows interface", "Aparência e comportamento do sistema.", "System look and behavior.", "Segurança (avançado)", "Security (advanced)", "Estes ajustes REDUZEM a proteção do PC. Use só se souber o que está fazendo.", "These tweaks REDUCE the PC's protection. Use only if you know what you are doing.", "Mantenha a GPU, o chipset e os demais dispositivos atualizados.", "Keep the GPU, chipset and other devices up to date.",
+            "Concluído.", "Done.", "Ignorado.", "Skipped.", "gravando", "writing", "conferindo", "verifying", "conferido sem erro", "verified, no error", "erro", "error", "Padrão", "Pattern", "Passagem", "Pass", "Blocos", "Blocks", "Reservando a memória do teste...", "Reserving the test memory...", "Escrita sequencial (1 MB)", "Sequential write (1 MB)", "Leitura sequencial + conferência", "Sequential read + verification", "Leitura aleatória 4K", "Random 4K read", "Histórico de testes", "Test history", "Data e hora", "Date and time", "Avaliação da conexão", "Connection rating", "Faça um teste para ver se a sua conexão serve para jogos, streaming e chamadas.", "Run a test to see whether your connection suits gaming, streaming and calls.", "Medindo...", "Measuring...", "Copiar linha selecionada", "Copy selected row", "Controle, segurança e resultado ao vivo", "Controls, safety and live results", "Taxa atual", "Current rate", "Copiar relatório", "Copy report", "Salvar relatório...", "Save report...", "Mostrar só alertas", "Show alerts only", "Filtrar:", "Filter:", "Situação", "Status", "Selecione um disco primeiro.", "Select a disk first.", "Relatório copiado para a área de transferência.", "Report copied to the clipboard.", "Relatório salvo.", "Report saved.", "Inverter seleção", "Invert selection", "Dica: Enter nos campos de % ou RPM também aplica.", "Tip: Enter in the % or RPM boxes also applies.", "Identificar = liga as selecionadas a 100% por 5 s para você descobrir qual é qual.  Botão direito na lista: selecionar por tipo ou renomear (inclua CPU, Bomba ou Gabinete no nome). Atalhos: Ctrl+A seleciona tudo, F2 ou duplo clique renomeia.", "Identify = runs the selected fans at 100% for 5 s so you can tell which is which.  Right-click the list: select by type or rename (include CPU, Pump or Case in the name). Shortcuts: Ctrl+A selects all, F2 or double-click renames.", "Limpeza e manutenção", "Cleanup and maintenance", "Libera espaço no disco.", "Frees disk space.", "Desempenho em jogos", "Gaming performance", "Ajustes que podem melhorar FPS, tremidas e resposta do mouse.", "Tweaks that can improve FPS, stutter and mouse response.", "Interface do Windows", "Windows interface", "Aparência e comportamento do sistema.", "System look and behavior.", "Segurança (avançado)", "Security (advanced)", "Estes ajustes REDUZEM a proteção do PC. Use só se souber o que está fazendo.", "These tweaks REDUCE the PC's protection. Use only if you know what you are doing.", "Mantenha a GPU, o chipset e os demais dispositivos atualizados.", "Keep the GPU, chipset and other devices up to date.",
             "Instalador fechado.", "Installer closed.",
             "Abrindo o instalador. Conclua a instalação na janela da fabricante...", "Opening the installer. Finish the installation in the manufacturer's window...",
             "Instalador apagado por segurança. Nada foi executado.", "Installer deleted for safety. Nothing was run.",
@@ -1887,7 +1887,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.41.2";
+        public const string Version = "v1.42.0";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -5991,7 +5991,10 @@ namespace BunoTunner
         protected override void WndProc(ref Message m)
         {
             if (m.Msg == 0x84 && !edit) { m.Result = (IntPtr)(-1); return; }   // WM_NCHITTEST -> HTTRANSPARENT
+            if (m.Msg == 0x21 && !edit) { m.Result = (IntPtr)3; return; }       // WM_MOUSEACTIVATE -> MA_NOACTIVATE: um clique nunca rouba o foco do jogo
             base.WndProc(ref m);
+            // se algo (o Windows, o jogo) mexer no estilo da janela, o clique-atraves e reafirmado na hora
+            if ((m.Msg == 0x7D || m.Msg == 0x47 || m.Msg == 0x18) && !edit && IsHandleCreated) ApplyClickThru();   // WM_STYLECHANGED, WM_WINDOWPOSCHANGED, WM_SHOWWINDOW
         }
 
         void Fonts()
@@ -6328,7 +6331,7 @@ namespace BunoTunner
             UI.Lbl(body, "Sensores disponíveis  (duplo clique ou arraste para a direita)", 8, 72, Xp.UiBold);
             txSearch = UI.Txt(body, 8, 94, 220, "");
             cbGrp = Combo(body, 234, 94, 146);
-            lvAv = new ListView(); lvAv.SetBounds(8, 124, 372, 332); lvAv.View = View.Details; lvAv.FullRowSelect = true; lvAv.HideSelection = false; lvAv.GridLines = true;
+            lvAv = new XpList(); lvAv.SetBounds(8, 124, 372, 332); lvAv.View = View.Details; lvAv.FullRowSelect = true; lvAv.HideSelection = false; lvAv.GridLines = true;
             lvAv.Columns.Add("Sensor", 190); lvAv.Columns.Add("Grupo", 100); lvAv.Columns.Add("Valor", 62);
             lvAv.BackColor = Xp.EditBg; lvAv.Font = Xp.Ui; lvAv.AllowDrop = true; UI.DoubleBuffer(lvAv);
             body.Controls.Add(lvAv);
@@ -6727,7 +6730,7 @@ namespace BunoTunner
         string[] catNames = { "Todos", "GPU", "CPU", "Placa-mae", "Memória RAM", "Discos", "Ventoinhas", "Coolers", "Rede", "Outros" };
         DateTime openedAt = DateTime.UtcNow;
         const string DefaultHint = "Dica: marque a caixinha (ou de duplo clique) para ver o sensor no gráfico. Botão direito = alerta, copiar... Clique no cabeçalho para ordenar.";
-        ListView lv = new ListView(); XpGraph graph = new XpGraph(); Timer timer = new Timer();
+        ListView lv = new XpList(); XpGraph graph = new XpGraph(); Timer timer = new Timer();
         Label lblInfo; XpButton btnPause; ContextMenuStrip menu, exportMenu; LTip tip = new LTip();
         Dictionary<Sn, Series> ser = new Dictionary<Sn, Series>();
         Dictionary<Sn, ListViewItem> itemOf = new Dictionary<Sn, ListViewItem>();
@@ -9497,7 +9500,7 @@ namespace BunoTunner
     class FanPage : Panel
     {
         Gpu cur;
-        ListView lv = new ListView();
+        ListView lv = new XpList();
         XpOption optAuto, optManual, chkSafe, chkRestore;
         XpSlider sl; XpText txPct, txRpm, txSafe;
         Label lblMsg, lblSel;
@@ -9547,7 +9550,7 @@ namespace BunoTunner
         void BuildList()
         {
             XpGroup g = new XpGroup(); g.Title = "Ventoinhas detectadas (Ctrl/Shift = várias)"; g.SetBounds(0, 0, 676, 286); g.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
-            lv.SetBounds(10, 54, 656, 188); lv.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom; lv.View = View.Details; lv.FullRowSelect = true; lv.GridLines = true;
+            ((XpList)lv).AutoFit = true; lv.SetBounds(10, 54, 656, 188); lv.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom; lv.View = View.Details; lv.FullRowSelect = true; lv.GridLines = true;
             lv.MultiSelect = true; lv.HideSelection = false; lv.BackColor = Xp.EditBg; lv.Font = Xp.Ui;
             lv.Columns.Add("Ventoinha", 180); lv.Columns.Add("Tipo", 90); lv.Columns.Add("Origem", 170); lv.Columns.Add("RPM", 60);
             lv.Columns.Add("%", 50); lv.Columns.Add("Modo", 102);
@@ -10603,7 +10606,7 @@ namespace BunoTunner
             if (kind == "AMD4" || kind == "AMD5") return FilterSpec(SpecAmd, kind);
             return SpecBasic;
         }
-        ListView lvMod = new ListView();
+        ListView lvMod = new XpList();
         int speed, channels = 1;
         bool reading, readOnce;
         Dictionary<string, string> tim = new Dictionary<string, string>();
@@ -10759,7 +10762,7 @@ namespace BunoTunner
 
         void BuildMods()
         {
-            lvMod.SetBounds(0, 274, 656, 104); lvMod.View = View.Details; lvMod.FullRowSelect = true; lvMod.GridLines = true;
+            ((XpList)lvMod).AutoFit = true; lvMod.SetBounds(0, 274, 656, 104); lvMod.View = View.Details; lvMod.FullRowSelect = true; lvMod.GridLines = true;
             lvMod.BackColor = Xp.EditBg; lvMod.Font = Xp.Ui;
             lvMod.Columns.Add("Slot", 140); lvMod.Columns.Add("Cap.", 55); lvMod.Columns.Add("Fabricante", 90); lvMod.Columns.Add("Part number", 150);
             lvMod.Columns.Add("MT/s", 50); lvMod.Columns.Add("Volt", 55); lvMod.Columns.Add("Tipo", 50); lvMod.Columns.Add("Ranks", 50);
@@ -10922,7 +10925,7 @@ namespace BunoTunner
         static readonly string[] Blocked = { "system", "idle", "registry", "smss", "csrss", "wininit", "services", "lsass", "winlogon", "memory compression", "secure system" };
 
         int N;
-        ListView lvP = new ListView(), lvRules = new ListView();
+        ListView lvP = new XpList(), lvRules = new XpList();
         XpText txFilter; XpOption chkPause, chkSame, chkRules; XpOption[] cpuBox;
         ComboBox cbPrio, cbPre; Label lblCount, lblMsg;
         Dictionary<int, ListViewItem> pidItem = new Dictionary<int, ListViewItem>();
@@ -11023,7 +11026,7 @@ namespace BunoTunner
         {
             XpGroup g = new XpGroup(); g.Title = "Regras automáticas"; g.SetBounds(428, 418, 248, 168);
             chkRules = UI.Opt(g, "Aplicar regras automaticamente", 10, 22, 228, false);
-            lvRules.SetBounds(10, 46, 228, 80); lvRules.View = View.Details; lvRules.FullRowSelect = true; lvRules.GridLines = true; lvRules.Font = Xp.Ui; lvRules.BackColor = Xp.EditBg;
+            ((XpList)lvRules).AutoFit = true; lvRules.SetBounds(10, 46, 228, 80); lvRules.View = View.Details; lvRules.FullRowSelect = true; lvRules.GridLines = true; lvRules.Font = Xp.Ui; lvRules.BackColor = Xp.EditBg;
             lvRules.Columns.Add("Processo", 110); lvRules.Columns.Add("Preset", 100);
             g.Controls.Add(lvRules);
             UI.Btn(g, "Nova regra", 10, 132, 100, delegate { NewRule(); });
@@ -11343,7 +11346,7 @@ namespace BunoTunner
     class UninstallPage : Panel
     {
         static readonly string[] Generic = { "windows", "microsoft", "system", "common", "program", "programs", "update", "updates", "software", "data", "temp", "cache", "setup", "install", "installer", "drivers", "driver", "intel", "amd", "nvidia", "google", "apps", "app", "files", "microsoftedge", "internet", "explorer", "defender", "visual", "runtime" };
-        ListView lvP = new ListView(), lvL = new ListView();
+        ListView lvP = new XpList(), lvL = new XpList();
         XpText txFind; Label lblInfo, lblMsg, lblSel; XpProgress pb;
         XpOption chkBin, chkReg, chkRestore;
         XpButton bUn, bForce, bScan, bDel, bKill;
@@ -12194,7 +12197,7 @@ namespace BunoTunner
     {
         SpeedGauge gauge = new SpeedGauge();
         StatCard lblPing, lblJit, lblDown, lblUp, lblQual; Label lblMsg, lblHint;
-        ListView lvHist = new ListView(); double hPing = double.NaN, hJit = double.NaN, hDown = double.NaN, hUp = double.NaN;
+        ListView lvHist = new XpList(); double hPing = double.NaN, hJit = double.NaN, hDown = double.NaN, hUp = double.NaN;
         XpButton bStart, bInfo, bCopy, bHide;
         TextBox tbInfo = new TextBox();
         volatile bool running, cancel;
@@ -12216,7 +12219,7 @@ namespace BunoTunner
             Controls.Add(g1);
 
             XpGroup gh = new XpGroup(); gh.Title = "Histórico de testes"; gh.SetBounds(0, 306, 676, 118); gh.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            lvHist.SetBounds(12, 24, 560, 84); lvHist.View = View.Details; lvHist.FullRowSelect = true; lvHist.GridLines = true; lvHist.HideSelection = false;
+            ((XpList)lvHist).AutoFit = true; lvHist.SetBounds(12, 24, 560, 84); lvHist.View = View.Details; lvHist.FullRowSelect = true; lvHist.GridLines = true; lvHist.HideSelection = false;
             lvHist.BackColor = Xp.EditBg; lvHist.Font = Xp.Ui;
             lvHist.Columns.Add("Data e hora", 150); lvHist.Columns.Add("Ping", 80); lvHist.Columns.Add("Jitter", 80); lvHist.Columns.Add("Download", 120); lvHist.Columns.Add("Upload", 120);
             UI.DoubleBuffer(lvHist); gh.Controls.Add(lvHist);
@@ -12540,7 +12543,7 @@ namespace BunoTunner
 
     class StoragePage : Panel
     {
-        ListView lvD = new ListView(), lvA = new ListView();
+        ListView lvD = new XpList(), lvA = new XpList();
         Label lblHealth, lblLife, lblTemp, lblAdvice, lblMsg;
         XpProgress pbLife, pbTemp;
         XpOption chkAlert; XpText txFilter; List<string[]> allRows = new List<string[]>();
@@ -12552,7 +12555,7 @@ namespace BunoTunner
         {
             Size = new Size(676, 586); Dock = DockStyle.Fill;   // tamanho inicial = o da area da pagina, para os ancoramentos funcionarem
             XpGroup g1 = new XpGroup(); g1.Title = "Seus discos"; g1.SetBounds(0, 0, 676, 156); g1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            lvD.SetBounds(12, 24, 652, 88); lvD.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right; lvD.View = View.Details; lvD.FullRowSelect = true; lvD.GridLines = true; lvD.HideSelection = false; lvD.MultiSelect = false;
+            ((XpList)lvD).AutoFit = true; lvD.SetBounds(12, 24, 652, 88); lvD.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right; lvD.View = View.Details; lvD.FullRowSelect = true; lvD.GridLines = true; lvD.HideSelection = false; lvD.MultiSelect = false;
             lvD.BackColor = Xp.EditBg; lvD.Font = Xp.Ui;
             lvD.Columns.Add("Disco", 232); lvD.Columns.Add("Tipo", 90); lvD.Columns.Add("Tamanho", 70); lvD.Columns.Add("Saúde", 70); lvD.Columns.Add("Vida", 60); lvD.Columns.Add("Temp.", 60); lvD.Columns.Add("Horas", 60);
             UI.DoubleBuffer(lvD);
@@ -12581,7 +12584,7 @@ namespace BunoTunner
             txFilter = UI.Txt(g2, 266, 165, 200, "");
             chkAlert.CheckedChanged += delegate { FillAttrs(); };
             txFilter.Box.TextChanged += delegate { FillAttrs(); };
-            lvA.SetBounds(12, 194, 652, 220); lvA.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom; lvA.View = View.Details; lvA.FullRowSelect = true; lvA.GridLines = true;
+            ((XpList)lvA).AutoFit = true; lvA.SetBounds(12, 194, 652, 220); lvA.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom; lvA.View = View.Details; lvA.FullRowSelect = true; lvA.GridLines = true;
             lvA.BackColor = Xp.EditBg; lvA.Font = Xp.Ui;
             lvA.Columns.Add("Atributo / sensor", 290); lvA.Columns.Add("Valor", 270); lvA.Columns.Add("Situação", 80);
             UI.DoubleBuffer(lvA);
@@ -13849,6 +13852,123 @@ namespace BunoTunner
         }
     }
 
+    // lista padrao do programa: botao direito / Ctrl+C copia so as linhas selecionadas; opcionalmente (AutoFit) a altura acompanha o numero de linhas
+    class XpList : ListView
+    {
+        [DllImport("user32.dll")] static extern IntPtr SendMessage(IntPtr h, int msg, IntPtr w, IntPtr l);
+        [DllImport("user32.dll")] static extern bool GetWindowRect(IntPtr h, out RCT r);
+        [StructLayout(LayoutKind.Sequential)] struct RCT { public int L, T, R, B; }
+        public bool AutoFit;
+        int maxH = -1; bool fitting, pending;
+        ContextMenuStrip own;
+
+        public XpList()
+        {
+            own = new ContextMenuStrip(); own.RenderMode = ToolStripRenderMode.System;
+            AddCopyItem(own);
+            ContextMenuStrip = own;
+            ContextMenuStripChanged += delegate { if (ContextMenuStrip != null && ContextMenuStrip != own) AddCopyItem(ContextMenuStrip); };
+        }
+
+        void AddCopyItem(ContextMenuStrip m)
+        {
+            foreach (ToolStripItem x in m.Items) if (x.Tag is string && (string)x.Tag == "xpcopy") return;
+            if (m.Items.Count > 0) { ToolStripSeparator sp = new ToolStripSeparator(); sp.Tag = "xpcopy"; m.Items.Add(sp); }
+            ToolStripItem it = m.Items.Add("Copiar linha selecionada", null, delegate { CopySelected(); });
+            it.Tag = "xpcopy";
+            m.Opening += delegate { it.Enabled = SelectedItems.Count > 0; };
+            Lang.Menu(m);
+        }
+
+        public void CopySelected()
+        {
+            if (SelectedItems.Count == 0) return;
+            StringBuilder sb = new StringBuilder();
+            foreach (ListViewItem it in SelectedItems)
+            {
+                if (sb.Length > 0) sb.Append("\r\n");
+                for (int i = 0; i < it.SubItems.Count; i++) { if (i > 0) sb.Append('\t'); sb.Append(it.SubItems[i].Text); }
+            }
+            try { Clipboard.SetText(sb.ToString()); } catch (Exception) { }
+        }
+
+        protected override void OnMouseDown(MouseEventArgs e)
+        {
+            base.OnMouseDown(e);
+            if (e.Button == MouseButtons.Right)
+            {
+                ListViewHitTestInfo h = HitTest(e.Location);
+                if (h.Item != null && !h.Item.Selected) { SelectedItems.Clear(); h.Item.Selected = true; h.Item.Focused = true; }
+            }
+        }
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+            if (e.Control && e.KeyCode == Keys.C && !e.Alt) { CopySelected(); e.Handled = true; e.SuppressKeyPress = true; }
+        }
+
+        // ---- altura = numero de linhas ----
+        protected override void OnHandleCreated(EventArgs e) { base.OnHandleCreated(e); QueueFit(); }
+        protected override void OnVisibleChanged(EventArgs e) { base.OnVisibleChanged(e); if (Visible) QueueFit(); }
+        protected override void OnResize(EventArgs e) { base.OnResize(e); if (!fitting && AutoFit && IsHandleCreated) { maxH = Height; QueueFit(); } }
+        protected override void WndProc(ref Message m)
+        {
+            base.WndProc(ref m);
+            // LVM_INSERTITEMA/W, LVM_DELETEITEM, LVM_DELETEALLITEMS
+            if (AutoFit && (m.Msg == 0x1007 || m.Msg == 0x104D || m.Msg == 0x1008 || m.Msg == 0x1009)) QueueFit();
+        }
+        void QueueFit()
+        {
+            if (!AutoFit || pending || !IsHandleCreated) return;
+            pending = true;
+            try { BeginInvoke(new Action(delegate { pending = false; FitRows(); })); } catch (Exception) { pending = false; }
+        }
+
+        int HeaderH()
+        {
+            if (HeaderStyle == ColumnHeaderStyle.None) return 0;
+            try { IntPtr hh = SendMessage(Handle, 0x101F, IntPtr.Zero, IntPtr.Zero); RCT r; if (hh != IntPtr.Zero && GetWindowRect(hh, out r) && r.B > r.T) return r.B - r.T; } catch (Exception) { }
+            return Font.Height + 8;
+        }
+
+        public void FitRows()
+        {
+            if (!AutoFit || Dock != DockStyle.None || !IsHandleCreated || Parent == null || View != View.Details || Groups.Count > 0) return;
+            if (maxH < 0) maxH = Height;
+            int rowH = Items.Count > 0 ? Items[0].GetBounds(ItemBoundsPortion.Entire).Height : Font.Height + 4;
+            if (rowH < 10) rowH = Font.Height + 4;
+            int colW = 0; foreach (ColumnHeader c in Columns) colW += c.Width;
+            int extra = colW > ClientSize.Width ? SystemInformation.HorizontalScrollBarHeight : 0;
+            int chrome = Height - ClientSize.Height;
+            int need = HeaderH() + Math.Max(1, Items.Count) * rowH + chrome + extra + 2;
+            int minH = HeaderH() + rowH + chrome + 2;
+            int nh = Math.Max(minH, Math.Min(maxH, need));
+            if (nh == Height) return;
+            int delta = nh - Height, oldBottom = Bottom;
+            fitting = true;
+            try { Height = nh; Reflow(this, oldBottom, delta); }
+            finally { fitting = false; }
+        }
+
+        // sobe/desce o que esta abaixo (e cresce/encolhe o grupo que contem a lista) para nao sobrar espaco vazio
+        static void Reflow(Control c, int oldBottom, int delta)
+        {
+            Control p = c.Parent; if (p == null) return;
+            p.SuspendLayout();
+            List<KeyValuePair<Control, AnchorStyles>> saved = new List<KeyValuePair<Control, AnchorStyles>>();
+            foreach (Control k in p.Controls)
+                if (k.Dock == DockStyle.None) { saved.Add(new KeyValuePair<Control, AnchorStyles>(k, k.Anchor)); k.Anchor = AnchorStyles.Top | AnchorStyles.Left; }
+            foreach (Control k in p.Controls)
+                if (k != c && k.Dock == DockStyle.None && k.Top >= oldBottom - 1 && k.Left < c.Right && k.Right > c.Left) k.Top += delta;
+            XpGroup g = p as XpGroup; int pOldBottom = p.Bottom;
+            if (g != null) g.Height += delta;
+            foreach (KeyValuePair<Control, AnchorStyles> kv in saved) kv.Key.Anchor = kv.Value;
+            p.ResumeLayout(true);
+            if (g != null) Reflow(p, pOldBottom, delta);
+        }
+    }
+
     static class UI
     {
         public static Label Lbl(Control p, string t, int x, int y, Font f = null, Color? c = null)
@@ -13906,7 +14026,7 @@ namespace BunoTunner
         FanPage fanPage; RamPage ramPage; AffinityPage affPage;
         XpIconButton btnRam, btnAff, btnUnin, btnNet, btnSto, btnOpt;
         Label lblGpuSel;
-        ListView lvCpu = new ListView();
+        ListView lvCpu = new XpList();
         List<ListViewItem> cpuLive = new List<ListViewItem>();
         Timer timer = new Timer();
         Label status = new Label();
@@ -13918,7 +14038,7 @@ namespace BunoTunner
         ComboBox cbBThr, cbBRam, cbBDrive, cbBSize, cbTheme;
         Label lblTheme, lblBRate, lblBAvg, lblBPeak, lblBTemp, lblBErr, lblBTime, lblBMsg;
         XpOption chkBSafe; XpText txBTemp; XpProgress pbBench;
-        XpGraph grBench = new XpGraph(); ListView lvBench = new ListView(); Timer tmBench = new Timer();
+        XpGraph grBench = new XpGraph(); ListView lvBench = new XpList(); Timer tmBench = new Timer();
         Sn bsnRate, bsnTemp; float? bRateNow, bTempNow;
         RenderForm rf; bool bExt; string bU = ""; double bSc = 1; Action bFallback; bool bRunning; int bKind, bDurSec, bN, gpuGen; long bLast; DateTime bStart, bLastT; double bSum, bPeak, bTempMax;
         static readonly string[] BName = { "GPU", "CPU", "FPU", "RAM", "SSD" };
@@ -13934,7 +14054,7 @@ namespace BunoTunner
         XpGroup grpOc; XpButton btnOcApply, btnOcReset;
         List<Control> ocLock = new List<Control>();
         // specs
-        ListView lvSpec = new ListView();
+        ListView lvSpec = new XpList();
 
         public MainForm()
         {

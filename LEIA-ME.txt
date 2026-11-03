@@ -420,3 +420,8 @@ v1.41.1 (TESTE)
 
 v1.41.2 (TESTE)
 - Drivers: corrigido o erro ao fechar o popup de andamento (X) antes do fim e abrir de novo; o processo continua normalmente em segundo plano.
+
+v1.42.0 (TESTE)
+- Todas as listas do programa: botao direito (ou Ctrl+C) copia so a linha selecionada (varias linhas se houver varias selecionadas).
+- Listas com poucas linhas (modulos de RAM, discos, ventoinhas, historico de testes, regras de afinidade, atributos S.M.A.R.T.) agora tem a altura exata para o numero de linhas; o que estava abaixo sobe junto.
+- Overlay: clique-atraves reforcado (o estilo e reafirmado se o Windows ou o jogo o alterar, e clicar no overlay nunca ativa a janela dele).
