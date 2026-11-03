@@ -29,10 +29,10 @@ using Th = System.Threading;
 [assembly: AssemblyDescription("BunoTunner - controle de ventoinhas, overclock e sensores (open source)")]
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
-[assembly: AssemblyCopyright("Copyright (c) Buno - codigo aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.41.0.0")]
-[assembly: AssemblyFileVersion("1.41.0.0")]
-[assembly: AssemblyInformationalVersion("1.41.0")]
+[assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
+[assembly: AssemblyVersion("1.41.1.0")]
+[assembly: AssemblyFileVersion("1.41.1.0")]
+[assembly: AssemblyInformationalVersion("1.41.1")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -179,63 +179,63 @@ namespace BunoTunner
         static readonly string[] Pairs = {
             "Placa de video:", "Graphics card:",
             "Tema:", "Theme:",
-            "Ventoinhas\nAutomatico, manual (% e RPM) e curva de temperatura", "Fans\nAutomatic, manual (% and RPM) and temperature curve",
+            "Ventoinhas\nAutomático, manual (% e RPM) e curva de temperatura", "Fans\nAutomatic, manual (% and RPM) and temperature curve",
             "Overclock\nCore clock, memory clock, TDP, limite de temperatura e travar clocks", "Overclock\nCore clock, memory clock, TDP, temperature limit and clock locking",
-            "Especificacoes da GPU\nTodos os dados da placa de video", "GPU specifications\nAll graphics card data",
-            "Especificacoes da CPU\nProcessador, nucleos, cache, clocks e conjuntos de instrucoes", "CPU specifications\nProcessor, cores, cache, clocks and instruction sets",
-            "Benchmark / Estresse\nGPU, CPU, FPU, RAM e SSD com verificacao de erros e limite de temperatura", "Benchmark / Stress test\nGPU, CPU, FPU, RAM and SSD with error checking and temperature limit",
-            "Memoria RAM\nVelocidade, canais, voltagem, modulos e todos os timings que o controlador expuser (tCAS, tRCD, tRP, tRAS, tRFC, Command Rate, tRRD, tFAW, tREFI...)", "RAM\nSpeed, channels, voltage, modules and basic timings (tCAS, tRCD, tRP, tRAS, tRC, tRFC, Command Rate)",
-            "Saude do armazenamento\nVida util restante, temperatura e S.M.A.R.T. de SSDs NVMe/SATA e HDs", "Storage health\nRemaining life, temperature and S.M.A.R.T. of NVMe/SATA SSDs and HDDs",
-            "Internet\nTeste de velocidade (ping, download, upload) e informacoes da rede", "Internet\nSpeed test (ping, download, upload) and network information",
-            "Afinidade de processos\nEscolha em quais nucleos cada programa roda; presets e regras automaticas", "Process affinity\nChoose which cores each program runs on; presets and automatic rules",
-            "Desinstalador\nRemove programas por completo: pastas, registro, inicializacao, servicos e tarefas que sobram; tambem remove o que se recusa a desinstalar", "Uninstaller\nRemoves programs completely: leftover folders, registry, startup entries, services and tasks; also removes what refuses to uninstall",
-            "Otimizacoes do Windows\nLimpeza de temporarios, compressao de memoria e outros ajustes", "Windows optimizations\nTemp cleanup, memory compression and other tweaks",
-            "Sensores\nTudo em uma janela: GPU, CPU, placa-mae, memoria, discos e ventoinhas, com grafico, busca e alertas", "Sensors\nEverything in one window: GPU, CPU, motherboard, memory, disks and fans, with graph, search and alerts",
-            "Limpar arquivos temporarios", "Clean temporary files",
-            "Apaga C:\\Windows\\Temp, Prefetch e a pasta %temp% do usuario (itens em uso sao ignorados). Nenhum documento pessoal e tocado.", "Deletes C:\\Windows\\Temp, Prefetch and the user %temp% folder (files in use are skipped). No personal documents are touched.",
-            "Desativar compressao de memoria", "Disable memory compression",
-            "Executa Disable-MMAgent -mc: o Windows deixa de comprimir a RAM (usa um pouco menos de CPU, um pouco mais de RAM). Vale apos reiniciar o PC.", "Runs Disable-MMAgent -mc: Windows stops compressing RAM (slightly less CPU, slightly more RAM used). Takes effect after a reboot.",
+            "Especificações da GPU\nTodos os dados da placa de video", "GPU specifications\nAll graphics card data",
+            "Especificações da CPU\nProcessador, núcleos, cache, clocks e conjuntos de instruções", "CPU specifications\nProcessor, cores, cache, clocks and instruction sets",
+            "Benchmark / Estresse\nGPU, CPU, FPU, RAM e SSD com verificação de erros e limite de temperatura", "Benchmark / Stress test\nGPU, CPU, FPU, RAM and SSD with error checking and temperature limit",
+            "Memória RAM\nVelocidade, canais, voltagem, módulos e todos os timings que o controlador expuser (tCAS, tRCD, tRP, tRAS, tRFC, Command Rate, tRRD, tFAW, tREFI...)", "RAM\nSpeed, channels, voltage, modules and basic timings (tCAS, tRCD, tRP, tRAS, tRC, tRFC, Command Rate)",
+            "Saúde do armazenamento\nVida útil restante, temperatura e S.M.A.R.T. de SSDs NVMe/SATA e HDs", "Storage health\nRemaining life, temperature and S.M.A.R.T. of NVMe/SATA SSDs and HDDs",
+            "Internet\nTeste de velocidade (ping, download, upload) e informações da rede", "Internet\nSpeed test (ping, download, upload) and network information",
+            "Afinidade de processos\nEscolha em quais núcleos cada programa roda; presets e regras automáticas", "Process affinity\nChoose which cores each program runs on; presets and automatic rules",
+            "Desinstalador\nRemove programas por completo: pastas, registro, inicialização, serviços e tarefas que sobram; também remove o que se recusa a desinstalar", "Uninstaller\nRemoves programs completely: leftover folders, registry, startup entries, services and tasks; also removes what refuses to uninstall",
+            "Otimizações do Windows\nLimpeza de temporários, compressão de memória e outros ajustes", "Windows optimizations\nTemp cleanup, memory compression and other tweaks",
+            "Sensores\nTudo em uma janela: GPU, CPU, placa-mae, memória, discos e ventoinhas, com gráfico, busca e alertas", "Sensors\nEverything in one window: GPU, CPU, motherboard, memory, disks and fans, with graph, search and alerts",
+            "Limpar arquivos temporários", "Clean temporary files",
+            "Apaga C:\\Windows\\Temp, Prefetch e a pasta %temp% do usuário (itens em uso são ignorados). Nenhum documento pessoal é tocado.", "Deletes C:\\Windows\\Temp, Prefetch and the user %temp% folder (files in use are skipped). No personal documents are touched.",
+            "Desativar compressão de memória", "Disable memory compression",
+            "Executa Disable-MMAgent -mc: o Windows deixa de comprimir a RAM (usa um pouco menos de CPU, um pouco mais de RAM). Vale após reiniciar o PC.", "Runs Disable-MMAgent -mc: Windows stops compressing RAM (slightly less CPU, slightly more RAM used). Takes effect after a reboot.",
             "Menu de clique direito do Windows 10", "Windows 10 right-click menu",
-            "No Windows 11, traz de volta o menu de clique direito completo e classico do Windows 10 (sem o \"Mostrar mais opcoes\"). Vale ao reiniciar o Explorer ou fazer logoff.", "On Windows 11, brings back the full classic Windows 10 right-click menu (no \"Show more options\"). Takes effect after restarting Explorer or signing out.",
+            "No Windows 11, traz de volta o menu de clique direito completo e clássico do Windows 10 (sem o \"Mostrar mais opções\"). Vale ao reiniciar o Explorer ou fazer logoff.", "On Windows 11, brings back the full classic Windows 10 right-click menu (no \"Show more options\"). Takes effect after restarting Explorer or signing out.",
             "Desativar MPO (Multiplane Overlay)", "Disable MPO (Multiplane Overlay)",
             "Define OverlayTestMode=5 no DWM. Ajuda a resolver tremidas, telas piscando e telas pretas em alguns monitores/placas NVIDIA e AMD. Reinicie o PC para valer.", "Sets OverlayTestMode=5 in DWM. Helps with stutter, flickering and black screens on some monitors/NVIDIA and AMD cards. Reboot to apply.",
             "Overlay DLSS (indicador na tela)", "DLSS overlay (on-screen indicator)",
-            "Mostra no canto do jogo um indicador quando o DLSS esta em uso (so placas NVIDIA RTX). Aplica na proxima vez que abrir o jogo.", "Shows an indicator in the game corner when DLSS is in use (NVIDIA RTX only). Applies next time the game starts.",
-            "Isolamento de nucleo (Integridade de memoria)", "Core isolation (Memory integrity)",
-            "Recurso de seguranca do Windows (HVCI) que isola o nucleo do sistema usando virtualizacao. Desativar pode dar mais FPS em jogos e liberar drivers antigos, mas reduz a protecao. Reinicie o PC.", "Windows security feature (HVCI) that isolates the system core using virtualization. Disabling may give more FPS in games and allow old drivers, but lowers protection. Reboot required.",
-            "Hibernacao", "Hibernation",
-            "Liga ou desliga a hibernacao (powercfg /hibernate). Desligada, apaga o hiberfil.dat (libera varios GB no disco) e tambem desativa a Inicializacao Rapida.", "Turns hibernation on or off (powercfg /hibernate). When off, deletes hiberfil.sys (frees several GB) and also disables Fast Startup.",
-            "Aceleracao do mouse (Aprimorar precisao do ponteiro)", "Mouse acceleration (Enhance pointer precision)",
-            "Desligada, o ponteiro anda sempre a mesma distancia para o mesmo movimento da mao (recomendado para jogos). Aplica na hora, sem reiniciar.", "When off, the pointer always moves the same distance for the same hand movement (recommended for games). Applies instantly, no reboot.",
-            "Mitigacoes do Windows (Spectre / Meltdown)", "Windows mitigations (Spectre / Meltdown)",
-            "Desativa as mitigacoes de execucao especulativa (FeatureSettingsOverride=3) para ganhar desempenho. REDUZ A SEGURANCA do PC; use so em maquina de jogos sem dados sensiveis. Reinicie o PC.", "Disables speculative-execution mitigations (FeatureSettingsOverride=3) for performance. LOWERS PC SECURITY; use only on a gaming machine without sensitive data. Reboot required.",
+            "Mostra no canto do jogo um indicador quando o DLSS está em uso (só placas NVIDIA RTX). Aplica na próxima vez que abrir o jogo.", "Shows an indicator in the game corner when DLSS is in use (NVIDIA RTX only). Applies next time the game starts.",
+            "Isolamento de núcleo (Integridade de memória)", "Core isolation (Memory integrity)",
+            "Recurso de segurança do Windows (HVCI) que isola o núcleo do sistema usando virtualização. Desativar pode dar mais FPS em jogos e liberar drivers antigos, mas reduz a proteção. Reinicie o PC.", "Windows security feature (HVCI) that isolates the system core using virtualization. Disabling may give more FPS in games and allow old drivers, but lowers protection. Reboot required.",
+            "Hibernação", "Hibernation",
+            "Liga ou desliga a hibernação (powercfg /hibernate). Desligada, apaga o hiberfil.dat (libera vários GB no disco) e também desativa a Inicialização Rápida.", "Turns hibernation on or off (powercfg /hibernate). When off, deletes hiberfil.sys (frees several GB) and also disables Fast Startup.",
+            "Aceleração do mouse (Aprimorar precisão do ponteiro)", "Mouse acceleration (Enhance pointer precision)",
+            "Desligada, o ponteiro anda sempre a mesma distância para o mesmo movimento da mão (recomendado para jogos). Aplica na hora, sem reiniciar.", "When off, the pointer always moves the same distance for the same hand movement (recommended for games). Applies instantly, no reboot.",
+            "Mitigações do Windows (Spectre / Meltdown)", "Windows mitigations (Spectre / Meltdown)",
+            "Desativa as mitigações de execução especulativa (FeatureSettingsOverride=3) para ganhar desempenho. REDUZ A SEGURANÇA do PC; use só em máquina de jogos sem dados sensíveis. Reinicie o PC.", "Disables speculative-execution mitigations (FeatureSettingsOverride=3) for performance. LOWERS PC SECURITY; use only on a gaming machine without sensitive data. Reboot required.",
             "Limpar", "Clean",
             "Desativar", "Disable",
             "Ativar", "Enable",
             "Reativar", "Re-enable",
             "Desfazer", "Undo",
-            "Padrao do Windows", "Windows default",
+            "Padrão do Windows", "Windows default",
             "Desativar MPO", "Disable MPO",
             "Executando...", "Running...",
             "GPU  -  render 3D (estilo FurMark)", "GPU  -  3D render (FurMark style)",
             "Abre uma janela OpenGL com shader e pelos e mostra o FPS. Fechar a janela para o teste.", "Opens an OpenGL window with shaders and fur and shows FPS. Closing the window stops the test.",
             "CPU  -  ray tracing 3D (estilo Cinebench)", "CPU  -  3D ray tracing (Cinebench style)",
-            "Renderiza uma cena em todos os nucleos, bloco a bloco. Pontos = Mrays/s x 100.", "Renders a scene on all cores, block by block. Points = Mrays/s x 100.",
+            "Renderiza uma cena em todos os núcleos, bloco a bloco. Pontos = Mrays/s x 100.", "Renders a scene on all cores, block by block. Points = Mrays/s x 100.",
             "FPU  -  campo de ondas em ponto flutuante", "FPU  -  floating-point wave field",
-            "Calculo de ondas com seno/cosseno em todos os nucleos; mostra GFLOPS estimado.", "Wave calculation with sine/cosine on all cores; shows estimated GFLOPS.",
-            "RAM  -  escrita e leitura com verificacao", "RAM  -  write and read with verification",
-            "Grava e le padroes na memoria e confere cada valor; qualquer diferenca conta como erro.", "Writes and reads patterns in memory and checks every value; any difference counts as an error.",
-            "SSD  -  sequencial + 4K aleatorio", "SSD  -  sequential + random 4K",
-            "Usa um arquivo temporario no drive escolhido (apagado ao fim). Em 'Ate parar' gera desgaste.", "Uses a temporary file on the chosen drive (deleted at the end). 'Until stopped' causes wear.",
-            "Duracao:", "Duration:",
+            "Cálculo de ondas com seno/cosseno em todos os núcleos; mostra GFLOPS estimado.", "Wave calculation with sine/cosine on all cores; shows estimated GFLOPS.",
+            "RAM  -  escrita e leitura com verificação", "RAM  -  write and read with verification",
+            "Grava e le padrões na memória e confere cada valor; qualquer diferença conta como erro.", "Writes and reads patterns in memory and checks every value; any difference counts as an error.",
+            "SSD  -  sequencial + 4K aleatório", "SSD  -  sequential + random 4K",
+            "Usa um arquivo temporário no drive escolhido (apagado ao fim). Em 'Até parar' gera desgaste.", "Uses a temporary file on the chosen drive (deleted at the end). 'Until stopped' causes wear.",
+            "Duração:", "Duration:",
             "Threads:", "Threads:",
             "Usar (% da livre):", "Use (% of free):",
             "Drive:", "Drive:",
             "Tamanho:", "Size:",
             "Parar se passar de", "Stop if above",
-            "Rodar sequencia (CPU, FPU, RAM, GPU)", "Run sequence (CPU, FPU, RAM, GPU)",
+            "Rodar sequência (CPU, FPU, RAM, GPU)", "Run sequence (CPU, FPU, RAM, GPU)",
             "Parar tudo", "Stop all",
-            "Clique no icone de um teste para iniciar.", "Click a test icon to start.",
+            "Clique no ícone de um teste para iniciar.", "Click a test icon to start.",
             "Resultado ao vivo", "Live result",
             "Taxa atual", "Current rate",
             "Teste", "Test",
@@ -254,13 +254,13 @@ namespace BunoTunner
             "Atualizar lista", "Refresh list",
             "Escolher pasta ou .exe...", "Choose folder or .exe...",
             "Desinstalar e limpar restos", "Uninstall and clean leftovers",
-            "Remocao forcada", "Forced removal",
+            "Remoção forçada", "Forced removal",
             "So procurar restos", "Only scan for leftovers",
             "Encerrar processos", "End processes",
             "Duplo clique desinstala.", "Double-click to uninstall.",
             "Programa", "Program",
             "Editora", "Publisher",
-            "Versao", "Version",
+            "Versão", "Version",
             "Tamanho", "Size",
             "Instalado", "Installed",
             "Tipo", "Type",
@@ -269,30 +269,30 @@ namespace BunoTunner
             "Marcar tudo", "Check all",
             "Desmarcar tudo", "Uncheck all",
             "Remover itens marcados", "Remove checked items",
-            "Pastas e arquivos vao para a Lixeira (podem ser recuperados)", "Folders and files go to the Recycle Bin (recoverable)",
-            "Salvar copia (.reg) das chaves do registro antes de apagar", "Save a copy (.reg) of registry keys before deleting",
-            "Criar ponto de restauracao do Windows antes", "Create a Windows restore point first",
-            "Dica: itens com 'Certeza: alta' sao ligados ao programa; os de certeza 'media' vem desmarcados - confira antes.", "Tip: items with 'high' certainty belong to the program; 'medium' ones come unchecked - review them first.",
+            "Pastas e arquivos vão para a Lixeira (podem ser recuperados)", "Folders and files go to the Recycle Bin (recoverable)",
+            "Salvar cópia (.reg) das chaves do registro antes de apagar", "Save a copy (.reg) of registry keys before deleting",
+            "Criar ponto de restauração do Windows antes", "Create a Windows restore point first",
+            "Dica: itens com 'Certeza: alta' são ligados ao programa; os de certeza 'media' vêm desmarcados - confira antes.", "Tip: items with 'high' certainty belong to the program; 'medium' ones come unchecked - review them first.",
             "Pasta", "Folder",
             "Exe", "Exe",
             "Cancelar", "Cancel",
             "Cancelando...", "Cancelling...",
             "Teste de velocidade da internet", "Internet speed test",
-            "Informacoes da rede", "Network information",
+            "Informações da rede", "Network information",
             "Iniciar teste", "Start test",
-            "Mostrar informacoes da rede", "Show network information",
+            "Mostrar informações da rede", "Show network information",
             "Ocultar", "Hide",
             "Mede ping, download e upload de verdade (servidor da Cloudflare).", "Measures real ping, download and upload (Cloudflare server).",
-            "Por privacidade, nada e mostrado ate voce clicar. Ao clicar aparecem dados pessoais (IPs, MAC, provedor, cidade, nome do Wi-Fi).", "For privacy, nothing is shown until you click. Clicking reveals personal data (IPs, MAC, ISP, city, Wi-Fi name).",
+            "Por privacidade, nada é mostrado até você clicar. Ao clicar aparecem dados pessoais (IPs, MAC, provedor, cidade, nome do Wi-Fi).", "For privacy, nothing is shown until you click. Clicking reveals personal data (IPs, MAC, ISP, city, Wi-Fi name).",
             "Seus discos", "Your disks",
             "Detalhes do disco selecionado", "Selected disk details",
-            "Saude geral:", "Overall health:",
-            "Vida util restante:", "Remaining life:",
+            "Saúde geral:", "Overall health:",
+            "Vida útil restante:", "Remaining life:",
             "Temperatura:", "Temperature:",
             "Selecione um disco na lista acima.", "Select a disk in the list above.",
             "Atualizar", "Refresh",
             "Disco", "Disk",
-            "Saude", "Health",
+            "Saúde", "Health",
             "Vida", "Life",
             "Temp.", "Temp.",
             "Horas", "Hours",
@@ -302,50 +302,50 @@ namespace BunoTunner
             "Timings atuais (leitura automática)", "Current timings (automatic reading)",
             "Lendo os timings...", "Reading timings...",
             "Ler novamente", "Read again",
-            "Diagnostico", "Diagnostics",
+            "Diagnóstico", "Diagnostics",
             "Indicar CPU-Z...", "Set CPU-Z...",
             "Baixar CPU-Z", "Download CPU-Z",
-            "Latencia da memoria (ns)", "Memory latency (ns)",
-            "Medir latencia", "Measure latency",
+            "Latência da memória (ns)", "Memory latency (ns)",
+            "Medir latência", "Measure latency",
             "Parar", "Stop",
-            "Latencia da RAM (bloco de 256 MB)", "RAM latency (256 MB block)",
+            "Latência da RAM (bloco de 256 MB)", "RAM latency (256 MB block)",
             "Afinidade (CPUs)", "Affinity (CPUs)",
             "Prioridade", "Priority",
             "Prioridade:", "Priority:",
             "Processo", "Process",
-            "Memoria", "Memory",
+            "Memória", "Memory",
             "Filtrar:", "Filter:",
             "Marcar mesmo nome", "Check same name",
             "Desmarcar", "Uncheck",
-            "Pausar atualizacao", "Pause updating",
+            "Pausar atualização", "Pause updating",
             "Aplicar", "Apply",
             "Aplicar aos marcados", "Apply to checked",
             "Aplicar regras automaticamente", "Apply rules automatically",
-            "Regras automaticas", "Automatic rules",
+            "Regras automáticas", "Automatic rules",
             "Presets", "Presets",
             "Preset", "Preset",
             "Salvar atual", "Save current",
             "Excluir", "Delete",
             "Nova regra", "New rule",
             "Remover", "Remove",
-            "Especificacoes da CPU", "CPU specifications",
-            "Especificacoes da GPU selecionada", "Selected GPU specifications",
+            "Especificações da CPU", "CPU specifications",
+            "Especificações da GPU selecionada", "Selected GPU specifications",
             "Propriedade", "Property",
             "Fechar", "Close",
             "Todos", "All",
             "Nenhum", "None",
             "Inverter", "Invert",
-            "Fisicos", "Physical",
+            "Físicos", "Physical",
             "Essenciais", "Essentials",
             "1a metade", "1st half",
             "2a metade", "2nd half",
-            "Ventoinhas detectadas (Ctrl/Shift = varias)", "Detected fans (Ctrl/Shift = several)",
+            "Ventoinhas detectadas (Ctrl/Shift = várias)", "Detected fans (Ctrl/Shift = several)",
             "Modo de funcionamento das selecionadas", "Operating mode of the selected fans",
             "Aplicar", "Apply",
             "Aplicar nas selecionadas", "Apply to selected",
-            "Tudo automatico", "All automatic",
+            "Tudo automático", "All automatic",
             "Identificar", "Identify",
-            "Voltar tudo ao automatico ao fechar", "Return everything to automatic on close",
+            "Voltar tudo ao automático ao fechar", "Return everything to automatic on close",
             "Ventoinha", "Fan",
             "Modo", "Mode",
             "Fabricante", "Manufacturer",
@@ -359,51 +359,51 @@ namespace BunoTunner
             "Max", "Max",
             "Origem", "Source",
             "Redefinir tudo", "Reset all",
-            "Restaurar padrao", "Restore default",
+            "Restaurar padrão", "Restore default",
             "Destravar tudo", "Unlock all",
             "Travar", "Lock",
             "Overclock / limites", "Overclock / limits",
             "Manual - velocidade fixa em %:", "Manual - fixed speed in %:",
             "Definir por RPM", "Set by RPM",
             "RPM alvo:", "Target RPM:",
-            "Automatico - a placa/BIOS decide (recomendado no dia a dia)", "Automatic - the card/BIOS decides (recommended for daily use)",
-            "Travar clock do nucleo (MHz):  min", "Lock core clock (MHz):  min",
-            "Travar clock da memoria (MHz):  min", "Lock memory clock (MHz):  min",
+            "Automático - a placa/BIOS decide (recomendado no dia a dia)", "Automatic - the card/BIOS decides (recommended for daily use)",
+            "Travar clock do núcleo (MHz):  min", "Lock core clock (MHz):  min",
+            "Travar clock da memória (MHz):  min", "Lock memory clock (MHz):  min",
             "Atualizar a cada:", "Update every:" };
         static readonly string[] Pairs2 = {
             "Drivers de GPU e Chipset direto da fabricante", "GPU and Chipset drivers straight from the manufacturer",
-            "Consulta o site da NVIDIA / AMD e compara com o driver instalado. Se houver versao mais nova, baixa o instalador oficial, confere a assinatura digital e abre a instalacao normal para voce concluir. Para Intel, abre o Assistente de Drivers da Intel.", "Checks the NVIDIA / AMD website and compares with the installed driver. If a newer version exists, it downloads the official installer, checks its digital signature and opens the normal installation for you to finish. For Intel, it opens Intel's Driver & Support Assistant.",
+            "Consulta o site da NVIDIA / AMD e compara com o driver instalado. Se houver versão mais nova, baixa o instalador oficial, confere a assinatura digital e abre a instalação normal para você concluir. Para Intel, abre o Assistente de Drivers da Intel.", "Checks the NVIDIA / AMD website and compares with the installed driver. If a newer version exists, it downloads the official installer, checks its digital signature and opens the normal installation for you to finish. For Intel, it opens Intel's Driver & Support Assistant.",
             "Verificar GPU e Chipset", "Check GPU and Chipset",
             "Consultando os sites das fabricantes...", "Checking the manufacturers' websites...",
             "Atualizar drivers (todos os dispositivos, GPU e Chipset)", "Update drivers (all devices, GPU and Chipset)", "Windows Update (todos os dispositivos)", "Windows Update (all devices)", "Site da fabricante (GPU NVIDIA/AMD e chipset AMD)", "Manufacturer website (NVIDIA/AMD GPU and AMD chipset)",
             "Marque pelo menos uma das origens (Windows Update ou site da fabricante).", "Tick at least one source (Windows Update or manufacturer website).", "---- Windows Update ----", "---- Windows Update ----", "---- Site da fabricante ----", "---- Manufacturer website ----",
-            "Concluido.", "Done.", "Ignorado.", "Skipped.", "gravando", "writing", "conferindo", "verifying", "conferido sem erro", "verified, no error", "erro", "error", "Padrao", "Pattern", "Passagem", "Pass", "Blocos", "Blocks", "Reservando a memoria do teste...", "Reserving the test memory...", "Escrita sequencial (1 MB)", "Sequential write (1 MB)", "Leitura sequencial + conferencia", "Sequential read + verification", "Leitura aleatoria 4K", "Random 4K read", "Historico de testes", "Test history", "Data e hora", "Date and time", "Avaliacao da conexao", "Connection rating", "Faca um teste para ver se a sua conexao serve para jogos, streaming e chamadas.", "Run a test to see whether your connection suits gaming, streaming and calls.", "Medindo...", "Measuring...", "Controle, seguranca e resultado ao vivo", "Controls, safety and live results", "Taxa atual", "Current rate", "Copiar relatorio", "Copy report", "Salvar relatorio...", "Save report...", "Mostrar so alertas", "Show alerts only", "Filtrar:", "Filter:", "Situacao", "Status", "Selecione um disco primeiro.", "Select a disk first.", "Relatorio copiado para a area de transferencia.", "Report copied to the clipboard.", "Relatorio salvo.", "Report saved.", "Inverter selecao", "Invert selection", "Dica: Enter nos campos de % ou RPM tambem aplica.", "Tip: Enter in the % or RPM boxes also applies.", "Identificar = liga as selecionadas a 100% por 5 s para voce descobrir qual e qual.  Botao direito na lista: selecionar por tipo ou renomear (inclua CPU, Bomba ou Gabinete no nome). Atalhos: Ctrl+A seleciona tudo, F2 ou duplo clique renomeia.", "Identify = runs the selected fans at 100% for 5 s so you can tell which is which.  Right-click the list: select by type or rename (include CPU, Pump or Case in the name). Shortcuts: Ctrl+A selects all, F2 or double-click renames.", "Limpeza e manutencao", "Cleanup and maintenance", "Libera espaco no disco.", "Frees disk space.", "Desempenho em jogos", "Gaming performance", "Ajustes que podem melhorar FPS, tremidas e resposta do mouse.", "Tweaks that can improve FPS, stutter and mouse response.", "Interface do Windows", "Windows interface", "Aparencia e comportamento do sistema.", "System look and behavior.", "Seguranca (avancado)", "Security (advanced)", "Estes ajustes REDUZEM a protecao do PC. Use so se souber o que esta fazendo.", "These tweaks REDUCE the PC's protection. Use only if you know what you are doing.", "Mantenha a GPU, o chipset e os demais dispositivos atualizados.", "Keep the GPU, chipset and other devices up to date.",
+            "Concluído.", "Done.", "Ignorado.", "Skipped.", "gravando", "writing", "conferindo", "verifying", "conferido sem erro", "verified, no error", "erro", "error", "Padrão", "Pattern", "Passagem", "Pass", "Blocos", "Blocks", "Reservando a memória do teste...", "Reserving the test memory...", "Escrita sequencial (1 MB)", "Sequential write (1 MB)", "Leitura sequencial + conferência", "Sequential read + verification", "Leitura aleatória 4K", "Random 4K read", "Histórico de testes", "Test history", "Data e hora", "Date and time", "Avaliação da conexão", "Connection rating", "Faça um teste para ver se a sua conexão serve para jogos, streaming e chamadas.", "Run a test to see whether your connection suits gaming, streaming and calls.", "Medindo...", "Measuring...", "Controle, segurança e resultado ao vivo", "Controls, safety and live results", "Taxa atual", "Current rate", "Copiar relatório", "Copy report", "Salvar relatório...", "Save report...", "Mostrar só alertas", "Show alerts only", "Filtrar:", "Filter:", "Situação", "Status", "Selecione um disco primeiro.", "Select a disk first.", "Relatório copiado para a área de transferência.", "Report copied to the clipboard.", "Relatório salvo.", "Report saved.", "Inverter seleção", "Invert selection", "Dica: Enter nos campos de % ou RPM também aplica.", "Tip: Enter in the % or RPM boxes also applies.", "Identificar = liga as selecionadas a 100% por 5 s para você descobrir qual é qual.  Botão direito na lista: selecionar por tipo ou renomear (inclua CPU, Bomba ou Gabinete no nome). Atalhos: Ctrl+A seleciona tudo, F2 ou duplo clique renomeia.", "Identify = runs the selected fans at 100% for 5 s so you can tell which is which.  Right-click the list: select by type or rename (include CPU, Pump or Case in the name). Shortcuts: Ctrl+A selects all, F2 or double-click renames.", "Limpeza e manutenção", "Cleanup and maintenance", "Libera espaço no disco.", "Frees disk space.", "Desempenho em jogos", "Gaming performance", "Ajustes que podem melhorar FPS, tremidas e resposta do mouse.", "Tweaks that can improve FPS, stutter and mouse response.", "Interface do Windows", "Windows interface", "Aparência e comportamento do sistema.", "System look and behavior.", "Segurança (avançado)", "Security (advanced)", "Estes ajustes REDUZEM a proteção do PC. Use só se souber o que está fazendo.", "These tweaks REDUCE the PC's protection. Use only if you know what you are doing.", "Mantenha a GPU, o chipset e os demais dispositivos atualizados.", "Keep the GPU, chipset and other devices up to date.",
             "Instalador fechado.", "Installer closed.",
-            "Abrindo o instalador. Conclua a instalacao na janela da fabricante...", "Opening the installer. Finish the installation in the manufacturer's window...",
-            "Instalador apagado por seguranca. Nada foi executado.", "Installer deleted for safety. Nothing was run.",
+            "Abrindo o instalador. Conclua a instalação na janela da fabricante...", "Opening the installer. Finish the installation in the manufacturer's window...",
+            "Instalador apagado por segurança. Nada foi executado.", "Installer deleted for safety. Nothing was run.",
             "Nenhuma placa de video NVIDIA/AMD ou chipset AMD identificado.", "No NVIDIA/AMD graphics card or AMD chipset identified.",
-            "Intel: a Intel nao oferece consulta publica confiavel de versoes; o Assistente de Drivers e Suporte da Intel faz isso.", "Intel: Intel offers no reliable public version lookup; Intel's Driver & Support Assistant does that.",
-            "Desfazer", "Undo", "Refazer", "Redo", "Limpar lista", "Clear list", "Restaurar padrao", "Restore defaults", "Exportar...", "Export...", "Importar...", "Import...",
+            "Intel: a Intel não oferece consulta pública confiável de versões; o Assistente de Drivers e Suporte da Intel faz isso.", "Intel: Intel offers no reliable public version lookup; Intel's Driver & Support Assistant does that.",
+            "Desfazer", "Undo", "Refazer", "Redo", "Limpar lista", "Clear list", "Restaurar padrão", "Restore defaults", "Exportar...", "Export...", "Importar...", "Import...",
             "Todos os grupos", "All groups", "Adicionar ao overlay", "Add to overlay", "Adicionar todos os resultados da busca", "Add all search results",
             "Aplicar esta cor a todos os itens", "Apply this color to all items",
-            "Configuracao do overlay (*.bto)|*.bto|Todos os arquivos|*.*", "Overlay settings (*.bto)|*.bto|All files|*.*",
-            "Exportar configuracao do overlay", "Export overlay settings", "Importar configuracao do overlay", "Import overlay settings",
-            "Configuracao exportada.", "Settings exported.", "Configuracao importada. Use Ctrl+Z para voltar a anterior.", "Settings imported. Press Ctrl+Z to go back to the previous ones.",
-            "Esse arquivo nao tem uma configuracao valida do overlay.", "This file does not contain a valid overlay configuration.",
+            "Configuração do overlay (*.bto)|*.bto|Todos os arquivos|*.*", "Overlay settings (*.bto)|*.bto|All files|*.*",
+            "Exportar configuração do overlay", "Export overlay settings", "Importar configuração do overlay", "Import overlay settings",
+            "Configuração exportada.", "Settings exported.", "Configuração importada. Use Ctrl+Z para voltar a anterior.", "Settings imported. Press Ctrl+Z to go back to the previous ones.",
+            "Esse arquivo não tem uma configuração valida do overlay.", "This file does not contain a valid overlay configuration.",
             "Defina antes uma cor para o item selecionado.", "First set a color for the selected item.",
-            "Restaurar todas as opcoes do overlay (itens, cores, nomes, tamanho, opacidade...) para o padrao?\nVoce pode desfazer com Ctrl+Z.", "Restore all overlay options (items, colors, names, size, opacity...) to the defaults?\nYou can undo with Ctrl+Z.",
+            "Restaurar todas as opções do overlay (itens, cores, nomes, tamanho, opacidade...) para o padrão?\nVocê pode desfazer com Ctrl+Z.", "Restore all overlay options (items, colors, names, size, opacity...) to the defaults?\nYou can undo with Ctrl+Z.",
             "Cor...", "Color...", "Renomear...", "Rename...", "Renomear", "Rename", "Subir", "Move up", "Descer", "Move down", "Resetar", "Reset",
             "Resetar cor e nome", "Reset color and name", "Remover do overlay", "Remove from overlay",
             "Nome que aparece no overlay (deixe vazio para voltar ao nome original):", "Name shown in the overlay (leave empty to restore the original):",
             "Selecione antes um item na lista da direita (Ordem no overlay).", "First select an item in the right-hand list (Order in overlay).",
-                        "Compacto (so os valores, sem nomes)", "Compact (values only, no names)", "Aplicar a cor tambem ao nome", "Also apply the color to the name",
+                        "Compacto (só os valores, sem nomes)", "Compact (values only, no names)", "Aplicar a cor também ao nome", "Also apply the color to the name",
             "Temperatura em vermelho a partir de:", "Red temperature from:", "Desligado", "Off",
             "Ativado", "Enabled", "Desativado", "Disabled",
-            "Interface fisica (PHY)", "Physical interface (PHY)",
+            "Interface física (PHY)", "Physical interface (PHY)",
             "Velocidade (MT/s):", "Speed (MT/s):", "Gear Down Mode:", "Gear Down Mode:", "Burst length:", "Burst length:",
             "Principais", "Main",
-            "Ativacao e escrita", "Activation and write",
-            "Refresh e calibracao", "Refresh and calibration",
+            "Ativação e escrita", "Activation and write",
+            "Refresh e calibração", "Refresh and calibration",
             "Leitura / escrita entre bancos e ranks", "Read / write between banks and ranks",
             "Economia de energia", "Power saving",
             "Treino do controlador (RTL / IOL)", "Controller training (RTL / IOL)",
@@ -415,61 +415,61 @@ namespace BunoTunner
             "Overlay em jogos", "In-game overlay",
             "Ativar overlay em jogos", "Enable in-game overlay",
             "Tamanho:", "Size:",
-            "Opacidade:", "Opacity:", "Layout:", "Layout:", "Padrao (fundo + contorno)", "Default (background + border)", "Sem fundo nem contorno", "No background or border",
-            "So contorno (sem fundo)", "Border only (no background)", "Barra lateral", "Side bar", "Neon", "Neon", "Terminal (verde)", "Terminal (green)", "Tema: Luna (XP)", "Theme: Luna (XP)", "Tema: Frutiger Aero (Win 7)", "Theme: Frutiger Aero (Win 7)", "Tema: Dark / AMOLED", "Theme: Dark / AMOLED", "Tema: Neon / Cyberpunk", "Theme: Neon / Cyberpunk", "Tema: Steampunk", "Theme: Steampunk", "Tema: Vintage (Win 95)", "Theme: Vintage (Win 95)", "Tema: GTA VI (Vice City)", "Theme: GTA VI (Vice City)", "Vidro (translucido)", "Glass (translucent)", "Pilula", "Pill", "Claro minimalista", "Light minimal", "Barra superior", "Top bar", "Barra inferior", "Bottom bar", "Ambar (monitor antigo)", "Amber (old monitor)", "HUD ciano", "Cyan HUD", "Oceano", "Ocean", "Floresta", "Forest", "Rosa", "Pink", "Papel", "Paper", "Faixa escura (sem borda)", "Dark strip (no border)", 
+            "Opacidade:", "Opacity:", "Layout:", "Layout:", "Padrão (fundo + contorno)", "Default (background + border)", "Sem fundo nem contorno", "No background or border",
+            "So contorno (sem fundo)", "Border only (no background)", "Barra lateral", "Side bar", "Neon", "Neon", "Terminal (verde)", "Terminal (green)", "Tema: Luna (XP)", "Theme: Luna (XP)", "Tema: Frutiger Aero (Win 7)", "Theme: Frutiger Aero (Win 7)", "Tema: Dark / AMOLED", "Theme: Dark / AMOLED", "Tema: Neon / Cyberpunk", "Theme: Neon / Cyberpunk", "Tema: Steampunk", "Theme: Steampunk", "Tema: Vintage (Win 95)", "Theme: Vintage (Win 95)", "Tema: GTA VI (Vice City)", "Theme: GTA VI (Vice City)", "Vidro (translúcido)", "Glass (translucent)", "Pílula", "Pill", "Claro minimalista", "Light minimal", "Barra superior", "Top bar", "Barra inferior", "Bottom bar", "Âmbar (monitor antigo)", "Amber (old monitor)", "HUD ciano", "Cyan HUD", "Oceano", "Ocean", "Floresta", "Forest", "Rosa", "Pink", "Papel", "Paper", "Faixa escura (sem borda)", "Dark strip (no border)", 
             "Mostrar:", "Show:",
             "Somente em jogos (tela cheia ou janela sem borda)", "Only in games (fullscreen or borderless)",
             "Em qualquer programa que desenhe com DirectX", "In any program that renders with DirectX",
             "Sempre (para testar)", "Always (for testing)",
-            "Sensores disponiveis  (duplo clique ou arraste para a direita)", "Available sensors  (double-click or drag to the right)",
+            "Sensores disponíveis  (duplo clique ou arraste para a direita)", "Available sensors  (double-click or drag to the right)",
             "Ordem no overlay  (arraste para reordenar)", "Order in the overlay  (drag to reorder)",
-            "Posicao:", "Position:", "Atalho:", "Hotkey:", "Mostrar/ocultar: ", "Show/hide: ", "(nenhum)", "(none)", "Pressione o atalho...  (Esc cancela, Del limpa)", "Press the hotkey...  (Esc cancels, Del clears)",
+            "Posição:", "Position:", "Atalho:", "Hotkey:", "Mostrar/ocultar: ", "Show/hide: ", "(nenhum)", "(none)", "Pressione o atalho...  (Esc cancela, Del limpa)", "Press the hotkey...  (Esc cancels, Del clears)",
             "Sup. esq.", "Top left", "Sup. dir.", "Top right", "Inf. esq.", "Bottom left", "Inf. dir.", "Bottom right",
-            "Editar na tela", "Edit on screen", "Concluir edicao", "Finish editing", "Concluir", "Done",
+            "Editar na tela", "Edit on screen", "Concluir edição", "Finish editing", "Concluir", "Done",
             "So FPS", "FPS only",
             "Arraste aqui para mover", "Drag here to move",
             "(vazio - adicione sensores no menu)", "(empty - add sensors in the menu)",
             "FPS (API + quadros/s)", "FPS (API + frames/s)", "Jogo", "Game",
-            "Dica: em \"Editar na tela\" o overlay aparece no desktop - arraste pelo topo para mover, arraste as linhas para reordenar e use o botao direito numa linha para remover. O FPS mostra a API grafica do jogo e os quadros por segundo. Jogos em tela cheia exclusiva (nao a sem borda) podem esconder o overlay. O atalho Mostrar/ocultar e global e fica reservado para o BunoTunner.", "Tip: with \"Edit on screen\" the overlay appears on the desktop - drag the top to move it, drag the rows to reorder and right-click a row to remove it. FPS shows the game's graphics API and frames per second. Exclusive-fullscreen games (not borderless) may hide the overlay. The Show/hide hotkey is global and reserved for BunoTunner.",
-            "Procurando atualizacoes...", "Looking for updates...",
-            "Baixando atualizacao...", "Downloading update...",
-            "Verificar atualizacoes\nProcura uma versao mais nova do BunoTunner e, se voce quiser, baixa e instala.", "Check for updates\nLooks for a newer BunoTunner version and, if you want, downloads and installs it.",
-            "Nao foi possivel verificar atualizacoes:\n", "Could not check for updates:\n",
-            "A versao mais recente nao foi encontrada.", "The latest version was not found.",
-            "Voce ja esta na versao mais recente (", "You already have the latest version (",
-            "Nova versao disponivel: ", "New version available: ",
+            "Dica: em \"Editar na tela\" o overlay aparece no desktop - arraste pelo topo para mover, arraste as linhas para reordenar e use o botão direito numa linha para remover. O FPS mostra a API gráfica do jogo e os quadros por segundo. Jogos em tela cheia exclusiva (não a sem borda) podem esconder o overlay. O atalho Mostrar/ocultar e global e fica reservado para o BunoTunner.", "Tip: with \"Edit on screen\" the overlay appears on the desktop - drag the top to move it, drag the rows to reorder and right-click a row to remove it. FPS shows the game's graphics API and frames per second. Exclusive-fullscreen games (not borderless) may hide the overlay. The Show/hide hotkey is global and reserved for BunoTunner.",
+            "Procurando atualizações...", "Looking for updates...",
+            "Baixando atualização...", "Downloading update...",
+            "Verificar atualizações\nProcura uma versão mais nova do BunoTunner e, se você quiser, baixa e instala.", "Check for updates\nLooks for a newer BunoTunner version and, if you want, downloads and installs it.",
+            "Não foi possível verificar atualizações:\n", "Could not check for updates:\n",
+            "A versão mais recente não foi encontrada.", "The latest version was not found.",
+            "Você já está na versão mais recente (", "You already have the latest version (",
+            "Nova versão disponível: ", "New version available: ",
             " (atual: ", " (current: ",
             "Deseja baixar e atualizar agora?", "Do you want to download and update now?",
-            "Falha ao baixar a atualizacao:\n", "Failed to download the update:\n",
-            "O arquivo baixado e invalido.", "The downloaded file is invalid.",
-            "O SHA-256 do arquivo baixado nao confere com o publicado no GitHub; o arquivo foi descartado.", "The downloaded file's SHA-256 does not match the one published on GitHub; the file was discarded.",
-            "A nova versao foi baixada, mas nao foi possivel substituir o arquivo atual.\nEla foi salva em:\n", "The new version was downloaded, but the current file could not be replaced.\nIt was saved at:\n",
+            "Falha ao baixar a atualização:\n", "Failed to download the update:\n",
+            "O arquivo baixado e inválido.", "The downloaded file is invalid.",
+            "O SHA-256 do arquivo baixado não confere com o publicado no GitHub; o arquivo foi descartado.", "The downloaded file's SHA-256 does not match the one published on GitHub; the file was discarded.",
+            "A nova versão foi baixada, mas não foi possível substituir o arquivo atual.\nEla foi salva em:\n", "The new version was downloaded, but the current file could not be replaced.\nIt was saved at:\n",
             "Atualizado para ", "Updated to ",
             " (SHA-256 conferido).", " (SHA-256 verified).",
             "Reiniciar o BunoTunner agora?", "Restart BunoTunner now?",
             "Iniciar com o Windows: LIGADO\nClique para desligar.", "Start with Windows: ON\nClick to turn off.",
             "Iniciar com o Windows: desligado\nClique para ligar (abre na bandeja ao entrar no Windows).", "Start with Windows: off\nClick to turn on (opens in the tray when you log in to Windows).",
-            "Nao foi possivel alterar a inicializacao com o Windows:\n", "Could not change the start with Windows setting:\n",
+            "Não foi possível alterar a inicialização com o Windows:\n", "Could not change the start with Windows setting:\n",
             "  Busca falhou (", "  Search failed (",
             "Windows Update", "Windows Update",
-            "servidor padrao", "default server",
-            "Nao foi possivel consultar o Windows Update: ", "Could not query Windows Update: ",
-            "  O servico Windows Update esta desativado; ativando para esta operacao...", "  The Windows Update service is disabled; enabling it for this operation...",
-            "O servico Windows Update esta desativado.", "The Windows Update service is disabled.",
+            "servidor padrão", "default server",
+            "Não foi possível consultar o Windows Update: ", "Could not query Windows Update: ",
+            "  O serviço Windows Update está desativado; ativando para esta operação...", "  The Windows Update service is disabled; enabling it for this operation...",
+            "O serviço Windows Update esta desativado.", "The Windows Update service is disabled.",
             "Sem acesso ao servidor do Windows Update (internet, DNS, proxy ou firewall).", "No access to the Windows Update server (internet, DNS, proxy or firewall).",
-            "O servico Windows Update nao esta pronto; reinicie o Windows e tente de novo.", "The Windows Update service is not ready; restart Windows and try again.",
+            "O serviço Windows Update não está pronto; reinicie o Windows e tente de novo.", "The Windows Update service is not ready; restart Windows and try again.",
             "Acesso negado; execute o programa como administrador.", "Access denied; run the program as administrator.",
             "O servidor do Windows Update esta ocupado; tente em alguns minutos.", "The Windows Update server is busy; try again in a few minutes.",
             "Erro: ", "Error: ",
             "Continuar?", "Continue?",
             "Atualizar drivers de todos os dispositivos", "Update drivers for all devices",
-            "Analisa todos os dispositivos do PC e procura no Windows Update os drivers mais novos. Antes de instalar, cria um ponto de restauracao e confere a assinatura digital e o hash SHA-256 dos arquivos baixados; se algum estiver alterado, nada e instalado.", "Scans every device in the PC and looks for newer drivers on Windows Update. Before installing, it creates a restore point and checks the digital signature and SHA-256 hash of the downloaded files; if any is altered, nothing is installed.",
+            "Analisa todos os dispositivos do PC e procura no Windows Update os drivers mais novos. Antes de instalar, cria um ponto de restauração e confere a assinatura digital e o hash SHA-256 dos arquivos baixados; se algum estiver alterado, nada é instalado.", "Scans every device in the PC and looks for newer drivers on Windows Update. Before installing, it creates a restore point and checks the digital signature and SHA-256 hash of the downloaded files; if any is altered, nothing is installed.",
             "Atualizar drivers", "Update drivers",
-            "So verificar", "Check only",
-            "Clique em 'Atualizar drivers' para analisar e instalar, ou em 'So verificar' para apenas listar o que esta desatualizado.", "Click 'Update drivers' to scan and install, or 'Check only' to just list what is outdated.",
+            "Só verificar", "Check only",
+            "Clique em 'Atualizar drivers' para analisar e instalar, ou em 'Só verificar' para apenas listar o que está desatualizado.", "Click 'Update drivers' to scan and install, or 'Check only' to just list what is outdated.",
             "1/6  Analisando os dispositivos do sistema...", "1/6  Scanning the system's devices...",
             "2/6  Procurando drivers mais novos no Windows Update (pode levar alguns minutos)...", "2/6  Looking for newer drivers on Windows Update (may take a few minutes)...",
-            "3/6  Criando ponto de restauracao do sistema...", "3/6  Creating a system restore point...",
+            "3/6  Criando ponto de restauração do sistema...", "3/6  Creating a system restore point...",
             "4/6  Baixando os drivers...", "4/6  Downloading the drivers...",
             "5/6  Verificando assinatura digital e hash SHA-256 dos arquivos baixados...", "5/6  Checking digital signature and SHA-256 hash of the downloaded files...",
             "6/6  Instalando...", "6/6  Installing...",
@@ -477,37 +477,37 @@ namespace BunoTunner
             "   sem assinatura: ", "   unsigned: ",
             "   com problema: ", "   with problems: ",
             "  Sem assinatura: ", "  Unsigned: ",
-            "  Com problema (codigo ", "  Problem (code ",
-            "  Ponto de restauracao criado.", "  Restore point created.",
-            "  Nao foi possivel criar o ponto de restauracao (", "  Could not create the restore point (",
+            "  Com problema (código ", "  Problem (code ",
+            "  Ponto de restauração criado.", "  Restore point created.",
+            "  Não foi possível criar o ponto de restauração (", "  Could not create the restore point (",
             "). Continuando.", "). Continuing.",
             "Encontrados: ", "Found: ",
             " driver(s) mais novo(s).", " newer driver(s).",
-            "Todos os drivers ja estao na versao mais nova oferecida pelo Windows Update.", "All drivers are already at the newest version offered by Windows Update.",
-            "Verificacao concluida: ", "Check finished: ",
+            "Todos os drivers já estão na versão mais nova oferecida pelo Windows Update.", "All drivers are already at the newest version offered by Windows Update.",
+            "Verificação concluída: ", "Check finished: ",
             " driver(s) podem ser atualizados.", " driver(s) can be updated.",
-            "Cancelado pelo usuario. Nada foi instalado.", "Cancelled by the user. Nothing was installed.",
-            "Falha no download (codigo ", "Download failed (code ",
+            "Cancelado pelo usuário. Nada foi instalado.", "Cancelled by the user. Nothing was installed.",
+            "Falha no download (código ", "Download failed (code ",
             "). Nada foi instalado.", "). Nothing was installed.",
             "  Assinaturas validas: ", "  Valid signatures: ",
-            "   sem assinatura propria (verificados pelo Windows Update): ", "   without their own signature (verified by Windows Update): ",
-            "   alterados/nao confiaveis: ", "   altered/untrusted: ",
+            "   sem assinatura própria (verificados pelo Windows Update): ", "   without their own signature (verified by Windows Update): ",
+            "   alterados/não confiáveis: ", "   altered/untrusted: ",
             "ABORTADO: ", "ABORTED: ",
-            " arquivo(s) com hash/assinatura invalidos. Nada foi instalado.", " file(s) with invalid hash/signature. Nothing was installed.",
+            " arquivo(s) com hash/assinatura inválidos. Nada foi instalado.", " file(s) with invalid hash/signature. Nothing was installed.",
             "  Instalado: ", "  Installed: ",
-            "  FALHOU (codigo ", "  FAILED (code ",
-            "Concluido: ", "Done: ",
+            "  FALHOU (código ", "  FAILED (code ",
+            "Concluído: ", "Done: ",
             " instalado(s), ", " installed, ",
             " com falha.", " failed.",
             " REINICIE o Windows para terminar.", " RESTART Windows to finish.",
-            "Estes drivers serao baixados, verificados (assinatura e hash SHA-256) e instalados:", "These drivers will be downloaded, verified (signature and SHA-256 hash) and installed:",
-            "Sera criado um ponto de restauracao antes. A tela pode piscar (driver de video) e pode ser preciso reiniciar o Windows.", "A restore point will be created first. The screen may flicker (video driver) and Windows may need to restart.",
+            "Estes drivers serão baixados, verificados (assinatura e hash SHA-256) e instalados:", "These drivers will be downloaded, verified (signature and SHA-256 hash) and installed:",
+            "Será criado um ponto de restauração antes. A tela pode piscar (driver de video) e pode ser preciso reiniciar o Windows.", "A restore point will be created first. The screen may flicker (video driver) and Windows may need to restart.",
             "Abrir BunoTunner", "Open BunoTunner",
-            "Botao - (minimizar) envia para a bandeja", "The - (minimize) button sends it to the tray",
-            "Continua rodando na bandeja. Clique duas vezes no icone para abrir.", "Still running in the tray. Double-click the icon to open.",
+            "Botão - (minimizar) envia para a bandeja", "The - (minimize) button sends it to the tray",
+            "Continua rodando na bandeja. Clique duas vezes no ícone para abrir.", "Still running in the tray. Double-click the icon to open.",
             "Sair", "Exit",
             "Placa:", "Card:",
-            "Controle e seguranca", "Control and safety",
+            "Controle e segurança", "Control and safety",
             "A placa e a escolhida la em cima. Se o OpenGL abrir em outra, o teste muda para OpenCL na escolhida.", "The card is the one chosen at the top. If OpenGL opens on another one, the test switches to OpenCL on the chosen card.",
             "O OpenGL abriu na placa '", "OpenGL opened on card '",
             "', diferente da selecionada ('", "', different from the selected one ('",
@@ -519,133 +519,133 @@ namespace BunoTunner
             " (restam ", " (remaining ",
             "  Velocidade do link: ", "  Link speed: ",
             "  blocos: ", "  blocks: ",
-            "  mascara ", "  mask ",
+            "  máscara ", "  mask ",
             "  tempo: ", "  time: ",
-            "  ultimo: ", "  last: ",
+            "  último: ", "  last: ",
             "  (estimado)", "  (estimated)",
-            "  ATENCAO: ", "  WARNING: ",
-            "  AVISO: overclock pode causar travamentos e artefatos. Va aos poucos e teste a estabilidade.\n  Vale ate reiniciar ou clicar em Redefinir. Funciona em NVIDIA, AMD (Overdrive8) e Intel Arc.", "  WARNING: overclocking can cause crashes and artifacts. Go in small steps and test stability.\n  Lasts until reboot or until you click Reset. Works on NVIDIA, AMD (Overdrive8) and Intel Arc.",
+            "  ATENÇÃO: ", "  WARNING: ",
+            "  AVISO: overclock pode causar travamentos e artefatos. Vá aos poucos e teste a estabilidade.\n  Vale até reiniciar ou clicar em Redefinir. Funciona em NVIDIA, AMD (Overdrive8) e Intel Arc.", "  WARNING: overclocking can cause crashes and artifacts. Go in small steps and test stability.\n  Lasts until reboot or until you click Reset. Works on NVIDIA, AMD (Overdrive8) and Intel Arc.",
             "  CEP: ", "  ZIP: ",
             "  Pontos CPU: ", "  CPU score: ",
-            "  Proximo teste em instantes...", "  Next test in a moment...",
-            "  Sequencia concluida.", "  Sequence finished.",
+            "  Próximo teste em instantes...", "  Next test in a moment...",
+            "  Sequência concluída.", "  Sequence finished.",
             "  [driver le ", "  [driver reads ",
             "  nenhum tipo PawnIO na DLL (DLL antiga: atualize a LibreHardwareMonitorLib.dll)", "  no PawnIO type in the DLL (old DLL: update LibreHardwareMonitorLib.dll)",
             "  recurso ", "  feature ",
             "  tipo ", "  type ",
-            "  |  Dica: em notebooks o fabricante (BIOS/vBIOS) pode bloquear o overclock; atualize o driver NVIDIA e tente valores menores. A secao \"Travar clock\" costuma funcionar mesmo assim.", "  |  Tip: on laptops the manufacturer (BIOS/vBIOS) may block overclocking; update the NVIDIA driver and try smaller values. The \"Lock clock\" section usually works anyway.",
+            "  |  Dica: em notebooks o fabricante (BIOS/vBIOS) pode bloquear o overclock; atualize o driver NVIDIA e tente valores menores. A seção \"Travar clock\" costuma funcionar mesmo assim.", "  |  Tip: on laptops the manufacturer (BIOS/vBIOS) may block overclocking; update the NVIDIA driver and try smaller values. The \"Lock clock\" section usually works anyway.",
             "  |  pelos OpenGL", "  |  OpenGL fur",
             "  |  shader + pelos OpenGL", "  |  shader + OpenGL fur",
             " (BIOS legado / CSM)", " (legacy BIOS / CSM)",
             " (BIOS legado ou sem suporte)", " (legacy BIOS or unsupported)",
             " (Esc fecha e para)", " (Esc closes and stops)",
-            " (Polaris/Vega/antiga): ajuste de clocks so no AMD Adrenalin; a ventoinha funciona se o driver permitir", " (Polaris/Vega/older): clock tuning only in AMD Adrenalin; the fan works if the driver allows it",
+            " (Polaris/Vega/antiga): ajuste de clocks só no AMD Adrenalin; a ventoinha funciona se o driver permitir", " (Polaris/Vega/older): clock tuning only in AMD Adrenalin; the fan works if the driver allows it",
             " (Windows/driver sem suporte)", " (unsupported Windows/driver)",
-            " (agora / maximo)", " (now / max)",
+            " (agora / máximo)", " (now / max)",
             " (aguardando reinicio)", " (waiting for reboot)",
             " (confira se o ajuste manual esta liberado no AMD Adrenalin)", " (check that manual tuning is enabled in AMD Adrenalin)",
-            " (em execucao)", " (running)",
+            " (em execução)", " (running)",
             " (erro ", " (error ",
             " (limite ", " (limit ",
             " (sem TPM ou desativado no firmware)", " (no TPM or disabled in firmware)",
-            " (sequencia cancelada)", " (sequence cancelled)",
-            " (so leitura)", " (read-only)",
+            " (sequência cancelada)", " (sequence cancelled)",
+            " (só leitura)", " (read-only)",
             " CPUs marcados", " CPUs checked",
             " Copias do registro em BunoTunner_backup.", " Registry copies in BunoTunner_backup.",
             " MB liberados.", " MB freed.",
-            " MB/s | 4K aleatorio ", " MB/s | random 4K ",
+            " MB/s | 4K aleatório ", " MB/s | random 4K ",
             " MB/s | Leitura seq ", " MB/s | Seq. read ",
-            " MHz     Memoria: ", " MHz     Memory: ",
+            " MHz     Memória: ", " MHz     Memory: ",
             " MHz reais", " real MHz",
             " adaptador(es):", " adapter(s):",
-            " ainda nao foi configurado.\nEm breve!", " has not been set up yet.\nComing soon!",
+            " ainda não foi configurado.\nEm breve!", " has not been set up yet.\nComing soon!",
             " ajustada(s).", " adjusted.",
             " alerta(s)", " alert(s)",
             " arquivo(s) apagado(s), ", " file(s) deleted, ",
-            " arquivo(s) em uso serao apagados no proximo reinicio do Windows.", " file(s) in use will be deleted on the next Windows restart.",
+            " arquivo(s) em uso serão apagados no próximo reinicio do Windows.", " file(s) in use will be deleted on the next Windows restart.",
             " canais", " channels",
             " canal(ais)).  ", " channel(s)).  ",
             " canal(is) em ", " channel(s) at ",
             " com falha.", " failed.",
             " dias)", " days)",
-            " disco(s). Alguns discos USB/RAID nao informam S.M.A.R.T. ao Windows.", " disk(s). Some USB/RAID disks do not report S.M.A.R.T. to Windows.",
+            " disco(s). Alguns discos USB/RAID não informam S.M.A.R.T. ao Windows.", " disk(s). Some USB/RAID disks do not report S.M.A.R.T. to Windows.",
             " do sistema ignorado(s)", " system item(s) skipped",
-            " durante o calculo (o driver pode ter reiniciado).", " during the calculation (the driver may have restarted).",
+            " durante o cálculo (o driver pode ter reiniciado).", " during the calculation (the driver may have restarted).",
             " e o CPU-Z não foi encontrado", " and CPU-Z was not found",
             " e o CPU-Z não retornou dados", " and CPU-Z returned no data",
             " erro 0x", " error 0x",
-            " erro(s) de calculo/verificacao - sistema instavel!", " calculation/verification error(s) - unstable system!",
+            " erro(s) de cálculo/verificação - sistema instável!", " calculation/verification error(s) - unstable system!",
             " falhou (", " failed (",
-            " item(ns) encontrado(s). Revise a lista (so os de certeza alta vem marcados) e clique em 'Remover itens marcados'.", " item(s) found. Review the list (only high-certainty ones come checked) and click 'Remove checked items'.",
+            " item(ns) encontrado(s). Revise a lista (só os de certeza alta vêm marcados) e clique em 'Remover itens marcados'.", " item(s) found. Review the list (only high-certainty ones come checked) and click 'Remove checked items'.",
             " item(ns) marcado(s)?\n\n", " checked item(s)?\n\n",
             " item(ns) removido(s)", " item(s) removed",
             " módulo(s))", " module(s))",
-            " no grafico  |  ", " on the graph  |  ",
-            " nucleos, ", " cores, ",
+            " no gráfico  |  ", " on the graph  |  ",
+            " núcleos, ", " cores, ",
             " processo(s) alterado(s)", " process(es) changed",
             " processo(s) encerrado(s). Procurando restos...", " process(es) ended. Looking for leftovers...",
             " processo(s) finalizado(s).", " process(es) ended.",
             " programas. Escolha um na lista.", " programs. Choose one from the list.",
             " rank(s) no total", " rank(s) in total",
             " s   melhor: ", " s   best: ",
-            " sem RPM maximo medido: use \"Identificar\" antes.", " no measured max RPM: use \"Identify\" first.",
+            " sem RPM máximo medido: use \"Identificar\" antes.", " no measured max RPM: use \"Identify\" first.",
             " sensores  |  ", " sensors  |  ",
             " sensores)", " sensors)",
             " ventoinha(s) aplicada(s). ", " fan(s) applied. ",
             " ventoinha(s) do tipo \"", " fan(s) of type \"",
             "% (a placa pode subir se esquentar)", "% (the card may go higher if it heats up)",
             "% restante", "% remaining",
-            "(!) Os sensores da CPU nao estao sendo lidos pelo driver (temperatura/tensao/consumo). Clique aqui para ver como resolver.", "(!) CPU sensors are not being read by the driver (temperature/voltage/power). Click here to see how to fix it.",
-            "(indisponivel)", "(unavailable)",
+            "(!) Os sensores da CPU não estão sendo lidos pelo driver (temperatura/tensão/consumo). Clique aqui para ver como resolver.", "(!) CPU sensors are not being read by the driver (temperature/voltage/power). Click here to see how to fix it.",
+            "(indisponível)", "(unavailable)",
             "(interrompido)", "(interrupted)",
             "(negado)", "(denied)",
-            "(use \"Identificar\" antes: ele mede o RPM maximo de cada ventoinha)", "(use \"Identify\" first: it measures each fan's max RPM)",
+            "(use \"Identificar\" antes: ele mede o RPM máximo de cada ventoinha)", "(use \"Identify\" first: it measures each fan's max RPM)",
             ") não expõe os timings sem um driver próprio", ") does not expose timings without its own driver",
             ").\nAbrir o download no navegador?", ").\nOpen the download in the browser?",
             "): usando o teste OpenCL.", "): using the OpenCL test.",
-            ")?\nTrabalho nao salvo nele sera perdido.", ")?\nUnsaved work in it will be lost.",
-            "- Botao direito: criar ALERTA (som), copiar nome/valor, zerar min/max.\n", "- Right-click: create an ALERT (sound), copy name/value, reset min/max.\n",
-            "- Cartoes no topo: os valores principais (GPU, CPU, RAM, ventoinha) sempre a vista.\n", "- Cards on top: the main values (GPU, CPU, RAM, fan) always in view.\n",
-            "- Exportar salva os valores/historico em CSV ou o grafico em PNG.", "- Export saves the values/history as CSV or the graph as PNG.",
-            "- Grafico: passe o mouse para ver os valores; \"Normalizar escala\" coloca unidades diferentes lado a lado.\n", "- Graph: hover to see the values; \"Normalize scale\" puts different units side by side.\n",
-            "- Lista: escolha a categoria a esquerda (GPU, CPU, Placa-mae, Memoria...) e use a busca (Ctrl+F) e o filtro de tipo.\n", "- List: choose the category on the left (GPU, CPU, Motherboard, Memory...) and use search (Ctrl+F) and the type filter.\n",
-            "- Marque a caixinha (ou de duplo clique) para ver o sensor no grafico.\n", "- Tick the checkbox (or double-click) to see the sensor on the graph.\n",
+            ")?\nTrabalho não salvo nele será perdido.", ")?\nUnsaved work in it will be lost.",
+            "- Botão direito: criar ALERTA (som), copiar nome/valor, zerar min/max.\n", "- Right-click: create an ALERT (sound), copy name/value, reset min/max.\n",
+            "- Cartões no topo: os valores principais (GPU, CPU, RAM, ventoinha) sempre a vista.\n", "- Cards on top: the main values (GPU, CPU, RAM, fan) always in view.\n",
+            "- Exportar salva os valores/histórico em CSV ou o gráfico em PNG.", "- Export saves the values/history as CSV or the graph as PNG.",
+            "- Gráfico: passe o mouse para ver os valores; \"Normalizar escala\" coloca unidades diferentes lado a lado.\n", "- Graph: hover to see the values; \"Normalize scale\" puts different units side by side.\n",
+            "- Lista: escolha a categoria a esquerda (GPU, CPU, Placa-mae, Memória...) e use a busca (Ctrl+F) e o filtro de tipo.\n", "- List: choose the category on the left (GPU, CPU, Motherboard, Memory...) and use search (Ctrl+F) and the type filter.\n",
+            "- Marque a caixinha (ou de duplo clique) para ver o sensor no gráfico.\n", "- Tick the checkbox (or double-click) to see the sensor on the graph.\n",
             "- \"Atualizar a cada\" muda a velocidade das leituras (em milissegundos).\n", "- \"Update every\" changes the reading speed (in milliseconds).\n",
             "- \"Essenciais\" marca os sensores mais importantes de uma vez.\n", "- \"Essentials\" ticks the most important sensors at once.\n",
             "--- Adaptador: ", "--- Adapter: ",
             "--- Ao vivo ---", "--- Live ---",
             "--- Overclock / controle (", "--- Overclock / control (",
             "--- Recursos (ligado / desligado) ---", "--- Features (on / off) ---",
-            "--- Recursos e seguranca (ligado / desligado) ---", "--- Features and security (on / off) ---",
+            "--- Recursos e segurança (ligado / desligado) ---", "--- Features and security (on / off) ---",
             ". Clique em Diagnóstico e envie o texto para análise.", ". Alternative: download CPU-Z (ZIP version), extract it next to the program or use \"Set CPU-Z\"; the program only uses it to read the timings.",
-            ". Esta placa/driver nao aceitou controle manual.", ". This card/driver did not accept manual control.",
-            ". Use 'Remocao forcada' ou 'So procurar restos'.", ". Use 'Forced removal' or 'Only scan for leftovers'.",
+            ". Esta placa/driver não aceitou controle manual.", ". This card/driver did not accept manual control.",
+            ". Use 'Remoção forçada' ou 'So procurar restos'.", ". Use 'Forced removal' or 'Only scan for leftovers'.",
             "2a thread", "2nd thread",
-            "1) \"Integridade de memoria\" (Isolamento de nucleo) do Windows ou o Defender bloqueando o driver: desative em Seguranca do Windows > Seguranca do dispositivo > Isolamento de nucleo e reinicie o PC.\n", "1) Windows \"Memory integrity\" (Core isolation) or Defender blocking the driver: turn it off in Windows Security > Device security > Core isolation and restart the PC.\n",
-            "2) Versao do LibreHardwareMonitor antiga para a sua CPU: use a mais recente (versoes novas podem exigir o driver PawnIO).\n", "2) LibreHardwareMonitor version too old for your CPU: use the latest one (newer versions may require the PawnIO driver).\n",
-            "3) Antivirus de terceiros.\n\n", "3) Third-party antivirus.\n\n",
+            "1) \"Integridade de memória\" (Isolamento de núcleo) do Windows ou o Defender bloqueando o driver: desative em Segurança do Windows > Segurança do dispositivo > Isolamento de núcleo e reinicie o PC.\n", "1) Windows \"Memory integrity\" (Core isolation) or Defender blocking the driver: turn it off in Windows Security > Device security > Core isolation and restart the PC.\n",
+            "2) Versão do LibreHardwareMonitor antiga para a sua CPU: use a mais recente (versões novas podem exigir o driver PawnIO).\n", "2) LibreHardwareMonitor version too old for your CPU: use the latest one (newer versions may require the PawnIO driver).\n",
+            "3) Antivírus de terceiros.\n\n", "3) Third-party antivírus.\n\n",
             "; rode como administrador); ", "; run as administrator); ",
             "=== Este computador ===", "=== This computer ===",
             "=== Internet (visto de fora) ===", "=== Internet (seen from outside) ===",
             "?  Como usar", "?  How to use",
-            "A placa Intel nao expoe controle de ventoinha.", "The Intel card does not expose fan control.",
-            "A placa-mae pode nao expor as ventoinhas ao Windows", "The motherboard may not expose the fans to Windows",
-            "A propria placa-mae ou o driver controla a velocidade pela temperatura.", "The motherboard or driver itself controls the speed based on temperature.",
-            "A ventoinha fica sempre na mesma velocidade, nao importa a temperatura.", "The fan always stays at the same speed, no matter the temperature.",
+            "A placa Intel não expõe controle de ventoinha.", "The Intel card does not expose fan control.",
+            "A placa-mae pode não expor as ventoinhas ao Windows", "The motherboard may not expose the fans to Windows",
+            "A própria placa-mae ou o driver controla a velocidade pela temperatura.", "The motherboard or driver itself controls the speed based on temperature.",
+            "A ventoinha fica sempre na mesma velocidade, não importa a temperatura.", "The fan always stays at the same speed, no matter the temperature.",
             "ADL incompleta", "ADL incomplete",
             "ADL sem Overdrive8", "ADL without Overdrive8",
             "ADL sem Overdrive8_Setting_Set", "ADL without Overdrive8_Setting_Set",
             "ADL2_Main_Control_Create erro ", "ADL2_Main_Control_Create error ",
             "ALERTA: ", "ALERT: ",
-            "AMD (plataforma nao identificada)", "AMD (platform not identified)",
-            "ATENCAO: as informacoes a seguir sao PESSOAIS.\n\nVao aparecer seu IP interno e externo, enderecos MAC, provedor, cidade aproximada, nome da rede Wi-Fi e DNS.\nNao compartilhe prints desta tela.\n\nMostrar mesmo assim?", "WARNING: the following information is PERSONAL.\n\nYour internal and external IP, MAC addresses, ISP, approximate city, Wi-Fi network name and DNS will appear.\nDo not share screenshots of this screen.\n\nShow it anyway?",
-            "ATENCAO: desativar as mitigacoes de Spectre/Meltdown deixa o PC mais vulneravel a ataques que leem memoria (por exemplo, por codigo malicioso no navegador). O ganho de desempenho costuma ser pequeno em CPUs recentes.\n\nDesativar mesmo assim?", "WARNING: disabling Spectre/Meltdown mitigations makes the PC more vulnerable to attacks that read memory (for example, malicious code in the browser). The performance gain is usually small on recent CPUs.\n\nDisable anyway?",
-            "ATENCAO: o disco indica falha iminente ou pouca vida util. Faca backup AGORA e planeje a troca.", "WARNING: the disk reports imminent failure or little remaining life. Back up NOW and plan a replacement.",
-            "ATENCAO: ", "WARNING: ",
+            "AMD (plataforma não identificada)", "AMD (platform not identified)",
+            "ATENÇÃO: as informações a seguir são PESSOAIS.\n\nVão aparecer seu IP interno e externo, endereços MAC, provedor, cidade aproximada, nome da rede Wi-Fi e DNS.\nNão compartilhe prints desta tela.\n\nMostrar mesmo assim?", "WARNING: the following information is PERSONAL.\n\nYour internal and external IP, MAC addresses, ISP, approximate city, Wi-Fi network name and DNS will appear.\nDo not share screenshots of this screen.\n\nShow it anyway?",
+            "ATENÇÃO: desativar as mitigações de Spectre/Meltdown deixa o PC mais vulnerável a ataques que leem memória (por exemplo, por código malicioso no navegador). O ganho de desempenho costuma ser pequeno em CPUs recentes.\n\nDesativar mesmo assim?", "WARNING: disabling Spectre/Meltdown mitigations makes the PC more vulnerable to attacks that read memory (for example, malicious code in the browser). The performance gain is usually small on recent CPUs.\n\nDisable anyway?",
+            "ATENÇÃO: o disco indica falha iminente ou pouca vida útil. Faça backup AGORA e planeje a troca.", "WARNING: the disk reports imminent failure or little remaining life. Back up NOW and plan a replacement.",
+            "ATENÇÃO: ", "WARNING: ",
             "Abaixo do normal", "Below normal",
-            "Aceleracao de GPU por hardware (HAGS)", "Hardware-accelerated GPU scheduling (HAGS)",
-            "Aceleracao do mouse ATIVADA.", "Mouse acceleration ENABLED.",
-            "Aceleracao do mouse DESATIVADA.", "Mouse acceleration DISABLED.",
+            "Aceleração de GPU por hardware (HAGS)", "Hardware-accelerated GPU scheduling (HAGS)",
+            "Aceleração do mouse ATIVADA.", "Mouse acceleration ENABLED.",
+            "Aceleração do mouse DESATIVADA.", "Mouse acceleration DISABLED.",
             "Acima do normal", "Above normal",
             "AdapterInfo_Get falhou (", "AdapterInfo_Get failed (",
             "Adicionado: ", "Added: ",
@@ -654,7 +654,7 @@ namespace BunoTunner
             "Alerta removido.", "Alert removed.",
             "Alerta", "Alert",
             "Alta", "High",
-            "Aplicar tambem a TODOS os processos com o mesmo nome", "Also apply to ALL processes with the same name",
+            "Aplicar também a TODOS os processos com o mesmo nome", "Also apply to ALL processes with the same name",
             "Apoie o BunoTunner via LivePix", "Support BunoTunner via LivePix",
             "Apoie o BunoTunner via PayPal", "Support BunoTunner via PayPal",
             "Armazenamento (HD/SSD)", "Storage (HDD/SSD)",
@@ -662,31 +662,31 @@ namespace BunoTunner
             "Arquitetura", "Architecture",
             "Arquivo", "File",
             "Atalho", "Shortcut",
-            "Ate parar", "Until stopped",
-            "Atencao", "Attention",
-            "Automatico", "Automatic",
+            "Até parar", "Until stopped",
+            "Atenção", "Attention",
+            "Automático", "Automatic",
             "Avisar (som + barra de status) quando \"", "Notify (sound + status bar) when \"",
             "Aviso", "Warning",
             "Baixa (Idle)", "Low (Idle)",
-            "Baixar e instalar o PawnIO agora?\n\nO instalador oficial (github.com/namazso/PawnIO.Setup) sera baixado e pedira permissao de administrador.", "Download and install PawnIO now?\n\nThe official installer (github.com/namazso/PawnIO.Setup) will be downloaded and will ask for administrator permission.",
+            "Baixar e instalar o PawnIO agora?\n\nO instalador oficial (github.com/namazso/PawnIO.Setup) será baixado e pedirá permissão de administrador.", "Download and install PawnIO now?\n\nThe official installer (github.com/namazso/PawnIO.Setup) will be downloaded and will ask for administrator permission.",
             "Banda teórica: ", "Theoretical bandwidth: ",
-            "Barramento da memoria", "Memory bus",
+            "Barramento da memória", "Memory bus",
             "Bateria", "Battery",
             "Boa", "Good",
             "Bomba/AIO", "Pump/AIO",
-            "Boot em modo UEFI (necessario p/ ReBAR)", "UEFI boot mode (required for ReBAR)",
+            "Boot em modo UEFI (necessário p/ ReBAR)", "UEFI boot mode (required for ReBAR)",
             "Boot em modo UEFI", "UEFI boot mode",
             "BunoTunner - Adicionar manualmente", "BunoTunner - Add manually",
             "BunoTunner - Dados pessoais", "BunoTunner - Personal data",
             "BunoTunner - Desinstalar", "BunoTunner - Uninstall",
-            "BunoTunner - Otimizacoes", "BunoTunner - Optimizations",
+            "BunoTunner - Otimizações", "BunoTunner - Optimizations",
             "BunoTunner - PawnIO recomendado", "BunoTunner - PawnIO recommended",
-            "BunoTunner - Remocao forcada", "BunoTunner - Forced removal",
+            "BunoTunner - Remoção forçada", "BunoTunner - Forced removal",
             "BunoTunner - Remover", "BunoTunner - Remove",
             "BunoTunner - Render do teste (Esc fecha e para)", "BunoTunner - Test render (Esc closes and stops)",
-            "BunoTunner - Sensores (GPU, CPU, placa-mae, memoria, discos, ventoinhas...)", "BunoTunner - Sensors (GPU, CPU, motherboard, memory, disks, fans...)",
+            "BunoTunner - Sensores (GPU, CPU, placa-mae, memória, discos, ventoinhas...)", "BunoTunner - Sensors (GPU, CPU, motherboard, memory, disks, fans...)",
             "BunoTunner - Sensores", "BunoTunner - Sensors",
-            "BunoTunner - diagnostico dos timings", "BunoTunner - timings diagnostics",
+            "BunoTunner - diagnóstico dos timings", "BunoTunner - timings diagnostics",
             "BunoTunner - erro fatal", "BunoTunner - fatal error",
             "BunoTunner - tempos da abertura (cada linha: tempo total, tempo desta etapa)\r\n", "BunoTunner - startup timings (each line: total time, time of this step)\r\n",
             "COMO USAR OS SENSORES\n\n", "HOW TO USE THE SENSORS\n\n",
@@ -707,65 +707,65 @@ namespace BunoTunner
             "Cidade: ", "City: ",
             "Clock atual (WMI)", "Current clock (WMI)",
             "Clock base", "Base clock",
-            "Clock da memoria", "Memory clock",
+            "Clock da memória", "Memory clock",
             "Clock de video", "Video clock",
-            "Clock do nucleo", "Core clock",
+            "Clock do núcleo", "Core clock",
             "Clock externo (BCLK)", "External clock (BCLK)",
-            "Clock maximo", "Max clock",
-            "Clock medio dos nucleos", "Average core clock",
+            "Clock máximo", "Max clock",
+            "Clock médio dos núcleos", "Average core clock",
             "Clock travado.", "Clock locked.",
             "Clocks atuais e suporte desta placa", "Current clocks and support of this card",
             "Clocks destravados.", "Clocks unlocked.",
             " (agora)", " (now)",
-            "Codigo ", "Code ",
-            "Coletando informacoes...", "Collecting information...",
-            "Compressao de memoria desativada. Reinicie o Windows para valer.", "Memory compression disabled. Restart Windows for it to take effect.",
-            "Compressao de memoria reativada. Reinicie o Windows para valer.", "Memory compression re-enabled. Restart Windows for it to take effect.",
-            "Concluido: ", "Done: ",
-            "Concluido.", "Done.",
-            "Concluido", "Done",
-            "Conjuntos de instrucoes", "Instruction sets",
+            "Código ", "Code ",
+            "Coletando informações...", "Collecting information...",
+            "Compressão de memória desativada. Reinicie o Windows para valer.", "Memory compression disabled. Restart Windows for it to take effect.",
+            "Compressão de memória reativada. Reinicie o Windows para valer.", "Memory compression re-enabled. Restart Windows for it to take effect.",
+            "Concluído: ", "Done: ",
+            "Concluído.", "Done.",
+            "Concluído", "Done",
+            "Conjuntos de instruções", "Instruction sets",
             "Consumo (watts)", "Power (watts)",
             "Consumo do pacote", "Package power",
             "Continuar", "Continue",
-            "ControlLib.dll nao encontrada (instale o driver Intel Arc / Graphics mais recente)", "ControlLib.dll not found (install the latest Intel Arc / Graphics driver)",
+            "ControlLib.dll não encontrada (instale o driver Intel Arc / Graphics mais recente)", "ControlLib.dll not found (install the latest Intel Arc / Graphics driver)",
             "Controlador embarcado", "Embedded controller",
             "Controladora", "Controller",
             "Controle (%)", "Control (%)",
-            "Controle automatico (curva original da placa) restaurado.", "Automatic control (card's original curve) restored.",
+            "Controle automático (curva original da placa) restaurado.", "Automatic control (card's original curve) restored.",
             "Controle da ventoinha", "Fan control",
-            "Controle de ventoinha indisponivel.", "Fan control unavailable.",
+            "Controle de ventoinha indisponível.", "Fan control unavailable.",
             "Copiado.", "Copied.",
             "Copiar nome", "Copy name",
             "Copiar valor", "Copy value",
             "Corrente", "Current",
-            "Criando ponto de restauracao (pode levar um minuto)...", "Creating restore point (may take a minute)...",
-            "Crossbar / Uncore / Fabric clock: nenhuma API publica (NVML, NvAPI, ADL, IGCL) expoe esses clocks, entao nenhum programa de terceiros consegue altera-los.", "Crossbar / Uncore / Fabric clock: no public API (NVML, NvAPI, ADL, IGCL) exposes these clocks, so no third-party program can change them.",
+            "Criando ponto de restauração (pode levar um minuto)...", "Creating restore point (may take a minute)...",
+            "Crossbar / Uncore / Fabric clock: nenhuma API pública (NVML, NvAPI, ADL, IGCL) expõe esses clocks, então nenhum programa de terceiros consegue alterá-los.", "Crossbar / Uncore / Fabric clock: no public API (NVML, NvAPI, ADL, IGCL) exposes these clocks, só no third-party program can change them.",
             "DDR5: cada módulo tem 2 subcanais de 32 bits.", "DDR5: each module has two 32-bit sub-channels.",
-            "DEP / NX (protecao de execucao)", "DEP / NX (execution protection)",
+            "DEP / NX (proteção de execução)", "DEP / NX (execution protection)",
             "Data do driver (registro)", "Driver date (registry)",
             "Data do driver", "Driver date",
             "Definir alerta (acima de...)", "Set alert (above...)",
-            "Depois do download, execute o PawnIO_setup.exe (como administrador), conclua a instalacao e abra o BunoTunner novamente.", "After downloading, run PawnIO_setup.exe (as administrator), finish the installation and open BunoTunner again.",
-            "Desativar o Isolamento de nucleo reduz a protecao contra malware que ataca o nucleo do Windows. Desativar mesmo assim?", "Disabling Core isolation reduces protection against malware that attacks the Windows kernel. Disable anyway?",
+            "Depois do download, execute o PawnIO_setup.exe (como administrador), conclua a instalação e abra o BunoTunner novamente.", "After downloading, run PawnIO_setup.exe (as administrator), finish the installation and open BunoTunner again.",
+            "Desativar o Isolamento de núcleo reduz a proteção contra malware que ataca o núcleo do Windows. Desativar mesmo assim?", "Disabling Core isolation reduces protection against malware that attacks the Windows kernel. Disable anyway?",
             "Desconhecida", "Unknown",
-            "Descricao: ", "Description: ",
-            "Deseja abrir o download oficial agora?\n(Sim = baixa o PawnIO_setup.exe; Nao = continuar sem ele. Este aviso aparece a cada abertura enquanto ele nao estiver instalado.)", "Do you want to open the official download now?\n(Yes = downloads PawnIO_setup.exe; No = continue without it. This notice appears at every start while it is not installed.)",
-            "Desgaste (uso da vida util)", "Wear (life used)",
-            "Desinstalador aberto: conclua as telas dele... (a busca de restos comeca quando ele terminar)", "Uninstaller open: finish its screens... (the leftover search starts when it ends)",
+            "Descrição: ", "Description: ",
+            "Deseja abrir o download oficial agora?\n(Sim = baixa o PawnIO_setup.exe; Não = continuar sem ele. Este aviso aparece a cada abertura enquanto ele não estiver instalado.)", "Do you want to open the official download now?\n(Yes = downloads PawnIO_setup.exe; No = continue without it. This notice appears at every start while it is not installed.)",
+            "Desgaste (uso da vida útil)", "Wear (life used)",
+            "Desinstalador aberto: conclua as telas dele... (a busca de restos começa quando ele terminar)", "Uninstaller open: finish its screens... (the leftover search starts when it ends)",
             "Desinstalador terminou.", "Uninstaller finished.",
             "Desinstalar \"", "Uninstall \"",
-            "Desligado (1 thread por nucleo)", "Off (1 thread per core)",
-            "Desligado ou nao confirmado (BAR1 de 256 MB)", "Off or unconfirmed (256 MB BAR1)",
+            "Desligado (1 thread por núcleo)", "Off (1 thread per core)",
+            "Desligado ou não confirmado (BAR1 de 256 MB)", "Off or unconfirmed (256 MB BAR1)",
             "Desligado", "Off",
-            "Dica: marque a caixinha (ou de duplo clique) para ver o sensor no grafico. Botao direito = alerta, copiar... Clique no cabecalho para ordenar.", "Tip: tick the checkbox (or double-click) to see the sensor on the graph. Right-click = alert, copy... Click the header to sort.",
-            "Digite parte do nome. Varias palavras = todas precisam aparecer (ex.: core temp). Ctrl+A seleciona tudo.", "Type part of the name. Several words = all must appear (e.g. core temp). Ctrl+A selects all.",
+            "Dica: marque a caixinha (ou de duplo clique) para ver o sensor no gráfico. Botão direito = alerta, copiar... Clique no cabeçalho para ordenar.", "Tip: tick the checkbox (or double-click) to see the sensor on the graph. Right-click = alert, copy... Click the header to sort.",
+            "Digite parte do nome. Várias palavras = todas precisam aparecer (ex.: core temp). Ctrl+A seleciona tudo.", "Type part of the name. Several words = all must appear (e.g. core temp). Ctrl+A selects all.",
             "Discos", "Disks",
-            "Driver SEM leitura da CPU (Integridade de memoria/Defender?) - usando zona termica do Windows", "Driver WITHOUT CPU reading (Memory integrity/Defender?) - using Windows thermal zone",
-            "Duracao", "Duration",
-            "ECC da memoria", "Memory ECC",
-            "Em 'Ate parar' o SSD recebe gravacoes continuas (gera desgaste). Continuar?", "With 'Until stopped' the SSD receives continuous writes (causes wear). Continue?",
-            "Enquanto isso o programa usa as zonas termicas do Windows (menos precisas).\n\nAbrir agora a tela de Isolamento de nucleo?", "Meanwhile the program uses Windows thermal zones (less accurate).\n\nOpen the Core isolation screen now?",
+            "Driver SEM leitura da CPU (Integridade de memória/Defender?) - usando zona térmica do Windows", "Driver WITHOUT CPU reading (Memory integrity/Defender?) - using Windows thermal zone",
+            "Duração", "Duration",
+            "ECC da memória", "Memory ECC",
+            "Em 'Até parar' o SSD recebe gravações contínuas (gera desgaste). Continuar?", "With 'Until stopped' the SSD receives continuous writes (causes wear). Continue?",
+            "Enquanto isso o programa usa as zonas térmicas do Windows (menos precisas).\n\nAbrir agora a tela de Isolamento de núcleo?", "Meanwhile the program uses Windows thermal zones (less accurate).\n\nOpen the Core isolation screen now?",
             "Erro ao executar ", "Error running ",
             "Erro de escrita (", "Write error (",
             "Erro de leitura (", "Read error (",
@@ -776,13 +776,13 @@ namespace BunoTunner
             "Erros:", "Errors:",
             "Escolha (ou salve) um preset antes de criar a regra.", "Choose (or save) a preset before creating the rule.",
             "Escolha a pasta do programa", "Choose the program folder",
-            "Escolha o cpuz.exe (versao portatil ou instalada)", "Choose cpuz.exe (portable or installed version)",
-            "Escolha o que voce quer ver: GPU, CPU, placa-mae, memoria, discos, ventoinhas...", "Choose what you want to see: GPU, CPU, motherboard, memory, disks, fans...",
-            "Escolha um preset para carregar nucleos e prioridade; depois clique em \"Aplicar aos marcados\". \"Salvar atual\" guarda o que esta na grade.", "Choose a preset to load cores and priority; then click \"Apply to checked\". \"Save current\" stores what is in the grid.",
+            "Escolha o cpuz.exe (versão portátil ou instalada)", "Choose cpuz.exe (portable or installed version)",
+            "Escolha o que você quer ver: GPU, CPU, placa-mae, memória, discos, ventoinhas...", "Choose what you want to see: GPU, CPU, motherboard, memory, disks, fans...",
+            "Escolha um preset para carregar núcleos e prioridade; depois clique em \"Aplicar aos marcados\". \"Salvar atual\" guarda o que está na grade.", "Choose a preset to load cores and priority; then click \"Apply to checked\". \"Save current\" stores what is in the grid.",
             "Escrita seq ", "Seq. write ",
-            "Essa pasta e protegida pelo sistema e nao pode ser usada aqui:\n", "This folder is protected by the system and cannot be used here:\n",
-            "Esta placa AMD nao aceitou controle de ventoinha pelo ADL.", "This AMD card did not accept fan control through ADL.",
-            "Esta placa expoe todos os ajustes acima. ", "This card exposes all the settings above. ",
+            "Essa pasta e protegida pelo sistema e não pode ser usada aqui:\n", "This folder is protected by the system and cannot be used here:\n",
+            "Esta placa AMD não aceitou controle de ventoinha pelo ADL.", "This AMD card did not accept fan control through ADL.",
+            "Esta placa expõe todos os ajustes acima. ", "This card exposes all the settings above. ",
             "Esta ventoinha e somente leitura.", "This fan is read-only.",
             "Estabilidade", "Stability",
             "Estado de desempenho", "Performance state",
@@ -791,45 +791,45 @@ namespace BunoTunner
             "Estado: ATIVADO", "State: ENABLED",
             "Estado: DESATIVADA", "State: DISABLED",
             "Estado: MPO DESATIVADO", "State: MPO DISABLED",
-            "Estado: MPO padrao (ativo)", "State: MPO default (active)",
+            "Estado: MPO padrão (ativo)", "State: MPO default (active)",
             "Estado: ativada", "State: enabled",
-            "Estado: compressao ATIVADA", "State: compression ENABLED",
-            "Estado: compressao DESATIVADA", "State: compression DISABLED",
+            "Estado: compressão ATIVADA", "State: compression ENABLED",
+            "Estado: compressão DESATIVADA", "State: compression DISABLED",
             "Estado: desativada", "State: disabled",
             "Estado: desativado", "State: disabled",
-            "Estado: menu classico ATIVO", "State: classic menu ACTIVE",
-            "Estado: menu padrao do Windows 11", "State: Windows 11 default menu",
+            "Estado: menu clássico ATIVO", "State: classic menu ACTIVE",
+            "Estado: menu padrão do Windows 11", "State: Windows 11 default menu",
             "Estado: overlay ATIVO", "State: overlay ACTIVE",
             "Estado: overlay desligado", "State: overlay off",
-            "Estado: padrao do Windows (mitigacoes ativas)", "State: Windows default (mitigations active)",
+            "Estado: padrão do Windows (mitigações ativas)", "State: Windows default (mitigations active)",
             "Estado: personalizado (FeatureSettingsOverride=", "State: custom (FeatureSettingsOverride=",
-            "Este item nao tem desinstalador. Use 'Remocao forcada'.", "This item has no uninstaller. Use 'Forced removal'.",
+            "Este item não tem desinstalador. Use 'Remoção forçada'.", "This item has no uninstaller. Use 'Forced removal'.",
             "Exclusivo", "Exclusive",
             "Exportar", "Export",
             "FALHOU - ", "FAILED - ",
             "FALHOU", "FAILED",
             "FPU - malha de ondas em ponto flutuante", "FPU - floating-point wave mesh",
             "Faixa da ventoinha (driver)", "Fan range (driver)",
-            "Faixa de potencia permitida", "Allowed power range",
+            "Faixa de potência permitida", "Allowed power range",
             "Falha ao abrir o desinstalador: ", "Failed to open the uninstaller: ",
             "Falha ao salvar: ", "Failed to save: ",
             "Falhou (execute como administrador): ", "Failed (run as administrator): ",
-            "Falhou: Overdrive8 indisponivel", "Failed: Overdrive8 unavailable",
+            "Falhou: Overdrive8 indisponível", "Failed: Overdrive8 unavailable",
             "Falhou: ctlFanSetFixedSpeedMode erro 0x", "Failed: ctlFanSetFixedSpeedMode error 0x",
-            "Falhou: funcao ausente", "Failed: function missing",
+            "Falhou: função ausente", "Failed: function missing",
             "Falhou: ", "Failed: ",
             "Falhou", "Failed",
-            "Familia / modelo / stepping", "Family / model / stepping",
+            "Família / modelo / stepping", "Family / model / stepping",
             "Ventoinha (RPM agora)", "Fan (RPM now)",
             "Ventoinha (% agora)", "Fan (% now)",
             "Filtrar por tipo de medida (temperatura, uso, clock...)", "Filter by measurement type (temperature, usage, clock...)",
-            "Finaliza todos os programas abertos que rodam da pasta do programa selecionado (e para os servicos dele). Use antes de desinstalar se ele estiver aberto.", "Ends all open programs that run from the selected program's folder (and stops its services). Use before uninstalling if it is open.",
+            "Finaliza todos os programas abertos que rodam da pasta do programa selecionado (e para os serviços dele). Use antes de desinstalar se ele estiver aberto.", "Ends all open programs that run from the selected program's folder (and stops its services). Use before uninstalling if it is open.",
             "Finalizando o teste anterior... tente de novo em um instante.", "Ending the previous test... try again in a moment.",
             "Finalizar todos os processos de \"", "End all processes of \"",
             "Fonte: ", "Source: ",
             "Fonte", "Source",
-            "Fuso horario: ", "Time zone: ",
-            "GPU nao encontrada", "GPU not found",
+            "Fuso horário: ", "Time zone: ",
+            "GPU não encontrada", "GPU not found",
             "GPU - consumo", "GPU - power",
             "GPU - render 3D de pelos (OpenGL)", "GPU - 3D fur render (OpenGL)",
             "GPU - temperatura", "GPU - temperature",
@@ -837,9 +837,9 @@ namespace BunoTunner
             "GPUs listadas", "GPUs listed",
             "Gabinete", "Case",
             "Ha sinais de desgaste, erros ou temperatura alta. Mantenha backup em dia e acompanhe.", "There are signs of wear, errors or high temperature. Keep your backups up to date and monitor it.",
-            "Hibernacao ATIVADA.", "Hibernation ENABLED.",
-            "Hibernacao DESATIVADA (hiberfil.sys removido).", "Hibernation DISABLED (hiberfil.sys removed).",
-            "Historico do grafico (CSV)...", "Graph history (CSV)...",
+            "Hibernação ATIVADA.", "Hibernation ENABLED.",
+            "Hibernação DESATIVADA (hiberfil.sys removido).", "Hibernation DISABLED (hiberfil.sys removed).",
+            "Histórico do gráfico (CSV)...", "Graph history (CSV)...",
             "Horas ligado", "Power-on hours",
             "Host reverso: ", "Reverse host: ",
             "Hypervisor ativo (Hyper-V / WSL2)", "Hypervisor active (Hyper-V / WSL2)",
@@ -847,21 +847,21 @@ namespace BunoTunner
             "ID do processador", "Processor ID",
             "IP externo: ", "External IP: ",
             "IP preferido (v6 se houver): ", "Preferred IP (v6 if available): ",
-            "Identificacao concluida: RPM maximo guardado (usado em \"Definir por RPM\").", "Identification finished: max RPM saved (used in \"Set by RPM\").",
+            "Identificação concluída: RPM máximo guardado (usado em \"Definir por RPM\").", "Identification finished: max RPM saved (used in \"Set by RPM\").",
             "Identificador", "Identifier",
             "Identificar (100% por 5 s)", "Identify (100% for 5 s)",
-            "Identificar = liga as selecionadas a 100% por 5 s para voce descobrir qual e qual.  Botao direito na lista: selecionar por tipo (CPU, bombas, gabinete) ou renomear (inclua CPU, Bomba ou Gabinete no nome).", "Identify = runs the selected fans at 100% for 5 s so you can tell which is which.  Right-click the list: select by type (CPU, pumps, case) or rename (include CPU, Pump or Case in the name).",
+            "Identificar = liga as selecionadas a 100% por 5 s para você descobrir qual é qual.  Botão direito na lista: selecionar por tipo (CPU, bombas, gabinete) ou renomear (inclua CPU, Bomba ou Gabinete no nome).", "Identify = runs the selected fans at 100% for 5 s so you can tell which is which.  Right-click the list: select by type (CPU, pumps, case) or rename (include CPU, Pump or Case in the name).",
             "Idioma:", "Language:",
-            "Imagem do grafico (PNG)...", "Graph image (PNG)...",
-            "Indisponivel (a leitura exata so existe no driver NVIDIA; veja no AMD Adrenalin: Smart Access Memory, ou na BIOS)", "Unavailable (the exact reading only exists in the NVIDIA driver; check AMD Adrenalin: Smart Access Memory, or the BIOS)",
-            "Indisponivel (placa sem ECC)", "Unavailable (board without ECC)",
-            "Indisponivel (placa/driver nao expoe)", "Unavailable (board/driver does not expose it)",
-            "Indisponivel (", "Unavailable (",
-            "Indisponivel: ", "Unavailable: ",
-            "Indisponivel", "Unavailable",
-            "Informe min e max validos.", "Enter valid min and max.",
-            "Inicializacao rapida (Fast Startup)", "Fast Startup",
-            "Inicializacao", "Startup",
+            "Imagem do gráfico (PNG)...", "Graph image (PNG)...",
+            "Indisponível (a leitura exata só existe no driver NVIDIA; veja no AMD Adrenalin: Smart Access Memory, ou na BIOS)", "Unavailable (the exact reading only exists in the NVIDIA driver; check AMD Adrenalin: Smart Access Memory, or the BIOS)",
+            "Indisponível (placa sem ECC)", "Unavailable (board without ECC)",
+            "Indisponível (placa/driver não expõe)", "Unavailable (board/driver does not expose it)",
+            "Indisponível (", "Unavailable (",
+            "Indisponível: ", "Unavailable: ",
+            "Indisponível", "Unavailable",
+            "Informe min e max válidos.", "Enter valid min and max.",
+            "Inicialização rápida (Fast Startup)", "Fast Startup",
+            "Inicialização", "Startup",
             "Iniciando...", "Starting...",
             "Iniciar / parar o estresse de CPU", "Start / stop the CPU stress",
             "Iniciar / parar o estresse de FPU", "Start / stop the FPU stress",
@@ -869,86 +869,86 @@ namespace BunoTunner
             "Iniciar / parar o estresse de RAM", "Start / stop the RAM stress",
             "Iniciar / parar o estresse de SSD", "Start / stop the SSD stress",
             "Instalar PawnIO", "Install PawnIO",
-            "Integridade de memoria (HVCI)", "Memory integrity (HVCI)",
-            "Intel (soquete nao identificado)", "Intel (socket not identified)",
-            "Intel IGCL (experimental): o driver Intel valida os limites; valores fora da faixa sao recusados.", "Intel IGCL (experimental): the Intel driver validates the limits; out-of-range values are rejected.",
-            "Interrompido pelo usuario.", "Interrupted by the user.",
-            "Isolamento de nucleo ATIVADO. Reinicie o PC.", "Core isolation ENABLED. Restart the PC.",
-            "Isolamento de nucleo DESATIVADO. Reinicie o PC.", "Core isolation DISABLED. Restart the PC.",
+            "Integridade de memória (HVCI)", "Memory integrity (HVCI)",
+            "Intel (soquete não identificado)", "Intel (socket not identified)",
+            "Intel IGCL (experimental): o driver Intel valida os limites; valores fora da faixa são recusados.", "Intel IGCL (experimental): the Intel driver validates the limits; out-of-range values are rejected.",
+            "Interrompido pelo usuário.", "Interrupted by the user.",
+            "Isolamento de núcleo ATIVADO. Reinicie o PC.", "Core isolation ENABLED. Restart the PC.",
+            "Isolamento de núcleo DESATIVADO. Reinicie o PC.", "Core isolation DISABLED. Restart the PC.",
             "Janela de render fechada: teste interrompido.", "Render window closed: test interrupted.",
-            "LHM aberto (CPU, GPU, placa-mae, memoria)", "LHM opened (CPU, GPU, motherboard, memory)",
-            "Largura de endereco", "Address width",
-            "Latencia da RAM (bloco de ", "RAM latency (block of ",
+            "LHM aberto (CPU, GPU, placa-mae, memória)", "LHM opened (CPU, GPU, motherboard, memory)",
+            "Largura de endereço", "Address width",
+            "Latência da RAM (bloco de ", "RAM latency (block of ",
             "Latência real do CAS: ", "Actual CAS latency: ",
             "Leitura de sensores", "Sensor reading",
             "Leitura dos sensores da CPU", "CPU sensor reading",
             "Leitura", "Reading",
             "Lendo a lista de programas instalados...", "Reading the list of installed programs...",
-            "Lendo informacoes da CPU...", "Reading CPU information...",
+            "Lendo informações da CPU...", "Reading CPU information...",
             "Lendo módulos...", "Reading modules...",
             "Lendo os discos (Windows Storage + S.M.A.R.T.)...", "Reading disks (Windows Storage + S.M.A.R.T.)...",
             "Lendo os timings direto do controlador de memória...", "Reading timings directly from the memory controller...",
             "Ligado (exigido pelo BAR grande)", "On (required by the large BAR)",
-            "Ligado: cada linha usa a propria escala (0-100%). Desligado: mesma escala para todas.", "On: each line uses its own scale (0-100%). Off: same scale for all.",
+            "Ligado: cada linha usa a própria escala (0-100%). Desligado: mesma escala para todas.", "On: each line uses its own scale (0-100%). Off: same scale for all.",
             "Ligado - faixa ", "On - range ",
             "Ligado (", "On (",
             "Ligado", "On",
-            "Limitacao de clock agora", "Current clock limit",
-            "Limite de potencia (TDP)", "Power limit (TDP)",
-            "Limite de potencia atual", "Current power limit",
-            "Limite de potencia padrao", "Default power limit",
-            "Limite de potencia", "Power limit",
+            "Limitação de clock agora", "Current clock limit",
+            "Limite de potência (TDP)", "Power limit (TDP)",
+            "Limite de potência atual", "Current power limit",
+            "Limite de potência padrão", "Default power limit",
+            "Limite de potência", "Power limit",
             "Limite de temperatura", "Temperature limit",
-            "Limpar historico", "Clear history",
-            "Localizacao aproximada: ", "Approximate location: ",
+            "Limpar histórico", "Clear history",
+            "Localização aproximada: ", "Approximate location: ",
             "MPO desativado. Reinicie o PC.", "MPO disabled. Restart the PC.",
-            "MPO restaurado ao padrao. Reinicie o PC.", "MPO restored to default. Restart the PC.",
+            "MPO restaurado ao padrão. Reinicie o PC.", "MPO restored to default. Restart the PC.",
             "Manter a atual", "Keep current",
-            "Marque (caixinha) os processos que quer alterar. Sem nenhum marcado, vale a selecao com Ctrl/Shift.", "Check the processes you want to change. With none checked, the Ctrl/Shift selection is used.",
+            "Marque (caixinha) os processos que quer alterar. Sem nenhum marcado, vale a seleção com Ctrl/Shift.", "Check the processes you want to change. With none checked, the Ctrl/Shift selection is used.",
             "Marque (caixinha) ou selecione pelo menos um processo na lista.", "Check or select at least one process in the list.",
             "Marque pelo menos um CPU antes de salvar.", "Check at least one CPU before saving.",
             "Marque pelo menos um CPU na grade.", "Check at least one CPU in the grid.",
-            "Marque sensores na lista (ou use 'Essenciais') para ver o grafico", "Check sensors in the list (or use 'Essentials') to see the graph",
-            "Marque sensores para o grafico primeiro.", "Check sensors for the graph first.",
+            "Marque sensores na lista (ou use 'Essenciais') para ver o gráfico", "Check sensors in the list (or use 'Essentials') to see the graph",
+            "Marque sensores para o gráfico primeiro.", "Check sensors for the graph first.",
             "Media:", "Average:",
             "Medindo (feche outros programas para um resultado melhor)...", "Measuring (close other programs for a better result)...",
             "Medindo download...", "Measuring download...",
-            "Medindo latencia...", "Measuring latency...",
+            "Medindo latência...", "Measuring latency...",
             "Medindo upload...", "Measuring upload...",
-            "Memoria RAM", "RAM",
-            "Memoria de video (VRAM)", "Video memory (VRAM)",
-            "Memoria livre insuficiente para o teste.", "Not enough free memory for the test.",
-            "Memoria/Dados", "Memory/Data",
-            "Memoria: ", "Memory: ",
-            "Menu classico ativado. Reinicie o Explorer ou faca logoff.", "Classic menu enabled. Restart Explorer or sign out.",
-            "Menu padrao do Windows 11 restaurado. Reinicie o Explorer ou faca logoff.", "Windows 11 default menu restored. Restart Explorer or sign out.",
+            "Memória RAM", "RAM",
+            "Memória de video (VRAM)", "Video memory (VRAM)",
+            "Memória livre insuficiente para o teste.", "Not enough free memory for the test.",
+            "Memória/Dados", "Memory/Data",
+            "Memória: ", "Memory: ",
+            "Menu clássico ativado. Reinicie o Explorer ou faça logoff.", "Classic menu enabled. Restart Explorer or sign out.",
+            "Menu padrão do Windows 11 restaurado. Reinicie o Explorer ou faça logoff.", "Windows 11 default menu restored. Restart Explorer or sign out.",
             "Metade", "Half",
-            "Mitigacoes DESATIVADAS. Reinicie o PC.", "Mitigations DISABLED. Restart the PC.",
-            "Mitigacoes restauradas ao padrao do Windows. Reinicie o PC.", "Mitigations restored to the Windows default. Restart the PC.",
+            "Mitigações DESATIVADAS. Reinicie o PC.", "Mitigations DISABLED. Restart the PC.",
+            "Mitigações restauradas ao padrão do Windows. Reinicie o PC.", "Mitigations restored to the Windows default. Restart the PC.",
             "Mobile (soldada)", "Mobile (soldered)",
             "Modelo", "Model",
-            "Modo de computacao", "Compute mode",
+            "Modo de computação", "Compute mode",
             "Modo de jogo (Game Mode)", "Game Mode",
             "Monitor conectado / display ativo", "Connected monitor / active display",
-            "Mostrar / ocultar no grafico", "Show / hide on graph",
+            "Mostrar / ocultar no gráfico", "Show / hide on graph",
             "Motivos: ", "Reasons: ",
             "Muda o visual do programa: Luna (XP), Frutiger Aero (Win7), Dark/AMOLED, Neon, Steampunk ou Vintage (Windows 95)", "Changes the program's look: Luna (XP), Frutiger Aero (Win7), Dark/AMOLED, Neon, Steampunk or Vintage (Windows 95)",
-            "NAO (rode como administrador)", "NO (run as administrator)",
+            "NÃO (rode como administrador)", "NO (run as administrator)",
             "Nada sobrou: nenhum resto encontrado para ", "Nothing left: no leftovers found for ",
-            "Nao consegui criar o arquivo de teste em ", "Could not create the test file in ",
-            "Nao foi possivel abrir o navegador: ", "Could not open the browser: ",
-            "Nao foi possivel consultar o IP externo: ", "Could not look up the external IP: ",
-            "Nao foi possivel criar o ponto de restauracao (o Windows limita 1 a cada 24 h, ou a protecao do sistema esta desligada). Continuando.", "Could not create the restore point (Windows limits it to 1 per 24 h, or system protection is off). Continuing.",
-            "Nao foi possivel instalar automaticamente (", "Could not install automatically (",
-            "Nao foi possivel ler: ", "Could not read: ",
-            "Nao foi possivel medir (sem internet ou bloqueio de rede?): ", "Could not measure (no internet or network block?): ",
-            "Nao foi possivel remover:\n\n", "Could not remove:\n\n",
-            "Nao foi possivel restaurar o modo automatico.", "Could not restore automatic mode.",
-            "Nao sei qual e a pasta deste programa; use 'Escolher pasta ou .exe' para informar.", "I don't know this program's folder; use 'Choose folder or .exe' to tell me.",
-            "Navegadores e jogos criam varios processos com o mesmo nome; isto altera todos de uma vez.", "Browsers and games create several processes with the same name; this changes all of them at once.",
-            "Nenhum ajuste disponivel nesta placa.", "No adjustments available on this card.",
+            "Não consegui criar o arquivo de teste em ", "Could not create the test file in ",
+            "Não foi possível abrir o navegador: ", "Could not open the browser: ",
+            "Não foi possível consultar o IP externo: ", "Could not look up the external IP: ",
+            "Não foi possível criar o ponto de restauração (o Windows limita 1 a cada 24 h, ou a proteção do sistema está desligada). Continuando.", "Could not create the restore point (Windows limits it to 1 per 24 h, or system protection is off). Continuing.",
+            "Não foi possível instalar automaticamente (", "Could not install automatically (",
+            "Não foi possível ler: ", "Could not read: ",
+            "Não foi possível medir (sem internet ou bloqueio de rede?): ", "Could not measure (no internet or network block?): ",
+            "Não foi possível remover:\n\n", "Could not remove:\n\n",
+            "Não foi possível restaurar o modo automático.", "Could not restore automatic mode.",
+            "Não sei qual é a pasta deste programa; use 'Escolher pasta ou .exe' para informar.", "I don't know this program's folder; use 'Choose folder or .exe' to tell me.",
+            "Navegadores e jogos criam vários processos com o mesmo nome; isto altera todos de uma vez.", "Browsers and games create several processes with the same name; this changes all of them at once.",
+            "Nenhum ajuste disponível nesta placa.", "No adjustments available on this card.",
             "Nenhum backend de overclock para esta GPU. ", "No overclock backend for this GPU. ",
-            "Nenhum drive disponivel para o teste de SSD.", "No drive available for the SSD test.",
+            "Nenhum drive disponível para o teste de SSD.", "No drive available for the SSD test.",
             "Nenhum item marcado.", "No item checked.",
             "Nenhum módulo informado pelo Windows (WMI)", "No module reported by Windows (WMI)",
             "Nenhum processo desse programa esta aberto.", "No process of this program is open.",
@@ -957,94 +957,94 @@ namespace BunoTunner
             "Nenhuma GPU encontrada pelo OpenCL.", "No GPU found by OpenCL.",
             "Nenhuma GPU selecionada.", "No GPU selected.",
             "Nenhuma placa de video foi detectada.\nRode como administrador e confira a pasta libs.", "No graphics card was detected.\nRun as administrator and check the libs folder.",
-            "Nenhuma ventoinha controlavel do tipo \"", "No controllable fan of type \"",
+            "Nenhuma ventoinha controlável do tipo \"", "No controllable fan of type \"",
             "Nenhuma ventoinha encontrada", "No fan found",
             "Nenhuma", "None",
             "Nome (inclua CPU, Bomba ou Gabinete para definir o tipo):", "Name (include CPU, Pump or Case to set the type):",
             "Nome do PC: ", "PC name: ",
-            "Nome do hardware nao identificado.", "Hardware name not identified.",
-            "Nome do preset (ex.: Jogo - nucleos fisicos):", "Preset name (e.g. Game - physical cores):",
+            "Nome do hardware não identificado.", "Hardware name not identified.",
+            "Nome do preset (ex.: Jogo - núcleos físicos):", "Preset name (e.g. Game - physical cores):",
             "Nome do processo (ex.: game.exe). Preset: ", "Process name (e.g. game.exe). Preset: ",
             "Nome", "Name",
             "Normalizar escala", "Normalize scale",
-            "Nucleo: ", "Core: ",
-            "Nucleos (CPUs logicos) que os processos marcados podem usar", "Cores (logical CPUs) the checked processes may use",
-            "Nucleos CUDA", "CUDA cores",
-            "Nucleos fisicos", "Physical cores",
+            "Núcleo: ", "Core: ",
+            "Núcleos (CPUs lógicos) que os processos marcados podem usar", "Cores (logical CPUs) the checked processes may use",
+            "Núcleos CUDA", "CUDA cores",
+            "Núcleos físicos", "Physical cores",
             "NvAPI EnumGPUs erro ", "NvAPI EnumGPUs error ",
             "NvAPI SetPstates20 erro ", "NvAPI SetPstates20 error ",
-            "NvAPI indisponivel", "NvAPI unavailable",
+            "NvAPI indisponível", "NvAPI unavailable",
             "NvAPI sem SetPstates20", "NvAPI without SetPstates20",
             "NvAPI_Initialize erro ", "NvAPI_Initialize error ",
             "Não consegui ler: ", "Could not read: ",
-            "O PawnIO e um driver assinado e de codigo aberto que o LibreHardwareMonitor (usado pelo BunoTunner) precisa para acessar o hardware. ", "PawnIO is a signed, open-source driver that LibreHardwareMonitor (used by BunoTunner) needs to access the hardware. ",
-            "O PawnIO ja esta instalado.", "PawnIO is already installed.",
-            "O Windows nao informou S.M.A.R.T. deste disco (comum em discos USB e controladoras RAID).", "Windows did not report S.M.A.R.T. for this disk (common on USB disks and RAID controllers).",
-            "O instalador foi fechado, mas o PawnIO nao foi detectado. Tente novamente.", "The installer was closed, but PawnIO was not detected. Try again.",
+            "O PawnIO e um driver assinado e de código aberto que o LibreHardwareMonitor (usado pelo BunoTunner) precisa para acessar o hardware. ", "PawnIO is a signed, open-source driver that LibreHardwareMonitor (used by BunoTunner) needs to access the hardware. ",
+            "O PawnIO já está instalado.", "PawnIO is already installed.",
+            "O Windows não informou S.M.A.R.T. deste disco (comum em discos USB e controladoras RAID).", "Windows did not report S.M.A.R.T. for this disk (common on USB disks and RAID controllers).",
+            "O instalador foi fechado, mas o PawnIO não foi detectado. Tente novamente.", "The installer was closed, but PawnIO was not detected. Try again.",
             "O link do ", "The link for ",
             "OC das GPUs (NVML/ADL/IGCL)", "GPU OC (NVML/ADL/IGCL)",
             "OK (ADL Overdrive6): ventoinha em ", "OK (ADL Overdrive6): fan at ",
-            "OK (ADL Overdrive8): velocidade minima da ventoinha em ", "OK (ADL Overdrive8): minimum fan speed at ",
+            "OK (ADL Overdrive8): velocidade mínima da ventoinha em ", "OK (ADL Overdrive8): minimum fan speed at ",
             "OK (IGCL): ventoinha em ", "OK (IGCL): fan at ",
             "OK (NVML): ventoinha(s) em ", "OK (NVML): fan(s) at ",
-            "OK: automatico", "OK: automatic",
-            "Observacao", "Note",
+            "OK: automático", "OK: automatic",
+            "Observação", "Note",
             "Ocultar sem leitura", "Hide without reading",
-            "Offset do clock da memoria, em MHz", "Memory clock offset, in MHz",
-            "Offset do clock da memoria", "Memory clock offset",
-            "Offset do clock do nucleo, em MHz acima do padrao", "Core clock offset, in MHz above default",
-            "Offset do clock do nucleo", "Core clock offset",
+            "Offset do clock da memória, em MHz", "Memory clock offset, in MHz",
+            "Offset do clock da memória", "Memory clock offset",
+            "Offset do clock do núcleo, em MHz acima do padrão", "Core clock offset, in MHz above default",
+            "Offset do clock do núcleo", "Core clock offset",
             "Ok - driver de sensores funcionando", "OK - sensor driver working",
-            "OpenCL nao encontrado (instale o driver da placa de video).", "OpenCL not found (install the graphics driver).",
+            "OpenCL não encontrado (instale o driver da placa de video).", "OpenCL not found (install the graphics driver).",
             "OpenCL: erro ao compilar (", "OpenCL: compile error (",
             "OpenCL: erro ", "OpenCL: error ",
             "OpenCL: falha ao carregar o programa (", "OpenCL: failed to load the program (",
             "OpenCL: falha ao criar contexto (", "OpenCL: failed to create context (",
             "OpenCL: falha na fila de comandos (", "OpenCL: command queue failure (",
-            "OpenCL: sem memoria de video para o teste.", "OpenCL: not enough video memory for the test.",
-            "OpenGL indisponivel (", "OpenGL unavailable (",
-            "Os sensores da CPU (temperatura, tensao, consumo) precisam do driver do LibreHardwareMonitor, e ele nao esta conseguindo ler esta CPU.\n\n", "CPU sensors (temperature, voltage, power) need the LibreHardwareMonitor driver, and it is unable to read this CPU.\n\n",
+            "OpenCL: sem memória de video para o teste.", "OpenCL: not enough video memory for the test.",
+            "OpenGL indisponível (", "OpenGL unavailable (",
+            "Os sensores da CPU (temperatura, tensão, consumo) precisam do driver do LibreHardwareMonitor, e ele não está conseguindo ler esta CPU.\n\n", "CPU sensors (temperature, voltage, power) need the LibreHardwareMonitor driver, and it is unable to read this CPU.\n\n",
             "Outra", "Other",
             "Outros", "Others",
             "Outro", "Other",
             "Overclock / limites - ", "Overclock / limits - ",
             "Overclock / ventoinha", "Overclock / fan",
-            "Overclock indisponivel para esta GPU. ", "Overclock unavailable for this GPU. ",
-            "Overdrive indisponivel nesta placa/driver (ative \"Ajuste manual\" no AMD Adrenalin)", "Overdrive unavailable on this card/driver (enable \"Manual tuning\" in AMD Adrenalin)",
+            "Overclock indisponível para esta GPU. ", "Overclock unavailable for this GPU. ",
+            "Overdrive indisponível nesta placa/driver (ative \"Ajuste manual\" no AMD Adrenalin)", "Overdrive unavailable on this card/driver (enable \"Manual tuning\" in AMD Adrenalin)",
             "Overdrive6_FanSpeed_Reset erro ", "Overdrive6_FanSpeed_Reset error ",
             "Overdrive6_FanSpeed_Set erro ", "Overdrive6_FanSpeed_Set error ",
-            "Overdrive8: nucleo = clock maximo; memoria = clock maximo (MHz reais); potencia em % relativo ao padrao.", "Overdrive8: core = max clock; memory = max clock (real MHz); power in % relative to default.",
+            "Overdrive8: núcleo = clock máximo; memória = clock máximo (MHz reais); potência em % relativo ao padrão.", "Overdrive8: core = max clock; memory = max clock (real MHz); power in % relative to default.",
             "Overdrive8_Init_Setting_Get erro ", "Overdrive8_Init_Setting_Get error ",
             "Overdrive8_Setting_Set erro ", "Overdrive8_Setting_Set error ",
             "Overlay do DLSS ativado.", "DLSS overlay enabled.",
             "Overlay do DLSS desativado.", "DLSS overlay disabled.",
             "PAUSADO", "PAUSED",
             "PCIe (agora)", "PCIe (now)",
-            "PCIe (maximo da placa)", "PCIe (card maximum)",
-            "PCIe - geracao", "PCIe - generation",
+            "PCIe (máximo da placa)", "PCIe (card maximum)",
+            "PCIe - geração", "PCIe - generation",
             "PCIe - largura (x)", "PCIe - width (x)",
-            "Padrao do Windows (nao alterado)", "Windows default (unchanged)",
-            "Padrao", "Default",
-            "Parado por seguranca: temperatura de ", "Stopped for safety: temperature of ",
-            "Passe o mouse sobre o grafico para ver os valores de cada instante", "Hover over the graph to see the values at each moment",
-            "Pastas e arquivos irao para a Lixeira.\n", "Folders and files will go to the Recycle Bin.\n",
-            "Pastas e arquivos serao APAGADOS de vez.\n", "Folders and files will be DELETED permanently.\n",
+            "Padrão do Windows (não alterado)", "Windows default (unchanged)",
+            "Padrão", "Default",
+            "Parado por segurança: temperatura de ", "Stopped for safety: temperature of ",
+            "Passe o mouse sobre o gráfico para ver os valores de cada instante", "Hover over the graph to see the values at each moment",
+            "Pastas e arquivos irão para a Lixeira.\n", "Folders and files will go to the Recycle Bin.\n",
+            "Pastas e arquivos serão APAGADOS de vez.\n", "Folders and files will be DELETED permanently.\n",
             "Pausar", "Pause",
             "PawnIO instalado! Feche e abra o BunoTunner para os sensores, ventoinhas e timings passarem a usar o driver.", "PawnIO installed! Close and reopen BunoTunner so sensors, fans and timings start using the driver.",
             "PawnIO instalado: ", "PawnIO installed: ",
             "PawnIO instalado", "PawnIO installed",
-            "PawnIO nao instalado; ", "PawnIO not installed; ",
+            "PawnIO não instalado; ", "PawnIO not installed; ",
             "PawnIO: driver usado pelo LibreHardwareMonitor para ler sensores da CPU/placa-mae e controlar as ventoinhas da placa-mae. Clique para baixar e instalar.", "PawnIO: driver used by LibreHardwareMonitor to read CPU/motherboard sensors and control motherboard fans. Click to download and install.",
-            "PawnIOLib.dll nao encontrada; ", "PawnIOLib.dll not found; ",
-            "PawnIOLib.dll sem as funcoes esperadas; ", "PawnIOLib.dll without the expected functions; ",
+            "PawnIOLib.dll não encontrada; ", "PawnIOLib.dll not found; ",
+            "PawnIOLib.dll sem as funções esperadas; ", "PawnIOLib.dll without the expected functions; ",
             "Pico:", "Peak:",
             "Placa-mae (Super I/O)", "Motherboard (Super I/O)",
             "Placa-mae", "Motherboard",
-            "Ponto de restauracao criado.", "Restore point created.",
+            "Ponto de restauração criado.", "Restore point created.",
             "Por que?\n", "Why?\n",
-            "Potencia", "Power",
-            "Pouco espaco livre no drive ", "Little free space on drive ",
-            "Processador - Zona termica (Windows/ACPI)", "Processor - Thermal zone (Windows/ACPI)",
+            "Potência", "Power",
+            "Pouco espaço livre no drive ", "Little free space on drive ",
+            "Processador - Zona térmica (Windows/ACPI)", "Processor - Thermal zone (Windows/ACPI)",
             "Processador de video", "Video processor",
             "Processador", "Processor",
             "Procurando restos de ", "Looking for leftovers of ",
@@ -1053,13 +1053,13 @@ namespace BunoTunner
             "Pronto: ", "Ready: ",
             "Pronto", "Ready",
             "Provedor (ISP/ASN): ", "Provider (ISP/ASN): ",
-            "Quando o processo abrir, o preset e aplicado sozinho (ex.: jogo.exe -> nucleos fisicos).", "When the process starts, the preset is applied automatically (e.g. game.exe -> physical cores).",
+            "Quando o processo abrir, o preset é aplicado sozinho (ex.: jogo.exe -> núcleos físicos).", "When the process starts, the preset is applied automatically (e.g. game.exe -> physical cores).",
             "Quantidade de ventoinhas", "Number of fans",
-            "RAM - mapa de memoria", "RAM - memory map",
+            "RAM - mapa de memória", "RAM - memory map",
             "RAM em uso", "RAM in use",
-            "REMOCAO FORCADA de \"", "FORCED REMOVAL of \"",
-            "RPM = giros por minuto. % = potencia enviada. \"so leitura\" = a placa-mae nao permite controle por software.", "RPM = revolutions per minute. % = power sent. \"read-only\" = the motherboard does not allow software control.",
-            "Recomendamos a instalacao do PawnIO.\n\n", "We recommend installing PawnIO.\n\n",
+            "REMOÇÃO FORÇADA de \"", "FORCED REMOVAL of \"",
+            "RPM = giros por minuto. % = potência enviada. \"só leitura\" = a placa-mae não permite controle por software.", "RPM = revolutions per minute. % = power sent. \"read-only\" = the motherboard does not allow software control.",
+            "Recomendamos a instalação do PawnIO.\n\n", "We recommend installing PawnIO.\n\n",
             "Redefinir: ", "Reset: ",
             "Registro", "Registry",
             "Regra aplicada: ", "Rule applied: ",
@@ -1068,201 +1068,201 @@ namespace BunoTunner
             "Remover ", "Remove ",
             "Renomear ventoinha", "Rename fan",
             "Renomear...", "Rename...",
-            "Resolucao atual", "Current resolution",
+            "Resolução atual", "Current resolution",
             "Resultados copiados.", "Results copied.",
-            "Revisao", "Revision",
+            "Revisão", "Revision",
             "Ring0 (LHM) com PCI: ", "Ring0 (LHM) with PCI: ",
-            "Roda CPU, FPU, RAM e GPU um apos o outro, cada um com a duracao do seu bloco (o SSD fica de fora para nao gerar desgaste).", "Runs CPU, FPU, RAM and GPU one after another, each with its block's duration (the SSD is left out to avoid wear).",
+            "Roda CPU, FPU, RAM e GPU um após o outro, cada um com a duração do seu bloco (o SSD fica de fora para não gerar desgaste).", "Runs CPU, FPU, RAM and GPU one after another, each with its block's duration (the SSD is left out to avoid wear).",
             "Rodando...", "Running...",
             "Ruim", "Poor",
-            "SEGURANCA: ", "SECURITY: ",
-            "SEGURANCA", "SECURITY",
-            "SLAT (paginacao aninhada)", "SLAT (nested paging)",
+            "SEGURANÇA: ", "SECURITY: ",
+            "SEGURANÇA", "SECURITY",
+            "SLAT (paginação aninhada)", "SLAT (nested paging)",
             "SSD - mapa de blocos do disco", "SSD - disk block map",
             "Salvar imagem do render (PNG)", "Save render image (PNG)",
             "Salvo em ", "Saved to ",
             "Salvo: ", "Saved: ",
-            "Se esquentar demais, as ventoinhas vao a 100% mesmo no modo manual.", "If it gets too hot, the fans go to 100% even in manual mode.",
+            "Se esquentar demais, as ventoinhas vão a 100% mesmo no modo manual.", "If it gets too hot, the fans go to 100% even in manual mode.",
             "Segundos", "Seconds",
-            "Seguranca baseada em virtualizacao (VBS)", "Virtualization-based security (VBS)",
-            "Seguranca: forcar 100% se a temperatura passar de", "Safety: force 100% if the temperature goes above",
-            "Selecionadas a 100% por 5 s. Veja/ouca qual acelerou e acompanhe o RPM na lista.", "Selected ones at 100% for 5 s. See/hear which one sped up and follow the RPM in the list.",
+            "Segurança baseada em virtualização (VBS)", "Virtualization-based security (VBS)",
+            "Segurança: forcar 100% se a temperatura passar de", "Safety: force 100% if the temperature goes above",
+            "Selecionadas a 100% por 5 s. Veja/ouça qual acelerou e acompanhe o RPM na lista.", "Selected ones at 100% for 5 s. See/hear which one sped up and follow the RPM in the list.",
             "Selecionado", "Selected",
-            "Selecionar so as controlaveis", "Select only the controllable ones",
+            "Selecionar só as controláveis", "Select only the controllable ones",
             "Selecionar todas", "Select all",
             "Selecionar: CPU", "Select: CPU",
             "Selecionar: GPU", "Select: GPU",
             "Selecionar: bombas / AIO", "Select: pumps / AIO",
             "Selecionar: gabinete", "Select: case",
-            "Selecione na lista pelo menos uma ventoinha controlavel.", "Select at least one controllable fan in the list.",
-            "Selecione pelo menos uma ventoinha controlavel.", "Select at least one controllable fan.",
+            "Selecione na lista pelo menos uma ventoinha controlável.", "Select at least one controllable fan in the list.",
+            "Selecione pelo menos uma ventoinha controlável.", "Select at least one controllable fan.",
             "Selecione uma ventoinha para renomear.", "Select a fan to rename.",
-            "Sem copia do registro.", "No registry copy.",
+            "Sem cópia do registro.", "No registry copy.",
             "Sem dados", "No data",
-            "Sem ele ficam sem leitura: varios sensores de temperatura da CPU e da placa-mae, o controle das ventoinhas ligadas a placa-mae e os timings da memoria RAM.\n\n", "Without it these have no reading: several CPU and motherboard temperature sensors, control of the fans connected to the motherboard, and the RAM timings.\n\n",
+            "Sem ele ficam sem leitura: vários sensores de temperatura da CPU e da placa-mae, o controle das ventoinhas ligadas a placa-mae e os timings da memória RAM.\n\n", "Without it these have no reading: several CPU and motherboard temperature sensors, control of the fans connected to the motherboard, and the RAM timings.\n\n",
             "Sem leitura de temperatura - veja o LEIA-ME (driver bloqueado?)", "No temperature reading - see the README (driver blocked?)",
             "Sensores atualizando a cada ", "Sensors updating every ",
             "Sensores da CPU sem leitura", "CPU sensors without reading",
             "Sensores expostos (LHM)", "Exposed sensors (LHM)",
-            "Servico", "Service",
+            "Serviço", "Service",
             "Servidor DHCP: ", "DHCP server: ",
-            "So no grafico", "Only on graph",
+            "Só no gráfico", "Only on graph",
             "Soquete", "Socket",
             "Sufixo DNS: ", "DNS suffix: ",
             "Tarefa", "Task",
-            "Taxa de atualizacao do monitor", "Monitor refresh rate",
+            "Taxa de atualização do monitor", "Monitor refresh rate",
             "Taxa de dados", "Data rate",
             "Taxa (", "Rate (",
-            "Temp Limit (alvo termico)", "Temp Limit (thermal target)",
+            "Temp Limit (alvo térmico)", "Temp Limit (thermal target)",
             "Temp. alvo (limite de temperatura)", "Target temp. (temperature limit)",
             "Temp. de desligamento", "Shutdown temp.",
             "Temp. de slowdown (throttle)", "Slowdown temp. (throttle)",
-            "Temp. maxima da GPU", "Max GPU temp.",
-            "Temp. maxima da memoria", "Max memory temp.",
-            "Temperatura do nucleo", "Core temperature",
-            "Temperatura maxima registrada", "Max recorded temperature",
+            "Temp. máxima da GPU", "Max GPU temp.",
+            "Temp. máxima da memória", "Max memory temp.",
+            "Temperatura do núcleo", "Core temperature",
+            "Temperatura máxima registrada", "Max recorded temperature",
             "Temperatura hotspot", "Hotspot temperature",
             "Temperatura: ", "Temperature: ",
             "Temperatura", "Temperature",
             "Tempo entre as leituras dos sensores (100 a 10000 ms). Menos = mais fluido, mas usa mais CPU.", "Time between sensor readings (100 to 10000 ms). Lower = smoother, but uses more CPU.",
             "Tempo:", "Time:",
             "Teste cancelado.", "Test cancelled.",
-            "Teste concluido.", "Test finished.",
+            "Teste concluído.", "Test finished.",
             "Teste finalizado.", "Test ended.",
-            "Threads (processadores logicos)", "Threads (logical processors)",
+            "Threads (processadores lógicos)", "Threads (logical processors)",
             "Tipo (LHM)", "Type (LHM)",
             "Tipo / interface", "Type / interface",
             "Tipo: ", "Type: ",
             "Tipo:", "Type:",
-            "Todas as ventoinhas voltaram ao automatico.", "All fans went back to automatic.",
+            "Todas as ventoinhas voltaram ao automático.", "All fans went back to automatic.",
             "Todos os tipos", "All types",
             "Todos (", "All (",
             "Todas", "All",
             "Tudo certo. Em HDDs, observe erros e temperatura (ideal abaixo de 50 C).", "All good. On HDDs, watch errors and temperature (ideally below 50 C).",
-            "Tudo certo. SSDs perdem vida conforme a quantidade de dados gravados; valores abaixo de 30% pedem atencao.", "All good. SSDs lose life according to the amount of data written; values below 30% need attention.",
-            "Uma copia das chaves do registro sera salva em BunoTunner_backup.", "A copy of the registry keys will be saved in BunoTunner_backup.",
+            "Tudo certo. SSDs perdem vida conforme a quantidade de dados gravados; valores abaixo de 30% pedem atenção.", "All good. SSDs lose life according to the amount of data written; values below 30% need attention.",
+            "Uma cópia das chaves do registro será salva em BunoTunner_backup.", "A copy of the registry keys will be saved in BunoTunner_backup.",
             "Usando ", "Using ",
-            "Use isto para programas que nao aparecem na lista (portateis, restos de algo ja removido, etc.).\n\nO que voce quer escolher?", "Use this for programs that do not appear in the list (portable ones, leftovers of something already removed, etc.).\n\nWhat do you want to choose?",
+            "Use isto para programas que não aparecem na lista (portáteis, restos de algo já removido, etc.).\n\nO que você quer escolher?", "Use this for programs that do not appear in the list (portable ones, leftovers of something already removed, etc.).\n\nWhat do you want to choose?",
             "Uso (%)", "Usage (%)",
-            "Uso do controlador de memoria", "Memory controller usage",
-            "Uso do nucleo", "Core usage",
+            "Uso do controlador de memória", "Memory controller usage",
+            "Uso do núcleo", "Core usage",
             "Uso total", "Total usage",
-            "Usuario: ", "User: ",
+            "Usuário: ", "User: ",
             "VRAM em uso (%)", "VRAM in use (%)",
             "VRAM usada", "VRAM used",
-            "Valor invalido.", "Invalid value.",
+            "Valor inválido.", "Invalid value.",
             "Valores atuais (CSV)...", "Current values (CSV)...",
             "Valores originais restaurados.", "Original values restored.",
-            "Variacao", "Variation",
+            "Variação", "Variation",
             "Velocidade:", "Speed:",
             "Ventoinha (%)", "Fan (%)",
             "Ventoinha (RPM)", "Fan (RPM)",
             "Ventoinha da CPU", "CPU fan",
             "Ventoinhas da GPU", "GPU fans",
             "Ventoinhas", "Fans",
-            "Versao do driver (Windows)", "Driver version (Windows)",
-            "Virtualizacao no firmware (VT-x / AMD-V)", "Virtualization in firmware (VT-x / AMD-V)",
+            "Versão do driver (Windows)", "Driver version (Windows)",
+            "Virtualização no firmware (VT-x / AMD-V)", "Virtualization in firmware (VT-x / AMD-V)",
             "Voltagem:", "Voltage:",
             "Voltagem", "Voltage",
-            "WMI indisponivel: ", "WMI unavailable: ",
+            "WMI indisponível: ", "WMI unavailable: ",
             "Zerar min/max deste sensor", "Reset min/max of this sensor",
-            "Zona termica", "Thermal zone",
+            "Zona térmica", "Thermal zone",
             "Zona ", "Zone ",
             "\" (pasta ", "\" (folder ",
             "\" (renomeie as suas para classificar).", "\" (rename yours to classify).",
             "\" passar de (", "\" goes above (",
             "\" salvo.", "\" saved.",
             "\" selecionada(s).", "\" selected.",
-            "\"?\n\n1) O desinstalador oficial sera aberto (siga as telas dele).\n2) Depois o BunoTunner procura o que sobrou para voce revisar.", "\"?\n\n1) The official uninstaller will open (follow its screens).\n2) Then BunoTunner looks for what was left behind for you to review.",
-            "\"\n\nIsto NAO usa o desinstalador: encerra os processos do programa, para os servicos dele e lista tudo o que for dele (pasta, registro, inicializacao, tarefas) para voce apagar.\n\nNada e apagado antes de voce revisar e confirmar a lista. Continuar?", "\"\n\nThis does NOT use the uninstaller: it ends the program's processes, stops its services and lists everything that belongs to it (folder, registry, startup, tasks) for you to delete.\n\nNothing is deleted before you review and confirm the list. Continue?",
-            "\n(copiado para a area de transferencia)", "\n(copied to the clipboard)",
+            "\"?\n\n1) O desinstalador oficial será aberto (siga as telas dele).\n2) Depois o BunoTunner procura o que sobrou para você revisar.", "\"?\n\n1) The official uninstaller will open (follow its screens).\n2) Then BunoTunner looks for what was left behind for you to review.",
+            "\"\n\nIsto NÃO usa o desinstalador: encerra os processos do programa, para os serviços dele e lista tudo o que for dele (pasta, registro, inicialização, tarefas) para você apagar.\n\nNada e apagado antes de você revisar e confirmar a lista. Continuar?", "\"\n\nThis does NOT use the uninstaller: it ends the program's processes, stops its services and lists everything that belongs to it (folder, registry, startup, tasks) for you to delete.\n\nNothing is deleted before you review and confirm the list. Continue?",
+            "\n(copiado para a área de transferência)", "\n(copied to the clipboard)",
             "\n(tempo esgotado)", "\n(timed out)",
-            "\n\nSe o arquivo esta em uso, feche o programa (ou use 'Remocao forcada') e tente de novo; ou reinicie o PC.", "\n\nIf the file is in use, close the program (or use 'Forced removal') and try again; or restart the PC.",
-            "a LibreHardwareMonitorLib.dll da pasta libs nao traz o modulo PawnIO (DLL antiga: atualize); ", "the LibreHardwareMonitorLib.dll in the libs folder does not include the PawnIO module (old DLL: update it); ",
+            "\n\nSe o arquivo está em uso, feche o programa (ou use 'Remoção forçada') e tente de novo; ou reinicie o PC.", "\n\nIf the file is in use, close the program (or use 'Forced removal') and try again; or restart the PC.",
+            "a LibreHardwareMonitorLib.dll da pasta libs não traz o módulo PawnIO (DLL antiga: atualize); ", "the LibreHardwareMonitorLib.dll in the libs folder does not include the PawnIO module (old DLL: update it); ",
             "acesso negado (rode como administrador)", "access denied (run as administrator)",
-            "adaptador AMD nao encontrado no ADL", "AMD adapter not found in ADL",
+            "adaptador AMD não encontrado no ADL", "AMD adapter not found in ADL",
             "alta", "high",
             "media", "medium",
-            "argumento invalido", "invalid argument",
+            "argumento inválido", "invalid argument",
             "arquivo protegido", "protected file",
-            "atiadlxx.dll nao encontrada (instale o driver Radeon/Adrenalin)", "atiadlxx.dll not found (install the Radeon/Adrenalin driver)",
-            "chave invalida", "invalid key",
+            "atiadlxx.dll não encontrada (instale o driver Radeon/Adrenalin)", "atiadlxx.dll not found (install the Radeon/Adrenalin driver)",
+            "chave inválida", "invalid key",
             "chave protegida", "protected key",
             "clock de aplicativo", "application clock",
-            "codigo ", "code ",
+            "código ", "code ",
             "controlador de memória da CPU (AMD Ryzen, canal ", "CPU memory controller (AMD Ryzen, channel ",
             "desligado no .ini (vendoroc=0)", "disabled in the .ini (vendoroc=0)",
-            "distancia ate o TjMax", "distance to TjMax",
-            "em uso e nao foi possivel agendar a exclusao", "in use and the deletion could not be scheduled",
+            "distância até o TjMax", "distance to TjMax",
+            "em uso e não foi possível agendar a exclusão", "in use and the deletion could not be scheduled",
             "entrada em Programas e Recursos", "entry in Programs and Features",
             "erro ao inspecionar a DLL: ", "error inspecting the DLL: ",
-            "erro generico", "generic error",
+            "erro genérico", "generic error",
             "erro - ", "error - ",
             "erro ", "error ",
             "esta placa usa Overdrive ", "this card uses Overdrive ",
             "esta plataforma (", "this platform (",
-            "este ajuste nao e exposto pelo driver Intel desta GPU", "this setting is not exposed by this GPU's Intel driver",
-            "fabricante sem suporte de OC nesta versao", "manufacturer without OC support in this version",
+            "este ajuste não e exposto pelo driver Intel desta GPU", "this setting is not exposed by this GPU's Intel driver",
+            "fabricante sem suporte de OC nesta versão", "manufacturer without OC support in this version",
             "falha ao carregar PawnIOLib.dll; ", "failed to load PawnIOLib.dll; ",
             "falhou", "failed",
-            "fase 2 concluida (+", "phase 2 finished (+",
+            "fase 2 concluída (+", "phase 2 finished (+",
             "fase 2 erro: ", "phase 2 error: ",
             "fase 2: ", "phase 2: ",
             "feature desligada no Adrenalin", "feature turned off in Adrenalin",
-            "formato de pixel OpenGL indisponivel", "OpenGL pixel format unavailable",
+            "formato de pixel OpenGL indisponível", "OpenGL pixel format unavailable",
             "freio de energia (HW)", "power brake (HW)",
             "frontal", "front",
             "gabinete", "case",
-            "grafico", "graph",
-            "indisponivel", "unavailable",
+            "gráfico", "graph",
+            "indisponível", "unavailable",
             "janela mostrada", "window shown",
             "leitura direta do controlador: só CPUs AMD Ryzen nesta versão", "direct controller reading: only AMD Ryzen CPUs in this version",
-            "limite de potencia (SW)", "power limit (SW)",
-            "limite de potencia fixo nesta placa (normal em notebooks: o fabricante trava o TDP)", "fixed power limit on this card (normal on laptops: the manufacturer locks the TDP)",
-            "limite de temperatura nao ajustavel nesta placa", "temperature limit not adjustable on this card",
-            "limite termico (HW)", "thermal limit (HW)",
-            "limite termico (SW)", "thermal limit (SW)",
-            "nao foi possivel criar o contexto OpenGL", "could not create the OpenGL context",
-            "nao foi possivel ler o controlador de memoria: ", "could not read the memory controller: ",
-            "nao suportado nesta GPU/notebook", "not supported on this GPU/laptop",
-            "nao suportado nesta placa", "not supported on this card",
-            "nao suportado", "not supported",
+            "limite de potência (SW)", "power limit (SW)",
+            "limite de potência fixo nesta placa (normal em notebooks: o fabricante trava o TDP)", "fixed power limit on this card (normal on laptops: the manufacturer locks the TDP)",
+            "limite de temperatura não ajustável nesta placa", "temperature limit not adjustable on this card",
+            "limite térmico (HW)", "thermal limit (HW)",
+            "limite térmico (SW)", "thermal limit (SW)",
+            "não foi possível criar o contexto OpenGL", "could not create the OpenGL context",
+            "não foi possível ler o controlador de memória: ", "could not read the memory controller: ",
+            "não suportado nesta GPU/notebook", "not supported on this GPU/laptop",
+            "não suportado nesta placa", "not supported on this card",
+            "não suportado", "not supported",
             "nenhum adaptador ADL", "no ADL adapter",
             "nenhum adaptador AMD no ADL (", "no AMD adapter in ADL (",
             "nenhum dispositivo Intel (ctlEnumerateDevices 0x", "no Intel device (ctlEnumerateDevices 0x",
-            "nvml.dll nao encontrada", "nvml.dll not found",
+            "nvml.dll não encontrada", "nvml.dll not found",
             "não informado pela BIOS", "not reported by the BIOS",
-            "o Windows nao informou discos", "Windows did not report disks",
-            "o driver Intel nao liberou overclock para esta GPU (so Arc dedicadas; graficos integrados nao tem)", "the Intel driver did not enable overclocking for this GPU (dedicated Arc only; integrated graphics do not have it)",
-            "o driver nao informa a faixa (comum em notebooks); valores acima do limite serao recusados", "the driver does not report the range (common on laptops); values above the limit will be rejected",
-            "o driver nao liberou este ajuste (", "the driver did not enable this setting (",
+            "o Windows não informou discos", "Windows did not report disks",
+            "o driver Intel não liberou overclock para esta GPU (só Arc dedicadas; gráficos integrados não tem)", "the Intel driver did not enable overclocking for this GPU (dedicated Arc only; integrated graphics do not have it)",
+            "o driver não informa a faixa (comum em notebooks); valores acima do limite serão recusados", "the driver does not report the range (common on laptops); values above the limit will be rejected",
+            "o driver não liberou este ajuste (", "the driver did not enable this setting (",
             "ociosa (normal)", "idle (normal)",
             "pawnio_load falhou (0x", "pawnio_load failed (0x",
             "pawnio_open falhou (0x", "pawnio_open failed (0x",
             "recurso inexistente neste driver", "feature not present in this driver",
-            "registradores do controlador nao reconhecidos nesta CPU (use o botao Diagnostico)", "controller registers not recognized on this CPU (use the Diagnostics button)",
+            "registradores do controlador não reconhecidos nesta CPU (use o botão Diagnóstico)", "controller registers not recognized on this CPU (use the Diagnostics button)",
             "relatório do CPU-Z (", "CPU-Z report (",
             "rode como Administrador", "run as Administrator",
             "sem backend para este fabricante", "no backend for this manufacturer",
             "sem driver NVIDIA", "no NVIDIA driver",
-            "sem implementacao", "not implemented",
-            "sem permissao no registro: ", "no registry permission: ",
+            "sem implementação", "not implemented",
+            "sem permissão no registro: ", "no registry permission: ",
             "sem reset", "no reset",
             "sensores prontos (fase 1)", "sensors ready (phase 1)",
             "slowdown de hardware", "hardware slowdown",
             "tipo desconhecido", "unknown type",
             "traseira", "rear",
-            "versao de estrutura incompativel", "incompatible structure version",
+            "versão de estrutura incompatível", "incompatible structure version",
             "papel de parede", "wallpaper",
             "sim", "yes",
-            "nao", "no",
+            "não", "no",
             "Sim", "Yes",
-            "Grupo;Sensor;Tipo;Valor;Minimo;Maximo;Unidade", "Group;Sensor;Type;Value;Minimum;Maximum;Unit",
+            "Grupo;Sensor;Tipo;Valor;Mínimo;Máximo;Unidade", "Group;Sensor;Type;Value;Minimum;Maximum;Unit",
             "IGCL incompleta", "IGCL incomplete",
             "IGCL sem Overclock", "IGCL without Overclock",
             "Sistema operacional", "Operating system",
             "Driver (registro)", "Driver (registry)",
-            "pasta de instalacao", "installation folder",
+            "pasta de instalação", "installation folder",
             "pasta protegida", "protected folder",
             "Temp max", "Max temp",
             "NVML iniciado", "NVML started",
@@ -1270,9 +1270,9 @@ namespace BunoTunner
             "Placa de video", "Graphics card",
             " MB em ", " MB in ",
             "LHM configurado", "LHM configured",
-            "MainForm: inicio", "MainForm: start",
-            "MainForm: paginas criadas", "MainForm: pages created",
-            "SensorHub.Open concluido", "SensorHub.Open done",
+            "MainForm: início", "MainForm: start",
+            "MainForm: páginas criadas", "MainForm: pages created",
+            "SensorHub.Open concluído", "SensorHub.Open done",
             "tema e PawnIO verificados", "theme and PawnIO checked",
             "ns x tamanho do bloco", "ns x block size" };
 
@@ -1887,7 +1887,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.41.0";
+        public const string Version = "v1.41.1";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -3163,7 +3163,7 @@ namespace BunoTunner
             }
             if (Paused) TextRenderer.DrawText(g, Lang.T("PAUSADO"), Xp.UiBold, new Point(pl.Right - 70, pl.Top + 4), Color.Yellow);
             if (Items.Count == 0)
-                TextRenderer.DrawText(g, Lang.T("Marque sensores na lista (ou use 'Essenciais') para ver o grafico"), Font, new Point(pl.Left + 20, pl.Top + pl.Height / 2), Xp.GraphText);
+                TextRenderer.DrawText(g, Lang.T("Marque sensores na lista (ou use 'Essenciais') para ver o gráfico"), Font, new Point(pl.Left + 20, pl.Top + pl.Height / 2), Xp.GraphText);
         }
     }
 
@@ -3259,7 +3259,7 @@ namespace BunoTunner
         public static string Err(int code)
         {
             if (code == -999) return "recurso inexistente neste driver";
-            if (code == -998) return "nvml.dll nao encontrada";
+            if (code == -998) return "nvml.dll não encontrada";
             try { return Marshal.PtrToStringAnsi(nvmlErrorString(code)) + " (" + code + ")"; } catch (Exception) { return "erro " + code; }
         }
 
@@ -3360,7 +3360,7 @@ namespace BunoTunner
             {
                 case 2: return "Kepler"; case 3: return "Maxwell"; case 4: return "Pascal"; case 5: return "Volta";
                 case 6: return "Turing"; case 7: return "Ampere"; case 8: return "Ada Lovelace"; case 9: return "Hopper";
-                case 10: return "Blackwell"; default: return "Codigo " + a.Value;
+                case 10: return "Blackwell"; default: return "Código " + a.Value;
             }
         }
         public static string Compute(IntPtr h)
@@ -3398,19 +3398,19 @@ namespace BunoTunner
             try
             {
                 ulong r;
-                if (nvmlDeviceGetCurrentClocksThrottleReasons(h, out r) != 0) return "Indisponivel";
+                if (nvmlDeviceGetCurrentClocksThrottleReasons(h, out r) != 0) return "Indisponível";
                 if (r == 0) return "Nenhuma";
                 List<string> l = new List<string>();
                 if ((r & 0x1) != 0) l.Add("ociosa (normal)");
                 if ((r & 0x2) != 0) l.Add("clock de aplicativo");
-                if ((r & 0x4) != 0) l.Add("limite de potencia (SW)");
+                if ((r & 0x4) != 0) l.Add("limite de potência (SW)");
                 if ((r & 0x8) != 0) l.Add("slowdown de hardware");
-                if ((r & 0x20) != 0) l.Add("limite termico (SW)");
-                if ((r & 0x40) != 0) l.Add("limite termico (HW)");
+                if ((r & 0x20) != 0) l.Add("limite térmico (SW)");
+                if ((r & 0x40) != 0) l.Add("limite térmico (HW)");
                 if ((r & 0x80) != 0) l.Add("freio de energia (HW)");
-                return l.Count == 0 ? "Codigo " + r : string.Join(", ", l.ToArray());
+                return l.Count == 0 ? "Código " + r : string.Join(", ", l.ToArray());
             }
-            catch (Exception) { return "Indisponivel"; }
+            catch (Exception) { return "Indisponível"; }
         }
 
         // API nova (R535+): offsets por tipo de clock (0 = nucleo, 2 = memoria) no estado P0
@@ -3497,7 +3497,7 @@ namespace BunoTunner
             try
             {
                 IntPtr pi = QueryInterface(0x0150E828);
-                if (pi == IntPtr.Zero) { err = "NvAPI indisponivel"; return false; }
+                if (pi == IntPtr.Zero) { err = "NvAPI indisponível"; return false; }
                 D0 init = (D0)Marshal.GetDelegateForFunctionPointer(pi, typeof(D0));
                 int r = init();
                 if (r != 0) { err = "NvAPI_Initialize erro " + r; return false; }
@@ -3515,10 +3515,10 @@ namespace BunoTunner
         {
             switch (r)
             {
-                case -1: return "erro generico"; case -3: return "sem implementacao"; case -5: return "argumento invalido";
-                case -9: return "versao de estrutura incompativel"; case -104: return "nao suportado nesta GPU/notebook";
-                case -6: return "sem driver NVIDIA"; case -8: return "GPU nao encontrada"; case -110: return "acesso negado (rode como administrador)";
-                default: return "codigo " + r;
+                case -1: return "erro genérico"; case -3: return "sem implementação"; case -5: return "argumento inválido";
+                case -9: return "versão de estrutura incompatível"; case -104: return "não suportado nesta GPU/notebook";
+                case -6: return "sem driver NVIDIA"; case -8: return "GPU não encontrada"; case -110: return "acesso negado (rode como administrador)";
+                default: return "código " + r;
             }
         }
 
@@ -3577,7 +3577,7 @@ namespace BunoTunner
                 if (IsGpu) return "GPU";
                 if (Group.StartsWith("Processador")) return "CPU";
                 if (Group.StartsWith("Placa-mae")) return "Placa-mae";
-                if (Group.StartsWith("Memoria RAM")) return "Memoria RAM";
+                if (Group.StartsWith("Memória RAM")) return "Memória RAM";
                 if (Group.StartsWith("Armazenamento")) return "Discos";
                 if (Group.StartsWith("Cooler")) return "Coolers";
                 if (Group.StartsWith("Rede")) return "Rede";
@@ -3603,7 +3603,23 @@ namespace BunoTunner
         public bool Seen { get { return seen; } }
         public float? AlertAbove;
         public DateTime LastBeep = DateTime.MinValue;
-        public string Key { get { return Group + "~:~" + Name; } }
+        // chave estavel (sem acentos): configuracoes salvas por versoes antigas continuam valendo
+        string kG, kN, kK;
+        public string Key
+        {
+            get
+            {
+                if (kK != null && object.ReferenceEquals(Group, kG) && object.ReferenceEquals(Name, kN)) return kK;
+                kG = Group; kN = Name; kK = NoAcc(Group) + "~:~" + NoAcc(Name); return kK;
+            }
+        }
+        static string NoAcc(string t)
+        {
+            if (string.IsNullOrEmpty(t)) return t;
+            string d = t.Normalize(NormalizationForm.FormD); StringBuilder sb = new StringBuilder(d.Length);
+            foreach (char c in d) if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark) sb.Append(c);
+            return sb.ToString().Normalize(NormalizationForm.FormC);
+        }
         public void ResetMinMax() { float? l = Last; if (l.HasValue) { Min = l.Value; Max = l.Value; } }
         public string Category
         {
@@ -3614,12 +3630,12 @@ namespace BunoTunner
                     case "Temperature": return "Temperatura";
                     case "Load": case "Level": return "Uso (%)";
                     case "Clock": case "Frequency": return "Clock";
-                    case "Power": case "Energy": return "Potencia";
+                    case "Power": case "Energy": return "Potência";
                     case "Voltage": return "Voltagem";
                     case "Current": return "Corrente";
                     case "Fan": return "Ventoinha";
                     case "Control": return "Controle (%)";
-                    case "Data": case "SmallData": return "Memoria/Dados";
+                    case "Data": case "SmallData": return "Memória/Dados";
                     case "Throughput": return "Taxa de dados";
                     default: return "Outros";
                 }
@@ -3691,8 +3707,8 @@ namespace BunoTunner
         public abstract string SetPower(int v);
         public abstract string SetTemp(int v);
         public abstract string ResetAll();
-        public virtual string SetFan(int pct) { return "Controle de ventoinha indisponivel."; }
-        public virtual string FanAuto() { return "Controle de ventoinha indisponivel."; }
+        public virtual string SetFan(int pct) { return "Controle de ventoinha indisponível."; }
+        public virtual string FanAuto() { return "Controle de ventoinha indisponível."; }
         public virtual int? FanPct() { return null; }
         public virtual int? FanRpm() { return null; }
         public static bool IsOk(string s) { return s != null && s.StartsWith("OK"); }
@@ -3711,10 +3727,10 @@ namespace BunoTunner
             int mn, mx;
             bool known = Nvml.GpcRange(g.H, out mn, out mx);
             Core = new OcCap(); Core.Ok = true; Core.Unit = "MHz"; Core.Min = mn; Core.Max = mx; Core.Cur = Nvml.GpcOffset(g.H) ?? 0;
-            if (!known) Core.Why = "o driver nao informa a faixa (comum em notebooks); valores acima do limite serao recusados";
+            if (!known) Core.Why = "o driver não informa a faixa (comum em notebooks); valores acima do limite serão recusados";
             known = Nvml.MemRange(g.H, out mn, out mx);
             Mem = new OcCap(); Mem.Ok = true; Mem.Unit = "MHz"; Mem.Min = mn / Gpu.MemFactor; Mem.Max = mx / Gpu.MemFactor; Mem.Cur = (Nvml.MemOffset(g.H) ?? 0) / Gpu.MemFactor;
-            if (!known) Mem.Why = "o driver nao informa a faixa (comum em notebooks); valores acima do limite serao recusados";
+            if (!known) Mem.Why = "o driver não informa a faixa (comum em notebooks); valores acima do limite serão recusados";
             Power = new OcCap(); Power.Unit = "W";
             uint pmn, pmx;
             defPowerMw = Nvml.PowerDefault(g.H) ?? 0;
@@ -3724,7 +3740,7 @@ namespace BunoTunner
                 uint? pl = Nvml.PowerLimit(g.H);
                 Power.Cur = pl.HasValue ? (int)(pl.Value / 1000) : Power.Max;
             }
-            else Power.Why = "limite de potencia fixo nesta placa (normal em notebooks: o fabricante trava o TDP)";
+            else Power.Why = "limite de potência fixo nesta placa (normal em notebooks: o fabricante trava o TDP)";
             Temp = new OcCap(); Temp.Unit = "\u00B0C";
             uint? tmin = Nvml.TempThr(g.H, 4), tmax = Nvml.TempThr(g.H, 6), tcur = Nvml.TempThr(g.H, 5);
             if (tcur.HasValue)
@@ -3734,12 +3750,12 @@ namespace BunoTunner
                 if ((int)tcur.Value < Temp.Min) Temp.Min = (int)tcur.Value;
                 Temp.Cur = (int)tcur.Value; Temp.Def = Temp.Cur; defTemp = Temp.Cur;
             }
-            else Temp.Why = "limite de temperatura nao ajustavel nesta placa";
+            else Temp.Why = "limite de temperatura não ajustável nesta placa";
         }
         static string Hint(string r)
         {
             if (r.StartsWith("FALHOU"))
-                return r + "  |  Dica: em notebooks o fabricante (BIOS/vBIOS) pode bloquear o overclock; atualize o driver NVIDIA e tente valores menores. A secao \"Travar clock\" costuma funcionar mesmo assim.";
+                return r + "  |  Dica: em notebooks o fabricante (BIOS/vBIOS) pode bloquear o overclock; atualize o driver NVIDIA e tente valores menores. A seção \"Travar clock\" costuma funcionar mesmo assim.";
             return r;
         }
         public override string SetCore(int v)
@@ -3756,13 +3772,13 @@ namespace BunoTunner
         }
         public override string SetPower(int v)
         {
-            if (!Power.Ok) return "nao suportado nesta placa";
+            if (!Power.Ok) return "não suportado nesta placa";
             int r = Nvml.SetPower(g.H, (uint)(v * 1000));
             return r == 0 ? "OK" : Nvml.Err(r);
         }
         public override string SetTemp(int v)
         {
-            if (!Temp.Ok) return "nao suportado nesta placa";
+            if (!Temp.Ok) return "não suportado nesta placa";
             int r = Nvml.SetTempThr(g.H, 5, v);
             return r == 0 ? "OK" : Nvml.Err(r);
         }
@@ -3818,7 +3834,7 @@ namespace BunoTunner
             {
                 IntPtr lib = LoadLibrary("atiadlxx.dll");
                 if (lib == IntPtr.Zero) lib = LoadLibrary("atiadlxy.dll");
-                if (lib == IntPtr.Zero) { Error = "atiadlxx.dll nao encontrada (instale o driver Radeon/Adrenalin)"; return false; }
+                if (lib == IntPtr.Zero) { Error = "atiadlxx.dll não encontrada (instale o driver Radeon/Adrenalin)"; return false; }
                 DCreate create = Fn<DCreate>(lib, "ADL2_Main_Control_Create");
                 fNum = Fn<DNum>(lib, "ADL2_Adapter_NumberOfAdapters_Get");
                 fInfo = Fn<DInfo>(lib, "ADL2_Adapter_AdapterInfo_Get");
@@ -3888,7 +3904,7 @@ namespace BunoTunner
             foreach (Ad a in Adapters)
                 if (!usedAd.Contains(a.Index) && n.Length > 0 && (Norm(a.Name).Contains(n) || n.Contains(Norm(a.Name)))) { pick = a; break; }
             if (pick == null) foreach (Ad a in Adapters) if (!usedAd.Contains(a.Index)) { pick = a; break; }
-            if (pick == null) { why = "adaptador AMD nao encontrado no ADL"; return null; }
+            if (pick == null) { why = "adaptador AMD não encontrado no ADL"; return null; }
             usedAd.Add(pick.Index);
             AmdOc oc = new AmdOc(pick);
             oc.Refresh();
@@ -4018,9 +4034,9 @@ namespace BunoTunner
             string e = null;
             od8 = false;
             if (ad.Od == 8) { e = Adl.ReadOd8(ad, out od); od8 = e == null; }
-            string why = ad.Od == 8 ? "o driver nao liberou este ajuste (" + (e ?? "feature desligada no Adrenalin") + ")"
-                : ad.Od == 0 ? "Overdrive indisponivel nesta placa/driver (ative \"Ajuste manual\" no AMD Adrenalin)"
-                : "esta placa usa Overdrive " + ad.Od + " (Polaris/Vega/antiga): ajuste de clocks so no AMD Adrenalin; a ventoinha funciona se o driver permitir";
+            string why = ad.Od == 8 ? "o driver não liberou este ajuste (" + (e ?? "feature desligada no Adrenalin") + ")"
+                : ad.Od == 0 ? "Overdrive indisponível nesta placa/driver (ative \"Ajuste manual\" no AMD Adrenalin)"
+                : "esta placa usa Overdrive " + ad.Od + " (Polaris/Vega/antiga): ajuste de clocks só no AMD Adrenalin; a ventoinha funciona se o driver permitir";
             if (od8)
             {
                 Core = Range(od, Adl.ID_GFX_MAX, true, "MHz");
@@ -4029,7 +4045,7 @@ namespace BunoTunner
                 Temp = Range(od, Adl.ID_TEMP_MAX, false, "\u00B0C");
                 OcCap fan = Range(od, Adl.ID_FAN_MIN, false, "%");
                 CanFan = fan.Ok;
-                Note = "Overdrive8: nucleo = clock maximo; memoria = clock maximo (MHz reais); potencia em % relativo ao padrao.";
+                Note = "Overdrive8: núcleo = clock máximo; memória = clock máximo (MHz reais); potência em % relativo ao padrão.";
             }
             else
             {
@@ -4045,14 +4061,14 @@ namespace BunoTunner
 
         string One(int id, int value)
         {
-            if (!od8) return "Falhou: Overdrive8 indisponivel";
+            if (!od8) return "Falhou: Overdrive8 indisponível";
             string e = Adl.SetOd8(ad, od.Count, new int[] { id }, new int[] { value });
             return e == null ? "OK (ADL)" : "Falhou: " + e + " (confira se o ajuste manual esta liberado no AMD Adrenalin)";
         }
-        public override string SetCore(int v) { return Core.Ok ? One(Adl.ID_GFX_MAX, od.Def[Adl.ID_GFX_MAX] + v) : "nao suportado"; }
-        public override string SetMem(int v) { return Mem.Ok ? One(Adl.ID_UCLK_MAX, od.Def[Adl.ID_UCLK_MAX] + v) : "nao suportado"; }
-        public override string SetPower(int v) { return Power.Ok ? One(Adl.ID_POWER, v) : "nao suportado"; }
-        public override string SetTemp(int v) { return Temp.Ok ? One(Adl.ID_TEMP_MAX, v) : "nao suportado"; }
+        public override string SetCore(int v) { return Core.Ok ? One(Adl.ID_GFX_MAX, od.Def[Adl.ID_GFX_MAX] + v) : "não suportado"; }
+        public override string SetMem(int v) { return Mem.Ok ? One(Adl.ID_UCLK_MAX, od.Def[Adl.ID_UCLK_MAX] + v) : "não suportado"; }
+        public override string SetPower(int v) { return Power.Ok ? One(Adl.ID_POWER, v) : "não suportado"; }
+        public override string SetTemp(int v) { return Temp.Ok ? One(Adl.ID_TEMP_MAX, v) : "não suportado"; }
 
         public override string ResetAll()
         {
@@ -4070,14 +4086,14 @@ namespace BunoTunner
             {
                 int v = Math.Max(od.Min[Adl.ID_FAN_MIN], Math.Min(od.Max[Adl.ID_FAN_MIN], pct));
                 string e = Adl.SetOd8(ad, od.Count, new int[] { Adl.ID_FAN_MIN }, new int[] { v });
-                return e == null ? "OK (ADL Overdrive8): velocidade minima da ventoinha em " + v + "% (a placa pode subir se esquentar)" : "Falhou: " + e;
+                return e == null ? "OK (ADL Overdrive8): velocidade mínima da ventoinha em " + v + "% (a placa pode subir se esquentar)" : "Falhou: " + e;
             }
             if (ad.Od == 6 && Adl.HasFan6)
             {
                 string e = Adl.FanSet6(ad, pct);
                 return e == null ? "OK (ADL Overdrive6): ventoinha em " + pct + "%" : "Falhou: " + e;
             }
-            return "Esta placa AMD nao aceitou controle de ventoinha pelo ADL.";
+            return "Esta placa AMD não aceitou controle de ventoinha pelo ADL.";
         }
         public override string FanAuto()
         {
@@ -4152,7 +4168,7 @@ namespace BunoTunner
             try
             {
                 IntPtr lib = FindLib();
-                if (lib == IntPtr.Zero) { Error = "ControlLib.dll nao encontrada (instale o driver Intel Arc / Graphics mais recente)"; return false; }
+                if (lib == IntPtr.Zero) { Error = "ControlLib.dll não encontrada (instale o driver Intel Arc / Graphics mais recente)"; return false; }
                 DInit init = Fn<DInit>(lib, "ctlInit");
                 DEnum en = Fn<DEnum>(lib, "ctlEnumerateDevices");
                 GetProps = Fn<DProps>(lib, "ctlOverclockGetProperties");
@@ -4232,7 +4248,7 @@ namespace BunoTunner
                 catch (Exception ex) { why = "IGCL: " + ex.Message; }
                 finally { Marshal.FreeHGlobal(buf); }
             }
-            if (why.Length == 0) why = "o driver Intel nao liberou overclock para esta GPU (so Arc dedicadas; graficos integrados nao tem)";
+            if (why.Length == 0) why = "o driver Intel não liberou overclock para esta GPU (só Arc dedicadas; gráficos integrados não tem)";
             return null;
         }
     }
@@ -4282,9 +4298,9 @@ namespace BunoTunner
                 if (Temp.Ok && Igcl.GetTemp != null && Igcl.GetTemp(dev, out v) == 0) Temp.Cur = (int)Math.Round(v);
             }
             catch (Exception) { }
-            string why = "este ajuste nao e exposto pelo driver Intel desta GPU";
+            string why = "este ajuste não e exposto pelo driver Intel desta GPU";
             if (!Core.Ok) Core.Why = why; if (!Mem.Ok) Mem.Why = why; if (!Power.Ok) Power.Why = why; if (!Temp.Ok) Temp.Why = why;
-            Note = "Intel IGCL (experimental): o driver Intel valida os limites; valores fora da faixa sao recusados.";
+            Note = "Intel IGCL (experimental): o driver Intel valida os limites; valores fora da faixa são recusados.";
             TryFan();
         }
 
@@ -4319,14 +4335,14 @@ namespace BunoTunner
         {
             string w = Waiver();
             if (w != null) return "Falhou: " + w;
-            if (f == null) return "Falhou: funcao ausente";
+            if (f == null) return "Falhou: função ausente";
             try { uint r = f(dev, v); return r == 0 ? "OK (IGCL)" : "Falhou: " + nome + " erro 0x" + r.ToString("X"); }
             catch (Exception ex) { return "Falhou: " + ex.Message; }
         }
-        public override string SetCore(int v) { return Core.Ok ? Do(Igcl.SetGpuF, v, "GpuFrequencyOffset") : "nao suportado"; }
-        public override string SetMem(int v) { return Mem.Ok ? Do(Igcl.SetVramF, v, "VramFrequencyOffset") : "nao suportado"; }
-        public override string SetPower(int v) { return Power.Ok ? Do(Igcl.SetPow, v * pScale, "PowerLimit") : "nao suportado"; }
-        public override string SetTemp(int v) { return Temp.Ok ? Do(Igcl.SetTemp, v, "TemperatureLimit") : "nao suportado"; }
+        public override string SetCore(int v) { return Core.Ok ? Do(Igcl.SetGpuF, v, "GpuFrequencyOffset") : "não suportado"; }
+        public override string SetMem(int v) { return Mem.Ok ? Do(Igcl.SetVramF, v, "VramFrequencyOffset") : "não suportado"; }
+        public override string SetPower(int v) { return Power.Ok ? Do(Igcl.SetPow, v * pScale, "PowerLimit") : "não suportado"; }
+        public override string SetTemp(int v) { return Temp.Ok ? Do(Igcl.SetTemp, v, "TemperatureLimit") : "não suportado"; }
         public override string ResetAll()
         {
             try { if (Igcl.ResetDef != null && Igcl.ResetDef(dev) == 0) return "OK"; } catch (Exception) { }
@@ -4336,7 +4352,7 @@ namespace BunoTunner
         public override string SetFan(int pct)
         {
             TryFan();
-            if (fan == IntPtr.Zero) return "A placa Intel nao expoe controle de ventoinha.";
+            if (fan == IntPtr.Zero) return "A placa Intel não expõe controle de ventoinha.";
             IntPtr p = Marshal.AllocHGlobal(32);
             try
             {
@@ -4423,7 +4439,7 @@ namespace BunoTunner
                 if (Settings.Get("vendoroc", "1") == "0") { OcWhy = "desligado no .ini (vendoroc=0)"; return; }
                 if (Vendor == "AMD") Oc = Adl.Attach(this, out why);
                 else if (Vendor == "Intel") Oc = Igcl.Attach(this, out why);
-                else { why = "fabricante sem suporte de OC nesta versao"; }
+                else { why = "fabricante sem suporte de OC nesta versão"; }
                 OcWhy = why ?? "";
             }
             catch (Exception ex) { OcWhy = ex.Message; Oc = null; }
@@ -4527,7 +4543,7 @@ namespace BunoTunner
                 if (GpuOc.IsOk(r)) { msg = r; return true; }
                 nvErr = (nvErr != null ? nvErr + " | " : "") + r;
             }
-            msg = "Falhou" + (nvErr != null ? " - " + nvErr : "") + ". Esta placa/driver nao aceitou controle manual.";
+            msg = "Falhou" + (nvErr != null ? " - " + nvErr : "") + ". Esta placa/driver não aceitou controle manual.";
             return false;
         }
 
@@ -4569,7 +4585,7 @@ namespace BunoTunner
                         try { s.Control.SetDefault(); ok = true; } catch (Exception) { }
                     }
             if (!ok && Oc != null && Oc.CanFan) ok = GpuOc.IsOk(Oc.FanAuto());
-            msg = ok ? "Controle automatico (curva original da placa) restaurado." : "Nao foi possivel restaurar o modo automatico.";
+            msg = ok ? "Controle automático (curva original da placa) restaurado." : "Não foi possível restaurar o modo automático.";
             return ok;
         }
 
@@ -4581,21 +4597,21 @@ namespace BunoTunner
             if (!Nv) return l;
             IntPtr h = H;
             string g = "NVML - " + Name;
-            l.Add(Mk(g, "Temperatura do nucleo", "Temperature", delegate { return F(Nvml.Temp(h)); }));
-            l.Add(Mk(g, "Uso do nucleo", "Load", delegate { uint a, b; return Nvml.GetUtil(h, out a, out b) ? (float?)a : null; }));
-            l.Add(Mk(g, "Uso do controlador de memoria", "Load", delegate { uint a, b; return Nvml.GetUtil(h, out a, out b) ? (float?)b : null; }));
+            l.Add(Mk(g, "Temperatura do núcleo", "Temperature", delegate { return F(Nvml.Temp(h)); }));
+            l.Add(Mk(g, "Uso do núcleo", "Load", delegate { uint a, b; return Nvml.GetUtil(h, out a, out b) ? (float?)a : null; }));
+            l.Add(Mk(g, "Uso do controlador de memória", "Load", delegate { uint a, b; return Nvml.GetUtil(h, out a, out b) ? (float?)b : null; }));
             l.Add(Mk(g, "VRAM usada", "SmallData", delegate { ulong t, u; return Nvml.Mem(h, out t, out u) ? (float?)(u / 1048576.0) : null; }));
             l.Add(Mk(g, "VRAM total", "SmallData", delegate { ulong t, u; return Nvml.Mem(h, out t, out u) ? (float?)(t / 1048576.0) : null; }));
             l.Add(Mk(g, "VRAM em uso (%)", "Load", delegate { ulong t, u; return Nvml.Mem(h, out t, out u) && t > 0 ? (float?)(100.0 * u / t) : null; }));
             l.Add(Mk(g, "Consumo (watts)", "Power", delegate { uint? p = Nvml.Power(h); return p.HasValue ? (float?)(p.Value / 1000f) : null; }));
-            l.Add(Mk(g, "Limite de potencia (TDP)", "Power", delegate { uint? p = Nvml.PowerLimit(h); return p.HasValue ? (float?)(p.Value / 1000f) : null; }));
+            l.Add(Mk(g, "Limite de potência (TDP)", "Power", delegate { uint? p = Nvml.PowerLimit(h); return p.HasValue ? (float?)(p.Value / 1000f) : null; }));
             l.Add(Mk(g, "Ventoinha (%)", "Control", delegate { return F(Nvml.Fan(h, 0)); }));
             l.Add(Mk(g, "Ventoinha (RPM)", "Fan", delegate { return F(Nvml.FanRpm(h, 0)); }));
-            l.Add(Mk(g, "Clock do nucleo", "Clock", delegate { return F(Nvml.Clock(h, 0)); }));
+            l.Add(Mk(g, "Clock do núcleo", "Clock", delegate { return F(Nvml.Clock(h, 0)); }));
             l.Add(Mk(g, "Clock SM", "Clock", delegate { return F(Nvml.Clock(h, 1)); }));
-            l.Add(Mk(g, "Clock da memoria", "Clock", delegate { return F(Nvml.Clock(h, 2)); }));
+            l.Add(Mk(g, "Clock da memória", "Clock", delegate { return F(Nvml.Clock(h, 2)); }));
             l.Add(Mk(g, "Clock de video", "Clock", delegate { return F(Nvml.Clock(h, 3)); }));
-            l.Add(Mk(g, "PCIe - geracao", "Factor", delegate { return F(Nvml.Pcie(h, false, false)); }));
+            l.Add(Mk(g, "PCIe - geração", "Factor", delegate { return F(Nvml.Pcie(h, false, false)); }));
             l.Add(Mk(g, "PCIe - largura (x)", "Factor", delegate { return F(Nvml.Pcie(h, true, false)); }));
             return l;
         }
@@ -4613,30 +4629,30 @@ namespace BunoTunner
                 add("Driver NVIDIA", Nvml.Driver());
                 add("Arquitetura", Nvml.Arch(H));
                 add("Compute capability (CUDA)", Nvml.Compute(H));
-                add("Nucleos CUDA", Fm(Nvml.Cores(H), ""));
+                add("Núcleos CUDA", Fm(Nvml.Cores(H), ""));
                 add("VBIOS", Nvml.Vbios(H));
                 add("UUID", Nvml.Uuid(H));
                 ulong t, u;
-                if (Nvml.Mem(H, out t, out u)) add("Memoria de video (VRAM)", (t / 1048576UL) + " MB");
-                add("Barramento da memoria", Fm(Nvml.MemBus(H), " bits"));
+                if (Nvml.Mem(H, out t, out u)) add("Memória de video (VRAM)", (t / 1048576UL) + " MB");
+                add("Barramento da memória", Fm(Nvml.MemBus(H), " bits"));
                 uint? g1 = Nvml.Pcie(H, false, false), w1 = Nvml.Pcie(H, true, false), g2 = Nvml.Pcie(H, false, true), w2 = Nvml.Pcie(H, true, true);
                 if (g1.HasValue && w1.HasValue) add("PCIe (agora)", "Gen " + g1.Value + " x" + w1.Value);
-                if (g2.HasValue && w2.HasValue) add("PCIe (maximo da placa)", "Gen " + g2.Value + " x" + w2.Value);
-                string[] cn = { "Clock do nucleo", "Clock SM", "Clock da memoria", "Clock de video" };
+                if (g2.HasValue && w2.HasValue) add("PCIe (máximo da placa)", "Gen " + g2.Value + " x" + w2.Value);
+                string[] cn = { "Clock do núcleo", "Clock SM", "Clock da memória", "Clock de video" };
                 for (int i = 0; i < 4; i++)
                 {
                     uint? c = Nvml.Clock(H, i), m = Nvml.MaxClock(H, i);
-                    if (c.HasValue || m.HasValue) add(cn[i] + " (agora / maximo)", (c.HasValue ? c.Value.ToString() : "?") + " / " + (m.HasValue ? m.Value.ToString() : "?") + " MHz");
+                    if (c.HasValue || m.HasValue) add(cn[i] + " (agora / máximo)", (c.HasValue ? c.Value.ToString() : "?") + " / " + (m.HasValue ? m.Value.ToString() : "?") + " MHz");
                 }
                 uint? pl = Nvml.PowerLimit(H), pd = Nvml.PowerDefault(H);
                 uint pmn, pmx;
-                if (pl.HasValue) add("Limite de potencia atual", (pl.Value / 1000f).ToString("0") + " W");
-                if (pd.HasValue) add("Limite de potencia padrao", (pd.Value / 1000f).ToString("0") + " W");
-                if (Nvml.PowerRange(H, out pmn, out pmx)) add("Faixa de potencia permitida", (pmn / 1000f).ToString("0") + Lang.Pick(" a ", " to ") + (pmx / 1000f).ToString("0") + " W");
+                if (pl.HasValue) add("Limite de potência atual", (pl.Value / 1000f).ToString("0") + " W");
+                if (pd.HasValue) add("Limite de potência padrão", (pd.Value / 1000f).ToString("0") + " W");
+                if (Nvml.PowerRange(H, out pmn, out pmx)) add("Faixa de potência permitida", (pmn / 1000f).ToString("0") + Lang.Pick(" a ", " to ") + (pmx / 1000f).ToString("0") + " W");
                 add("Temp. de desligamento", Fm(Nvml.TempThr(H, 0), " \u00B0C"));
                 add("Temp. de slowdown (throttle)", Fm(Nvml.TempThr(H, 1), " \u00B0C"));
-                add("Temp. maxima da GPU", Fm(Nvml.TempThr(H, 2), " \u00B0C"));
-                add("Temp. maxima da memoria", Fm(Nvml.TempThr(H, 3), " \u00B0C"));
+                add("Temp. máxima da GPU", Fm(Nvml.TempThr(H, 2), " \u00B0C"));
+                add("Temp. máxima da memória", Fm(Nvml.TempThr(H, 3), " \u00B0C"));
                 add("Temp. alvo (limite de temperatura)", Fm(Nvml.TempThr(H, 5), " \u00B0C"));
                 add("Quantidade de ventoinhas", FanCount().ToString());
                 uint fmn, fmx;
@@ -4649,11 +4665,11 @@ namespace BunoTunner
                 add("Leitura de sensores", "LibreHardwareMonitor" + (Oc != null ? " + " + Oc.Backend : ""));
                 long vram; string drv, drvDate;
                 GpuReg.Read(Name, out vram, out drv, out drvDate);
-                if (vram > 0) add("Memoria de video (VRAM)", (vram / 1048576L) + " MB");
+                if (vram > 0) add("Memória de video (VRAM)", (vram / 1048576L) + " MB");
                 add("Driver (registro)", drv);
                 add("Data do driver (registro)", drvDate);
-                string[] live = { "Temperature|Temperatura", "Temperature|Hot Spot|Temperatura hotspot", "Clock|Core|Clock do nucleo (agora)", "Clock|Memory|Clock da memoria (agora)",
-                                  "Power|Consumo (agora)", "Load|Core|Uso do nucleo (agora)", "Fan|Ventoinha (RPM agora)", "Control|Ventoinha (% agora)" };
+                string[] live = { "Temperature|Temperatura", "Temperature|Hot Spot|Temperatura hotspot", "Clock|Core|Clock do núcleo (agora)", "Clock|Memory|Clock da memória (agora)",
+                                  "Power|Consumo (agora)", "Load|Core|Uso do núcleo (agora)", "Fan|Ventoinha (RPM agora)", "Control|Ventoinha (% agora)" };
                 foreach (string lv in live)
                 {
                     string[] p = lv.Split('|');
@@ -4668,20 +4684,20 @@ namespace BunoTunner
                     Action<string, OcCap> cap = delegate(string k, OcCap c)
                     {
                         if (c.Ok) add(k, "Ligado - faixa " + c.Min + Lang.Pick(" a ", " to ") + c.Max + " " + c.Unit);
-                        else add(k, "Indisponivel (" + c.Why + ")");
+                        else add(k, "Indisponível (" + c.Why + ")");
                     };
-                    cap("Offset do clock do nucleo", Oc.Core); cap("Offset do clock da memoria", Oc.Mem);
-                    cap("Limite de potencia", Oc.Power); cap("Limite de temperatura", Oc.Temp);
-                    add("Controle da ventoinha", Oc.CanFan ? "Ligado" : "Indisponivel (placa/driver nao expoe)");
-                    if (Oc.Note.Length > 0) add("Observacao", Oc.Note);
+                    cap("Offset do clock do núcleo", Oc.Core); cap("Offset do clock da memória", Oc.Mem);
+                    cap("Limite de potência", Oc.Power); cap("Limite de temperatura", Oc.Temp);
+                    add("Controle da ventoinha", Oc.CanFan ? "Ligado" : "Indisponível (placa/driver não expõe)");
+                    if (Oc.Note.Length > 0) add("Observação", Oc.Note);
                 }
-                else add("Overclock / ventoinha", "Indisponivel (" + (OcWhy.Length > 0 ? OcWhy : "sem backend para este fabricante") + ")");
+                else add("Overclock / ventoinha", "Indisponível (" + (OcWhy.Length > 0 ? OcWhy : "sem backend para este fabricante") + ")");
             }
             if (Hw != null)
             {
                 add("Tipo (LHM)", Hw.HardwareType.ToString());
                 float? vm = Lhm("SmallData", "Memory Total");
-                if (vm.HasValue && !Nv) add("Memoria de video (VRAM)", vm.Value.ToString("0") + " MB");
+                if (vm.HasValue && !Nv) add("Memória de video (VRAM)", vm.Value.ToString("0") + " MB");
                 add("Sensores expostos (LHM)", Hw.Sensors.Length.ToString());
             }
 
@@ -4691,23 +4707,23 @@ namespace BunoTunner
             {
                 bool big = bt > 268435456UL;
                 add("Resizable BAR (Re-Size BAR)", (big ? "Ligado" : "Desligado") + " (BAR1 = " + (bt / 1048576UL) + " MB)");
-                add("Above 4G Decoding", big ? "Ligado (exigido pelo BAR grande)" : "Desligado ou nao confirmado (BAR1 de 256 MB)");
+                add("Above 4G Decoding", big ? "Ligado (exigido pelo BAR grande)" : "Desligado ou não confirmado (BAR1 de 256 MB)");
             }
-            else add("Resizable BAR / Above 4G Decoding", Nv ? "Indisponivel" : "Indisponivel (a leitura exata so existe no driver NVIDIA; veja no AMD Adrenalin: Smart Access Memory, ou na BIOS)");
-            add("Boot em modo UEFI (necessario p/ ReBAR)", Platform.UefiText());
-            add("Aceleracao de GPU por hardware (HAGS)", Platform.Hags());
+            else add("Resizable BAR / Above 4G Decoding", Nv ? "Indisponível" : "Indisponível (a leitura exata só existe no driver NVIDIA; veja no AMD Adrenalin: Smart Access Memory, ou na BIOS)");
+            add("Boot em modo UEFI (necessário p/ ReBAR)", Platform.UefiText());
+            add("Aceleração de GPU por hardware (HAGS)", Platform.Hags());
             add("Modo de jogo (Game Mode)", Platform.GameMode());
             if (Nv)
             {
                 int? da = Nvml.DisplayActive(H);
                 if (da.HasValue) add("Monitor conectado / display ativo", da.Value == 1 ? "Ligado" : "Desligado");
                 int? ecc = Nvml.EccCurrent(H);
-                add("ECC da memoria", ecc.HasValue ? (ecc.Value == 1 ? "Ligado" : "Desligado") : "Indisponivel (placa sem ECC)");
+                add("ECC da memória", ecc.HasValue ? (ecc.Value == 1 ? "Ligado" : "Desligado") : "Indisponível (placa sem ECC)");
                 int? gsp = Nvml.Gsp(H);
                 if (gsp.HasValue) add("Firmware GSP", gsp.Value == 1 ? "Ligado" : "Desligado");
                 int? cm = Nvml.ComputeMode(H);
-                if (cm.HasValue) add("Modo de computacao", cm.Value == 0 ? "Padrao" : (cm.Value == 2 ? "Proibido" : "Exclusivo"));
-                add("Limitacao de clock agora", Nvml.Throttle(H));
+                if (cm.HasValue) add("Modo de computação", cm.Value == 0 ? "Padrão" : (cm.Value == 2 ? "Proibido" : "Exclusivo"));
+                add("Limitação de clock agora", Nvml.Throttle(H));
             }
             return s;
         }
@@ -4734,7 +4750,7 @@ namespace BunoTunner
         }
         static string Kb(string v) { return (string.IsNullOrEmpty(v) || v == "0") ? null : v + " KB"; }
         static string Mhz(string v) { return string.IsNullOrEmpty(v) ? null : v + " MHz"; }
-        static string YesNo(string v) { return v == null ? null : (v.ToLower() == "true" ? "sim" : "nao"); }
+        static string YesNo(string v) { return v == null ? null : (v.ToLower() == "true" ? "sim" : "não"); }
 
         public static List<string[]> Collect()
         {
@@ -4753,29 +4769,29 @@ namespace BunoTunner
                         string pre = n > 1 ? "CPU " + i + " - " : "";
                         add(pre + "Nome", P(mo, "Name"));
                         add(pre + "Fabricante", P(mo, "Manufacturer"));
-                        add(pre + "Familia / modelo / stepping", P(mo, "Description"));
+                        add(pre + "Família / modelo / stepping", P(mo, "Description"));
                         add(pre + "Arquitetura", Arch(P(mo, "Architecture")));
                         add(pre + "Soquete", P(mo, "SocketDesignation"));
-                        add(pre + "Nucleos fisicos", P(mo, "NumberOfCores"));
-                        add(pre + "Threads (processadores logicos)", P(mo, "NumberOfLogicalProcessors"));
+                        add(pre + "Núcleos físicos", P(mo, "NumberOfCores"));
+                        add(pre + "Threads (processadores lógicos)", P(mo, "NumberOfLogicalProcessors"));
                         int cv, tv;
                         if (int.TryParse(P(mo, "NumberOfCores"), out cv)) coresSum += cv;
                         if (int.TryParse(P(mo, "NumberOfLogicalProcessors"), out tv)) thrSum += tv;
                         if (i == 1) CpuId.Socket = P(mo, "SocketDesignation") ?? "";
-                        add(pre + "Clock maximo", Mhz(P(mo, "MaxClockSpeed")));
+                        add(pre + "Clock máximo", Mhz(P(mo, "MaxClockSpeed")));
                         add(pre + "Clock atual (WMI)", Mhz(P(mo, "CurrentClockSpeed")));
                         add(pre + "Clock externo (BCLK)", Mhz(P(mo, "ExtClock")));
                         add(pre + "Cache L2", Kb(P(mo, "L2CacheSize")));
                         add(pre + "Cache L3", Kb(P(mo, "L3CacheSize")));
                         string aw = P(mo, "AddressWidth");
-                        add(pre + "Largura de endereco", aw == null ? null : aw + " bits");
+                        add(pre + "Largura de endereço", aw == null ? null : aw + " bits");
                         add(pre + "ID do processador", P(mo, "ProcessorId"));
-                        add(pre + "Revisao", P(mo, "Revision"));
+                        add(pre + "Revisão", P(mo, "Revision"));
                         mo.Dispose();
                     }
                 }
             }
-            catch (Exception ex) { add("Aviso", "WMI indisponivel: " + ex.Message); }
+            catch (Exception ex) { add("Aviso", "WMI indisponível: " + ex.Message); }
 
             if (l.Count <= 1)
             {
@@ -4794,7 +4810,7 @@ namespace BunoTunner
                     }
                 }
                 catch (Exception) { }
-                add("Threads (processadores logicos)", Environment.ProcessorCount.ToString());
+                add("Threads (processadores lógicos)", Environment.ProcessorCount.ToString());
             }
 
             string[] fn = { "MMX", "SSE", "SSE2", "SSE3", "SSSE3", "SSE4.1", "SSE4.2", "AVX", "AVX2", "AVX-512" };
@@ -4804,14 +4820,14 @@ namespace BunoTunner
             {
                 for (int i = 0; i < fn.Length; i++)
                     if (IsProcessorFeaturePresent(fid[i])) { if (sb.Length > 0) sb.Append(", "); sb.Append(fn[i]); }
-                add("Conjuntos de instrucoes", sb.ToString());
+                add("Conjuntos de instruções", sb.ToString());
             }
             catch (Exception) { }
 
             CpuId.Cores = coresSum; if (thrSum > 0) CpuId.Threads = thrSum;
-            add("--- Recursos e seguranca (ligado / desligado) ---", " ");
+            add("--- Recursos e segurança (ligado / desligado) ---", " ");
             if (thrSum > 0 && coresSum > 0)
-                add("Hyper-Threading / SMT", thrSum > coresSum ? "Ligado (" + coresSum + " nucleos, " + thrSum + " threads)" : "Desligado (1 thread por nucleo)");
+                add("Hyper-Threading / SMT", thrSum > coresSum ? "Ligado (" + coresSum + " núcleos, " + thrSum + " threads)" : "Desligado (1 thread por núcleo)");
             l.AddRange(Platform.Fast());
             l.AddRange(Platform.Slow());
             return l;
@@ -4919,7 +4935,7 @@ namespace BunoTunner
         public static bool CpuDriverOk()
         {
             foreach (Sn s in PcSensors)
-                if (s.Group.StartsWith("Processador") && !s.Group.Contains("Zona termica") && s.IsRealTemp && s.Seen) return true;
+                if (s.Group.StartsWith("Processador") && !s.Group.Contains("Zona térmica") && s.IsRealTemp && s.Seen) return true;
             return false;
         }
         public static float? CpuTemp()
@@ -4936,7 +4952,7 @@ namespace BunoTunner
                 case "Cpu": return "Processador";
                 case "Motherboard": return "Placa-mae";
                 case "SuperIO": return "Placa-mae (Super I/O)";
-                case "Memory": return "Memoria RAM";
+                case "Memory": return "Memória RAM";
                 case "Storage": return "Armazenamento (HD/SSD)";
                 case "Cooler": return "Cooler / Water cooler";
                 case "Network": return "Rede";
@@ -4997,7 +5013,7 @@ namespace BunoTunner
                 }
                 Startup.Mark("LHM configurado");
                 pc.Open();
-                Startup.Mark("LHM aberto (CPU, GPU, placa-mae, memoria)");
+                Startup.Mark("LHM aberto (CPU, GPU, placa-mae, memória)");
                 hwList = new List<LHM.IHardware>(pc.Hardware);
             }
             catch (Exception ex) { Error = ex.Message; pc = null; }
@@ -5098,7 +5114,7 @@ namespace BunoTunner
                 foreach (string zn in AcpiTemp.Names())
                 {
                     Sn z = new Sn(); string nn = zn;
-                    z.Group = "Processador - Zona termica (Windows/ACPI)"; z.Name = "Zona " + zn; z.Type = "Temperature";
+                    z.Group = "Processador - Zona térmica (Windows/ACPI)"; z.Name = "Zona " + zn; z.Type = "Temperature";
                     z.Get = delegate { return AcpiTemp.Get(nn); };
                     add.Add(z);
                 }
@@ -5107,7 +5123,7 @@ namespace BunoTunner
                 List<Sn> na = new List<Sn>(all); na.AddRange(add);
                 foreach (Sn x in add) LoadAlertFor(x);
                 hwList = nh; all = na; PcSensors = np;
-                Startup.Mark("fase 2 concluida (+" + add.Count + " sensores)");
+                Startup.Mark("fase 2 concluída (+" + add.Count + " sensores)");
             }
             catch (Exception ex) { Startup.Mark("fase 2 erro: " + ex.Message); }
         }
@@ -5220,8 +5236,8 @@ namespace BunoTunner
         public static string Status()
         {
             bool admin = new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
-            return "Administrador: " + (admin ? "sim" : "NAO (rode como administrador)") +
-                   "   |   NVML: " + (Nvml.Available ? "ok" : "indisponivel") +
+            return "Administrador: " + (admin ? "sim" : "NÃO (rode como administrador)") +
+                   "   |   NVML: " + (Nvml.Available ? "ok" : "indisponível") +
                    "   |   LibreHardwareMonitor: " + (pc != null ? "ok" : "erro - " + Error);
         }
 
@@ -5438,7 +5454,7 @@ namespace BunoTunner
             if (running) return true;
             try
             {
-                if (IntPtr.Size != 8) { Error = "FPS so funciona na versao de 64 bits."; return false; }
+                if (IntPtr.Size != 8) { Error = "FPS só funciona na versão de 64 bits."; return false; }
                 IntPtr p0 = MakeProps(); ControlTraceW(0, SessName, p0, 1); Marshal.FreeHGlobal(p0);   // sessao velha (se o programa fechou sem parar)
                 IntPtr p = MakeProps(); int r = StartTraceW(out sess, SessName, p); Marshal.FreeHGlobal(p);
                 if (r != 0) { Error = "ETW erro " + r + (r == 5 ? " (acesso negado: execute como administrador)" : ""); return false; }
@@ -5700,7 +5716,7 @@ namespace BunoTunner
             undo.Push(lastSnap ?? Snap()); lastSnap = redo.Pop();
             ApplyText(lastSnap); Save(); Notify(); Tick();
         }
-        public static string Export() { StringBuilder sb = new StringBuilder("# BunoTunner - configuracao do overlay\n"); sb.Append(Snap()); return sb.ToString(); }
+        public static string Export() { StringBuilder sb = new StringBuilder("# BunoTunner - configuração do overlay\n"); sb.Append(Snap()); return sb.ToString(); }
         public static int Import(string text)
         {
             Record();                                  // garante que o estado atual possa ser desfeito
@@ -5799,7 +5815,7 @@ namespace BunoTunner
             switch (t)
             {
                 case "Temperature": return "Temp"; case "Load": return "Uso"; case "Clock": return "Clock"; case "Power": return "Pot.";
-                case "Fan": return "Fan"; case "Voltage": return "Tensao"; case "Control": return "Ctrl"; default: return "";
+                case "Fan": return "Fan"; case "Voltage": return "Tensão"; case "Control": return "Ctrl"; default: return "";
             }
         }
         public static string LabelOf(Sn s)
@@ -5816,7 +5832,7 @@ namespace BunoTunner
             Sn s = Find(key);
             if (s != null) return LabelOf(s);
             int i = key.LastIndexOf("~:~");
-            return (i >= 0 ? key.Substring(i + 3) : key) + " (indisponivel)";
+            return (i >= 0 ? key.Substring(i + 3) : key) + " (indisponível)";
         }
         public static string ValueOf(Sn s)
         {
@@ -6068,7 +6084,7 @@ namespace BunoTunner
         static LD[] BuildLayouts()
         {
             List<LD> l = new List<LD>(); LD d; Pal p;
-            d = N(l, "Padrao (fundo + contorno)"); d.Top = d.Bot = cBg; d.Bd = cBorder; d.Soft = true; d.Line = KA(30, 255, 255, 255); d.Gloss = true;
+            d = N(l, "Padrão (fundo + contorno)"); d.Top = d.Bot = cBg; d.Bd = cBorder; d.Soft = true; d.Line = KA(30, 255, 255, 255); d.Gloss = true;
             d = N(l, "Sem fundo nem contorno"); d.Dot = K(0, 229, 255);
             d = N(l, "So contorno (sem fundo)"); d.Bd = K(235, 238, 245); d.BW = 2f; d.Inner = KA(110, 255, 255, 255); d.Corner = K(255, 255, 255); d.CornerStyle = 1;
             d = N(l, "Barra lateral"); d.Top = d.Bot = cBg; d.Rad = 0; d.Bar = K(0, 190, 255); d.Bar2 = K(0, 90, 220); d.BarPos = 1; d.Zebra = KA(18, 255, 255, 255); d.Line = KA(36, 255, 255, 255); d.Dot = K(0, 190, 255);
@@ -6083,12 +6099,12 @@ namespace BunoTunner
             p = Pal.Make(5); d = N(l, "Tema: Vintage (Win 95)"); d.Top = d.Bot = p.Face; d.Rad = 0; d.Bevel = true; d.Hdr = "BunoTunner"; d.HdrA = p.CapA; d.HdrB = p.CapB; d.HdrTx = Color.White; d.Pill = Color.White; d.PillBd = K(128, 128, 128); d.Lab = K(64, 64, 64); d.Val = Color.Black;
             p = Pal.Make(6); d = N(l, "Tema: GTA VI (Vice City)"); d.Top = K(120, 30, 110); d.Bot = K(210, 70, 100); d.Bd = p.Border; d.BW = 2f; d.Hdr = "VICE CITY"; d.HdrA = K(255, 150, 60); d.HdrB = K(210, 40, 130); d.HdrTx = K(255, 246, 230); d.Bar = p.Hot; d.Bar2 = K(255, 110, 150); d.BarPos = 3; d.Inner = KA(110, 255, 200, 120); d.Dot = p.Hot; d.Pill = KA(110, 0, 0, 0); d.Gloss = true; d.Line = KA(50, 255, 220, 200); d.Lab = p.Dim; d.Val = p.Text;
             // outros estilos
-            d = N(l, "Vidro (translucido)"); d.Top = d.Bot = KA(110, 255, 255, 255); d.Bd = KA(170, 255, 255, 255); d.Rad = 14; d.Gloss = true; d.Inner = KA(90, 255, 255, 255); d.Pill = KA(60, 255, 255, 255); d.Lab = K(230, 235, 245); d.Val = Color.White;
-            d = N(l, "Pilula"); d.Top = d.Bot = cBg; d.Rad = 60; d.Bd = K(120, 126, 140); d.Dot = K(120, 200, 255); d.Pill = K(38, 42, 56); d.Gloss = true;
+            d = N(l, "Vidro (translúcido)"); d.Top = d.Bot = KA(110, 255, 255, 255); d.Bd = KA(170, 255, 255, 255); d.Rad = 14; d.Gloss = true; d.Inner = KA(90, 255, 255, 255); d.Pill = KA(60, 255, 255, 255); d.Lab = K(230, 235, 245); d.Val = Color.White;
+            d = N(l, "Pílula"); d.Top = d.Bot = cBg; d.Rad = 60; d.Bd = K(120, 126, 140); d.Dot = K(120, 200, 255); d.Pill = K(38, 42, 56); d.Gloss = true;
             d = N(l, "Claro minimalista"); d.Top = K(250, 251, 253); d.Bot = K(232, 235, 242); d.Bd = K(190, 194, 204); d.Hdr = "Sensores"; d.HdrA = K(238, 240, 246); d.HdrB = K(214, 218, 228); d.HdrTx = K(60, 66, 80); d.Zebra = KA(14, 0, 0, 0); d.Line = KA(40, 0, 0, 0); d.Pill = KA(22, 0, 0, 0); d.Lab = K(100, 106, 120); d.Val = K(25, 28, 36);
             d = N(l, "Barra superior"); d.Top = d.Bot = cBg; d.Rad = 8; d.Bar = K(255, 140, 0); d.Bar2 = K(255, 210, 60); d.BarPos = 2; d.Zebra = KA(20, 255, 255, 255); d.Dot = K(255, 170, 30); d.Line = KA(28, 255, 255, 255);
             d = N(l, "Barra inferior"); d.Top = d.Bot = cBg; d.Rad = 8; d.Bar = K(60, 200, 110); d.Bar2 = K(40, 150, 220); d.BarPos = 3; d.Pill = K(28, 58, 42); d.Dot = K(60, 200, 110); d.Line = KA(28, 255, 255, 255);
-            d = N(l, "Ambar (monitor antigo)"); d.Top = d.Bot = K(10, 6, 0); d.Rad = 0; d.Bd = K(255, 176, 0); d.Hdr = "READY_"; d.HdrA = d.HdrB = K(255, 176, 0); d.HdrTx = K(0, 0, 0); d.Scan = true; d.Corner = K(255, 176, 0); d.CornerStyle = 1; d.Line = KA(70, 255, 176, 0); d.Lab = K(190, 120, 0); d.Val = K(255, 190, 40);
+            d = N(l, "Âmbar (monitor antigo)"); d.Top = d.Bot = K(10, 6, 0); d.Rad = 0; d.Bd = K(255, 176, 0); d.Hdr = "READY_"; d.HdrA = d.HdrB = K(255, 176, 0); d.HdrTx = K(0, 0, 0); d.Scan = true; d.Corner = K(255, 176, 0); d.CornerStyle = 1; d.Line = KA(70, 255, 176, 0); d.Lab = K(190, 120, 0); d.Val = K(255, 190, 40);
             d = N(l, "HUD ciano"); d.Top = d.Bot = K(2, 22, 32); d.Rad = 0; d.Bd = K(0, 150, 180); d.Corner = K(0, 229, 255); d.CornerStyle = 1; d.Bar = K(0, 229, 255); d.BarPos = 1; d.Hdr = "SYS//HUD"; d.HdrA = K(0, 80, 100); d.HdrB = K(0, 30, 44); d.HdrTx = K(0, 229, 255); d.Scan = true; d.Zebra = KA(30, 0, 229, 255); d.Lab = K(90, 170, 190); d.Val = K(200, 250, 255);
             d = N(l, "Oceano"); d.Top = K(0, 70, 120); d.Bot = K(0, 20, 50); d.Bd = K(0, 170, 230); d.Rad = 24; d.Gloss = true; d.Inner = KA(80, 150, 220, 255); d.Hdr = "SENSORES"; d.HdrA = K(0, 130, 190); d.HdrB = K(0, 60, 110); d.HdrTx = Color.White; d.Dot = K(80, 220, 255); d.Pill = KA(50, 255, 255, 255); d.Lab = K(160, 205, 230); d.Val = Color.White;
             d = N(l, "Floresta"); d.Top = K(26, 70, 36); d.Bot = K(8, 26, 14); d.Bd = K(100, 190, 110); d.Rad = 8; d.Hdr = "SENSORES"; d.HdrA = K(64, 136, 76); d.HdrB = K(26, 70, 36); d.HdrTx = K(235, 250, 235); d.Inner = KA(80, 160, 230, 170); d.Zebra = KA(24, 255, 255, 255); d.Line = KA(50, 150, 220, 160); d.Dot = K(140, 230, 150); d.Lab = K(160, 205, 165); d.Val = K(235, 250, 235);
@@ -6309,7 +6325,7 @@ namespace BunoTunner
             btnKey = UI.Btn(body, "", 556, 36, 220, delegate { capturing = true; Overlay.PauseKey(true); btnKey.Text = "Pressione o atalho...  (Esc cancela, Del limpa)"; });
             btnKey.Text = "Mostrar/ocultar: " + Overlay.KeyName() + (Overlay.KeyOk ? "" : " (em uso!)");
 
-            UI.Lbl(body, "Sensores disponiveis  (duplo clique ou arraste para a direita)", 8, 72, Xp.UiBold);
+            UI.Lbl(body, "Sensores disponíveis  (duplo clique ou arraste para a direita)", 8, 72, Xp.UiBold);
             txSearch = UI.Txt(body, 8, 94, 220, "");
             cbGrp = Combo(body, 234, 94, 146);
             lvAv = new ListView(); lvAv.SetBounds(8, 124, 372, 332); lvAv.View = View.Details; lvAv.FullRowSelect = true; lvAv.HideSelection = false; lvAv.GridLines = true;
@@ -6335,23 +6351,23 @@ namespace BunoTunner
             UI.Btn(body, "Desfazer", 8, 497, 76, delegate { Overlay.Undo(); });
             UI.Btn(body, "Refazer", 88, 497, 70, delegate { Overlay.Redo(); });
             UI.Btn(body, "Limpar lista", 162, 497, 96, delegate { if (Overlay.Items.Count == 0) return; Overlay.Items.Clear(); Overlay.Commit(); });
-            UI.Btn(body, "Restaurar padrao", 262, 497, 118, delegate
+            UI.Btn(body, "Restaurar padrão", 262, 497, 118, delegate
             {
-                if (Dlg.Show(this, "Restaurar todas as opcoes do overlay (itens, cores, nomes, tamanho, opacidade...) para o padrao?\nVoce pode desfazer com Ctrl+Z.", "Overlay em jogos", MessageBoxButtons.YesNo) == DialogResult.Yes) Overlay.ResetAll();
+                if (Dlg.Show(this, "Restaurar todas as opções do overlay (itens, cores, nomes, tamanho, opacidade...) para o padrão?\nVocê pode desfazer com Ctrl+Z.", "Overlay em jogos", MessageBoxButtons.YesNo) == DialogResult.Yes) Overlay.ResetAll();
             });
             btnEdit = UI.Btn(body, "Editar na tela", 430, 497, 124, delegate { Overlay.SetEditing(!Overlay.Editing, Screen.FromControl(this)); });
             UI.Btn(body, "Exportar...", 558, 497, 104, delegate { DoExport(); });
             UI.Btn(body, "Importar...", 666, 497, 110, delegate { DoImport(); });
 
-            chkCompact = UI.Opt(body, "Compacto (so os valores, sem nomes)", 8, 535, 270, false);
-            chkColName = UI.Opt(body, "Aplicar a cor tambem ao nome", 290, 535, 230, false);
+            chkCompact = UI.Opt(body, "Compacto (só os valores, sem nomes)", 8, 535, 270, false);
+            chkColName = UI.Opt(body, "Aplicar a cor também ao nome", 290, 535, 230, false);
             UI.Btn(body, "Fechar", 686, 531, 90, delegate { Close(); });
             UI.Lbl(body, "Temperatura em vermelho a partir de:", 8, 568);
             cbHot = Combo(body, 238, 564, 90);
             cbHot.Items.Add("Desligado"); for (int t = 70; t <= 95; t += 5) cbHot.Items.Add(t + " °C");
 
             hint = UI.Lbl(body, "", 8, 600, Xp.Ui, Xp.Dim); hint.AutoSize = false; hint.SetBounds(8, 598, 768, 46);
-            hint.Text = "Dica: Esc fecha esta janela; Ctrl+Z desfaz e Ctrl+Y refaz. Clique com o botao direito num item da lista para mudar cor, nome, ordem ou remover; duplo clique abre a cor. Em \"Editar na tela\" arraste o overlay pelo topo e as linhas para reordenar. Jogos em tela cheia exclusiva (nao a sem borda) podem esconder o overlay. O atalho Mostrar/ocultar e global: a combinacao escolhida fica reservada para o BunoTunner e nao chega aos outros programas (se aparecer \"em uso!\", outro programa ja a usa - escolha outra).";
+            hint.Text = "Dica: Esc fecha esta janela; Ctrl+Z desfaz e Ctrl+Y refaz. Clique com o botão direito num item da lista para mudar cor, nome, ordem ou remover; duplo clique abre a cor. Em \"Editar na tela\" arraste o overlay pelo topo e as linhas para reordenar. Jogos em tela cheia exclusiva (não a sem borda) podem esconder o overlay. O atalho Mostrar/ocultar e global: a combinação escolhida fica reservada para o BunoTunner e não chega aos outros programas (se aparecer \"em uso!\", outro programa já a usa - escolha outra).";
 
             building = true;
             chkOn.Checked = Overlay.On;
@@ -6488,24 +6504,24 @@ namespace BunoTunner
         {
             using (SaveFileDialog sd = new SaveFileDialog())
             {
-                sd.Filter = Lang.T("Configuracao do overlay (*.bto)|*.bto|Todos os arquivos|*.*"); sd.FileName = "BunoTunner-overlay.bto"; sd.Title = Lang.T("Exportar configuracao do overlay");
+                sd.Filter = Lang.T("Configuração do overlay (*.bto)|*.bto|Todos os arquivos|*.*"); sd.FileName = "BunoTunner-overlay.bto"; sd.Title = Lang.T("Exportar configuração do overlay");
                 if (sd.ShowDialog(this) != DialogResult.OK) return;
-                try { File.WriteAllText(sd.FileName, Overlay.Export(), new UTF8Encoding(false)); Dlg.Show(this, "Configuracao exportada.", "Overlay em jogos"); }
-                catch (Exception ex) { Dlg.Show(this, "Nao consegui salvar: " + ex.Message, "Overlay em jogos"); }
+                try { File.WriteAllText(sd.FileName, Overlay.Export(), new UTF8Encoding(false)); Dlg.Show(this, "Configuração exportada.", "Overlay em jogos"); }
+                catch (Exception ex) { Dlg.Show(this, "Não consegui salvar: " + ex.Message, "Overlay em jogos"); }
             }
         }
         void DoImport()
         {
             using (OpenFileDialog od = new OpenFileDialog())
             {
-                od.Filter = Lang.T("Configuracao do overlay (*.bto)|*.bto|Todos os arquivos|*.*"); od.Title = Lang.T("Importar configuracao do overlay");
+                od.Filter = Lang.T("Configuração do overlay (*.bto)|*.bto|Todos os arquivos|*.*"); od.Title = Lang.T("Importar configuração do overlay");
                 if (od.ShowDialog(this) != DialogResult.OK) return;
                 try
                 {
                     FileInfo fi = new FileInfo(od.FileName);
-                    if (fi.Length > 1024 * 1024) { Dlg.Show(this, "Arquivo grande demais para ser uma configuracao do overlay.", "Overlay em jogos"); return; }
+                    if (fi.Length > 1024 * 1024) { Dlg.Show(this, "Arquivo grande demais para ser uma configuração do overlay.", "Overlay em jogos"); return; }
                     int n = Overlay.Import(File.ReadAllText(od.FileName));
-                    if (n == 0) Dlg.Show(this, "Esse arquivo nao tem uma configuracao valida do overlay.", "Overlay em jogos");
+                    if (n == 0) Dlg.Show(this, "Esse arquivo não tem uma configuração valida do overlay.", "Overlay em jogos");
                     else
                     {
                         building = true;
@@ -6514,10 +6530,10 @@ namespace BunoTunner
                         cbHot.SelectedIndex = Overlay.HotTemp <= 0 ? 0 : Math.Max(1, Math.Min(cbHot.Items.Count - 1, (Overlay.HotTemp - 70) / 5 + 1));
                         building = false;
                         btnKey.Text = "Mostrar/ocultar: " + Overlay.KeyName();
-                        Dlg.Show(this, "Configuracao importada. Use Ctrl+Z para voltar a anterior.", "Overlay em jogos");
+                        Dlg.Show(this, "Configuração importada. Use Ctrl+Z para voltar a anterior.", "Overlay em jogos");
                     }
                 }
-                catch (Exception ex) { Dlg.Show(this, "Nao consegui ler o arquivo: " + ex.Message, "Overlay em jogos"); }
+                catch (Exception ex) { Dlg.Show(this, "Não consegui ler o arquivo: " + ex.Message, "Overlay em jogos"); }
             }
         }
 
@@ -6572,7 +6588,7 @@ namespace BunoTunner
         void OnState()
         {
             if (IsDisposed) return;
-            btnEdit.Text = Overlay.Editing ? "Concluir edicao" : "Editar na tela";
+            btnEdit.Text = Overlay.Editing ? "Concluir edição" : "Editar na tela";
             if (!capturing) btnKey.Text = "Mostrar/ocultar: " + Overlay.KeyName() + (Overlay.KeyOk ? "" : " (em uso!)");
             building = true;
             int si = Array.IndexOf(Sizes, Overlay.Scale), oi = Array.IndexOf(Ops, Overlay.Opac);
@@ -6698,7 +6714,7 @@ namespace BunoTunner
             if (keyData == Keys.Escape) { Close(); return true; }
             return base.ProcessCmdKey(ref msg, keyData);
         }
-        static readonly string[] Cats = { "Temperatura", "Uso (%)", "Clock", "Potencia", "Voltagem", "Corrente", "Ventoinha", "Controle (%)", "Memoria/Dados", "Taxa de dados", "Outros" };
+        static readonly string[] Cats = { "Temperatura", "Uso (%)", "Clock", "Potência", "Voltagem", "Corrente", "Ventoinha", "Controle (%)", "Memória/Dados", "Taxa de dados", "Outros" };
         static readonly int[] Wins = { 60, 120, 300, 600, 1800 };
         static readonly Color[] Pal = {
             Color.FromArgb(0,200,0), Color.FromArgb(230,50,50), Color.FromArgb(50,130,255), Color.FromArgb(255,140,0),
@@ -6708,9 +6724,9 @@ namespace BunoTunner
         string key; List<Sn> list; TileDef[] tiles; Sn[] tileSn; Label[] tileVal;
         XpText txSearch; ComboBox cbType, cbWin; XpOption chkHide, chkOnly, chkNorm;
         ListBox lbCat; Label lblHint; bool hintDriver, catUpdating;
-        string[] catNames = { "Todos", "GPU", "CPU", "Placa-mae", "Memoria RAM", "Discos", "Ventoinhas", "Coolers", "Rede", "Outros" };
+        string[] catNames = { "Todos", "GPU", "CPU", "Placa-mae", "Memória RAM", "Discos", "Ventoinhas", "Coolers", "Rede", "Outros" };
         DateTime openedAt = DateTime.UtcNow;
-        const string DefaultHint = "Dica: marque a caixinha (ou de duplo clique) para ver o sensor no grafico. Botao direito = alerta, copiar... Clique no cabecalho para ordenar.";
+        const string DefaultHint = "Dica: marque a caixinha (ou de duplo clique) para ver o sensor no gráfico. Botão direito = alerta, copiar... Clique no cabeçalho para ordenar.";
         ListView lv = new ListView(); XpGraph graph = new XpGraph(); Timer timer = new Timer();
         Label lblInfo; XpButton btnPause; ContextMenuStrip menu, exportMenu; LTip tip = new LTip();
         Dictionary<Sn, Series> ser = new Dictionary<Sn, Series>();
@@ -6723,13 +6739,13 @@ namespace BunoTunner
         static TileDef[] AllTiles()
         {
             return new TileDef[] {
-                new TileDef("GPU - temperatura", "@GPU", "Temperature", "GPU Core", "Temperatura do nucleo", "Core", "Hot Spot", ""),
-                new TileDef("GPU - uso", "@GPU", "Load", "GPU Core", "Uso do nucleo", "Core", ""),
+                new TileDef("GPU - temperatura", "@GPU", "Temperature", "GPU Core", "Temperatura do núcleo", "Core", "Hot Spot", ""),
+                new TileDef("GPU - uso", "@GPU", "Load", "GPU Core", "Uso do núcleo", "Core", ""),
                 new TileDef("GPU - consumo", "@GPU", "Power", "GPU Package", "Consumo (watts)", "Package", ""),
                 new TileDef("CPU - temperatura", "Processador", "Temperature", "CPU Package", "Package", "Tdie", "CCD", "Core Max", "Core Average", "Tctl", "Core", ""),
                 new TileDef("CPU - uso", "Processador", "Load", "CPU Total", ""),
                 new TileDef("CPU - consumo", "Processador", "Power", "CPU Package", "Package", ""),
-                new TileDef("RAM em uso", "Memoria RAM", "Load", "Memory", ""),
+                new TileDef("RAM em uso", "Memória RAM", "Load", "Memory", ""),
                 new TileDef("Ventoinha da CPU", "@PC", "Fan", "CPU Fan", "CPU", "Fan #1", "") };
         }
         static bool Match(Sn s, TileDef d)
@@ -6847,11 +6863,11 @@ namespace BunoTunner
             foreach (string c in Cats) cbType.Items.Add(c);
             cbType.SelectedIndex = 0;
             chkHide = UI.Opt(f, "Ocultar sem leitura", 500, 8, 140, false);
-            chkOnly = UI.Opt(f, "So no grafico", 646, 8, 100, false);
+            chkOnly = UI.Opt(f, "Só no gráfico", 646, 8, 100, false);
             UI.Btn(f, "Essenciais", 756, 5, 84, delegate { Essentials(); });
             UI.Btn(f, "Desmarcar tudo", 846, 5, 110, delegate { ClearPlot(); });
-            tip.SetToolTip(txSearch, "Digite parte do nome. Varias palavras = todas precisam aparecer (ex.: core temp). Ctrl+A seleciona tudo.");
-            tip.SetToolTip(txSearch.Box, "Digite parte do nome. Varias palavras = todas precisam aparecer (ex.: core temp). Ctrl+A seleciona tudo.");
+            tip.SetToolTip(txSearch, "Digite parte do nome. Várias palavras = todas precisam aparecer (ex.: core temp). Ctrl+A seleciona tudo.");
+            tip.SetToolTip(txSearch.Box, "Digite parte do nome. Várias palavras = todas precisam aparecer (ex.: core temp). Ctrl+A seleciona tudo.");
             tip.SetToolTip(cbType, "Filtrar por tipo de medida (temperatura, uso, clock...)");
         }
 
@@ -6869,7 +6885,7 @@ namespace BunoTunner
             lblHint.Text = DefaultHint;
             lblHint.Click += delegate { if (hintDriver) DriverHelp(); };
             left.Controls.Add(lv); left.Controls.Add(lbCat); left.Controls.Add(lblHint);
-            tip.SetToolTip(lbCat, "Escolha o que voce quer ver: GPU, CPU, placa-mae, memoria, discos, ventoinhas...");
+            tip.SetToolTip(lbCat, "Escolha o que você quer ver: GPU, CPU, placa-mae, memória, discos, ventoinhas...");
         }
         void BuildGraphSide(Panel right)
         {
@@ -6882,9 +6898,9 @@ namespace BunoTunner
             chkNorm = UI.Opt(gt, "Normalizar escala", 128, 6, 124, false); chkNorm.Checked = true;
             btnPause = UI.Btn(gt, "Pausar", 256, 3, 66, null);
             btnPause.Click += delegate { graph.Paused = !graph.Paused; btnPause.Text = graph.Paused ? "Continuar" : "Pausar"; graph.Invalidate(); };
-            UI.Btn(gt, "Limpar historico", 326, 3, 112, delegate { foreach (Series s in graph.Items) s.V.Clear(); graph.Invalidate(); });
-            tip.SetToolTip(chkNorm, "Ligado: cada linha usa a propria escala (0-100%). Desligado: mesma escala para todas.");
-            tip.SetToolTip(graph, "Passe o mouse sobre o grafico para ver os valores de cada instante");
+            UI.Btn(gt, "Limpar histórico", 326, 3, 112, delegate { foreach (Series s in graph.Items) s.V.Clear(); graph.Invalidate(); });
+            tip.SetToolTip(chkNorm, "Ligado: cada linha usa a própria escala (0-100%). Desligado: mesma escala para todas.");
+            tip.SetToolTip(graph, "Passe o mouse sobre o gráfico para ver os valores de cada instante");
             graph.Dock = DockStyle.Fill;
             right.Controls.Add(graph); right.Controls.Add(gt);
         }
@@ -6910,7 +6926,7 @@ namespace BunoTunner
         void BuildMenus()
         {
             menu = new ContextMenuStrip(); menu.RenderMode = ToolStripRenderMode.System;
-            menu.Items.Add("Mostrar / ocultar no grafico", null, delegate { TogglePlot(); });
+            menu.Items.Add("Mostrar / ocultar no gráfico", null, delegate { TogglePlot(); });
             menu.Items.Add("Definir alerta (acima de...)", null, delegate { SetAlertDlg(); });
             menu.Items.Add("Remover alerta", null, delegate { RemoveAlert(); });
             menu.Items.Add(new ToolStripSeparator());
@@ -6921,8 +6937,8 @@ namespace BunoTunner
 
             exportMenu = new ContextMenuStrip(); exportMenu.RenderMode = ToolStripRenderMode.System;
             exportMenu.Items.Add("Valores atuais (CSV)...", null, delegate { ExportValues(); });
-            exportMenu.Items.Add("Historico do grafico (CSV)...", null, delegate { ExportHistory(); });
-            exportMenu.Items.Add("Imagem do grafico (PNG)...", null, delegate { ExportImage(); });
+            exportMenu.Items.Add("Histórico do gráfico (CSV)...", null, delegate { ExportHistory(); });
+            exportMenu.Items.Add("Imagem do gráfico (PNG)...", null, delegate { ExportImage(); });
             Lang.Menu(exportMenu);
         }
 
@@ -6951,26 +6967,26 @@ namespace BunoTunner
         {
             Dlg.Show(
                 "COMO USAR OS SENSORES\n\n" +
-                "- Cartoes no topo: os valores principais (GPU, CPU, RAM, ventoinha) sempre a vista.\n" +
-                "- Lista: escolha a categoria a esquerda (GPU, CPU, Placa-mae, Memoria...) e use a busca (Ctrl+F) e o filtro de tipo.\n" +
-                "- Marque a caixinha (ou de duplo clique) para ver o sensor no grafico.\n" +
-                "- Botao direito: criar ALERTA (som), copiar nome/valor, zerar min/max.\n" +
+                "- Cartões no topo: os valores principais (GPU, CPU, RAM, ventoinha) sempre a vista.\n" +
+                "- Lista: escolha a categoria a esquerda (GPU, CPU, Placa-mae, Memória...) e use a busca (Ctrl+F) e o filtro de tipo.\n" +
+                "- Marque a caixinha (ou de duplo clique) para ver o sensor no gráfico.\n" +
+                "- Botão direito: criar ALERTA (som), copiar nome/valor, zerar min/max.\n" +
                 "- \"Essenciais\" marca os sensores mais importantes de uma vez.\n" +
-                "- Grafico: passe o mouse para ver os valores; \"Normalizar escala\" coloca unidades diferentes lado a lado.\n" +
+                "- Gráfico: passe o mouse para ver os valores; \"Normalizar escala\" coloca unidades diferentes lado a lado.\n" +
                 "- \"Atualizar a cada\" muda a velocidade das leituras (em milissegundos).\n" +
-                "- Exportar salva os valores/historico em CSV ou o grafico em PNG.",
+                "- Exportar salva os valores/histórico em CSV ou o gráfico em PNG.",
                 "BunoTunner - Sensores", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         void DriverHelp()
         {
             if (Dlg.Show(
-                "Os sensores da CPU (temperatura, tensao, consumo) precisam do driver do LibreHardwareMonitor, e ele nao esta conseguindo ler esta CPU.\n\n" +
+                "Os sensores da CPU (temperatura, tensão, consumo) precisam do driver do LibreHardwareMonitor, e ele não está conseguindo ler esta CPU.\n\n" +
                 "Causas comuns:\n" +
-                "1) \"Integridade de memoria\" (Isolamento de nucleo) do Windows ou o Defender bloqueando o driver: desative em Seguranca do Windows > Seguranca do dispositivo > Isolamento de nucleo e reinicie o PC.\n" +
-                "2) Versao do LibreHardwareMonitor antiga para a sua CPU: use a mais recente (versoes novas podem exigir o driver PawnIO).\n" +
-                "3) Antivirus de terceiros.\n\n" +
-                "Enquanto isso o programa usa as zonas termicas do Windows (menos precisas).\n\nAbrir agora a tela de Isolamento de nucleo?",
+                "1) \"Integridade de memória\" (Isolamento de núcleo) do Windows ou o Defender bloqueando o driver: desative em Segurança do Windows > Segurança do dispositivo > Isolamento de núcleo e reinicie o PC.\n" +
+                "2) Versão do LibreHardwareMonitor antiga para a sua CPU: use a mais recente (versões novas podem exigir o driver PawnIO).\n" +
+                "3) Antivírus de terceiros.\n\n" +
+                "Enquanto isso o programa usa as zonas térmicas do Windows (menos precisas).\n\nAbrir agora a tela de Isolamento de núcleo?",
                 "Sensores da CPU sem leitura", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
             try { Process.Start("windowsdefender://coreisolation"); } catch (Exception) { }
         }
@@ -7080,7 +7096,7 @@ namespace BunoTunner
         {
             int alerts = 0;
             foreach (Sn s in list) if (s.AlertAbove.HasValue) alerts++;
-            lblInfo.Text = shown + Lang.Pick(" de ", " of ") + list.Count + " sensores  |  " + ser.Count + " no grafico  |  " + alerts + " alerta(s)";
+            lblInfo.Text = shown + Lang.Pick(" de ", " of ") + list.Count + " sensores  |  " + ser.Count + " no gráfico  |  " + alerts + " alerta(s)";
         }
 
         static void SetSub(ListViewItem it, int i, string t) { t = Lang.T(t); if (it.SubItems[i].Text != t) it.SubItems[i].Text = t; }
@@ -7102,7 +7118,7 @@ namespace BunoTunner
                 hintDriver = needHint;
                 lblHint.ForeColor = needHint ? Xp.Bad : Xp.Dim;
                 lblHint.Cursor = needHint ? Cursors.Hand : Cursors.Default;
-                lblHint.Text = needHint ? "(!) Os sensores da CPU nao estao sendo lidos pelo driver (temperatura/tensao/consumo). Clique aqui para ver como resolver." : DefaultHint;
+                lblHint.Text = needHint ? "(!) Os sensores da CPU não estão sendo lidos pelo driver (temperatura/tensão/consumo). Clique aqui para ver como resolver." : DefaultHint;
             }
 
             for (int i = 0; i < tiles.Length; i++)
@@ -7161,7 +7177,7 @@ namespace BunoTunner
             string r = PromptForm.Ask(this, "Alerta", "Avisar (som + barra de status) quando \"" + s.Name + "\" passar de (" + Sn.Unit(s.Type) + "):", cur);
             if (r == null || r.Length == 0) return;
             float v;
-            if (!float.TryParse(r.Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out v)) { Say("Valor invalido."); return; }
+            if (!float.TryParse(r.Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out v)) { Say("Valor inválido."); return; }
             SensorHub.SetAlert(s, v);
             Say("Alerta definido: " + s.Name + " > " + v.ToString("0.##") + " " + Sn.Unit(s.Type));
         }
@@ -7203,7 +7219,7 @@ namespace BunoTunner
             try
             {
                 StringBuilder sb = new StringBuilder();
-                sb.AppendLine(Lang.T("Grupo;Sensor;Tipo;Valor;Minimo;Maximo;Unidade"));
+                sb.AppendLine(Lang.T("Grupo;Sensor;Tipo;Valor;Mínimo;Máximo;Unidade"));
                 foreach (Sn s in list)
                     if (s.Seen)
                         sb.AppendLine(Csv(s.Group) + ";" + Csv(s.Name) + ";" + s.Category + ";" + (s.Last.HasValue ? s.Last.Value.ToString("0.##") : "") + ";" +
@@ -7216,8 +7232,8 @@ namespace BunoTunner
 
         void ExportHistory()
         {
-            if (graph.Items.Count == 0) { Say("Marque sensores para o grafico primeiro."); return; }
-            string f = AskFile("CSV (*.csv)|*.csv", "historico");
+            if (graph.Items.Count == 0) { Say("Marque sensores para o gráfico primeiro."); return; }
+            string f = AskFile("CSV (*.csv)|*.csv", "histórico");
             if (f == null) return;
             try
             {
@@ -7244,7 +7260,7 @@ namespace BunoTunner
 
         void ExportImage()
         {
-            string f = AskFile("PNG (*.png)|*.png", "grafico");
+            string f = AskFile("PNG (*.png)|*.png", "gráfico");
             if (f == null) return;
             try
             {
@@ -7276,7 +7292,7 @@ namespace BunoTunner
     {
         [DllImport("kernel32.dll")] static extern bool GetFirmwareType(out int t);
         [DllImport("kernel32.dll")] static extern bool IsProcessorFeaturePresent(uint f);
-        public const string On = "Ligado", Off = "Desligado", NA = "Indisponivel";
+        public const string On = "Ligado", Off = "Desligado", NA = "Indisponível";
 
         static object Reg(RegistryKey root, string sub, string name)
         {
@@ -7308,7 +7324,7 @@ namespace BunoTunner
         public static string GameMode()
         {
             object v = Reg(Registry.CurrentUser, @"Software\Microsoft\GameBar", "AutoGameModeEnabled");
-            return v == null ? "Padrao do Windows (nao alterado)" : Flag(v, 1, NA);
+            return v == null ? "Padrão do Windows (não alterado)" : Flag(v, 1, NA);
         }
         static string Hvci()
         {
@@ -7332,11 +7348,11 @@ namespace BunoTunner
             l.Add(new string[] { "Sistema operacional", OsName() });
             l.Add(new string[] { "Boot em modo UEFI", UefiText() });
             l.Add(new string[] { "Secure Boot", SecureBoot() });
-            l.Add(new string[] { "Virtualizacao no firmware (VT-x / AMD-V)", Feature(21) });
-            l.Add(new string[] { "SLAT (paginacao aninhada)", Feature(20) });
-            l.Add(new string[] { "DEP / NX (protecao de execucao)", Feature(12) });
-            l.Add(new string[] { "Integridade de memoria (HVCI)", Hvci() });
-            l.Add(new string[] { "Inicializacao rapida (Fast Startup)", FastStartup() });
+            l.Add(new string[] { "Virtualização no firmware (VT-x / AMD-V)", Feature(21) });
+            l.Add(new string[] { "SLAT (paginação aninhada)", Feature(20) });
+            l.Add(new string[] { "DEP / NX (proteção de execução)", Feature(12) });
+            l.Add(new string[] { "Integridade de memória (HVCI)", Hvci() });
+            l.Add(new string[] { "Inicialização rápida (Fast Startup)", FastStartup() });
             return l;
         }
 
@@ -7374,9 +7390,9 @@ namespace BunoTunner
             if (vbs != null)
             {
                 int n = Convert.ToInt32(vbs);
-                vb = n == 2 ? On + " (em execucao)" : (n == 1 ? On + " (aguardando reinicio)" : Off);
+                vb = n == 2 ? On + " (em execução)" : (n == 1 ? On + " (aguardando reinicio)" : Off);
             }
-            l.Add(new string[] { "Seguranca baseada em virtualizacao (VBS)", vb });
+            l.Add(new string[] { "Segurança baseada em virtualização (VBS)", vb });
 
             object hv = Wmi(@"\\.\root\CIMV2", "SELECT * FROM Win32_ComputerSystem", "HypervisorPresent");
             l.Add(new string[] { "Hypervisor ativo (Hyper-V / WSL2)", hv == null ? NA : (Convert.ToBoolean(hv) ? On : Off) });
@@ -7405,16 +7421,16 @@ namespace BunoTunner
                     foreach (ManagementBaseObject mo in col)
                     {
                         if (!Same(CpuInfo.P(mo, "Name"), gpuName)) { mo.Dispose(); continue; }
-                        add("Versao do driver (Windows)", CpuInfo.P(mo, "DriverVersion"));
+                        add("Versão do driver (Windows)", CpuInfo.P(mo, "DriverVersion"));
                         string dd = CpuInfo.P(mo, "DriverDate");
                         if (!string.IsNullOrEmpty(dd))
                         {
                             try { add("Data do driver", ManagementDateTimeConverter.ToDateTime(dd).ToString("dd/MM/yyyy")); } catch (Exception) { }
                         }
                         string hr = CpuInfo.P(mo, "CurrentHorizontalResolution"), vr = CpuInfo.P(mo, "CurrentVerticalResolution");
-                        if (hr != null && vr != null) add("Resolucao atual", hr + " x " + vr);
+                        if (hr != null && vr != null) add("Resolução atual", hr + " x " + vr);
                         string rf = CpuInfo.P(mo, "CurrentRefreshRate");
-                        if (rf != null) add("Taxa de atualizacao do monitor", rf + " Hz");
+                        if (rf != null) add("Taxa de atualização do monitor", rf + " Hz");
                         add("Processador de video", CpuInfo.P(mo, "VideoProcessor"));
                         add("ID de hardware (PNP)", CpuInfo.P(mo, "PNPDeviceID"));
                         mo.Dispose();
@@ -7460,7 +7476,7 @@ namespace BunoTunner
     class BenchCanvas : Control
     {
         public bool HudOnly; public int Kind; public double Rate, Temp = double.NaN, Elapsed, Total; public string Unit = "", Extra = ""; public long Errors;
-        static readonly string[] Names = { "GPU - render 3D de pelos (OpenGL)", "CPU - render 3D por blocos (ray tracing)", "FPU - malha de ondas em ponto flutuante", "RAM - mapa de memoria", "SSD - mapa de blocos do disco" };
+        static readonly string[] Names = { "GPU - render 3D de pelos (OpenGL)", "CPU - render 3D por blocos (ray tracing)", "FPU - malha de ondas em ponto flutuante", "RAM - mapa de memória", "SSD - mapa de blocos do disco" };
         Timer tm = new Timer();
         DateTime t0 = DateTime.UtcNow, fpsT = DateTime.UtcNow; int frames; double fps;
         // pelos
@@ -7759,7 +7775,7 @@ namespace BunoTunner
                     if (bstate[b] == 1) g.DrawRectangle(p, x0 + (b % NBX) * B * s, y0 + (b / NBX) * B * s, B * s, B * s);
             using (Pen fr = new Pen(Color.FromArgb(120, 120, 120))) g.DrawRectangle(fr, x0, y0, w, h);
             string st = "Render #" + (pass + 1) + "   blocos: " + doneB + "/" + NB + "   tempo: " + (doneB >= NB ? lastPass : (DateTime.UtcNow - passStart).TotalSeconds).ToString("0.0") + " s";
-            if (lastPass > 0) st += "   ultimo: " + lastPass.ToString("0.0") + " s   melhor: " + bestPass.ToString("0.0") + " s";
+            if (lastPass > 0) st += "   último: " + lastPass.ToString("0.0") + " s   melhor: " + bestPass.ToString("0.0") + " s";
             TextRenderer.DrawText(g, Lang.T(st), SystemFonts.DefaultFont, new Point((int)x0 + 4, (int)y0 + 4), Color.White, Color.FromArgb(150, 0, 0, 0));
         }
 
@@ -7775,7 +7791,7 @@ namespace BunoTunner
             using (SolidBrush bg = new SolidBrush(Color.FromArgb(16, 16, 20))) g.FillRectangle(bg, map);
             if (nb == 0)
             {
-                TextRenderer.DrawText(g, Lang.T("Reservando a memoria do teste..."), SystemFonts.DefaultFont, new Point(map.X + 8, map.Y + 8), Color.Gray);
+                TextRenderer.DrawText(g, Lang.T("Reservando a memória do teste..."), SystemFonts.DefaultFont, new Point(map.X + 8, map.Y + 8), Color.Gray);
             }
             else
             {
@@ -7806,7 +7822,7 @@ namespace BunoTunner
                 string tx = Lang.T(lt[i]); TextRenderer.DrawText(g, tx, SystemFonts.DefaultFont, new Point(lx + 14, ly), Color.Silver);
                 lx += 14 + TextRenderer.MeasureText(tx, SystemFonts.DefaultFont).Width + 14;
             }
-            string info = Lang.T("Padrao") + ": 0x" + Bench.RamPattern.ToString("X16") + "     " + Lang.T("Passagem") + " " + Bench.RamRound + "     " + Lang.T("Blocos") + ": " + nb + " x 64 MB";
+            string info = Lang.T("Padrão") + ": 0x" + Bench.RamPattern.ToString("X16") + "     " + Lang.T("Passagem") + " " + Bench.RamRound + "     " + Lang.T("Blocos") + ": " + nb + " x 64 MB";
             TextRenderer.DrawText(g, info, new Font("Consolas", 9f, FontStyle.Bold), new Point(map.X, ly + 20), Color.FromArgb(255, 200, 60));
             // palavras reais da memoria que esta sendo gravada/conferida agora
             long[] view = Bench.RamView; int vp = Bench.RamViewPos;
@@ -7833,7 +7849,7 @@ namespace BunoTunner
             int ph = Bench.SsdPhase, smb = Math.Max(1, Bench.SsdMb); byte[] map = Bench.SsdMap; int[] hits = Bench.SsdHit;
             Color cW = Color.FromArgb(70, 150, 255), cR = Color.FromArgb(60, 200, 110), cK = Color.FromArgb(240, 200, 40), cE = Color.FromArgb(235, 50, 50);
             Color acc = ph == 2 ? cK : (ph == 1 ? cR : cW);
-            string[] pn = { "Escrita sequencial (1 MB)", "Leitura sequencial + conferencia", "Leitura aleatoria 4K" };
+            string[] pn = { "Escrita sequencial (1 MB)", "Leitura sequencial + conferência", "Leitura aleatória 4K" };
             TextRenderer.DrawText(g, Lang.T(pn[Math.Max(0, Math.Min(2, ph))]), SystemFonts.DefaultFont, new Point(r.X + 12, r.Y + 2), acc);
             // 1) faixa do arquivo: cada segmento e uma fatia real do arquivo de teste
             Rectangle lane = new Rectangle(r.X + 10, r.Y + 22, r.Width - 20, 30);
@@ -8012,8 +8028,8 @@ namespace BunoTunner
         // Baixa e executa o instalador oficial (pede permissao de administrador). Chamado pelo botao do menu Ventoinhas.
         public static void InstallNow(Control owner)
         {
-            if (Installed()) { Dlg.Show(owner, "O PawnIO ja esta instalado.", "BunoTunner", MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
-            if (Dlg.Show(owner, "Baixar e instalar o PawnIO agora?\n\nO instalador oficial (github.com/namazso/PawnIO.Setup) sera baixado e pedira permissao de administrador.", "BunoTunner - PawnIO", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+            if (Installed()) { Dlg.Show(owner, "O PawnIO já está instalado.", "BunoTunner", MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
+            if (Dlg.Show(owner, "Baixar e instalar o PawnIO agora?\n\nO instalador oficial (github.com/namazso/PawnIO.Setup) será baixado e pedirá permissão de administrador.", "BunoTunner - PawnIO", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
             string exe = Path.Combine(Path.GetTempPath(), "PawnIO_setup.exe");
             owner.Enabled = false;
             Th.ThreadPool.QueueUserWorkItem(delegate
@@ -8035,10 +8051,10 @@ namespace BunoTunner
                         owner.Enabled = true;
                         if (err != null)
                         {
-                            if (Dlg.Show(owner, "Nao foi possivel instalar automaticamente (" + err + ").\nAbrir o download no navegador?", "BunoTunner", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                            if (Dlg.Show(owner, "Não foi possível instalar automaticamente (" + err + ").\nAbrir o download no navegador?", "BunoTunner", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
                                 try { Process.Start("https://github.com/namazso/PawnIO.Setup/releases/latest/download/PawnIO_setup.exe"); } catch (Exception) { }
                         }
-                        else if (done) Dlg.Show(owner, Installed() ? "PawnIO instalado! Feche e abra o BunoTunner para os sensores, ventoinhas e timings passarem a usar o driver." : "O instalador foi fechado, mas o PawnIO nao foi detectado. Tente novamente.", "BunoTunner", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        else if (done) Dlg.Show(owner, Installed() ? "PawnIO instalado! Feche e abra o BunoTunner para os sensores, ventoinhas e timings passarem a usar o driver." : "O instalador foi fechado, mas o PawnIO não foi detectado. Tente novamente.", "BunoTunner", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }));
                 }
                 catch (Exception) { }
@@ -8050,11 +8066,11 @@ namespace BunoTunner
         {
             if (Installed()) return;
             DialogResult r = Dlg.Show(owner,
-                "Recomendamos a instalacao do PawnIO.\n\n" +
+                "Recomendamos a instalação do PawnIO.\n\n" +
                 "Por que?\n" +
-                "O PawnIO e um driver assinado e de codigo aberto que o LibreHardwareMonitor (usado pelo BunoTunner) precisa para acessar o hardware. " +
-                "Sem ele ficam sem leitura: varios sensores de temperatura da CPU e da placa-mae, o controle das ventoinhas ligadas a placa-mae e os timings da memoria RAM.\n\n" +
-                "Deseja abrir o download oficial agora?\n(Sim = baixa o PawnIO_setup.exe; Nao = continuar sem ele. Este aviso aparece a cada abertura enquanto ele nao estiver instalado.)",
+                "O PawnIO e um driver assinado e de código aberto que o LibreHardwareMonitor (usado pelo BunoTunner) precisa para acessar o hardware. " +
+                "Sem ele ficam sem leitura: vários sensores de temperatura da CPU e da placa-mae, o controle das ventoinhas ligadas a placa-mae e os timings da memória RAM.\n\n" +
+                "Deseja abrir o download oficial agora?\n(Sim = baixa o PawnIO_setup.exe; Não = continuar sem ele. Este aviso aparece a cada abertura enquanto ele não estiver instalado.)",
                 "BunoTunner - PawnIO recomendado", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
             if (r != DialogResult.Yes) return;
             try
@@ -8067,7 +8083,7 @@ namespace BunoTunner
             {
                 try { Process.Start("https://pawnio.eu"); } catch (Exception) { }
             }
-            Dlg.Show(owner, "Depois do download, execute o PawnIO_setup.exe (como administrador), conclua a instalacao e abra o BunoTunner novamente.", "BunoTunner", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            Dlg.Show(owner, "Depois do download, execute o PawnIO_setup.exe (como administrador), conclua a instalação e abra o BunoTunner novamente.", "BunoTunner", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 
@@ -8843,9 +8859,9 @@ namespace BunoTunner
                 PFD pfd = new PFD();
                 pfd.nSize = (ushort)Marshal.SizeOf(typeof(PFD)); pfd.nVersion = 1; pfd.dwFlags = 4 | 0x20 | 1; pfd.iPixelType = 0; pfd.cColorBits = 32; pfd.cDepthBits = 24;
                 int fmt = ChoosePixelFormat(hdc, ref pfd);
-                if (fmt == 0 || !SetPixelFormat(hdc, fmt, ref pfd)) throw new Exception("formato de pixel OpenGL indisponivel");
+                if (fmt == 0 || !SetPixelFormat(hdc, fmt, ref pfd)) throw new Exception("formato de pixel OpenGL indisponível");
                 rc = wglCreateContext(hdc);
-                if (rc == IntPtr.Zero || !wglMakeCurrent(hdc, rc)) throw new Exception("nao foi possivel criar o contexto OpenGL");
+                if (rc == IntPtr.Zero || !wglMakeCurrent(hdc, rc)) throw new Exception("não foi possível criar o contexto OpenGL");
                 string rend = "";
                 try { rend = Marshal.PtrToStringAnsi(glGetString(0x1F01)); } catch (Exception) { }
                 DSwapInterval swap = null;
@@ -8959,10 +8975,10 @@ namespace BunoTunner
         public static void Open(string name, bool gpu, IWin32Window owner)
         {
             string q = Query(name, gpu);
-            if (q.Length == 0) { Dlg.Show(owner, "Nome do hardware nao identificado.", "BunoTunner"); return; }
+            if (q.Length == 0) { Dlg.Show(owner, "Nome do hardware não identificado.", "BunoTunner"); return; }
             string url = "https://www.techpowerup.com/" + (gpu ? "gpu-specs/" : "cpu-specs/") + "?q=" + Uri.EscapeDataString(q);
             try { ProcessStartInfo psi = new ProcessStartInfo(url); psi.UseShellExecute = true; Process.Start(psi); }
-            catch (Exception ex) { Dlg.Show(owner, "Nao foi possivel abrir o navegador: " + ex.Message, "BunoTunner"); }
+            catch (Exception ex) { Dlg.Show(owner, "Não foi possível abrir o navegador: " + ex.Message, "BunoTunner"); }
         }
     }
 
@@ -9059,7 +9075,7 @@ namespace BunoTunner
                     {
                         long avail = AvailPhys();
                         long total = Math.Min(avail * ramPct / 100, avail - 1024L * 1048576L);
-                        if (total < 128L * 1048576L) { Fail = "Memoria livre insuficiente para o teste."; break; }
+                        if (total < 128L * 1048576L) { Fail = "Memória livre insuficiente para o teste."; break; }
                         int th = Math.Max(1, Math.Min(4, Environment.ProcessorCount / 2));
                         long per = total / th;
                         int nPer = (int)Math.Max(1, per / (RamChunk * 8L));
@@ -9174,13 +9190,13 @@ namespace BunoTunner
             try
             {
                 DriveInfo di = new DriveInfo(drive.Substring(0, 1));
-                if (di.AvailableFreeSpace < (long)mb * 1048576L + 512L * 1048576L) { Fail = "Pouco espaco livre no drive " + drive; return; }
+                if (di.AvailableFreeSpace < (long)mb * 1048576L + 512L * 1048576L) { Fail = "Pouco espaço livre no drive " + drive; return; }
             }
             catch (Exception) { }
             const uint RW = 0xC0000000u;
             const uint FLAGS = 0x20000000u | 0x80000000u | 0x04000000u;   // NO_BUFFERING | WRITE_THROUGH | DELETE_ON_CLOSE
             IntPtr h = CreateFile(path, RW, 0, IntPtr.Zero, 2, FLAGS, IntPtr.Zero);
-            if (h == new IntPtr(-1)) { Fail = "Nao consegui criar o arquivo de teste em " + drive + " (erro " + Marshal.GetLastWin32Error() + ")"; return; }
+            if (h == new IntPtr(-1)) { Fail = "Não consegui criar o arquivo de teste em " + drive + " (erro " + Marshal.GetLastWin32Error() + ")"; return; }
             const int BLK = 1 << 20;
             IntPtr raw = Marshal.AllocHGlobal(BLK + 4096);
             try
@@ -9234,7 +9250,7 @@ namespace BunoTunner
                         if (ReadFile(h, buf, 4096, out done, IntPtr.Zero)) { ops++; Th.Interlocked.Add(ref Counter, done); SsdHit[(int)(uidx * 512L / (mb * 256L))] = Environment.TickCount | 1; }
                     }
                     iops = ops / Math.Max(0.001, sw.Elapsed.TotalSeconds);
-                    Extra = "Escrita seq " + w.ToString("0") + " MB/s | Leitura seq " + rd.ToString("0") + " MB/s | 4K aleatorio " + iops.ToString("0") + " IOPS";
+                    Extra = "Escrita seq " + w.ToString("0") + " MB/s | Leitura seq " + rd.ToString("0") + " MB/s | 4K aleatório " + iops.ToString("0") + " IOPS";
                 }
             }
             finally { Marshal.FreeHGlobal(raw); CloseHandle(h); }
@@ -9263,7 +9279,7 @@ namespace BunoTunner
         static void GpuRun(string gpuName)
         {
             uint np;
-            if (Cl.clGetPlatformIDs(0, null, out np) != 0 || np == 0) { Fail = "OpenCL nao encontrado (instale o driver da placa de video)."; return; }
+            if (Cl.clGetPlatformIDs(0, null, out np) != 0 || np == 0) { Fail = "OpenCL não encontrado (instale o driver da placa de video)."; return; }
             IntPtr[] plats = new IntPtr[np];
             Cl.clGetPlatformIDs(np, plats, out np);
             IntPtr dev = IntPtr.Zero, first = IntPtr.Zero; string devName = null, firstName = null;
@@ -9317,7 +9333,7 @@ namespace BunoTunner
                 if (cap > 1024 * 1024 && cap < nel) nel = cap;
                 bufA = Cl.clCreateBuffer(ctx, 1, (IntPtr)(nel * 4), IntPtr.Zero, out err);
                 bufB = Cl.clCreateBuffer(ctx, 1, (IntPtr)(nel * 4), IntPtr.Zero, out err);
-                if (bufO == IntPtr.Zero || bufA == IntPtr.Zero || bufB == IntPtr.Zero) { Fail = "OpenCL: sem memoria de video para o teste."; return; }
+                if (bufO == IntPtr.Zero || bufA == IntPtr.Zero || bufB == IntPtr.Zero) { Fail = "OpenCL: sem memória de video para o teste."; return; }
 
                 Cl.ArgMem(kBurn, 0, (IntPtr)IntPtr.Size, ref bufO);
                 Cl.ArgMem(kMem, 0, (IntPtr)IntPtr.Size, ref bufA);
@@ -9336,7 +9352,7 @@ namespace BunoTunner
                     err = Cl.clEnqueueNDRangeKernel(q, kBurn, 1, null, gsz, null, 0, IntPtr.Zero, IntPtr.Zero);
                     if (err == 0) err = Cl.clFinish(q);
                     sw.Stop();
-                    if (err != 0) { Fail = "OpenCL: erro " + err + " durante o calculo (o driver pode ter reiniciado)."; break; }
+                    if (err != 0) { Fail = "OpenCL: erro " + err + " durante o cálculo (o driver pode ter reiniciado)."; break; }
                     double ms = sw.Elapsed.TotalMilliseconds;
                     Th.Interlocked.Add(ref Counter, (long)items * iters * 16);
                     // mantem cada disparo curto (~40-150 ms) para nao acionar o TDR do Windows
@@ -9428,7 +9444,7 @@ namespace BunoTunner
             if (Gpu != null) return Gpu.SetFanAuto(out msg);
             if (Ctl != null && Ctl.Control != null)
             {
-                try { Ctl.Control.SetDefault(); msg = "OK: automatico"; return true; }
+                try { Ctl.Control.SetDefault(); msg = "OK: automático"; return true; }
                 catch (Exception ex) { msg = ex.Message; return false; }
             }
             msg = "Esta ventoinha e somente leitura."; return false;
@@ -9522,7 +9538,7 @@ namespace BunoTunner
             int n = 0, tot = 0;
             foreach (FanCh c in FanHub.All) if (c.Controllable) tot++;
             foreach (ListViewItem it in lv.SelectedItems) { FanCh c = it.Tag as FanCh; if (c != null && c.Controllable) n++; }
-            lblSel.Text = n + Lang.Pick(" de ", " of ") + tot + Lang.Pick(" controlaveis selecionadas", " controllable selected");
+            lblSel.Text = n + Lang.Pick(" de ", " of ") + tot + Lang.Pick(" controláveis selecionadas", " controllable selected");
             lblSel.ForeColor = n > 0 ? Xp.GroupText : Xp.Dim;
         }
 
@@ -9530,7 +9546,7 @@ namespace BunoTunner
 
         void BuildList()
         {
-            XpGroup g = new XpGroup(); g.Title = "Ventoinhas detectadas (Ctrl/Shift = varias)"; g.SetBounds(0, 0, 676, 286); g.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
+            XpGroup g = new XpGroup(); g.Title = "Ventoinhas detectadas (Ctrl/Shift = várias)"; g.SetBounds(0, 0, 676, 286); g.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
             lv.SetBounds(10, 54, 656, 188); lv.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom; lv.View = View.Details; lv.FullRowSelect = true; lv.GridLines = true;
             lv.MultiSelect = true; lv.HideSelection = false; lv.BackColor = Xp.EditBg; lv.Font = Xp.Ui;
             lv.Columns.Add("Ventoinha", 180); lv.Columns.Add("Tipo", 90); lv.Columns.Add("Origem", 170); lv.Columns.Add("RPM", 60);
@@ -9539,21 +9555,21 @@ namespace BunoTunner
             g.Controls.Add(lv);
             foreach (FanCh c in FanHub.All)
             {
-                ListViewItem it = new ListViewItem(new string[] { c.Display, c.Controllable ? c.RoleName : c.RoleName + " (so leitura)", c.Origin, "-", "-", "-" });
+                ListViewItem it = new ListViewItem(new string[] { c.Display, c.Controllable ? c.RoleName : c.RoleName + " (só leitura)", c.Origin, "-", "-", "-" });
                 it.Tag = c;
                 if (!c.Controllable) it.ForeColor = Xp.Dim;
                 lv.Items.Add(it); items[c] = it;
             }
             if (FanHub.All.Count == 0)
-                lv.Items.Add(new ListViewItem(new string[] { "Nenhuma ventoinha encontrada", "", "A placa-mae pode nao expor as ventoinhas ao Windows", "", "", "" }));
+                lv.Items.Add(new ListViewItem(new string[] { "Nenhuma ventoinha encontrada", "", "A placa-mae pode não expor as ventoinhas ao Windows", "", "", "" }));
             lblSel = UI.Lbl(g, "", 10, 27, Xp.UiBold, Xp.Dim); lblSel.AutoSize = false; lblSel.SetBounds(10, 27, 400, 18);
             lv.DoubleClick += delegate { Rename(); };
             lv.KeyDown += delegate(object o, KeyEventArgs e) { if (e.Control && e.KeyCode == Keys.A) { foreach (ListViewItem x in lv.Items) x.Selected = true; e.Handled = true; } else if (e.KeyCode == Keys.F2) { Rename(); e.Handled = true; } };
             XpButton bId = UI.Btn(g, "Identificar", 420, 22, 100, delegate { Identify(); }); bId.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            XpButton bAuto = UI.Btn(g, "Tudo automatico", 526, 22, 140, delegate { AllAuto(); }); bAuto.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            Label h = UI.Lbl(g, "Identificar = liga as selecionadas a 100% por 5 s para voce descobrir qual e qual.  Botao direito na lista: selecionar por tipo (CPU, bombas, gabinete) ou renomear (inclua CPU, Bomba ou Gabinete no nome).", 10, 248, Xp.Ui, Xp.Dim);
+            XpButton bAuto = UI.Btn(g, "Tudo automático", 526, 22, 140, delegate { AllAuto(); }); bAuto.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            Label h = UI.Lbl(g, "Identificar = liga as selecionadas a 100% por 5 s para você descobrir qual é qual.  Botão direito na lista: selecionar por tipo (CPU, bombas, gabinete) ou renomear (inclua CPU, Bomba ou Gabinete no nome).", 10, 248, Xp.Ui, Xp.Dim);
             h.MaximumSize = new Size(650, 0); h.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            tip.SetToolTip(lv, "RPM = giros por minuto. % = potencia enviada. \"so leitura\" = a placa-mae nao permite controle por software. Atalhos: Ctrl+A seleciona tudo; F2 ou duplo clique renomeia.");
+            tip.SetToolTip(lv, "RPM = giros por minuto. % = potência enviada. \"só leitura\" = a placa-mae não permite controle por software. Atalhos: Ctrl+A seleciona tudo; F2 ou duplo clique renomeia.");
             Controls.Add(g);
         }
 
@@ -9561,11 +9577,11 @@ namespace BunoTunner
         {
             ContextMenuStrip m = new ContextMenuStrip(); m.RenderMode = ToolStripRenderMode.System;
             m.Items.Add("Selecionar todas", null, delegate { foreach (ListViewItem x in lv.Items) x.Selected = true; });
-            m.Items.Add("Selecionar so as controlaveis", null, delegate
+            m.Items.Add("Selecionar só as controláveis", null, delegate
             {
                 foreach (ListViewItem x in lv.Items) { FanCh f = x.Tag as FanCh; x.Selected = f != null && f.Controllable; }
             });
-            m.Items.Add("Inverter selecao", null, delegate { foreach (ListViewItem x in lv.Items) x.Selected = !x.Selected; });
+            m.Items.Add("Inverter seleção", null, delegate { foreach (ListViewItem x in lv.Items) x.Selected = !x.Selected; });
             m.Items.Add(new ToolStripSeparator());
             m.Items.Add("Selecionar: CPU", null, delegate { SelectRole("CPU"); });
             m.Items.Add("Selecionar: bombas / AIO", null, delegate { SelectRole("Bomba/AIO"); });
@@ -9580,7 +9596,7 @@ namespace BunoTunner
         void BuildMode()
         {
             XpGroup g = new XpGroup(); g.Title = "Modo de funcionamento das selecionadas"; g.SetBounds(0, 292, 676, 166); g.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            optAuto = UI.Opt(g, "Automatico - a placa/BIOS decide (recomendado no dia a dia)", 14, 22, 520, true);
+            optAuto = UI.Opt(g, "Automático - a placa/BIOS decide (recomendado no dia a dia)", 14, 22, 520, true);
             optManual = UI.Opt(g, "Manual - velocidade fixa em %:", 14, 44, 300, true);
             sl = new XpSlider(); sl.SetBounds(34, 60, 280, 32); sl.Minimum = 0; sl.Maximum = 100; sl.Value = 50; g.Controls.Add(sl);
             txPct = UI.Txt(g, 322, 66, 44, "50"); UI.Lbl(g, "%", 370, 70);
@@ -9596,9 +9612,9 @@ namespace BunoTunner
             txRpm = UI.Txt(g, 96, 106, 60, "1200");
             txRpm.Box.KeyDown += delegate(object o, KeyEventArgs e) { if (e.KeyCode == Keys.Enter) ByRpm(); };
             UI.Btn(g, "Definir por RPM", 166, 104, 112, delegate { ByRpm(); });
-            UI.Lbl(g, "(use \"Identificar\" antes: ele mede o RPM maximo de cada ventoinha)", 288, 110, Xp.Ui, Xp.Dim);
-            tip.SetToolTip(optAuto, "A propria placa-mae ou o driver controla a velocidade pela temperatura.");
-            tip.SetToolTip(optManual, "A ventoinha fica sempre na mesma velocidade, nao importa a temperatura.");
+            UI.Lbl(g, "(use \"Identificar\" antes: ele mede o RPM máximo de cada ventoinha)", 288, 110, Xp.Ui, Xp.Dim);
+            tip.SetToolTip(optAuto, "A própria placa-mae ou o driver controla a velocidade pela temperatura.");
+            tip.SetToolTip(optManual, "A ventoinha fica sempre na mesma velocidade, não importa a temperatura.");
             Controls.Add(g);
         }
 
@@ -9606,11 +9622,11 @@ namespace BunoTunner
         {
             XpGroup g = new XpGroup(); g.Title = "Aplicar"; g.SetBounds(0, 464, 676, 80); g.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             UI.Btn(g, "Aplicar nas selecionadas", 10, 20, 170, delegate { ApplySel(); }).Height = 26;
-            UI.Lbl(g, "Dica: Enter nos campos de % ou RPM tambem aplica.", 190, 26, Xp.Ui, Xp.Dim);
-            chkSafe = UI.Opt(g, "Seguranca: forcar 100% se a temperatura passar de", 10, 54, 320, false); chkSafe.Checked = true;
+            UI.Lbl(g, "Dica: Enter nos campos de % ou RPM também aplica.", 190, 26, Xp.Ui, Xp.Dim);
+            chkSafe = UI.Opt(g, "Segurança: forcar 100% se a temperatura passar de", 10, 54, 320, false); chkSafe.Checked = true;
             txSafe = UI.Txt(g, 336, 51, 40, "85"); UI.Lbl(g, "\u00B0C", 380, 55);
-            chkRestore = UI.Opt(g, "Voltar tudo ao automatico ao fechar", 420, 54, 250, false); chkRestore.Checked = true;
-            tip.SetToolTip(chkSafe, "Se esquentar demais, as ventoinhas vao a 100% mesmo no modo manual.");
+            chkRestore = UI.Opt(g, "Voltar tudo ao automático ao fechar", 420, 54, 250, false); chkRestore.Checked = true;
+            tip.SetToolTip(chkSafe, "Se esquentar demais, as ventoinhas vão a 100% mesmo no modo manual.");
             Controls.Add(g);
             lblMsg = UI.Lbl(this, "", 0, 474, Xp.UiBold, Xp.Good);
             lblMsg.AutoSize = false; lblMsg.SetBounds(0, 548, 676, 38); lblMsg.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
@@ -9635,7 +9651,7 @@ namespace BunoTunner
                 bool on = c != null && c.Controllable && c.RoleName == role;
                 it.Selected = on; if (on) n++;
             }
-            Msg(n > 0 ? n + " ventoinha(s) do tipo \"" + role + "\" selecionada(s)." : "Nenhuma ventoinha controlavel do tipo \"" + role + "\" (renomeie as suas para classificar).", n == 0);
+            Msg(n > 0 ? n + " ventoinha(s) do tipo \"" + role + "\" selecionada(s)." : "Nenhuma ventoinha controlável do tipo \"" + role + "\" (renomeie as suas para classificar).", n == 0);
         }
 
         void Rename()
@@ -9647,13 +9663,13 @@ namespace BunoTunner
             if (r == null) return;
             c.Custom = (r == c.Name) ? "" : r;
             Settings.Set("fan.name." + c.Key, c.Custom);
-            it.Text = c.Display; it.SubItems[1].Text = Lang.T(c.Controllable ? c.RoleName : c.RoleName + " (so leitura)");
+            it.Text = c.Display; it.SubItems[1].Text = Lang.T(c.Controllable ? c.RoleName : c.RoleName + " (só leitura)");
         }
 
         void ApplySel()
         {
             List<FanCh> sel = Selected();
-            if (sel.Count == 0) { Msg("Selecione na lista pelo menos uma ventoinha controlavel.", true); return; }
+            if (sel.Count == 0) { Msg("Selecione na lista pelo menos uma ventoinha controlável.", true); return; }
             int ok = 0; string last = "";
             foreach (FanCh c in sel)
             {
@@ -9681,23 +9697,23 @@ namespace BunoTunner
                 string m; c.Set(c.Manual, out m); ok++;
             }
             if (ok > 0) optManual.Checked = true;
-            Msg(ok + " ajustada(s)." + (nomax > 0 ? " " + nomax + " sem RPM maximo medido: use \"Identificar\" antes." : ""), ok == 0);
+            Msg(ok + " ajustada(s)." + (nomax > 0 ? " " + nomax + " sem RPM máximo medido: use \"Identificar\" antes." : ""), ok == 0);
         }
 
         void Identify()
         {
             List<FanCh> sel = Selected();
-            if (sel.Count == 0) { Msg("Selecione pelo menos uma ventoinha controlavel.", true); return; }
+            if (sel.Count == 0) { Msg("Selecione pelo menos uma ventoinha controlável.", true); return; }
             foreach (FanCh c in sel) { string m; c.Set(100, out m); if (!identList.Contains(c)) identList.Add(c); }
             identUntil = DateTime.UtcNow.AddSeconds(5);
-            Msg("Selecionadas a 100% por 5 s. Veja/ouca qual acelerou e acompanhe o RPM na lista.", false);
+            Msg("Selecionadas a 100% por 5 s. Veja/ouça qual acelerou e acompanhe o RPM na lista.", false);
         }
 
         void AllAuto()
         {
             foreach (FanCh c in FanHub.All) if (c.Controllable) { c.Mode = 0; c.Boost = false; string m; c.Auto(out m); }
             optAuto.Checked = true;
-            Msg("Todas as ventoinhas voltaram ao automatico.", false);
+            Msg("Todas as ventoinhas voltaram ao automático.", false);
         }
 
         public void RestoreAll()
@@ -9725,7 +9741,7 @@ namespace BunoTunner
                     if (c.Mode == 1) c.Set(c.Manual, out m); else c.Auto(out m);
                 }
                 identList.Clear();
-                Msg("Identificacao concluida: RPM maximo guardado (usado em \"Definir por RPM\").", false);
+                Msg("Identificação concluída: RPM máximo guardado (usado em \"Definir por RPM\").", false);
             }
             bool safeOn = chkSafe.Checked; int safeT = UI.Int(txSafe, 85);
             foreach (FanCh c in FanHub.All)
@@ -9734,7 +9750,7 @@ namespace BunoTunner
                 float? t = TempOf(c);
                 if (safeOn && t.HasValue && t.Value >= safeT)
                 {
-                    if (!c.Boost) { c.Boost = true; string m1; c.Set(100, out m1); Msg("SEGURANCA: " + c.Display + Lang.Pick(" a 100% (", " at 100% (") + t.Value.ToString("0") + " \u00B0C).", true); }
+                    if (!c.Boost) { c.Boost = true; string m1; c.Set(100, out m1); Msg("SEGURANÇA: " + c.Display + Lang.Pick(" a 100% (", " at 100% (") + t.Value.ToString("0") + " \u00B0C).", true); }
                     continue;
                 }
                 if (c.Boost) { if (t.HasValue && t.Value < safeT - 5) { c.Boost = false; c.Last = -1; } else continue; }
@@ -9756,7 +9772,7 @@ namespace BunoTunner
                 int? r = c.RpmNow(), p = c.Pct();
                 SetSub(it, 3, r.HasValue ? r.Value.ToString() : "-");
                 SetSub(it, 4, p.HasValue ? p.Value + "%" : "-");
-                SetSub(it, 5, !c.Controllable ? "-" : (c.Boost ? "SEGURANCA" : (c.Mode == 0 ? "Automatico" : "Manual " + c.Manual + "%")));
+                SetSub(it, 5, !c.Controllable ? "-" : (c.Boost ? "SEGURANÇA" : (c.Mode == 0 ? "Automático" : "Manual " + c.Manual + "%")));
                 Color rc = !c.Controllable ? Xp.Dim : c.Boost ? Xp.Bad : (c.Mode == 1 ? Xp.GroupText : (r.HasValue && r.Value == 0 && p.HasValue && p.Value >= 25 ? Xp.Bad : Xp.Text));   // vermelho = seguranca ou ventoinha parada com potencia
                 if (it.ForeColor != rc) it.ForeColor = rc;
             }
@@ -9819,9 +9835,9 @@ namespace BunoTunner
                         if (d >= '7' && d <= '9') return "AM5";
                     }
                 }
-                return s.Length > 0 ? s : "AMD (plataforma nao identificada)";
+                return s.Length > 0 ? s : "AMD (plataforma não identificada)";
             }
-            return s.Length > 0 ? s : (Vendor == "Intel" ? "Intel (soquete nao identificado)" : "Desconhecida");
+            return s.Length > 0 ? s : (Vendor == "Intel" ? "Intel (soquete não identificado)" : "Desconhecida");
         }
         public static int CoMin { get { return Platform() == "AM5" ? -50 : -30; } }
         public static int CoMax { get { return 30; } }
@@ -10022,17 +10038,17 @@ namespace BunoTunner
                     string dll = null;
                     foreach (string e in new string[] { Environment.GetEnvironmentVariable("ProgramW6432"), Environment.GetEnvironmentVariable("ProgramFiles") })
                         if (!string.IsNullOrEmpty(e) && File.Exists(Path.Combine(Path.Combine(e, "PawnIO"), "PawnIOLib.dll"))) { dll = Path.Combine(Path.Combine(e, "PawnIO"), "PawnIOLib.dll"); break; }
-                    if (dll == null) { DiagWhy += "PawnIOLib.dll nao encontrada; "; return false; }
+                    if (dll == null) { DiagWhy += "PawnIOLib.dll não encontrada; "; return false; }
                     Assembly asm = typeof(LHM.Computer).Assembly;
                     byte[] blob = null;
                     foreach (string rn in asm.GetManifestResourceNames())
                         if (rn.EndsWith("AmdFamily17.bin", StringComparison.OrdinalIgnoreCase))
                             using (Stream st = asm.GetManifestResourceStream(rn)) { MemoryStream ms = new MemoryStream(); st.CopyTo(ms); blob = ms.ToArray(); }
-                    if (blob == null) { DiagWhy += "a LibreHardwareMonitorLib.dll da pasta libs nao traz o modulo PawnIO (DLL antiga: atualize); "; return false; }
+                    if (blob == null) { DiagWhy += "a LibreHardwareMonitorLib.dll da pasta libs não traz o módulo PawnIO (DLL antiga: atualize); "; return false; }
                     IntPtr lib = LoadLibraryW(dll);
                     if (lib == IntPtr.Zero) { DiagWhy += "falha ao carregar PawnIOLib.dll; "; return false; }
                     IntPtr po = GetProcAddress(lib, "pawnio_open"), pl = GetProcAddress(lib, "pawnio_load"), px = GetProcAddress(lib, "pawnio_execute");
-                    if (po == IntPtr.Zero || pl == IntPtr.Zero || px == IntPtr.Zero) { DiagWhy += "PawnIOLib.dll sem as funcoes esperadas; "; return false; }
+                    if (po == IntPtr.Zero || pl == IntPtr.Zero || px == IntPtr.Zero) { DiagWhy += "PawnIOLib.dll sem as funções esperadas; "; return false; }
                     DPOpen fo = (DPOpen)Marshal.GetDelegateForFunctionPointer(po, typeof(DPOpen));
                     DPLoad fl = (DPLoad)Marshal.GetDelegateForFunctionPointer(pl, typeof(DPLoad));
                     IntPtr h;
@@ -10061,18 +10077,18 @@ namespace BunoTunner
             string dll = null;
             foreach (string e in new string[] { Environment.GetEnvironmentVariable("ProgramW6432"), Environment.GetEnvironmentVariable("ProgramFiles") })
                 if (!string.IsNullOrEmpty(e) && File.Exists(Path.Combine(Path.Combine(e, "PawnIO"), "PawnIOLib.dll"))) { dll = Path.Combine(Path.Combine(e, "PawnIO"), "PawnIOLib.dll"); break; }
-            if (dll == null) { why += "PawnIOLib.dll nao encontrada (instale o PawnIO); "; return null; }
+            if (dll == null) { why += "PawnIOLib.dll não encontrada (instale o PawnIO); "; return null; }
             IntPtr lib = LoadLibraryW(dll);
             if (lib == IntPtr.Zero) { why += "falha ao carregar PawnIOLib.dll; "; return null; }
             IntPtr po = GetProcAddress(lib, "pawnio_open"), pl = GetProcAddress(lib, "pawnio_load"), px = GetProcAddress(lib, "pawnio_execute");
-            if (po == IntPtr.Zero || pl == IntPtr.Zero || px == IntPtr.Zero) { why += "PawnIOLib.dll sem as funcoes esperadas; "; return null; }
+            if (po == IntPtr.Zero || pl == IntPtr.Zero || px == IntPtr.Zero) { why += "PawnIOLib.dll sem as funções esperadas; "; return null; }
             DPOpen fo = (DPOpen)Marshal.GetDelegateForFunctionPointer(po, typeof(DPOpen));
             DPLoad fl = (DPLoad)Marshal.GetDelegateForFunctionPointer(pl, typeof(DPLoad));
             IntPtr h;
             int hr = fo(out h);
             if (hr < 0) { why += "pawnio_open falhou (0x" + hr.ToString("X8") + "; rode como administrador); "; return null; }
             hr = fl(h, blob, (UIntPtr)(uint)blob.Length);
-            if (hr < 0) { why += "pawnio_load do modulo falhou (0x" + hr.ToString("X8") + "; CPU nao suportada ou MCHBAR desativado); "; return null; }
+            if (hr < 0) { why += "pawnio_load do módulo falhou (0x" + hr.ToString("X8") + "; CPU não suportada ou MCHBAR desativado); "; return null; }
             PawnMod m = new PawnMod(); m.H = h; m.Ex = (DPExec)Marshal.GetDelegateForFunctionPointer(px, typeof(DPExec));
             return m;
         }
@@ -10103,7 +10119,7 @@ namespace BunoTunner
                 {
                     mchTried = true;
                     byte[] blob = FindBlob("IntelMCHBAR.bin");
-                    if (blob == null) { MchWhy += "modulo IntelMCHBAR.bin ausente nesta compilacao; "; return false; }
+                    if (blob == null) { MchWhy += "módulo IntelMCHBAR.bin ausente nesta compilação; "; return false; }
                     mch = OpenMod(blob, ref MchWhy);
                 }
                 if (mch == null) return false;
@@ -10125,7 +10141,7 @@ namespace BunoTunner
             bool blockA = CpuId.Family == 6 && (m == 0x4E || m == 0x5E || m == 0x8E || m == 0x9E || m == 0xA5 || m == 0xA6);
             if (!blockA)
             {
-                r.Note = "esta CPU Intel (familia " + CpuId.Family + ", modelo 0x" + m.ToString("X") + ") ainda não tem mapa de registradores no programa (suportadas: Skylake, Kaby, Coffee e Comet Lake)";
+                r.Note = "esta CPU Intel (família " + CpuId.Family + ", modelo 0x" + m.ToString("X") + ") ainda não tem mapa de registradores no programa (suportadas: Skylake, Kaby, Coffee e Comet Lake)";
                 return r;
             }
             uint t70 = 0, ch = 0; bool found = false;
@@ -10387,8 +10403,8 @@ namespace BunoTunner
                 r.Source = "controlador de memória da CPU (AMD Ryzen, canal " + (char)('A' + ch) + ")";
                 return r;
             }
-            r.Note = anyRead ? "registradores do controlador nao reconhecidos nesta CPU (use o botao Diagnostico)"
-                : "nao foi possivel ler o controlador de memoria: " + (PawnIo.Installed() ? "" : "PawnIO nao instalado; ") + DiagWhy + "rode como Administrador";
+            r.Note = anyRead ? "registradores do controlador não reconhecidos nesta CPU (use o botão Diagnóstico)"
+                : "não foi possível ler o controlador de memória: " + (PawnIo.Installed() ? "" : "PawnIO não instalado; ") + DiagWhy + "rode como Administrador";
             return r;
         }
 
@@ -10465,7 +10481,7 @@ namespace BunoTunner
             sb.AppendLine("CPU: " + CpuId.Vendor);
             sb.AppendLine("PawnIO instalado: " + PawnIo.Installed());
             sb.AppendLine("Ring0 (LHM) com PCI: " + okRing);
-            sb.AppendLine("CPU familia " + CpuId.Family + " modelo 0x" + CpuId.Model.ToString("X") + "  modulo IntelMCHBAR.bin embutido: " + (FindBlob("IntelMCHBAR.bin") != null));
+            sb.AppendLine("CPU família " + CpuId.Family + " modelo 0x" + CpuId.Model.ToString("X") + "  módulo IntelMCHBAR.bin embutido: " + (FindBlob("IntelMCHBAR.bin") != null));
             if (CpuId.Vendor == "Intel")
             {
                 foreach (uint a in new uint[] { 0x4000, 0x4004, 0x4008, 0x400C, 0x4010, 0x4014, 0x4018, 0x401C, 0x4070, 0x4238, 0x423C, 0x4240, 0x4248, 0x4020, 0x4024, 0x5004, 0x5008 })
@@ -10528,9 +10544,9 @@ namespace BunoTunner
         static readonly string[] SpecIntel = {
             "#", "Principais",
             "tCAS", "tCL (CAS):", "tRCD", "tRCD:", "tRP", "tRP:", "tRAS", "tRAS:", "tRC", "tRC:", "tRFC", "tRFC:", "CR", "Command Rate:", "tCWL", "tCWL:", "tFAW", "tFAW:",
-            "#", "Ativacao e escrita",
+            "#", "Ativação e escrita",
             "tRRD_S", "tRRD_S:", "tRRD_L", "tRRD_L:", "tWR", "tWR:", "tRTP", "tRTP:", "tWTR_S", "tWTR_S:", "tWTR_L", "tWTR_L:", "tWRPRE", "tWRPRE:",
-            "#", "Refresh e calibracao",
+            "#", "Refresh e calibração",
             "tREFI", "tREFI:", "tREFIx9", "tREFIx9:", "OREF_RI", "OREF_RI:", "tXSDLL", "tXSDLL:", "tXS_Offset", "tXS Offset:", "tZQOPER", "tZQOPER:",
             "tZQCS", "tZQCS:", "ZQCS_period", "ZQCS period:", "tMOD", "tMOD:",
             "#", "Leitura / escrita entre bancos e ranks",
@@ -10552,10 +10568,10 @@ namespace BunoTunner
             "#", "Principais",
             "MTs", "Velocidade (MT/s):", "tCAS", "tCL (CAS):", "tRCD", "tRCDRD:", "tRCDWR", "tRCDWR:", "tRP", "tRP:", "tRAS", "tRAS:", "tRC", "tRC:", "tRFC", "tRFC:", "CR", "Command Rate:",
             "tCWL", "tCWL:", "tFAW", "tFAW:", "GDM", "Gear Down Mode:", "BGS", "Bank Group Swap:", "BGSAlt", "BGS Alt:", "ECC", "ECC:", "BurstLength", "Burst length:",
-            "#", "Ativacao e escrita",
+            "#", "Ativação e escrita",
             "tRRD_S", "tRRD_S:", "tRRD_L", "tRRD_L:", "tWR", "tWR:", "tRTP", "tRTP:", "tWTR_S", "tWTR_S:", "tWTR_L", "tWTR_L:", "tWRPRE", "tWRPRE:", "tRDPRE", "tRDPRE:",
             "5|tRPpb", "tRPpb:", "5|tRCpb", "tRCpb:", "5|tPPD", "tPPD:", "TRCPAGE", "tRCPAGE:", "5|tMW", "tMW:", "4|Preamble2t", "Preamble 2T:",
-            "#", "Refresh e calibracao",
+            "#", "Refresh e calibração",
             "tREFI", "tREFI:", "tRFC2", "tRFC2:", "4|tRFC4", "tRFC4:", "5|tRFCsb", "tRFCsb:", "tSTAG", "tSTAG:", "5|tSTAGsb", "tSTAGsb:", "tXS", "tXS:", "tDLLK", "tDLLK:",
             "tMOD", "tMOD:", "tMODPDA", "tMODPDA:", "tMRD", "tMRD:", "tMRDPDA", "tMRDPDA:", "tZQOPER", "tZQOPER:", "tZQCS", "tZQCS:", "ZqcsInterval", "ZQCS interval:",
             "5|tMRR", "tMRR:", "5|tMRW", "tMRW:", "5|tMRRI", "tMRRI:", "5|tSRX2SRX", "tSRX2SRX:", "5|tSTAB", "tSTAB:", "5|tECSc", "tECSc:",
@@ -10566,7 +10582,7 @@ namespace BunoTunner
             "#", "Economia de energia",
             "tCKE", "tCKE:", "tXP", "tXP:", "tPD", "tPD:", "tCPDED", "tCPDED:", "PowerDown", "Power Down:", "AggrPD", "Aggressive PD:",
             "AggrPwrDownDly", "Aggr PD delay:", "PwrDownDly", "PD delay:", "LpExitDly", "LP exit delay:", "LpDly", "LP delay:",
-            "#", "Interface fisica (PHY)",
+            "#", "Interface física (PHY)",
             "tPHYWRD", "tPHYWRD:", "tPHYWRL", "tPHYWRL:", "tPHYRDL", "tPHYRDL:", "RDDATAEN", "RdDataEn:", "CmdStgCnt", "CmdStgCnt:", "RcvrWait", "RcvrWait:" };
         string[] curSpec; string lastKind = "";
         XpGroup grpTim;
@@ -10614,12 +10630,12 @@ namespace BunoTunner
 
         void BuildLatency()
         {
-            XpGroup g = new XpGroup(); g.Title = "Latencia da memoria (ns)"; g.SetBounds(0, 0, 656, 142);
+            XpGroup g = new XpGroup(); g.Title = "Latência da memória (ns)"; g.SetBounds(0, 0, 656, 142);
             lblLatBig = UI.Lbl(g, "- ns", 14, 28, Xp.Big, Xp.GroupText);
             lblLatBig.Font = new Font(Xp.Big.FontFamily, 22f, FontStyle.Bold);
-            lblLatSub = UI.Lbl(g, "Latencia da RAM (bloco de 256 MB)", 14, 66, Xp.Ui, Xp.Dim);
+            lblLatSub = UI.Lbl(g, "Latência da RAM (bloco de 256 MB)", 14, 66, Xp.Ui, Xp.Dim);
             lblLatSub.AutoSize = false; lblLatSub.SetBounds(14, 66, 200, 32);
-            bLat = UI.Btn(g, "Medir latencia", 14, 102, 130, delegate { ToggleLat(); });
+            bLat = UI.Btn(g, "Medir latência", 14, 102, 130, delegate { ToggleLat(); });
             bLat.Height = 28;
             pbLat = new XpProgress(); pbLat.SetBounds(150, 108, 64, 14); g.Controls.Add(pbLat);
             latGraph.SetBounds(222, 24, 424, 82); g.Controls.Add(latGraph);
@@ -10670,11 +10686,11 @@ namespace BunoTunner
             {
                 BeginInvoke(new Action(delegate
                 {
-                    latBusy = false; bLat.Text = "Medir latencia"; pbLat.Value = 0;
+                    latBusy = false; bLat.Text = "Medir latência"; pbLat.Value = 0;
                     int n = latGraph.Ns.Count;
                     if (n == 0) { lblLatBig.Text = "- ns"; lblLatSteps.Text = err != null ? "Falhou: " + err : "Cancelado."; return; }
                     lblLatBig.Text = latGraph.Ns[n - 1].ToString("0.0") + " ns";
-                    lblLatSub.Text = "Latencia da RAM (bloco de " + (latGraph.Kb[n - 1] >= 1024 ? (latGraph.Kb[n - 1] / 1024).ToString("0") + " MB" : latGraph.Kb[n - 1].ToString("0") + " KB") + ")";
+                    lblLatSub.Text = "Latência da RAM (bloco de " + (latGraph.Kb[n - 1] >= 1024 ? (latGraph.Kb[n - 1] / 1024).ToString("0") + " MB" : latGraph.Kb[n - 1].ToString("0") + " KB") + ")";
                     StringBuilder sb = new StringBuilder();
                     double[] want = { 16, 256, 8192 };
                     string[] nm = { "16 KB", "256 KB", "8 MB" };
@@ -10782,13 +10798,13 @@ namespace BunoTunner
             lblSrc.AutoSize = false; lblSrc.SetBounds(14, y + 28, 630, 36);
             int by = y + 68;
             UI.Btn(g, "Ler novamente", 14, by, 110, delegate { ReadAsync(); });
-            UI.Btn(g, "Diagnostico", 130, by, 100, delegate
+            UI.Btn(g, "Diagnóstico", 130, by, 100, delegate
             {
                 System.Threading.ThreadPool.QueueUserWorkItem(delegate
                 {
                     string d;
                     try { d = MemRead.Diagnose(); } catch (Exception ex) { d = ex.ToString(); }
-                    try { BeginInvoke(new Action(delegate { try { Clipboard.SetText(d); } catch (Exception) { } Dlg.Show(this, d + "\n(copiado para a area de transferencia)", "BunoTunner - diagnostico dos timings"); })); } catch (Exception) { }
+                    try { BeginInvoke(new Action(delegate { try { Clipboard.SetText(d); } catch (Exception) { } Dlg.Show(this, d + "\n(copiado para a área de transferência)", "BunoTunner - diagnóstico dos timings"); })); } catch (Exception) { }
                 });
             });
             g.SetBounds(0, 384, 656, by + 44);
@@ -10931,11 +10947,11 @@ namespace BunoTunner
             UI.Btn(this, "Atualizar", 208, 1, 70, delegate { Refresh2(); });
             UI.Btn(this, "Marcar mesmo nome", 284, 1, 130, delegate { MarkSameName(); });
             UI.Btn(this, "Desmarcar", 420, 1, 80, delegate { foreach (ListViewItem it in lvP.Items) it.Checked = false; });
-            chkPause = UI.Opt(this, "Pausar atualizacao", 510, 4, 160, false);
+            chkPause = UI.Opt(this, "Pausar atualização", 510, 4, 160, false);
 
             lvP.SetBounds(0, 30, 676, 226); lvP.View = View.Details; lvP.CheckBoxes = true; lvP.FullRowSelect = true; lvP.GridLines = true;
             lvP.MultiSelect = true; lvP.HideSelection = false; lvP.BackColor = Xp.EditBg; lvP.Font = Xp.Ui;
-            lvP.Columns.Add("Processo", 170); lvP.Columns.Add("PID", 55); lvP.Columns.Add("CPU", 55); lvP.Columns.Add("Memoria", 75);
+            lvP.Columns.Add("Processo", 170); lvP.Columns.Add("PID", 55); lvP.Columns.Add("CPU", 55); lvP.Columns.Add("Memória", 75);
             lvP.Columns.Add("Afinidade (CPUs)", 170); lvP.Columns.Add("Prioridade", 110);
             UI.DoubleBuffer(lvP);
             lvP.ColumnClick += delegate(object o, ColumnClickEventArgs e)
@@ -10945,7 +10961,7 @@ namespace BunoTunner
             };
             lvP.ListViewItemSorter = new ProcSorter(0, true);
             Controls.Add(lvP);
-            tip.SetToolTip(lvP, "Marque (caixinha) os processos que quer alterar. Sem nenhum marcado, vale a selecao com Ctrl/Shift.");
+            tip.SetToolTip(lvP, "Marque (caixinha) os processos que quer alterar. Sem nenhum marcado, vale a seleção com Ctrl/Shift.");
 
             BuildCores(); BuildPresets(); BuildRules();
             LoadPresets(); LoadRules();
@@ -10960,7 +10976,7 @@ namespace BunoTunner
         // ---------- interface ----------
         void BuildCores()
         {
-            XpGroup g = new XpGroup(); g.Title = "Nucleos (CPUs logicos) que os processos marcados podem usar"; g.SetBounds(0, 262, 420, 324);
+            XpGroup g = new XpGroup(); g.Title = "Núcleos (CPUs lógicos) que os processos marcados podem usar"; g.SetBounds(0, 262, 420, 324);
             Panel gp = new Panel(); gp.SetBounds(10, 22, 400, 108); gp.AutoScroll = true; g.Controls.Add(gp);
             cpuBox = new XpOption[N];
             for (int i = 0; i < N; i++)
@@ -10971,7 +10987,7 @@ namespace BunoTunner
             }
             UI.Btn(g, "Todos", 10, 136, 60, delegate { SetMask((1L << N) - 1); });
             UI.Btn(g, "Nenhum", 74, 136, 60, delegate { SetMask(0); });
-            UI.Btn(g, "Fisicos", 138, 136, 64, delegate { SetMask(PhysMask(0)); });
+            UI.Btn(g, "Físicos", 138, 136, 64, delegate { SetMask(PhysMask(0)); });
             UI.Btn(g, "2a thread", 206, 136, 64, delegate { SetMask(PhysMask(1)); });
             UI.Btn(g, "1a metade", 274, 136, 64, delegate { SetMask(((1L << (N / 2)) - 1)); });
             UI.Btn(g, "2a metade", 342, 136, 64, delegate { SetMask(((1L << N) - 1) & ~((1L << (N / 2)) - 1)); });
@@ -10981,12 +10997,12 @@ namespace BunoTunner
             cbPrio = new ComboBox(); cbPrio.DropDownStyle = ComboBoxStyle.DropDownList; cbPrio.Font = Xp.Ui; cbPrio.SetBounds(84, 194, 170, 22);
             cbPrio.Items.AddRange(new object[] { "Manter a atual", "Baixa (Idle)", "Abaixo do normal", "Normal", "Acima do normal", "Alta" });
             cbPrio.SelectedIndex = 0; g.Controls.Add(cbPrio);
-            chkSame = UI.Opt(g, "Aplicar tambem a TODOS os processos com o mesmo nome", 10, 222, 390, false);
+            chkSame = UI.Opt(g, "Aplicar também a TODOS os processos com o mesmo nome", 10, 222, 390, false);
             UI.Btn(g, "Aplicar aos marcados", 10, 250, 150, delegate { ApplyNow(false); }).Height = 26;
-            UI.Btn(g, "Restaurar padrao", 168, 250, 130, delegate { ApplyNow(true); }).Height = 26;
+            UI.Btn(g, "Restaurar padrão", 168, 250, 130, delegate { ApplyNow(true); }).Height = 26;
             lblMsg = UI.Lbl(g, "", 10, 284, Xp.UiBold, Xp.Good);
             lblMsg.AutoSize = false; lblMsg.SetBounds(10, 282, 400, 36);
-            tip.SetToolTip(chkSame, "Navegadores e jogos criam varios processos com o mesmo nome; isto altera todos de uma vez.");
+            tip.SetToolTip(chkSame, "Navegadores e jogos criam vários processos com o mesmo nome; isto altera todos de uma vez.");
             Controls.Add(g);
             UpdateCount();
         }
@@ -10998,14 +11014,14 @@ namespace BunoTunner
             cbPre.SelectedIndexChanged += delegate { PresetToGrid(); };
             UI.Btn(g, "Salvar atual", 10, 54, 100, delegate { SavePreset(); });
             UI.Btn(g, "Excluir", 116, 54, 70, delegate { DeletePreset(); });
-            Label h = UI.Lbl(g, "Escolha um preset para carregar nucleos e prioridade; depois clique em \"Aplicar aos marcados\". \"Salvar atual\" guarda o que esta na grade.", 10, 84, Xp.Ui, Xp.Dim);
+            Label h = UI.Lbl(g, "Escolha um preset para carregar núcleos e prioridade; depois clique em \"Aplicar aos marcados\". \"Salvar atual\" guarda o que está na grade.", 10, 84, Xp.Ui, Xp.Dim);
             h.MaximumSize = new Size(230, 0);
             Controls.Add(g);
         }
 
         void BuildRules()
         {
-            XpGroup g = new XpGroup(); g.Title = "Regras automaticas"; g.SetBounds(428, 418, 248, 168);
+            XpGroup g = new XpGroup(); g.Title = "Regras automáticas"; g.SetBounds(428, 418, 248, 168);
             chkRules = UI.Opt(g, "Aplicar regras automaticamente", 10, 22, 228, false);
             lvRules.SetBounds(10, 46, 228, 80); lvRules.View = View.Details; lvRules.FullRowSelect = true; lvRules.GridLines = true; lvRules.Font = Xp.Ui; lvRules.BackColor = Xp.EditBg;
             lvRules.Columns.Add("Processo", 110); lvRules.Columns.Add("Preset", 100);
@@ -11013,7 +11029,7 @@ namespace BunoTunner
             UI.Btn(g, "Nova regra", 10, 132, 100, delegate { NewRule(); });
             UI.Btn(g, "Remover", 116, 132, 80, delegate { RemoveRule(); });
             chkRules.CheckedChanged += delegate { Settings.Set("aff.rulesOn", chkRules.Checked ? "1" : "0"); };
-            tip.SetToolTip(chkRules, "Quando o processo abrir, o preset e aplicado sozinho (ex.: jogo.exe -> nucleos fisicos).");
+            tip.SetToolTip(chkRules, "Quando o processo abrir, o preset é aplicado sozinho (ex.: jogo.exe -> núcleos físicos).");
             Controls.Add(g);
         }
 
@@ -11219,7 +11235,7 @@ namespace BunoTunner
         {
             long m = GridMask();
             if (m == 0) { Msg("Marque pelo menos um CPU antes de salvar.", true); return; }
-            string n = PromptForm.Ask(FindForm(), "Preset", "Nome do preset (ex.: Jogo - nucleos fisicos):", cbPre.Text);
+            string n = PromptForm.Ask(FindForm(), "Preset", "Nome do preset (ex.: Jogo - núcleos físicos):", cbPre.Text);
             if (string.IsNullOrEmpty(n)) return;
             AffPreset ex = null; foreach (AffPreset a in presets) if (a.Name == n) ex = a;
             if (ex == null) { ex = new AffPreset(); ex.Name = n; presets.Add(ex); }
@@ -11348,7 +11364,7 @@ namespace BunoTunner
             lblSel = UI.Lbl(g1, "", 548, 30, Xp.Ui, Xp.Dim);
             lvP.SetBounds(12, 56, 652, 156); lvP.View = View.Details; lvP.FullRowSelect = true; lvP.GridLines = true; lvP.HideSelection = false; lvP.MultiSelect = false;
             lvP.BackColor = Xp.EditBg; lvP.Font = Xp.Ui;
-            lvP.Columns.Add("Programa", 250); lvP.Columns.Add("Editora", 130); lvP.Columns.Add("Versao", 80); lvP.Columns.Add("Tamanho", 70); lvP.Columns.Add("Instalado", 80);
+            lvP.Columns.Add("Programa", 250); lvP.Columns.Add("Editora", 130); lvP.Columns.Add("Versão", 80); lvP.Columns.Add("Tamanho", 70); lvP.Columns.Add("Instalado", 80);
             UI.DoubleBuffer(lvP);
             lvP.ColumnClick += delegate(object o, ColumnClickEventArgs e) { if (sortCol == e.Column) sortAsc = !sortAsc; else { sortCol = e.Column; sortAsc = true; } FillProgs(); };
             lvP.SelectedIndexChanged += delegate
@@ -11360,11 +11376,11 @@ namespace BunoTunner
             lvP.DoubleClick += delegate { if (sel != null) DoUninstall(false); };
             g1.Controls.Add(lvP);
             bUn = UI.Btn(g1, "Desinstalar e limpar restos", 12, 222, 178, delegate { DoUninstall(false); });
-            bForce = UI.Btn(g1, "Remocao forcada", 194, 222, 112, delegate { DoUninstall(true); });
+            bForce = UI.Btn(g1, "Remoção forçada", 194, 222, 112, delegate { DoUninstall(true); });
             bScan = UI.Btn(g1, "So procurar restos", 310, 222, 112, delegate { StartScan(sel, "Procurando restos..."); });
             bKill = UI.Btn(g1, "Encerrar processos", 426, 222, 118, delegate { KillNow(); });
             bUn.Height = bForce.Height = bScan.Height = bKill.Height = 28;
-            tipU.SetToolTip(bKill, "Finaliza todos os programas abertos que rodam da pasta do programa selecionado (e para os servicos dele). Use antes de desinstalar se ele estiver aberto.");
+            tipU.SetToolTip(bKill, "Finaliza todos os programas abertos que rodam da pasta do programa selecionado (e para os serviços dele). Use antes de desinstalar se ele estiver aberto.");
             lblInfo = UI.Lbl(g1, "Duplo clique desinstala.", 550, 228, Xp.Ui, Xp.Dim);
             lblInfo.AutoSize = false; lblInfo.SetBounds(550, 218, 114, 40);
             Controls.Add(g1);
@@ -11375,9 +11391,9 @@ namespace BunoTunner
             lvL.Columns.Add("Tipo", 90); lvL.Columns.Add("Local", 380); lvL.Columns.Add("Tamanho", 70); lvL.Columns.Add("Certeza", 60);
             UI.DoubleBuffer(lvL);
             g2.Controls.Add(lvL);
-            chkBin = UI.Opt(g2, "Pastas e arquivos vao para a Lixeira (podem ser recuperados)", 12, 182, 400, false); chkBin.Checked = true;
-            chkReg = UI.Opt(g2, "Salvar copia (.reg) das chaves do registro antes de apagar", 12, 202, 400, false); chkReg.Checked = true;
-            chkRestore = UI.Opt(g2, "Criar ponto de restauracao do Windows antes", 12, 222, 400, false);
+            chkBin = UI.Opt(g2, "Pastas e arquivos vão para a Lixeira (podem ser recuperados)", 12, 182, 400, false); chkBin.Checked = true;
+            chkReg = UI.Opt(g2, "Salvar cópia (.reg) das chaves do registro antes de apagar", 12, 202, 400, false); chkReg.Checked = true;
+            chkRestore = UI.Opt(g2, "Criar ponto de restauração do Windows antes", 12, 222, 400, false);
             UI.Btn(g2, "Marcar tudo", 420, 180, 110, delegate { foreach (ListViewItem it in lvL.Items) it.Checked = true; });
             UI.Btn(g2, "Desmarcar tudo", 536, 180, 128, delegate { foreach (ListViewItem it in lvL.Items) it.Checked = false; });
             bDel = UI.Btn(g2, "Remover itens marcados", 420, 214, 244, delegate { DoRemove(); });
@@ -11385,7 +11401,7 @@ namespace BunoTunner
             Controls.Add(g2);
 
             pb = new XpProgress(); pb.SetBounds(0, 534, 676, 14); Controls.Add(pb);
-            lblMsg = UI.Lbl(this, "Dica: itens com 'Certeza: alta' sao ligados ao programa; os de certeza 'media' vem desmarcados - confira antes.", 0, 552, Xp.Ui, Xp.Dim);
+            lblMsg = UI.Lbl(this, "Dica: itens com 'Certeza: alta' são ligados ao programa; os de certeza 'media' vêm desmarcados - confira antes.", 0, 552, Xp.Ui, Xp.Dim);
             lblMsg.AutoSize = false; lblMsg.SetBounds(0, 550, 676, 34);
             UpdateButtons();
             Timer tk = new Timer(); tk.Interval = 100; tk.Tick += delegate { if (busy) pb.Step(); }; tk.Start();
@@ -11529,11 +11545,11 @@ namespace BunoTunner
             string nm = Directory.Exists(path) ? new DirectoryInfo(path).Name : Path.GetFileNameWithoutExtension(path);
             try { if (File.Exists(path)) { FileVersionInfo vi = FileVersionInfo.GetVersionInfo(path); if (!string.IsNullOrEmpty(vi.ProductName)) nm = vi.ProductName.Trim(); if (!string.IsNullOrEmpty(vi.CompanyName)) p.Publisher = vi.CompanyName.Trim(); } } catch (Exception) { }
             p.Name = nm; p.Loc = folder.TrimEnd('\\'); p.Version = "(manual)";
-            if (!SafeFolder(p.Loc)) { Dlg.Show("Essa pasta e protegida pelo sistema e nao pode ser usada aqui:\n" + p.Loc, "BunoTunner", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
+            if (!SafeFolder(p.Loc)) { Dlg.Show("Essa pasta e protegida pelo sistema e não pode ser usada aqui:\n" + p.Loc, "BunoTunner", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
             progs.Insert(0, p);
             sortCol = -1; txFind.Box.Text = ""; FillProgs();
             if (lvP.Items.Count > 0) { sel = null; foreach (ListViewItem it in lvP.Items) if (it.Tag == p) { it.Selected = true; it.EnsureVisible(); break; } }
-            Msg("Adicionado: " + p.Name + ". Use 'Remocao forcada' ou 'So procurar restos'.");
+            Msg("Adicionado: " + p.Name + ". Use 'Remoção forçada' ou 'So procurar restos'.");
         }
 
         // pergunta com botoes Pasta / Exe / Cancelar: 1 = pasta, 2 = exe, 0 = cancelar
@@ -11544,7 +11560,7 @@ namespace BunoTunner
             {
                 f.Text = "BunoTunner - Adicionar manualmente"; f.FormBorderStyle = FormBorderStyle.FixedDialog; f.StartPosition = FormStartPosition.CenterParent;
                 f.MaximizeBox = false; f.MinimizeBox = false; f.ShowInTaskbar = false; f.ClientSize = new Size(380, 120); f.BackColor = Xp.Face; f.Font = Xp.Ui;
-                Label l = new Label(); l.Text = "Use isto para programas que nao aparecem na lista (portateis, restos de algo ja removido, etc.).\n\nO que voce quer escolher?";
+                Label l = new Label(); l.Text = "Use isto para programas que não aparecem na lista (portáteis, restos de algo já removido, etc.).\n\nO que você quer escolher?";
                 l.SetBounds(14, 12, 352, 56); l.ForeColor = Xp.Text; f.Controls.Add(l);
                 XpButton bp = new XpButton(); bp.Text = "Pasta"; bp.SetBounds(30, 80, 100, 28); bp.Click += delegate { res = 1; f.Close(); }; f.Controls.Add(bp);
                 XpButton be = new XpButton(); be.Text = "Exe"; be.SetBounds(140, 80, 100, 28); be.Click += delegate { res = 2; f.Close(); }; f.Controls.Add(be);
@@ -11625,10 +11641,10 @@ namespace BunoTunner
             UProg p = sel;
             if (!force)
             {
-                if (p.Uninst.Length == 0) { Msg("Este item nao tem desinstalador. Use 'Remocao forcada'."); return; }
-                if (Dlg.Show("Desinstalar \"" + p.Name + "\"?\n\n1) O desinstalador oficial sera aberto (siga as telas dele).\n2) Depois o BunoTunner procura o que sobrou para voce revisar.", "BunoTunner - Desinstalar", MessageBoxButtons.OKCancel, MessageBoxIcon.Question) != DialogResult.OK) return;
+                if (p.Uninst.Length == 0) { Msg("Este item não tem desinstalador. Use 'Remoção forçada'."); return; }
+                if (Dlg.Show("Desinstalar \"" + p.Name + "\"?\n\n1) O desinstalador oficial será aberto (siga as telas dele).\n2) Depois o BunoTunner procura o que sobrou para você revisar.", "BunoTunner - Desinstalar", MessageBoxButtons.OKCancel, MessageBoxIcon.Question) != DialogResult.OK) return;
                 if (chkRestore.Checked) MakeRestorePoint(p.Name);
-                Busy(true, "Desinstalador aberto: conclua as telas dele... (a busca de restos comeca quando ele terminar)");
+                Busy(true, "Desinstalador aberto: conclua as telas dele... (a busca de restos começa quando ele terminar)");
                 string cmd = p.Uninst;
                 if (Regex.IsMatch(cmd, @"msiexec", RegexOptions.IgnoreCase)) cmd = Regex.Replace(cmd, @"/I(\s*\{)", "/X$1", RegexOptions.IgnoreCase);
                 System.Threading.ThreadPool.QueueUserWorkItem(delegate
@@ -11646,7 +11662,7 @@ namespace BunoTunner
             }
             else
             {
-                if (Dlg.Show("REMOCAO FORCADA de \"" + p.Name + "\"\n\nIsto NAO usa o desinstalador: encerra os processos do programa, para os servicos dele e lista tudo o que for dele (pasta, registro, inicializacao, tarefas) para voce apagar.\n\nNada e apagado antes de voce revisar e confirmar a lista. Continuar?", "BunoTunner - Remocao forcada", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) != DialogResult.OK) return;
+                if (Dlg.Show("REMOÇÃO FORÇADA de \"" + p.Name + "\"\n\nIsto NÃO usa o desinstalador: encerra os processos do programa, para os serviços dele e lista tudo o que for dele (pasta, registro, inicialização, tarefas) para você apagar.\n\nNada e apagado antes de você revisar e confirmar a lista. Continuar?", "BunoTunner - Remoção forçada", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) != DialogResult.OK) return;
                 if (chkRestore.Checked) MakeRestorePoint(p.Name);
                 int k = KillProcs(p);
                 StartScan(p, k > 0 ? k + " processo(s) encerrado(s). Procurando restos..." : "Procurando restos...");
@@ -11655,8 +11671,8 @@ namespace BunoTunner
         void KillNow()
         {
             if (sel == null) return;
-            if (string.IsNullOrEmpty(sel.Loc) || !SafeFolder(sel.Loc)) { Msg("Nao sei qual e a pasta deste programa; use 'Escolher pasta ou .exe' para informar."); return; }
-            if (Dlg.Show("Finalizar todos os processos de \"" + sel.Name + "\" (pasta " + sel.Loc + ")?\nTrabalho nao salvo nele sera perdido.", "BunoTunner", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) != DialogResult.OK) return;
+            if (string.IsNullOrEmpty(sel.Loc) || !SafeFolder(sel.Loc)) { Msg("Não sei qual é a pasta deste programa; use 'Escolher pasta ou .exe' para informar."); return; }
+            if (Dlg.Show("Finalizar todos os processos de \"" + sel.Name + "\" (pasta " + sel.Loc + ")?\nTrabalho não salvo nele será perdido.", "BunoTunner", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) != DialogResult.OK) return;
             int n = KillProcs(sel);
             Msg(n > 0 ? n + " processo(s) finalizado(s)." : "Nenhum processo desse programa esta aberto.");
         }
@@ -11688,11 +11704,11 @@ namespace BunoTunner
         }
         void MakeRestorePoint(string name)
         {
-            Busy(true, "Criando ponto de restauracao (pode levar um minuto)...");
+            Busy(true, "Criando ponto de restauração (pode levar um minuto)...");
             Update();
             int code;
             string o = Proc.Run("powershell.exe", "-NoProfile -Command \"Checkpoint-Computer -Description 'Buno Tunner - antes de remover " + name.Replace("'", "").Replace("\"", "") + "' -RestorePointType MODIFY_SETTINGS\"", 120000, out code);
-            Busy(false, code == 0 ? "Ponto de restauracao criado." : "Nao foi possivel criar o ponto de restauracao (o Windows limita 1 a cada 24 h, ou a protecao do sistema esta desligada). Continuando.");
+            Busy(false, code == 0 ? "Ponto de restauração criado." : "Não foi possível criar o ponto de restauração (o Windows limita 1 a cada 24 h, ou a proteção do sistema está desligada). Continuando.");
         }
 
         // ----- busca de restos -----
@@ -11723,7 +11739,7 @@ namespace BunoTunner
                             lvL.Items.Add(it);
                         }
                         lvL.EndUpdate();
-                        Busy(false, err != null ? "Erro na busca: " + err : res.Count == 0 ? "Nada sobrou: nenhum resto encontrado para " + p.Name + "." : res.Count + " item(ns) encontrado(s). Revise a lista (so os de certeza alta vem marcados) e clique em 'Remover itens marcados'.");
+                        Busy(false, err != null ? "Erro na busca: " + err : res.Count == 0 ? "Nada sobrou: nenhum resto encontrado para " + p.Name + "." : res.Count + " item(ns) encontrado(s). Revise a lista (só os de certeza alta vêm marcados) e clique em 'Remover itens marcados'.");
                     }));
                 }
                 catch (Exception) { }
@@ -11764,7 +11780,7 @@ namespace BunoTunner
             if (locOk && Directory.Exists(loc))
             {
                 int bud = 40000;
-                ULeft l = new ULeft(); l.Kind = "Pasta"; l.Target = loc; l.Strong = true; l.Why = "pasta de instalacao"; l.Size = DirSize(loc, ref bud);
+                ULeft l = new ULeft(); l.Kind = "Pasta"; l.Target = loc; l.Strong = true; l.Why = "pasta de instalação"; l.Size = DirSize(loc, ref bud);
                 res.Add(l); seen.Add(loc);
             }
             // pastas/arquivos com o nome do programa
@@ -11801,7 +11817,7 @@ namespace BunoTunner
                                     bool byPath = locOk && img.IndexOf(loc, StringComparison.OrdinalIgnoreCase) >= 0;
                                     bool st; bool byName = NameHit(sn, nc, np, out st) || NameHit(dn, nc, np, out st);
                                     if (!byPath && !byName) continue;
-                                    ULeft l = new ULeft(); l.Kind = "Servico"; l.Target = sn; l.Extra = img.Length > 60 ? img.Substring(0, 60) + "..." : img; l.Strong = byPath;
+                                    ULeft l = new ULeft(); l.Kind = "Serviço"; l.Target = sn; l.Extra = img.Length > 60 ? img.Substring(0, 60) + "..." : img; l.Strong = byPath;
                                     res.Add(l);
                                 }
                             }
@@ -11914,7 +11930,7 @@ namespace BunoTunner
                                 bool byPath = locOk && data.IndexOf(loc, StringComparison.OrdinalIgnoreCase) >= 0;
                                 bool st; bool byName = NameHit(vn, nc, np, out st);
                                 if (!byPath && !byName) continue;
-                                ULeft l = new ULeft(); l.Kind = "Inicializacao"; l.Target = hn[h] + "\\" + rp; l.Extra = vn; l.Strong = byPath || st; res.Add(l);
+                                ULeft l = new ULeft(); l.Kind = "Inicialização"; l.Target = hn[h] + "\\" + rp; l.Extra = vn; l.Strong = byPath || st; res.Add(l);
                             }
                         }
                     }
@@ -11929,7 +11945,7 @@ namespace BunoTunner
             foreach (ListViewItem it in lvL.CheckedItems) items.Add((ULeft)it.Tag);
             if (items.Count == 0) { Msg("Nenhum item marcado."); return; }
             bool bin = chkBin.Checked, bak = chkReg.Checked;
-            if (Dlg.Show("Remover " + items.Count + " item(ns) marcado(s)?\n\n" + (bin ? "Pastas e arquivos irao para a Lixeira.\n" : "Pastas e arquivos serao APAGADOS de vez.\n") + (bak ? "Uma copia das chaves do registro sera salva em BunoTunner_backup." : "Sem copia do registro."), "BunoTunner - Remover", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) != DialogResult.OK) return;
+            if (Dlg.Show("Remover " + items.Count + " item(ns) marcado(s)?\n\n" + (bin ? "Pastas e arquivos irão para a Lixeira.\n" : "Pastas e arquivos serão APAGADOS de vez.\n") + (bak ? "Uma cópia das chaves do registro será salva em BunoTunner_backup." : "Sem cópia do registro."), "BunoTunner - Remover", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) != DialogResult.OK) return;
             Busy(true, "Removendo...");
             UProg kp = lastProg;
             System.Threading.ThreadPool.QueueUserWorkItem(delegate
@@ -11951,9 +11967,9 @@ namespace BunoTunner
                 {
                     BeginInvoke(new Action(delegate
                     {
-                        Busy(false, ok + " item(ns) removido(s)" + (fails.Count > 0 ? ", " + fails.Count + " com falha." : ".") + (rebootN > 0 ? " " + rebootN + " arquivo(s) em uso serao apagados no proximo reinicio do Windows." : "") + (bak && regN > 0 ? " Copias do registro em BunoTunner_backup." : ""));
+                        Busy(false, ok + " item(ns) removido(s)" + (fails.Count > 0 ? ", " + fails.Count + " com falha." : ".") + (rebootN > 0 ? " " + rebootN + " arquivo(s) em uso serão apagados no próximo reinicio do Windows." : "") + (bak && regN > 0 ? " Copias do registro em BunoTunner_backup." : ""));
                         if (fails.Count > 0)
-                            Dlg.Show("Nao foi possivel remover:\n\n" + string.Join("\n", fails.GetRange(0, Math.Min(12, fails.Count)).ToArray()) + "\n\nSe o arquivo esta em uso, feche o programa (ou use 'Remocao forcada') e tente de novo; ou reinicie o PC.", "BunoTunner", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            Dlg.Show("Não foi possível remover:\n\n" + string.Join("\n", fails.GetRange(0, Math.Min(12, fails.Count)).ToArray()) + "\n\nSe o arquivo está em uso, feche o programa (ou use 'Remoção forçada') e tente de novo; ou reinicie o PC.", "BunoTunner", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         LoadProgs();
                         lvL.Items.Clear();
                     }));
@@ -11997,18 +12013,18 @@ namespace BunoTunner
                         catch (Exception)
                         {
                             int c; string o = Proc.Run("reg.exe", "delete \"" + l.Target + "\" /f", 15000, out c);
-                            return c == 0 ? null : "sem permissao no registro: " + o;
+                            return c == 0 ? null : "sem permissão no registro: " + o;
                         }
                     }
-                case "Inicializacao":
+                case "Inicialização":
                     {
                         string sub; RegistryKey root = RegRoot(l.Target, out sub);
-                        if (root == null) return "chave invalida";
+                        if (root == null) return "chave inválida";
                         if (bak) { Directory.CreateDirectory(bdir); File.AppendAllText(Path.Combine(bdir, "inicializacao.txt"), l.Target + "  " + l.Extra + " = " + ReadVal(root, sub, l.Extra) + "\r\n"); }
                         using (RegistryKey k = root.OpenSubKey(sub, true)) if (k != null) k.DeleteValue(l.Extra, false);
                         return null;
                     }
-                case "Servico":
+                case "Serviço":
                     {
                         int c;
                         Proc.Run("sc.exe", "stop \"" + l.Target + "\"", 15000, out c);
@@ -12053,7 +12069,7 @@ namespace BunoTunner
                 bool ok = true;
                 foreach (string f in files) { if (MoveFileEx(f, null, 4)) rebootN++; else ok = false; }
                 foreach (string d in dirs) if (!MoveFileEx(d, null, 4)) ok = false;
-                return ok ? null : "em uso e nao foi possivel agendar a exclusao";
+                return ok ? null : "em uso e não foi possível agendar a exclusão";
             }
             catch (Exception ex) { return ex.Message; }
         }
@@ -12192,14 +12208,14 @@ namespace BunoTunner
             gauge.SetBounds(10, 24, 404, 266); gauge.Caption = "Pronto"; g1.Controls.Add(gauge);
             lblPing = Card(g1, "Ping", 426, 26, 118, 62); lblJit = Card(g1, "Jitter", 546, 26, 118, 62);
             lblDown = Card(g1, "Download", 426, 94, 118, 62); lblUp = Card(g1, "Upload", 546, 94, 118, 62);
-            lblQual = Card(g1, "Avaliacao da conexao", 426, 162, 238, 60); lblQual.Small = true; lblQual.Text = "Faca um teste para ver se a sua conexao serve para jogos, streaming e chamadas.";
+            lblQual = Card(g1, "Avaliação da conexão", 426, 162, 238, 60); lblQual.Small = true; lblQual.Text = "Faça um teste para ver se a sua conexão serve para jogos, streaming e chamadas.";
             bStart = UI.Btn(g1, "Iniciar teste", 426, 230, 238, delegate { Toggle(); });
             bStart.Height = 32;
             lblMsg = UI.Lbl(g1, "Mede ping, download e upload de verdade (servidor da Cloudflare).", 426, 268, Xp.Ui, Xp.Dim);
             lblMsg.AutoSize = false; lblMsg.SetBounds(426, 266, 238, 30);
             Controls.Add(g1);
 
-            XpGroup gh = new XpGroup(); gh.Title = "Historico de testes"; gh.SetBounds(0, 306, 676, 118); gh.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            XpGroup gh = new XpGroup(); gh.Title = "Histórico de testes"; gh.SetBounds(0, 306, 676, 118); gh.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             lvHist.SetBounds(12, 24, 560, 84); lvHist.View = View.Details; lvHist.FullRowSelect = true; lvHist.GridLines = true; lvHist.HideSelection = false;
             lvHist.BackColor = Xp.EditBg; lvHist.Font = Xp.Ui;
             lvHist.Columns.Add("Data e hora", 150); lvHist.Columns.Add("Ping", 80); lvHist.Columns.Add("Jitter", 80); lvHist.Columns.Add("Download", 120); lvHist.Columns.Add("Upload", 120);
@@ -12209,13 +12225,13 @@ namespace BunoTunner
             Controls.Add(gh);
             LoadHist();
 
-            XpGroup g2 = new XpGroup(); g2.Title = "Informacoes da rede"; g2.SetBounds(0, 430, 676, 156); g2.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            bInfo = UI.Btn(g2, "Mostrar informacoes da rede", 12, 24, 220, delegate { ShowInfo(); });
+            XpGroup g2 = new XpGroup(); g2.Title = "Informações da rede"; g2.SetBounds(0, 430, 676, 156); g2.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            bInfo = UI.Btn(g2, "Mostrar informações da rede", 12, 24, 220, delegate { ShowInfo(); });
             bInfo.Height = 26;
             bCopy = UI.Btn(g2, "Copiar", 238, 24, 80, delegate { try { if (tbInfo.Text.Length > 0) Clipboard.SetText(tbInfo.Text); } catch (Exception) { } });
             bHide = UI.Btn(g2, "Ocultar", 324, 24, 80, delegate { tbInfo.Text = ""; tbInfo.Visible = false; lblHint.Visible = true; });
             bCopy.Height = bHide.Height = 26;
-            lblHint = UI.Lbl(g2, "Por privacidade, nada e mostrado ate voce clicar. Ao clicar aparecem dados pessoais (IPs, MAC, provedor, cidade, nome do Wi-Fi).", 12, 60, Xp.Ui, Xp.Dim);
+            lblHint = UI.Lbl(g2, "Por privacidade, nada é mostrado até você clicar. Ao clicar aparecem dados pessoais (IPs, MAC, provedor, cidade, nome do Wi-Fi).", 12, 60, Xp.Ui, Xp.Dim);
             lblHint.AutoSize = false; lblHint.SetBounds(12, 58, 650, 36);
             tbInfo.Multiline = true; tbInfo.ReadOnly = true; tbInfo.ScrollBars = ScrollBars.Vertical; tbInfo.Font = new Font("Consolas", 9f);
             tbInfo.BackColor = Xp.EditBg; tbInfo.ForeColor = Xp.Text; tbInfo.SetBounds(12, 56, 652, 90); tbInfo.Visible = false; tbInfo.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
@@ -12240,8 +12256,8 @@ namespace BunoTunner
         {
             if (double.IsNaN(hDown) && double.IsNaN(hPing)) return "-";
             List<string> l = new List<string>();
-            if (!double.IsNaN(hPing)) l.Add(hPing <= 20 ? "Latencia excelente para jogos online" : hPing <= 50 ? "Latencia boa para jogos" : hPing <= 100 ? "Latencia regular (jogos competitivos podem sofrer)" : "Latencia alta");
-            if (!double.IsNaN(hDown)) l.Add(hDown >= 100 ? "download otimo (4K e downloads rapidos)" : hDown >= 25 ? "download bom para streaming em HD" : hDown >= 5 ? "download basico" : "download lento");
+            if (!double.IsNaN(hPing)) l.Add(hPing <= 20 ? "Latência excelente para jogos online" : hPing <= 50 ? "Latência boa para jogos" : hPing <= 100 ? "Latência regular (jogos competitivos podem sofrer)" : "Latência alta");
+            if (!double.IsNaN(hDown)) l.Add(hDown >= 100 ? "download ótimo (4K e downloads rápidos)" : hDown >= 25 ? "download bom para streaming em HD" : hDown >= 5 ? "download básico" : "download lento");
             if (!double.IsNaN(hUp) && hUp < 3) l.Add("upload baixo (chamadas de video e envios podem engasgar)");
             return string.Join("; ", l.ToArray()) + ".";
         }
@@ -12304,7 +12320,7 @@ namespace BunoTunner
                 ServicePointManager.DefaultConnectionLimit = 32;
                 ServicePointManager.Expect100Continue = false;
                 // 1) ping
-                UI2(delegate { gauge.Caption = "Ping..."; gauge.Unit = "ms"; gauge.Reset(); lblMsg.Text = "Medindo latencia..."; });
+                UI2(delegate { gauge.Caption = "Ping..."; gauge.Unit = "ms"; gauge.Reset(); lblMsg.Text = "Medindo latência..."; });
                 List<double> rt = new List<double>();
                 for (int i = 0; i < 8 && !cancel; i++)
                 {
@@ -12331,8 +12347,8 @@ namespace BunoTunner
             UI2(delegate
             {
                 tm.Stop(); running = false; bStart.Text = "Iniciar teste";
-                gauge.Caption = err != null ? "Falhou" : (cancel ? "Cancelado" : "Concluido"); gauge.Unit = "Mbps";
-                lblMsg.Text = err != null ? "Nao foi possivel medir (sem internet ou bloqueio de rede?): " + err : (cancel ? "Teste cancelado." : "Teste concluido.");
+                gauge.Caption = err != null ? "Falhou" : (cancel ? "Cancelado" : "Concluído"); gauge.Unit = "Mbps";
+                lblMsg.Text = err != null ? "Não foi possível medir (sem internet ou bloqueio de rede?): " + err : (cancel ? "Teste cancelado." : "Teste concluído.");
                 if (err == null && !cancel) { lblQual.Text = Verdict(); AddHist(); } else lblQual.Text = "-";
             });
         }
@@ -12411,8 +12427,8 @@ namespace BunoTunner
         // ---------- informacoes (so ao clicar) ----------
         void ShowInfo()
         {
-            if (Dlg.Show("ATENCAO: as informacoes a seguir sao PESSOAIS.\n\nVao aparecer seu IP interno e externo, enderecos MAC, provedor, cidade aproximada, nome da rede Wi-Fi e DNS.\nNao compartilhe prints desta tela.\n\nMostrar mesmo assim?", "BunoTunner - Dados pessoais", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
-            bInfo.Enabled = false; lblHint.Text = "Coletando informacoes..."; lblHint.Visible = true; tbInfo.Visible = false;
+            if (Dlg.Show("ATENÇÃO: as informações a seguir são PESSOAIS.\n\nVão aparecer seu IP interno e externo, endereços MAC, provedor, cidade aproximada, nome da rede Wi-Fi e DNS.\nNão compartilhe prints desta tela.\n\nMostrar mesmo assim?", "BunoTunner - Dados pessoais", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
+            bInfo.Enabled = false; lblHint.Text = "Coletando informações..."; lblHint.Visible = true; tbInfo.Visible = false;
             System.Threading.ThreadPool.QueueUserWorkItem(delegate
             {
                 string txt;
@@ -12439,7 +12455,7 @@ namespace BunoTunner
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("=== Este computador ===");
             sb.AppendLine("Nome do PC: " + Environment.MachineName);
-            sb.AppendLine("Usuario: " + Environment.UserDomainName + "\\" + Environment.UserName);
+            sb.AppendLine("Usuário: " + Environment.UserDomainName + "\\" + Environment.UserName);
             foreach (System.Net.NetworkInformation.NetworkInterface ni in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces())
             {
                 if (ni.NetworkInterfaceType == System.Net.NetworkInformation.NetworkInterfaceType.Loopback) continue;
@@ -12447,13 +12463,13 @@ namespace BunoTunner
                 System.Net.NetworkInformation.IPInterfaceProperties ip = ni.GetIPProperties();
                 sb.AppendLine();
                 sb.AppendLine("--- Adaptador: " + ni.Name + " ---");
-                sb.AppendLine("Descricao: " + ni.Description);
+                sb.AppendLine("Descrição: " + ni.Description);
                 sb.AppendLine("Tipo: " + ni.NetworkInterfaceType + "   Velocidade do link: " + (ni.Speed / 1000000) + " Mbps");
                 string mac = ni.GetPhysicalAddress().ToString();
                 if (mac.Length == 12) mac = Regex.Replace(mac, "(.{2})(?!$)", "$1-");
                 sb.AppendLine("MAC: " + mac);
                 foreach (System.Net.NetworkInformation.UnicastIPAddressInformation u in ip.UnicastAddresses)
-                    sb.AppendLine((u.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork ? "IPv4: " : "IPv6: ") + u.Address + (u.IPv4Mask != null && u.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork ? "   mascara " + u.IPv4Mask : ""));
+                    sb.AppendLine((u.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork ? "IPv4: " : "IPv6: ") + u.Address + (u.IPv4Mask != null && u.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork ? "   máscara " + u.IPv4Mask : ""));
                 foreach (System.Net.NetworkInformation.GatewayIPAddressInformation gw in ip.GatewayAddresses) sb.AppendLine("Gateway: " + gw.Address);
                 foreach (System.Net.IPAddress d in ip.DnsAddresses) sb.AppendLine("DNS: " + d);
                 foreach (System.Net.IPAddress d in ip.DhcpServerAddresses) sb.AppendLine("Servidor DHCP: " + d);
@@ -12471,10 +12487,10 @@ namespace BunoTunner
                 string hn = J(j, "hostname"); if (hn.Length > 0) sb.AppendLine("Host reverso: " + hn);
                 sb.AppendLine("Provedor (ISP/ASN): " + J(j, "org"));
                 sb.AppendLine("Cidade: " + J(j, "city") + " - " + J(j, "region") + " - " + J(j, "country") + "  CEP: " + J(j, "postal"));
-                sb.AppendLine("Localizacao aproximada: " + J(j, "loc"));
-                sb.AppendLine("Fuso horario: " + J(j, "timezone"));
+                sb.AppendLine("Localização aproximada: " + J(j, "loc"));
+                sb.AppendLine("Fuso horário: " + J(j, "timezone"));
             }
-            catch (Exception ex) { sb.AppendLine("Nao foi possivel consultar o IP externo: " + ex.Message); }
+            catch (Exception ex) { sb.AppendLine("Não foi possível consultar o IP externo: " + ex.Message); }
             try { string v6 = Get("https://api64.ipify.org").Trim(); sb.AppendLine("IP preferido (v6 se houver): " + v6); } catch (Exception) { }
             return sb.ToString();
         }
@@ -12495,10 +12511,10 @@ namespace BunoTunner
         public string Reason = "";           // motivo do estado Ruim/Atencao, vindo dos atributos S.M.A.R.T.
         static readonly Dictionary<int, string> AttrNames = new Dictionary<int, string> {
             {1,"Taxa de erros de leitura"},{2,"Desempenho (throughput)"},{3,"Tempo de spin-up"},{4,"Partidas/paradas"},{5,"Setores realocados"},{7,"Taxa de erros de busca"},{9,"Horas ligado"},
-            {10,"Tentativas de spin-up"},{11,"Tentativas de recalibracao"},{12,"Ciclos liga/desliga"},{183,"Blocos ruins em execucao"},{184,"Erros fim-a-fim"},{187,"Erros incorrigiveis reportados"},
-            {188,"Timeouts de comando"},{189,"Gravacoes com cabeca alta"},{190,"Temperatura do fluxo de ar"},{191,"Choques (G-sense)"},{192,"Retracoes por desligamento"},{193,"Ciclos de carga/descarga"},
-            {194,"Temperatura"},{195,"Erros de ECC corrigidos"},{196,"Eventos de realocacao"},{197,"Setores pendentes"},{198,"Setores incorrigiveis offline"},{199,"Erros de CRC (cabo)"},{200,"Erros multi-zona"},
-            {240,"Horas de cabeca"},{241,"Total gravado (LBAs)"},{242,"Total lido (LBAs)"} };
+            {10,"Tentativas de spin-up"},{11,"Tentativas de recalibração"},{12,"Ciclos liga/desliga"},{183,"Blocos ruins em execução"},{184,"Erros fim-a-fim"},{187,"Erros incorrigíveis reportados"},
+            {188,"Timeouts de comando"},{189,"Gravações com cabeça alta"},{190,"Temperatura do fluxo de ar"},{191,"Choques (G-sense)"},{192,"Retrações por desligamento"},{193,"Ciclos de carga/descarga"},
+            {194,"Temperatura"},{195,"Erros de ECC corrigidos"},{196,"Eventos de realocação"},{197,"Setores pendentes"},{198,"Setores incorrigíveis offline"},{199,"Erros de CRC (cabo)"},{200,"Erros multi-zona"},
+            {240,"Horas de cabeça"},{241,"Total gravado (LBAs)"},{242,"Total lido (LBAs)"} };
         public static string AttrName(int id) { string s; return AttrNames.TryGetValue(id, out s) ? s : "Atributo"; }
         public void Judge(out bool bad, out bool warn)
         {
@@ -12538,21 +12554,21 @@ namespace BunoTunner
             XpGroup g1 = new XpGroup(); g1.Title = "Seus discos"; g1.SetBounds(0, 0, 676, 156); g1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             lvD.SetBounds(12, 24, 652, 88); lvD.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right; lvD.View = View.Details; lvD.FullRowSelect = true; lvD.GridLines = true; lvD.HideSelection = false; lvD.MultiSelect = false;
             lvD.BackColor = Xp.EditBg; lvD.Font = Xp.Ui;
-            lvD.Columns.Add("Disco", 232); lvD.Columns.Add("Tipo", 90); lvD.Columns.Add("Tamanho", 70); lvD.Columns.Add("Saude", 70); lvD.Columns.Add("Vida", 60); lvD.Columns.Add("Temp.", 60); lvD.Columns.Add("Horas", 60);
+            lvD.Columns.Add("Disco", 232); lvD.Columns.Add("Tipo", 90); lvD.Columns.Add("Tamanho", 70); lvD.Columns.Add("Saúde", 70); lvD.Columns.Add("Vida", 60); lvD.Columns.Add("Temp.", 60); lvD.Columns.Add("Horas", 60);
             UI.DoubleBuffer(lvD);
             lvD.SelectedIndexChanged += delegate { cur = lvD.SelectedItems.Count > 0 ? lvD.SelectedItems[0].Tag as DiskInfo : null; ShowDetail(); };
             g1.Controls.Add(lvD);
             UI.Btn(g1, "Atualizar", 12, 120, 90, delegate { Load(); });
-            UI.Btn(g1, "Copiar relatorio", 108, 120, 120, delegate { CopyReport(); });
-            UI.Btn(g1, "Salvar relatorio...", 234, 120, 130, delegate { SaveReport(); });
+            UI.Btn(g1, "Copiar relatório", 108, 120, 120, delegate { CopyReport(); });
+            UI.Btn(g1, "Salvar relatório...", 234, 120, 130, delegate { SaveReport(); });
             lblMsg = UI.Lbl(g1, "", 374, 118, Xp.Ui, Xp.Dim);
             lblMsg.AutoSize = false; lblMsg.SetBounds(374, 116, 290, 32);
             Controls.Add(g1);
 
             XpGroup g2 = new XpGroup(); g2.Title = "Detalhes do disco selecionado"; g2.SetBounds(0, 162, 676, 424); g2.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
-            UI.Lbl(g2, "Saude geral:", 14, 28, Xp.UiBold);
+            UI.Lbl(g2, "Saúde geral:", 14, 28, Xp.UiBold);
             lblHealth = UI.Lbl(g2, "-", 130, 24, Xp.Big, Xp.GroupText);
-            UI.Lbl(g2, "Vida util restante:", 14, 62, Xp.UiBold);
+            UI.Lbl(g2, "Vida útil restante:", 14, 62, Xp.UiBold);
             pbLife = new XpProgress(); pbLife.SetBounds(150, 60, 330, 18); g2.Controls.Add(pbLife);
             lblLife = UI.Lbl(g2, "-", 490, 62, Xp.UiBold, Xp.GroupText);
             UI.Lbl(g2, "Temperatura:", 14, 92, Xp.UiBold);
@@ -12560,14 +12576,14 @@ namespace BunoTunner
             lblTemp = UI.Lbl(g2, "-", 490, 92, Xp.UiBold, Xp.GroupText);
             lblAdvice = UI.Lbl(g2, "Selecione um disco na lista acima.", 14, 120, Xp.Ui, Xp.Dim);
             lblAdvice.AutoSize = false; lblAdvice.SetBounds(14, 120, 648, 44);
-            chkAlert = UI.Opt(g2, "Mostrar so alertas", 14, 166, 170, false);
+            chkAlert = UI.Opt(g2, "Mostrar só alertas", 14, 166, 170, false);
             UI.Lbl(g2, "Filtrar:", 220, 170);
             txFilter = UI.Txt(g2, 266, 165, 200, "");
             chkAlert.CheckedChanged += delegate { FillAttrs(); };
             txFilter.Box.TextChanged += delegate { FillAttrs(); };
             lvA.SetBounds(12, 194, 652, 220); lvA.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom; lvA.View = View.Details; lvA.FullRowSelect = true; lvA.GridLines = true;
             lvA.BackColor = Xp.EditBg; lvA.Font = Xp.Ui;
-            lvA.Columns.Add("Atributo / sensor", 290); lvA.Columns.Add("Valor", 270); lvA.Columns.Add("Situacao", 80);
+            lvA.Columns.Add("Atributo / sensor", 290); lvA.Columns.Add("Valor", 270); lvA.Columns.Add("Situação", 80);
             UI.DoubleBuffer(lvA);
             g2.Controls.Add(lvA);
             Controls.Add(g2);
@@ -12602,7 +12618,7 @@ namespace BunoTunner
                         if (d.Temp <= 0) d.Temp = double.NaN;
                         l.Add(d);
                     }
-                    if (l.Count == 0) err = o.Length > 0 && !o.StartsWith("DISK") ? o : "o Windows nao informou discos";
+                    if (l.Count == 0) err = o.Length > 0 && !o.StartsWith("DISK") ? o : "o Windows não informou discos";
                     // atributos S.M.A.R.T. reais (WMI root\wmi): o 'Healthy' do Windows quase nunca acusa um HDD ruim
                     try
                     {
@@ -12638,7 +12654,7 @@ namespace BunoTunner
                     BeginInvoke(new Action(delegate
                     {
                         loading = false; disks = l; FillList();
-                        lblMsg.Text = err != null ? "Nao foi possivel ler: " + err : l.Count + " disco(s). Alguns discos USB/RAID nao informam S.M.A.R.T. ao Windows.";
+                        lblMsg.Text = err != null ? "Não foi possível ler: " + err : l.Count + " disco(s). Alguns discos USB/RAID não informam S.M.A.R.T. ao Windows.";
                     }));
                 }
                 catch (Exception) { }
@@ -12649,7 +12665,7 @@ namespace BunoTunner
         {
             double life = d.Life; bool sb, sw; d.Judge(out sb, out sw);
             if (sb || d.Health.Equals("Unhealthy", StringComparison.OrdinalIgnoreCase) || (!double.IsNaN(life) && life < 10)) return "Ruim";
-            if (sw || d.Health.Equals("Warning", StringComparison.OrdinalIgnoreCase) || (!double.IsNaN(life) && life < 30) || (!double.IsNaN(d.Temp) && d.Temp >= 70) || (!double.IsNaN(d.ReadErr) && d.ReadErr > 0) || (!double.IsNaN(d.WriteErr) && d.WriteErr > 0)) return "Atencao";
+            if (sw || d.Health.Equals("Warning", StringComparison.OrdinalIgnoreCase) || (!double.IsNaN(life) && life < 30) || (!double.IsNaN(d.Temp) && d.Temp >= 70) || (!double.IsNaN(d.ReadErr) && d.ReadErr > 0) || (!double.IsNaN(d.WriteErr) && d.WriteErr > 0)) return "Atenção";
             if ((d.Health.Length == 0 || d.Health.Equals("Unknown", StringComparison.OrdinalIgnoreCase)) && d.Smart.Count == 0) return "Sem dados";
             return "Boa";
         }
@@ -12691,17 +12707,17 @@ namespace BunoTunner
             if (cur == null) { lblHealth.Text = "-"; lblLife.Text = "-"; lblTemp.Text = "-"; pbLife.Value = 0; pbTemp.Value = 0; allRows.Clear(); return; }
             DiskInfo d = cur; string h = HealthText(d);
             lblHealth.Text = h; lblHealth.ForeColor = HealthColor(h);
-            if (double.IsNaN(d.Life)) { pbLife.Value = 0; lblLife.Text = d.IsSsd ? "indisponivel" : "n/a (HDD)"; } else { pbLife.Value = (int)d.Life; lblLife.Text = d.Life.ToString("0") + "% restante"; }
+            if (double.IsNaN(d.Life)) { pbLife.Value = 0; lblLife.Text = d.IsSsd ? "indisponível" : "n/a (HDD)"; } else { pbLife.Value = (int)d.Life; lblLife.Text = d.Life.ToString("0") + "% restante"; }
             LiveTemp();
             List<string[]> rows = new List<string[]>();
             rows.Add(new string[] { "Modelo", d.Name }); rows.Add(new string[] { "Tipo / interface", d.Kind });
             rows.Add(new string[] { "Capacidade", (d.Size / 1000000000L) + " GB (" + (d.Size / 1073741824L) + " GiB)" });
             rows.Add(new string[] { "Firmware", d.Fw }); rows.Add(new string[] { "Estado informado pelo Windows", d.Health });
-            if (d.Smart.Count == 0) rows.Add(new string[] { "S.M.A.R.T. detalhado", "nao disponivel (disco USB/RAID ou NVMe sem tabela ATA)" });
-            if (!double.IsNaN(d.Wear)) rows.Add(new string[] { "Desgaste (uso da vida util)", d.Wear.ToString("0") + "%" });
+            if (d.Smart.Count == 0) rows.Add(new string[] { "S.M.A.R.T. detalhado", "não disponível (disco USB/RAID ou NVMe sem tabela ATA)" });
+            if (!double.IsNaN(d.Wear)) rows.Add(new string[] { "Desgaste (uso da vida útil)", d.Wear.ToString("0") + "%" });
             if (!double.IsNaN(d.Hours)) rows.Add(new string[] { "Horas ligado", d.Hours.ToString("0") + " h (~" + (d.Hours / 24).ToString("0") + " dias)" });
             if (!double.IsNaN(d.Cycles)) rows.Add(new string[] { "Ciclos liga/desliga", d.Cycles.ToString("0") });
-            if (!double.IsNaN(d.TempMax)) rows.Add(new string[] { "Temperatura maxima registrada", d.TempMax.ToString("0") + " C" });
+            if (!double.IsNaN(d.TempMax)) rows.Add(new string[] { "Temperatura máxima registrada", d.TempMax.ToString("0") + " C" });
             rows.Add(new string[] { "Erros de leitura (total)", Fmt(d.ReadErr, "") }); rows.Add(new string[] { "Erros de escrita (total)", Fmt(d.WriteErr, "") });
             foreach (DiskInfo.Attr a in d.Smart)
             {
@@ -12726,19 +12742,19 @@ namespace BunoTunner
                     if (at != null)
                     {
                         if (at.Thr > 0 && at.Val <= at.Thr) st = "Ruim";
-                        else if ((id == 5 || id == 10 || id == 184 || id == 187 || id == 188 || id == 196 || id == 197 || id == 198) && (at.Raw & 0xFFFFFFFFL) > 0) st = "Atencao";
+                        else if ((id == 5 || id == 10 || id == 184 || id == 187 || id == 188 || id == 196 || id == 197 || id == 198) && (at.Raw & 0xFFFFFFFFL) > 0) st = "Atenção";
                     }
                 }
-                else if ((r[0].StartsWith("Erros de leitura") || r[0].StartsWith("Erros de escrita")) && r[1] != "-" && r[1] != "0") st = "Atencao";
+                else if ((r[0].StartsWith("Erros de leitura") || r[0].StartsWith("Erros de escrita")) && r[1] != "-" && r[1] != "0") st = "Atenção";
                 allRows.Add(new string[] { r[0], r[1], st });
             }
             FillAttrs();
             string adv;
-            if (h == "Ruim") adv = "ATENCAO: o disco indica falha iminente ou pouca vida util" + (d.Reason.Length > 0 ? " (" + d.Reason + ")" : "") + ". Faca backup AGORA e planeje a troca.";
-            else if (h == "Atencao") adv = "Ha sinais de desgaste, erros ou temperatura alta" + (d.Reason.Length > 0 ? " (" + d.Reason + ")" : "") + ". Mantenha backup em dia e acompanhe.";
-            else if (h == "Boa") adv = d.IsSsd ? "Tudo certo. SSDs perdem vida conforme a quantidade de dados gravados; valores abaixo de 30% pedem atencao." : "Tudo certo. Em HDDs, observe erros e temperatura (ideal abaixo de 50 C).";
-            else adv = "O Windows nao informou S.M.A.R.T. deste disco (comum em discos USB e controladoras RAID).";
-            lblAdvice.Text = adv; lblAdvice.ForeColor = h == "Ruim" || h == "Atencao" ? Xp.Bad : Xp.Dim;
+            if (h == "Ruim") adv = "ATENÇÃO: o disco indica falha iminente ou pouca vida útil" + (d.Reason.Length > 0 ? " (" + d.Reason + ")" : "") + ". Faça backup AGORA e planeje a troca.";
+            else if (h == "Atenção") adv = "Ha sinais de desgaste, erros ou temperatura alta" + (d.Reason.Length > 0 ? " (" + d.Reason + ")" : "") + ". Mantenha backup em dia e acompanhe.";
+            else if (h == "Boa") adv = d.IsSsd ? "Tudo certo. SSDs perdem vida conforme a quantidade de dados gravados; valores abaixo de 30% pedem atenção." : "Tudo certo. Em HDDs, observe erros e temperatura (ideal abaixo de 50 C).";
+            else adv = "O Windows não informou S.M.A.R.T. deste disco (comum em discos USB e controladoras RAID).";
+            lblAdvice.Text = adv; lblAdvice.ForeColor = h == "Ruim" || h == "Atenção" ? Xp.Bad : Xp.Dim;
         }
 
         void FillAttrs()
@@ -12748,10 +12764,10 @@ namespace BunoTunner
             lvA.BeginUpdate(); lvA.Items.Clear();
             foreach (string[] r in allRows)
             {
-                if (only && r[2] != "Ruim" && r[2] != "Atencao") continue;
+                if (only && r[2] != "Ruim" && r[2] != "Atenção") continue;
                 if (f.Length > 0 && r[0].IndexOf(f, StringComparison.OrdinalIgnoreCase) < 0 && r[1].IndexOf(f, StringComparison.OrdinalIgnoreCase) < 0) continue;
                 ListViewItem it = new ListViewItem(new string[] { r[0], r[1], r[2] });
-                if (r[2] == "Ruim") it.ForeColor = Xp.Bad; else if (r[2] == "Atencao") it.ForeColor = Color.FromArgb(214, 140, 0);
+                if (r[2] == "Ruim") it.ForeColor = Xp.Bad; else if (r[2] == "Atenção") it.ForeColor = Color.FromArgb(214, 140, 0);
                 lvA.Items.Add(it);
             }
             lvA.EndUpdate();
@@ -12761,9 +12777,9 @@ namespace BunoTunner
         {
             if (cur == null) return "";
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("BunoTunner - relatorio de saude do disco  (" + DateTime.Now.ToString("yyyy-MM-dd HH:mm") + ")");
-            sb.AppendLine("Disco: " + cur.Name + "   Saude geral: " + HealthText(cur));
-            sb.AppendLine(lblLife.Text.Length > 0 ? "Vida util: " + lblLife.Text + "   Temperatura: " + lblTemp.Text : "");
+            sb.AppendLine("BunoTunner - relatório de saúde do disco  (" + DateTime.Now.ToString("yyyy-MM-dd HH:mm") + ")");
+            sb.AppendLine("Disco: " + cur.Name + "   Saúde geral: " + HealthText(cur));
+            sb.AppendLine(lblLife.Text.Length > 0 ? "Vida útil: " + lblLife.Text + "   Temperatura: " + lblTemp.Text : "");
             sb.AppendLine(lblAdvice.Text); sb.AppendLine();
             foreach (string[] r in allRows) sb.AppendLine(r[0] + ": " + r[1] + (r[2].Length > 0 && r[2] != "OK" ? "   [" + r[2] + "]" : ""));
             return sb.ToString();
@@ -12771,16 +12787,16 @@ namespace BunoTunner
         void CopyReport()
         {
             if (cur == null) { lblMsg.Text = "Selecione um disco primeiro."; return; }
-            try { Clipboard.SetText(Report()); lblMsg.Text = "Relatorio copiado para a area de transferencia."; } catch (Exception ex) { lblMsg.Text = "Nao foi possivel copiar: " + ex.Message; }
+            try { Clipboard.SetText(Report()); lblMsg.Text = "Relatório copiado para a área de transferência."; } catch (Exception ex) { lblMsg.Text = "Não foi possível copiar: " + ex.Message; }
         }
         void SaveReport()
         {
             if (cur == null) { lblMsg.Text = "Selecione um disco primeiro."; return; }
             using (SaveFileDialog sd = new SaveFileDialog())
             {
-                sd.Filter = "Texto (*.txt)|*.txt"; sd.FileName = "saude-disco-" + Regex.Replace(cur.Name, "[^A-Za-z0-9]+", "_") + ".txt";
+                sd.Filter = "Texto (*.txt)|*.txt"; sd.FileName = "saúde-disco-" + Regex.Replace(cur.Name, "[^A-Za-z0-9]+", "_") + ".txt";
                 if (sd.ShowDialog(FindForm()) != DialogResult.OK) return;
-                try { File.WriteAllText(sd.FileName, Report(), Encoding.UTF8); lblMsg.Text = "Relatorio salvo."; } catch (Exception ex) { lblMsg.Text = "Nao foi possivel salvar: " + ex.Message; }
+                try { File.WriteAllText(sd.FileName, Report(), Encoding.UTF8); lblMsg.Text = "Relatório salvo."; } catch (Exception ex) { lblMsg.Text = "Não foi possível salvar: " + ex.Message; }
             }
         }
 
@@ -12789,7 +12805,7 @@ namespace BunoTunner
             if (cur == null) return;
             double t = cur.Temp;
             foreach (Sn s in Sensors(cur)) if (s.Type == "Temperature" && s.IsRealTemp && s.Last.HasValue) { t = s.Last.Value; break; }
-            if (double.IsNaN(t)) { pbTemp.Value = 0; lblTemp.Text = "indisponivel"; return; }
+            if (double.IsNaN(t)) { pbTemp.Value = 0; lblTemp.Text = "indisponível"; return; }
             pbTemp.Value = (int)Math.Max(0, Math.Min(100, t)); lblTemp.Text = t.ToString("0") + " C";
             lblTemp.ForeColor = t >= 70 ? Xp.Bad : Xp.GroupText;
         }
@@ -12814,11 +12830,11 @@ namespace BunoTunner
             string hex = "0x" + hr.ToString("X8"), hint = "";
             switch ((uint)hr)
             {
-                case 0x80070422: hint = "O servico Windows Update esta desativado."; break;
+                case 0x80070422: hint = "O serviço Windows Update esta desativado."; break;
                 case 0x8024402C: case 0x80072EE7: case 0x80072EFD: case 0x80072EE2: case 0x8024401C: hint = "Sem acesso ao servidor do Windows Update (internet, DNS, proxy ou firewall)."; break;
-                case 0x80240438: case 0x8024001E: hint = "O servico Windows Update nao esta pronto; reinicie o Windows e tente de novo."; break;
+                case 0x80240438: case 0x8024001E: hint = "O serviço Windows Update não está pronto; reinicie o Windows e tente de novo."; break;
                 case 0x80070005: hint = "Acesso negado; execute o programa como administrador."; break;
-                case 0x80240024: hint = "O Windows Update nao tem drivers para oferecer."; break;
+                case 0x80240024: hint = "O Windows Update não tem drivers para oferecer."; break;
                 case 0x8024A105: case 0x80244022: case 0x80244010: hint = "O servidor do Windows Update esta ocupado; tente em alguns minutos."; break;
             }
             return ex.Message.Trim() + " (" + hex + ")" + (hint.Length > 0 ? " - " + hint : "");
@@ -12831,7 +12847,7 @@ namespace BunoTunner
             string q = Proc.Run("sc.exe", "qc wuauserv", 15000, out c);
             if (q.IndexOf("DISABLED", StringComparison.OrdinalIgnoreCase) >= 0 || q.IndexOf("DESATIVADO", StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                log("  O servico Windows Update esta desativado; ativando para esta operacao...");
+                log("  O serviço Windows Update está desativado; ativando para esta operação...");
                 Proc.Run("sc.exe", "config wuauserv start= demand", 15000, out c);
             }
             Proc.Run("sc.exe", "start wuauserv", 15000, out c);
@@ -12861,14 +12877,14 @@ namespace BunoTunner
                         if (sg is bool && !(bool)sg) { unsigned++; log("  Sem assinatura: " + S(o["DeviceName"])); }
                     }
             }
-            catch (Exception ex) { log("  (inventario WMI falhou: " + ex.Message + ")"); }
+            catch (Exception ex) { log("  (inventário WMI falhou: " + ex.Message + ")"); }
             try
             {
                 using (ManagementObjectSearcher s = new ManagementObjectSearcher("SELECT Name, ConfigManagerErrorCode FROM Win32_PnPEntity WHERE ConfigManagerErrorCode <> 0"))
                     foreach (ManagementBaseObject o in s.Get())
                     {
                         bad++;
-                        log("  Com problema (codigo " + S(o["ConfigManagerErrorCode"]) + "): " + S(o["Name"]));
+                        log("  Com problema (código " + S(o["ConfigManagerErrorCode"]) + "): " + S(o["Name"]));
                     }
             }
             catch (Exception) { }
@@ -12904,12 +12920,12 @@ namespace BunoTunner
                         sr = Cm(searcher, "Search", "IsInstalled=0 and Type='Driver' and IsHidden=0");
                         break;
                     }
-                    catch (Exception ex) { lastErr = Why(ex); L("  Busca falhou (" + (sv == 2 ? "Windows Update" : "servidor padrao") + "): " + lastErr); sr = null; }
+                    catch (Exception ex) { lastErr = Why(ex); L("  Busca falhou (" + (sv == 2 ? "Windows Update" : "servidor padrão") + "): " + lastErr); sr = null; }
                 }
-                if (sr == null) { result = "Nao foi possivel consultar o Windows Update: " + lastErr; L(result); done(result); return; }
+                if (sr == null) { result = "Não foi possível consultar o Windows Update: " + lastErr; L(result); done(result); return; }
                 object ups = Gp(sr, "Updates");
                 int n = Convert.ToInt32(Gp(ups, "Count"));
-                if (n == 0) { result = "Todos os drivers ja estao na versao mais nova oferecida pelo Windows Update."; L(result); done(result); return; }
+                if (n == 0) { result = "Todos os drivers já estão na versão mais nova oferecida pelo Windows Update."; L(result); done(result); return; }
 
                 List<Found> list = new List<Found>();
                 StringBuilder sb = new StringBuilder();
@@ -12923,13 +12939,13 @@ namespace BunoTunner
                     L(line); sb.AppendLine("- " + f.Title + (f.Date.Length > 0 ? " (" + f.Date + ")" : ""));
                 }
                 L("Encontrados: " + n + " driver(s) mais novo(s).");
-                if (!install) { result = "Verificacao concluida: " + n + " driver(s) podem ser atualizados."; done(result); return; }
+                if (!install) { result = "Verificação concluída: " + n + " driver(s) podem ser atualizados."; done(result); return; }
 
-                if (!confirm(sb.ToString())) { result = "Cancelado pelo usuario. Nada foi instalado."; L(result); done(result); return; }
+                if (!confirm(sb.ToString())) { result = "Cancelado pelo usuário. Nada foi instalado."; L(result); done(result); return; }
 
-                L("3/6  Criando ponto de restauracao do sistema...");
+                L("3/6  Criando ponto de restauração do sistema...");
                 string rp = Ps("try { Checkpoint-Computer -Description 'BunoTunner - antes de atualizar drivers' -RestorePointType MODIFY_SETTINGS -ErrorAction Stop; 'OK' } catch { 'FALHA: ' + $_.Exception.Message }", 180000);
-                L(rp.Contains("OK") ? "  Ponto de restauracao criado." : "  Nao foi possivel criar o ponto de restauracao (" + (rp.Length > 120 ? rp.Substring(0, 120) : rp) + "). Continuando.");
+                L(rp.Contains("OK") ? "  Ponto de restauração criado." : "  Não foi possível criar o ponto de restauração (" + (rp.Length > 120 ? rp.Substring(0, 120) : rp) + "). Continuando.");
 
                 L("4/6  Baixando os drivers...");
                 object coll = New("Microsoft.Update.UpdateColl");
@@ -12942,7 +12958,7 @@ namespace BunoTunner
                 Sp(dl, "Updates", coll);
                 object dr = Cm(dl, "Download");
                 int drc = Convert.ToInt32(Gp(dr, "ResultCode"));
-                if (drc != 2 && drc != 3) { result = "Falha no download (codigo " + drc + "). Nada foi instalado."; L(result); done(result); return; }
+                if (drc != 2 && drc != 3) { result = "Falha no download (código " + drc + "). Nada foi instalado."; L(result); done(result); return; }
 
                 L("5/6  Verificando assinatura digital e hash SHA-256 dos arquivos baixados...");
                 string cache = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), @"SoftwareDistribution\Download");
@@ -12960,8 +12976,8 @@ namespace BunoTunner
                     else if (p[0] == "HashMismatch" || p[0] == "NotTrusted") { tampered++; L("  ALERTA: " + p[2] + " -> " + p[0]); }
                     else other++;
                 }
-                L("  Assinaturas validas: " + ok + "   sem assinatura propria (verificados pelo Windows Update): " + other + "   alterados/nao confiaveis: " + tampered);
-                if (tampered > 0) { result = "ABORTADO: " + tampered + " arquivo(s) com hash/assinatura invalidos. Nada foi instalado."; L(result); done(result); return; }
+                L("  Assinaturas validas: " + ok + "   sem assinatura própria (verificados pelo Windows Update): " + other + "   alterados/não confiáveis: " + tampered);
+                if (tampered > 0) { result = "ABORTADO: " + tampered + " arquivo(s) com hash/assinatura inválidos. Nada foi instalado."; L(result); done(result); return; }
 
                 L("6/6  Instalando...");
                 object inst = Cm(session, "CreateUpdateInstaller");
@@ -12975,11 +12991,11 @@ namespace BunoTunner
                     object ur = Cm(ir, "GetUpdateResult", i);
                     int rc = Convert.ToInt32(Gp(ur, "ResultCode"));
                     if (rc == 2 || rc == 3) { good++; L("  Instalado: " + list[i].Title); }
-                    else { fail++; L("  FALHOU (codigo " + rc + ", 0x" + Convert.ToInt32(Gp(ur, "HResult")).ToString("X8") + "): " + list[i].Title); }
+                    else { fail++; L("  FALHOU (código " + rc + ", 0x" + Convert.ToInt32(Gp(ur, "HResult")).ToString("X8") + "): " + list[i].Title); }
                 }
                 bool reboot = false;
                 try { reboot = Convert.ToBoolean(Gp(ir, "RebootRequired")); } catch (Exception) { }
-                result = "Concluido: " + good + " instalado(s), " + fail + " com falha." + (reboot ? " REINICIE o Windows para terminar." : "");
+                result = "Concluído: " + good + " instalado(s), " + fail + " com falha." + (reboot ? " REINICIE o Windows para terminar." : "");
                 L(result);
                 done(result);
             }
@@ -13162,12 +13178,12 @@ namespace BunoTunner
             VItem it = new VItem(); it.Title = "Driver de video NVIDIA (" + g.Name + ")"; it.Pub = "NVIDIA"; it.Page = "https://www.nvidia.com/Download/index.aspx";
             it.Inst = NvVer(g.Drv);
             string ps, pf;
-            if (!NvIds(g.Name, out ps, out pf)) { log("NVIDIA: nao encontrei '" + g.Name + "' na lista de produtos do site da NVIDIA."); return it; }
+            if (!NvIds(g.Name, out ps, out pf)) { log("NVIDIA: não encontrei '" + g.Name + "' na lista de produtos do site da NVIDIA."); return it; }
             string j = Http("https://gfwsl.geforce.com/services_toolkit/services/com/nvidia/services/AjaxDriverService.php?func=DriverManualLookup&psid=" + ps + "&pfid=" + pf +
                 "&osID=" + (Win11() ? "135" : "57") + "&languageCode=1033&beta=0&isWHQL=0&dltype=-1&dch=1&upCRD=0&qnf=0&sort1=0&numberOfResults=1", null);
             Match v = Regex.Match(j, "\"Version\"\\s*:\\s*\"([0-9.]+)\"");
             Match u = Regex.Match(j, "\"DownloadURL\"\\s*:\\s*\"([^\"]+)\"");
-            if (!v.Success || !u.Success) { log("NVIDIA: o site nao devolveu nenhum driver para esta placa."); return it; }
+            if (!v.Success || !u.Success) { log("NVIDIA: o site não devolveu nenhum driver para esta placa."); return it; }
             it.Latest = v.Groups[1].Value;
             it.Url = u.Groups[1].Value.Replace("\\/", "/");
             if (it.Url.StartsWith("http:", StringComparison.OrdinalIgnoreCase)) it.Url = "https:" + it.Url.Substring(5);
@@ -13197,7 +13213,7 @@ namespace BunoTunner
             if (v != null && !Regex.IsMatch(v, "^\\d+\\.\\d+\\.\\d+$")) v = null;
             it.Inst = v;
             Match m = Regex.Match(g.Name ?? "", "RX\\s*(\\d{3,4})\\s*(XTX|XT|GRE)?", RegexOptions.IgnoreCase);
-            if (!m.Success) { log("AMD: nao reconheci o modelo '" + g.Name + "' (GPU integrada?). Use o site da AMD."); return it; }
+            if (!m.Success) { log("AMD: não reconheci o modelo '" + g.Name + "' (GPU integrada?). Use o site da AMD."); return it; }
             string num = m.Groups[1].Value, suf = m.Groups[2].Value.ToLowerInvariant();
             string slug = "amd-radeon-rx-" + num + (suf.Length > 0 ? "-" + suf : "");
             string ser = num.Substring(0, 1) + (num.Length == 4 ? "000" : "00");
@@ -13215,7 +13231,7 @@ namespace BunoTunner
                 }
                 catch (Exception) { }
             }
-            if (it.Latest == null) log("AMD: nao consegui ler a pagina de drivers do modelo '" + g.Name + "'.");
+            if (it.Latest == null) log("AMD: não consegui ler a página de drivers do modelo '" + g.Name + "'.");
             return it;
         }
 
@@ -13240,7 +13256,7 @@ namespace BunoTunner
                 }
                 catch (Exception) { }
             }
-            if (it.Latest == null) log("AMD: nao consegui ler a pagina do driver de chipset.");
+            if (it.Latest == null) log("AMD: não consegui ler a página do driver de chipset.");
             return it;
         }
 
@@ -13272,7 +13288,7 @@ namespace BunoTunner
                     }
                 }
             }
-            if (got < 1048576 || (total > 0 && got != total)) { try { File.Delete(dst); } catch (Exception) { } throw new Exception("download incompleto ou invalido");
+            if (got < 1048576 || (total > 0 && got != total)) { try { File.Delete(dst); } catch (Exception) { } throw new Exception("download incompleto ou inválido");
             }
             return dst;
         }
@@ -13285,7 +13301,7 @@ namespace BunoTunner
                 "'; $s.Status.ToString() + '|' + $s.SignerCertificate.Subject\"", 600000, out c).Trim();
             string[] p = o.Split(new char[] { '|' }, 2);
             bool ok = p.Length == 2 && p[0] == "Valid" && p[1].IndexOf(publisher, StringComparison.OrdinalIgnoreCase) >= 0;
-            log(ok ? "Assinatura digital valida: " + publisher + "." : "Assinatura digital NAO confere (" + o + ").");
+            log(ok ? "Assinatura digital valida: " + publisher + "." : "Assinatura digital NÃO confere (" + o + ").");
             return ok;
         }
 
@@ -13298,26 +13314,26 @@ namespace BunoTunner
         {
             if (it.Latest == null || it.Url == null)
             {
-                log(it.Title + ": nao foi possivel consultar a versao automaticamente.");
-                if (install && it.Page != null && confirm("Nao consegui consultar a versao mais recente de:\n" + it.Title + "\n\nAbrir a pagina oficial de downloads no navegador?")) OpenPage(it.Page);
+                log(it.Title + ": não foi possível consultar a versão automaticamente.");
+                if (install && it.Page != null && confirm("Não consegui consultar a versão mais recente de:\n" + it.Title + "\n\nAbrir a página oficial de downloads no navegador?")) OpenPage(it.Page);
                 return;
             }
             bool known = it.Inst != null;
-            if (known && Cmp(it.Inst, it.Latest) >= 0) { log(it.Title + ": ja esta atualizado (" + it.Inst + ")."); return; }
-            log(it.Title + ": instalada " + (known ? it.Inst : "(nao identificada)") + " -> mais recente " + it.Latest + ".");
+            if (known && Cmp(it.Inst, it.Latest) >= 0) { log(it.Title + ": já está atualizado (" + it.Inst + ")."); return; }
+            log(it.Title + ": instalada " + (known ? it.Inst : "(não identificada)") + " -> mais recente " + it.Latest + ".");
             if (!install) return;
-            if (!confirm(it.Title + "\n\nVersao instalada: " + (known ? it.Inst : "nao identificada") + "\nVersao mais recente no site da fabricante: " + it.Latest +
-                "\n\nBaixar o instalador oficial e abrir a instalacao normal para voce concluir?")) { log("Ignorado."); return; }
+            if (!confirm(it.Title + "\n\nVersão instalada: " + (known ? it.Inst : "não identificada") + "\nVersão mais recente no site da fabricante: " + it.Latest +
+                "\n\nBaixar o instalador oficial e abrir a instalação normal para você concluir?")) { log("Ignorado."); return; }
             string file = Download(it, log);
-            if (!Signed(file, it.Pub, log)) { try { File.Delete(file); } catch (Exception) { } log("Instalador apagado por seguranca. Nada foi executado."); return; }
-            log("Abrindo o instalador. Conclua a instalacao na janela da fabricante...");
+            if (!Signed(file, it.Pub, log)) { try { File.Delete(file); } catch (Exception) { } log("Instalador apagado por segurança. Nada foi executado."); return; }
+            log("Abrindo o instalador. Conclua a instalação na janela da fabricante...");
             try
             {
                 ProcessStartInfo psi = new ProcessStartInfo(file); psi.UseShellExecute = true; psi.Verb = "runas";
                 using (Process p = Process.Start(psi)) { if (p != null) p.WaitForExit(); }
                 log("Instalador fechado.");
             }
-            catch (Exception ex) { log("Nao foi possivel abrir o instalador: " + ex.Message); }
+            catch (Exception ex) { log("Não foi possível abrir o instalador: " + ex.Message); }
         }
 
         public static void Run(bool install, Action<string> log, Func<string, bool> confirm, Action done)
@@ -13351,10 +13367,10 @@ namespace BunoTunner
                 }
                 if (intel)
                 {
-                    log("Intel: a Intel nao oferece consulta publica confiavel de versoes; o Assistente de Drivers e Suporte da Intel faz isso.");
-                    if (install && confirm("Foi detectado hardware Intel (video e/ou chipset).\n\nA Intel nao permite consultar a versao mais recente automaticamente. Abrir a pagina oficial do Assistente de Drivers e Suporte da Intel, que detecta e instala os drivers?")) OpenPage(IntelPage);
+                    log("Intel: a Intel não oferece consulta pública confiável de versões; o Assistente de Drivers e Suporte da Intel faz isso.");
+                    if (install && confirm("Foi detectado hardware Intel (video e/ou chipset).\n\nA Intel não permite consultar a versão mais recente automaticamente. Abrir a página oficial do Assistente de Drivers e Suporte da Intel, que detecta e instala os drivers?")) OpenPage(IntelPage);
                 }
-                log("Concluido.");
+                log("Concluído.");
             }
             catch (Exception ex) { log("Erro: " + ex.Message); }
             finally { done(); }
@@ -13373,48 +13389,48 @@ namespace BunoTunner
             box.Dock = DockStyle.Fill; box.AutoScroll = true; Controls.Add(box);
             AddDrivers();
             AddAll();
-            Section("Limpeza e manutencao", "Libera espaco no disco.", false);
-            Add("Limpar arquivos temporarios", "Apaga C:\\Windows\\Temp, Prefetch e a pasta %temp% do usuario (itens em uso sao ignorados). Nenhum documento pessoal e tocado.",
+            Section("Limpeza e manutenção", "Libera espaço no disco.", false);
+            Add("Limpar arquivos temporários", "Apaga C:\\Windows\\Temp, Prefetch e a pasta %temp% do usuário (itens em uso são ignorados). Nenhum documento pessoal é tocado.",
                 "Limpar", delegate { return Clean(); }, null, null, null, null);
-            Add("Hibernacao", "Liga ou desliga a hibernacao (powercfg /hibernate). Desligada, apaga o hiberfil.dat (libera varios GB no disco) e tambem desativa a Inicializacao Rapida.",
-                "Desativar", delegate { return Pc("off", "Hibernacao DESATIVADA (hiberfil.sys removido)."); },
-                "Ativar", delegate { return Pc("on", "Hibernacao ATIVADA."); },
+            Add("Hibernação", "Liga ou desliga a hibernação (powercfg /hibernate). Desligada, apaga o hiberfil.dat (libera vários GB no disco) e também desativa a Inicialização Rápida.",
+                "Desativar", delegate { return Pc("off", "Hibernação DESATIVADA (hiberfil.sys removido)."); },
+                "Ativar", delegate { return Pc("on", "Hibernação ATIVADA."); },
                 delegate { object v = Get(true, @"SYSTEM\CurrentControlSet\Control\Power", "HibernateEnabled"); return v != null && Convert.ToInt32(v) == 0 ? "Estado: DESATIVADA" : "Estado: ativada"; }, null);
             Section("Desempenho em jogos", "Ajustes que podem melhorar FPS, tremidas e resposta do mouse.", false);
-            Add("Aceleracao do mouse (Aprimorar precisao do ponteiro)", "Desligada, o ponteiro anda sempre a mesma distancia para o mesmo movimento da mao (recomendado para jogos). Aplica na hora, sem reiniciar.",
+            Add("Aceleração do mouse (Aprimorar precisão do ponteiro)", "Desligada, o ponteiro anda sempre a mesma distância para o mesmo movimento da mão (recomendado para jogos). Aplica na hora, sem reiniciar.",
                 "Desativar", delegate { return Mouse(false); },
                 "Ativar", delegate { return Mouse(true); },
                 delegate { using (RegistryKey k = Root(false).OpenSubKey(@"Control Panel\Mouse")) { object v = k == null ? null : k.GetValue("MouseSpeed"); return v != null && v.ToString() != "0" ? "Estado: ATIVADA" : "Estado: desativada"; } }, null);
             Add("Desativar MPO (Multiplane Overlay)", "Define OverlayTestMode=5 no DWM. Ajuda a resolver tremidas, telas piscando e telas pretas em alguns monitores/placas NVIDIA e AMD. Reinicie o PC para valer.",
                 "Desativar MPO", delegate { Sub(true, @"SOFTWARE\Microsoft\Windows\Dwm", "OverlayTestMode", 5); return "MPO desativado. Reinicie o PC."; },
-                "Reativar", delegate { Del(true, @"SOFTWARE\Microsoft\Windows\Dwm", "OverlayTestMode"); return "MPO restaurado ao padrao. Reinicie o PC."; },
-                delegate { object v = Get(true, @"SOFTWARE\Microsoft\Windows\Dwm", "OverlayTestMode"); return v != null && Convert.ToInt32(v) == 5 ? "Estado: MPO DESATIVADO" : "Estado: MPO padrao (ativo)"; }, null);
-            Add("Desativar compressao de memoria", "Executa Disable-MMAgent -mc: o Windows deixa de comprimir a RAM (usa um pouco menos de CPU, um pouco mais de RAM). Vale apos reiniciar o PC.",
-                "Desativar", delegate { return Ps("Disable-MMAgent -mc", "Compressao de memoria desativada. Reinicie o Windows para valer."); },
-                "Reativar", delegate { return Ps("Enable-MMAgent -mc", "Compressao de memoria reativada. Reinicie o Windows para valer."); },
-                delegate { int c; string o = Proc.Run("powershell.exe", "-NoProfile -NonInteractive -Command \"(Get-MMAgent).MemoryCompression\"", 20000, out c); return o.Trim() == "True" ? "Estado: compressao ATIVADA" : o.Trim() == "False" ? "Estado: compressao DESATIVADA" : ""; }, null);
-            Add("Overlay DLSS (indicador na tela)", "Mostra no canto do jogo um indicador quando o DLSS esta em uso (so placas NVIDIA RTX). Aplica na proxima vez que abrir o jogo.",
+                "Reativar", delegate { Del(true, @"SOFTWARE\Microsoft\Windows\Dwm", "OverlayTestMode"); return "MPO restaurado ao padrão. Reinicie o PC."; },
+                delegate { object v = Get(true, @"SOFTWARE\Microsoft\Windows\Dwm", "OverlayTestMode"); return v != null && Convert.ToInt32(v) == 5 ? "Estado: MPO DESATIVADO" : "Estado: MPO padrão (ativo)"; }, null);
+            Add("Desativar compressão de memória", "Executa Disable-MMAgent -mc: o Windows deixa de comprimir a RAM (usa um pouco menos de CPU, um pouco mais de RAM). Vale após reiniciar o PC.",
+                "Desativar", delegate { return Ps("Disable-MMAgent -mc", "Compressão de memória desativada. Reinicie o Windows para valer."); },
+                "Reativar", delegate { return Ps("Enable-MMAgent -mc", "Compressão de memória reativada. Reinicie o Windows para valer."); },
+                delegate { int c; string o = Proc.Run("powershell.exe", "-NoProfile -NonInteractive -Command \"(Get-MMAgent).MemoryCompression\"", 20000, out c); return o.Trim() == "True" ? "Estado: compressão ATIVADA" : o.Trim() == "False" ? "Estado: compressão DESATIVADA" : ""; }, null);
+            Add("Overlay DLSS (indicador na tela)", "Mostra no canto do jogo um indicador quando o DLSS está em uso (só placas NVIDIA RTX). Aplica na próxima vez que abrir o jogo.",
                 "Ativar", delegate { Sub(true, @"SOFTWARE\NVIDIA Corporation\Global\NGXCore", "ShowDlssIndicator", 0x400); return "Overlay do DLSS ativado."; },
                 "Desativar", delegate { Sub(true, @"SOFTWARE\NVIDIA Corporation\Global\NGXCore", "ShowDlssIndicator", 0); return "Overlay do DLSS desativado."; },
                 delegate { object v = Get(true, @"SOFTWARE\NVIDIA Corporation\Global\NGXCore", "ShowDlssIndicator"); return v != null && Convert.ToInt32(v) == 0x400 ? "Estado: overlay ATIVO" : "Estado: overlay desligado"; }, null);
             const string HvKey = @"SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity";
-            Add("Isolamento de nucleo (Integridade de memoria)", "Recurso de seguranca do Windows (HVCI) que isola o nucleo do sistema usando virtualizacao. Desativar pode dar mais FPS em jogos e liberar drivers antigos, mas reduz a protecao. Reinicie o PC.",
-                "Desativar", delegate { Sub(true, HvKey, "Enabled", 0); return "Isolamento de nucleo DESATIVADO. Reinicie o PC."; },
-                "Ativar", delegate { Sub(true, HvKey, "Enabled", 1); return "Isolamento de nucleo ATIVADO. Reinicie o PC."; },
+            Add("Isolamento de núcleo (Integridade de memória)", "Recurso de segurança do Windows (HVCI) que isola o núcleo do sistema usando virtualização. Desativar pode dar mais FPS em jogos e liberar drivers antigos, mas reduz a proteção. Reinicie o PC.",
+                "Desativar", delegate { Sub(true, HvKey, "Enabled", 0); return "Isolamento de núcleo DESATIVADO. Reinicie o PC."; },
+                "Ativar", delegate { Sub(true, HvKey, "Enabled", 1); return "Isolamento de núcleo ATIVADO. Reinicie o PC."; },
                 delegate { object v = Get(true, HvKey, "Enabled"); return v != null && Convert.ToInt32(v) == 1 ? "Estado: ATIVADO" : "Estado: desativado"; },
-                "Desativar o Isolamento de nucleo reduz a protecao contra malware que ataca o nucleo do Windows. Desativar mesmo assim?");
+                "Desativar o Isolamento de núcleo reduz a proteção contra malware que ataca o núcleo do Windows. Desativar mesmo assim?");
             const string MmKey = @"SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management";
-            Add("Mitigacoes do Windows (Spectre / Meltdown)", "Desativa as mitigacoes de execucao especulativa (FeatureSettingsOverride=3) para ganhar desempenho. REDUZ A SEGURANCA do PC; use so em maquina de jogos sem dados sensiveis. Reinicie o PC.",
-                "Desativar", delegate { Sub(true, MmKey, "FeatureSettingsOverride", 3); Sub(true, MmKey, "FeatureSettingsOverrideMask", 3); return "Mitigacoes DESATIVADAS. Reinicie o PC."; },
-                "Padrao do Windows", delegate { Del(true, MmKey, "FeatureSettingsOverride"); Del(true, MmKey, "FeatureSettingsOverrideMask"); Del(true, @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Virtualization", "MinVmVersionForCpuBasedMitigations"); return "Mitigacoes restauradas ao padrao do Windows. Reinicie o PC."; },
-                delegate { object v = Get(true, MmKey, "FeatureSettingsOverride"); return v != null ? "Estado: personalizado (FeatureSettingsOverride=" + v + ")" : "Estado: padrao do Windows (mitigacoes ativas)"; },
-                "ATENCAO: desativar as mitigacoes de Spectre/Meltdown deixa o PC mais vulneravel a ataques que leem memoria (por exemplo, por codigo malicioso no navegador). O ganho de desempenho costuma ser pequeno em CPUs recentes.\n\nDesativar mesmo assim?");
-            Section("Interface do Windows", "Aparencia e comportamento do sistema.", false);
+            Add("Mitigações do Windows (Spectre / Meltdown)", "Desativa as mitigações de execução especulativa (FeatureSettingsOverride=3) para ganhar desempenho. REDUZ A SEGURANÇA do PC; use só em máquina de jogos sem dados sensíveis. Reinicie o PC.",
+                "Desativar", delegate { Sub(true, MmKey, "FeatureSettingsOverride", 3); Sub(true, MmKey, "FeatureSettingsOverrideMask", 3); return "Mitigações DESATIVADAS. Reinicie o PC."; },
+                "Padrão do Windows", delegate { Del(true, MmKey, "FeatureSettingsOverride"); Del(true, MmKey, "FeatureSettingsOverrideMask"); Del(true, @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Virtualization", "MinVmVersionForCpuBasedMitigations"); return "Mitigações restauradas ao padrão do Windows. Reinicie o PC."; },
+                delegate { object v = Get(true, MmKey, "FeatureSettingsOverride"); return v != null ? "Estado: personalizado (FeatureSettingsOverride=" + v + ")" : "Estado: padrão do Windows (mitigações ativas)"; },
+                "ATENÇÃO: desativar as mitigações de Spectre/Meltdown deixa o PC mais vulnerável a ataques que leem memória (por exemplo, por código malicioso no navegador). O ganho de desempenho costuma ser pequeno em CPUs recentes.\n\nDesativar mesmo assim?");
+            Section("Interface do Windows", "Aparência e comportamento do sistema.", false);
             const string ClickKey = @"Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}";
-            Add("Menu de clique direito do Windows 10", "No Windows 11, traz de volta o menu de clique direito completo e classico do Windows 10 (sem o \"Mostrar mais opcoes\"). Vale ao reiniciar o Explorer ou fazer logoff.",
-                "Ativar", delegate { using (RegistryKey k = Root(false).CreateSubKey(ClickKey + "\\InprocServer32")) { k.SetValue("", ""); } return "Menu classico ativado. Reinicie o Explorer ou faca logoff."; },
-                "Desfazer", delegate { Root(false).DeleteSubKeyTree(ClickKey, false); return "Menu padrao do Windows 11 restaurado. Reinicie o Explorer ou faca logoff."; },
-                delegate { using (RegistryKey k = Root(false).OpenSubKey(ClickKey + "\\InprocServer32")) return k != null ? "Estado: menu classico ATIVO" : "Estado: menu padrao do Windows 11"; }, null);
+            Add("Menu de clique direito do Windows 10", "No Windows 11, traz de volta o menu de clique direito completo e clássico do Windows 10 (sem o \"Mostrar mais opções\"). Vale ao reiniciar o Explorer ou fazer logoff.",
+                "Ativar", delegate { using (RegistryKey k = Root(false).CreateSubKey(ClickKey + "\\InprocServer32")) { k.SetValue("", ""); } return "Menu clássico ativado. Reinicie o Explorer ou faça logoff."; },
+                "Desfazer", delegate { Root(false).DeleteSubKeyTree(ClickKey, false); return "Menu padrão do Windows 11 restaurado. Reinicie o Explorer ou faça logoff."; },
+                delegate { using (RegistryKey k = Root(false).OpenSubKey(ClickKey + "\\InprocServer32")) return k != null ? "Estado: menu clássico ATIVO" : "Estado: menu padrão do Windows 11"; }, null);
             AddPrivacy();
         }
 
@@ -13451,7 +13467,7 @@ namespace BunoTunner
                 object cur = Get(r.M, r.Path, r.Name);
                 if (r.Val == null ? cur == null : (cur != null && cur.ToString() == r.Val.ToString())) on++;
             }
-            return on == t.Regs.Length ? "Estado: APLICADO" : on == 0 ? "Estado: padrao do Windows" : "Estado: parcialmente aplicado";
+            return on == t.Regs.Length ? "Estado: APLICADO" : on == 0 ? "Estado: padrão do Windows" : "Estado: parcialmente aplicado";
         }
 
         static string RunTw(Tw t, bool apply)
@@ -13463,15 +13479,15 @@ namespace BunoTunner
                 try
                 {
                     int c; Proc.Run("sc.exe", "config " + sv[0] + " start= " + (apply ? sv[1] : sv[2]), 20000, out c);
-                    if (c != 0 && c != 1060) bad.Add("servico " + sv[0] + " (codigo " + c + ")");
+                    if (c != 0 && c != 1060) bad.Add("serviço " + sv[0] + " (código " + c + ")");
                     if (apply) { int c2; Proc.Run("sc.exe", "stop " + sv[0], 20000, out c2); }
                 }
                 catch (Exception ex) { bad.Add(sv[0] + ": " + ex.Message); }
             }
             if (t.Extra != null) { try { string e = t.Extra(apply); if (!string.IsNullOrEmpty(e)) bad.Add(e); } catch (Exception ex) { bad.Add(ex.Message); } }
-            string ok = apply ? "Aplicado." : "Revertido ao padrao do Windows.";
+            string ok = apply ? "Aplicado." : "Revertido ao padrão do Windows.";
             string st = ""; try { st = TwState(t); } catch (Exception) { }
-            return bad.Count == 0 ? ok + (st.Length > 0 ? "  [" + st + "]" : "") : "Concluido com avisos (execute como administrador): " + string.Join("; ", bad.ToArray());
+            return bad.Count == 0 ? ok + (st.Length > 0 ? "  [" + st + "]" : "") : "Concluído com avisos (execute como administrador): " + string.Join("; ", bad.ToArray());
         }
 
         static void RestartExplorer()
@@ -13501,12 +13517,12 @@ namespace BunoTunner
 
         void AddPrivacy()
         {
-            Section("Privacidade e telemetria", "Corta recomendacoes, rastreamento, anuncios e coleta de dados da Microsoft.", false);
-            AddTw(new Tw { Title = "Desativar recomendacoes da Microsoft", Desc = "Impede o Windows de instalar apps sugeridos sozinho e de mostrar recomendacoes e dicas (DisableWindowsConsumerFeatures e SilentInstalledAppsEnabled).",
+            Section("Privacidade e telemetria", "Corta recomendações, rastreamento, anúncios e coleta de dados da Microsoft.", false);
+            AddTw(new Tw { Title = "Desativar recomendações da Microsoft", Desc = "Impede o Windows de instalar apps sugeridos sozinho e de mostrar recomendações e dicas (DisableWindowsConsumerFeatures e SilentInstalledAppsEnabled).",
                 Regs = new R[] {
                     new R(true, @"SOFTWARE\Policies\Microsoft\Windows\CloudContent", "DisableWindowsConsumerFeatures", 1, null),
                     new R(false, @"SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SilentInstalledAppsEnabled", 0, 1) } });
-            AddTw(new Tw { Title = "Desativar telemetria", Desc = "Desliga os servicos DiagTrack e WerSvc, a coleta de diagnostico, ID de publicidade, historico de atividades, envio automatico de amostras do Defender e a telemetria do PowerShell 7.",
+            AddTw(new Tw { Title = "Desativar telemetria", Desc = "Desliga os serviços DiagTrack e WerSvc, a coleta de diagnóstico, ID de publicidade, histórico de atividades, envio automático de amostras do Defender e a telemetria do PowerShell 7.",
                 Regs = new R[] {
                     new R(false, @"SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo", "Enabled", 0, null),
                     new R(false, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Privacy", "TailoredExperiencesWithDiagnosticDataEnabled", 0, null),
@@ -13528,54 +13544,54 @@ namespace BunoTunner
                     Environment.SetEnvironmentVariable("POWERSHELL_TELEMETRY_OPTOUT", on ? "1" : null, EnvironmentVariableTarget.Machine);
                     return r.Length > 0 ? "Defender: " + r : null;
                 } });
-            AddTw(new Tw { Title = "Desativar o Recall (IA que salva prints)", Desc = "Politicas DisableAIDataAnalysis=1 (WindowsAI) e AllowRecallEnablement=0 (Recall): impedem a IA do Windows de capturar e analisar o que aparece na tela.",
+            AddTw(new Tw { Title = "Desativar o Recall (IA que salva prints)", Desc = "Políticas DisableAIDataAnalysis=1 (WindowsAI) e AllowRecallEnablement=0 (Recall): impedem a IA do Windows de capturar e analisar o que aparece na tela.",
                 Regs = new R[] {
                     new R(true, @"SOFTWARE\Policies\Microsoft\Windows\WindowsAI", "DisableAIDataAnalysis", 1, null),
                     new R(true, @"SOFTWARE\Policies\Microsoft\Windows\Recall", "AllowRecallEnablement", 0, null) } });
             AddTw(new Tw { Title = "Desativar apps em segundo plano", Desc = "Impede que os apps da Microsoft Store rodem em segundo plano (BackgroundAccessApplications\\GlobalUserDisabled). Alguns apps deixam de notificar com o programa fechado.",
                 Regs = new R[] { new R(false, @"SOFTWARE\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications", "GlobalUserDisabled", 1, 0) } });
-            AddTw(new Tw { Title = "Desativar rastreamento de localizacao", Desc = "Nega o acesso a localizacao, desliga o servico lfsvc, o sensor de localizacao e a atualizacao automatica de mapas.",
+            AddTw(new Tw { Title = "Desativar rastreamento de localização", Desc = "Nega o acesso a localização, desliga o serviço lfsvc, o sensor de localização e a atualização automática de mapas.",
                 Regs = new R[] {
                     new R(true, @"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location", "Value", "Deny", "Allow"),
                     new R(true, @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Sensor\Overrides\{BFA794E4-F964-4FDB-90F6-51056BFE4B44}", "SensorPermissionState", 0, 1),
                     new R(true, @"SYSTEM\Maps", "AutoUpdateEnabled", 0, 1) },
                 Svcs = new string[][] { new string[] { "lfsvc", "disabled", "demand" } } });
-            AddTw(new Tw { Title = "Desativar pesquisa com Bing e sugestoes no Iniciar", Desc = "Pesquisar no menu Iniciar passa a buscar so no PC (sem Bing, sem sugestoes da web e sem Cortana). O Explorer e reiniciado para valer: a barra de tarefas pisca por um instante.",
+            AddTw(new Tw { Title = "Desativar pesquisa com Bing e sugestões no Iniciar", Desc = "Pesquisar no menu Iniciar passa a buscar só no PC (sem Bing, sem sugestões da web e sem Cortana). O Explorer e reiniciado para valer: a barra de tarefas pisca por um instante.",
                 Regs = new R[] {
                     new R(false, @"SOFTWARE\Policies\Microsoft\Windows\Explorer", "DisableSearchBoxSuggestions", 1, null),
                     new R(false, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Search", "BingSearchEnabled", 0, 1),
                     new R(false, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Search", "CortanaConsent", 0, null) },
                 Extra = delegate(bool on) { if (!batch) RestartExplorer(); return null; } });
-            AddTw(new Tw { Title = "Desativar recomendacoes da Microsoft Store na pesquisa", Desc = "Bloqueia o arquivo store.db da Microsoft Store (icacls /deny) para o Iniciar parar de sugerir apps da loja ao pesquisar. Se o arquivo ainda nao existir, abra a Store uma vez.",
+            AddTw(new Tw { Title = "Desativar recomendações da Microsoft Store na pesquisa", Desc = "Bloqueia o arquivo store.db da Microsoft Store (icacls /deny) para o Iniciar parar de sugerir apps da loja ao pesquisar. Se o arquivo ainda não existir, abra a Store uma vez.",
                 Extra = delegate(bool on)
                 {
                     string f = Path.Combine(Environment.GetEnvironmentVariable("LOCALAPPDATA") ?? "", @"Packages\Microsoft.WindowsStore_8wekyb3d8bbwe\LocalState\store.db");
-                    if (!File.Exists(f)) return "store.db nao encontrado (abra a Microsoft Store uma vez e tente de novo)";
+                    if (!File.Exists(f)) return "store.db não encontrado (abra a Microsoft Store uma vez e tente de novo)";
                     int c; string o = Proc.Run("icacls.exe", "\"" + f + "\" " + (on ? "/deny" : "/grant") + " *S-1-1-0:F", 20000, out c);
                     return c == 0 ? null : "icacls falhou: " + o.Trim();
                 } });
-            AddTw(new Tw { Title = "Brave - remover recursos extras", Desc = "Politicas do Brave: desliga Rewards, Carteira, VPN, Leo (IA), News, Talk, Tor, estatisticas, P3A e relatorios de metricas. Vale ao reabrir o Brave.",
+            AddTw(new Tw { Title = "Brave - remover recursos extras", Desc = "Políticas do Brave: desliga Rewards, Carteira, VPN, Leo (IA), News, Talk, Tor, estatísticas, P3A e relatórios de métricas. Vale ao reabrir o Brave.",
                 Regs = Brave() });
         }
 
         // logo abaixo dos drivers: executa TODOS os ajustes da pagina (inclusive os de seguranca) com 1 clique
         void AddAll()
         {
-            XpGroup g = new XpGroup(); g.Title = "Aplicar todos os ajustes (1 clique)"; g.SetBounds(12, top, 638, 100); top += 110;
-            Label d = UI.Lbl(g, "Executa TODOS os ajustes desta pagina, um apos o outro: limpeza, hibernacao, mouse, MPO, compressao de memoria, DLSS, menu classico, Isolamento de nucleo, mitigacoes Spectre/Meltdown e toda a secao Privacidade e telemetria. Alguns reduzem a protecao do PC.", 12, 22, Xp.Ui, Xp.Dim);
-            d.AutoSize = false; d.SetBounds(12, 22, 500, 48);
-            Label st = UI.Lbl(g, "", 12, 76, Xp.Ui, Xp.GroupText); st.AutoSize = false; st.SetBounds(12, 76, 500, 18);
+            XpGroup g = new XpGroup(); g.Title = "Aplicar todos os ajustes (1 clique)"; g.SetBounds(12, top, 638, 84); top += 94;
+            Label d = UI.Lbl(g, "Executa TODOS os ajustes desta página, um após o outro. O overlay do DLSS não vai ser executado.", 12, 22, Xp.Ui, Xp.Dim);
+            d.AutoSize = false; d.SetBounds(12, 22, 500, 34);
+            Label st = UI.Lbl(g, "", 12, 58, Xp.Ui, Xp.GroupText); st.AutoSize = false; st.SetBounds(12, 58, 500, 18);
             XpButton bAll = UI.Btn(g, "Aplicar todos", 524, 22, 112, null); bAll.Height = 28;
-            XpButton bUn = UI.Btn(g, "Desfazer todos", 524, 58, 112, null);
+            XpButton bUn = UI.Btn(g, "Desfazer todos", 524, 52, 112, null);
             Action<bool> go = delegate(bool apply)
             {
                 string msg = apply
-                    ? "Serao executados TODOS os ajustes desta pagina, incluindo os que REDUZEM A SEGURANCA: Isolamento de nucleo (HVCI) e mitigacoes Spectre/Meltdown desativados, hibernacao desligada, limpeza de temporarios, privacidade/telemetria (servicos, Recall, Brave, pesquisa) e outros. O Explorer sera reiniciado no fim e alguns itens pedem reiniciar o PC.\n\nContinuar?"
-                    : "Serao desfeitos todos os ajustes desta pagina que tem opcao de desfazer (a limpeza de temporarios nao tem). Alguns itens pedem reiniciar o PC.\n\nContinuar?";
-                if (Dlg.Show(this, msg, "BunoTunner - Otimizacoes", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) != DialogResult.OK) return;
+                    ? "Serão executados TODOS os ajustes desta página (menos o overlay do DLSS), incluindo os que REDUZEM A SEGURANÇA: Isolamento de núcleo (HVCI) e mitigações Spectre/Meltdown desativados, hibernação desligada, limpeza de temporários, privacidade/telemetria (serviços, Recall, Brave, pesquisa) e outros. O Explorer será reiniciado no fim e alguns itens pedem reiniciar o PC.\n\nContinuar?"
+                    : "Serão desfeitos todos os ajustes desta página que tem opção de desfazer (a limpeza de temporários não tem). Alguns itens pedem reiniciar o PC.\n\nContinuar?";
+                if (Dlg.Show(this, msg, "BunoTunner - Otimizações", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) != DialogResult.OK) return;
                 bAll.Enabled = false; bUn.Enabled = false;
                 List<Itm> list = new List<Itm>();
-                foreach (Itm it in itms) if (apply ? it.Run != null : it.Undo != null) list.Add(it);
+                foreach (Itm it in itms) if (!it.Title.StartsWith("Overlay DLSS") && (apply ? it.Run != null : it.Undo != null)) list.Add(it);   // o overlay do DLSS nunca entra
                 System.Threading.ThreadPool.QueueUserWorkItem(delegate
                 {
                     batch = true; int n = 0, warn = 0;
@@ -13584,7 +13600,7 @@ namespace BunoTunner
                         n++; Itm tt = t; int k = n;
                         try { BeginInvoke(new Action(delegate { st.Text = Lang.T(apply ? "Aplicando" : "Desfazendo") + " " + k + "/" + list.Count + ": " + Lang.T(tt.Title); tt.St.Text = Lang.T("Executando..."); })); } catch (Exception) { }
                         string r; try { r = (apply ? t.Run : t.Undo)(); } catch (Exception ex) { r = "Erro: " + ex.Message; }
-                        if (r.StartsWith("Concluido com avisos") || r.StartsWith("Erro") || r.StartsWith("Falhou")) warn++;
+                        if (r.StartsWith("Concluído com avisos") || r.StartsWith("Erro") || r.StartsWith("Falhou")) warn++;
                         try { BeginInvoke(new Action(delegate { tt.St.Text = r; })); } catch (Exception) { }
                     }
                     batch = false;
@@ -13635,25 +13651,37 @@ namespace BunoTunner
         void AddDrivers()
         {
             Section("Drivers", "Mantenha a GPU, o chipset e os demais dispositivos atualizados.", false);
-            XpGroup g = new XpGroup(); g.Title = "Atualizar drivers (todos os dispositivos, GPU e Chipset)"; g.SetBounds(12, top, 638, 270);
-            Label d = UI.Lbl(g, "Analisa o PC e procura drivers mais novos no Windows Update e, para a placa de video (NVIDIA / AMD) e o chipset AMD, direto no site da fabricante. Antes de instalar, cria um ponto de restauracao e confere a assinatura digital (e o hash SHA-256 no Windows Update); se algo estiver alterado, nada e instalado. Os instaladores da fabricante sao baixados e abertos para voce concluir; para Intel, abre o Assistente de Drivers da Intel.", 12, 22, Xp.Ui, Xp.Dim);
+            XpGroup g = new XpGroup(); g.Title = "Atualizar drivers (todos os dispositivos, GPU e Chipset)"; g.SetBounds(12, top, 638, 148);
+            Label d = UI.Lbl(g, "Analisa o PC e procura drivers mais novos no Windows Update e, para a placa de video (NVIDIA / AMD) e o chipset AMD, direto no site da fabricante. Antes de instalar, cria um ponto de restauração e confere a assinatura digital (e o hash SHA-256 no Windows Update); se algo estiver alterado, nada é instalado. Os instaladores da fabricante são baixados e abertos para você concluir; para Intel, abre o Assistente de Drivers da Intel.", 12, 22, Xp.Ui, Xp.Dim);
             d.AutoSize = false; d.SetBounds(12, 22, 624, 58);
             XpButton bGo = UI.Btn(g, "Atualizar drivers", 12, 86, 150, null);
-            XpButton bScan = UI.Btn(g, "So verificar", 170, 86, 120, null);
+            XpButton bScan = UI.Btn(g, "Só verificar", 170, 86, 120, null);
             bGo.Height = 24; bScan.Height = 24;
             XpProgress pb = new XpProgress(); pb.SetBounds(300, 91, 336, 14); g.Controls.Add(pb);
             XpOption chkWu = UI.Opt(g, "Windows Update (todos os dispositivos)", 12, 116, 300, false); chkWu.Checked = true;
             XpOption chkVend = UI.Opt(g, "Site da fabricante (GPU NVIDIA/AMD e chipset AMD)", 316, 116, 320, false); chkVend.Checked = true;
+            // o andamento aparece num popup (aberto ao clicar em "So verificar" ou "Atualizar drivers")
             TextBox log = new TextBox(); log.Multiline = true; log.ReadOnly = true; log.ScrollBars = ScrollBars.Vertical; log.WordWrap = true;
-            log.Font = Xp.Ui; log.BackColor = Xp.EditBg; log.ForeColor = Xp.Text; log.SetBounds(12, 142, 624, 120);
-            log.Text = "Clique em 'Atualizar drivers' para analisar e instalar, ou em 'So verificar' para apenas listar o que esta desatualizado.";
-            g.Controls.Add(log);
+            log.Font = Xp.Ui; log.BackColor = Xp.EditBg; log.ForeColor = Xp.Text; log.Dock = DockStyle.Fill;
+            XpForm pop = null;
+            Action showPop = delegate
+            {
+                if (pop == null || pop.IsDisposed)
+                {
+                    pop = new XpForm(); pop.Text = Lang.T("Atualizar drivers - andamento"); pop.Size = new Size(660, 440); pop.StartPosition = FormStartPosition.CenterParent;
+                    Panel bot = new Panel(); bot.Dock = DockStyle.Bottom; bot.Height = 36; bot.BackColor = Color.Transparent;
+                    XpButton bClose = UI.Btn(bot, "Fechar", 0, 6, 100, delegate { pop.Close(); }); bClose.Anchor = AnchorStyles.Top | AnchorStyles.Right; bClose.Left = 640 - 8 - 100 - 8;
+                    pop.Controls.Add(log); pop.Controls.Add(bot); log.BringToFront();
+                }
+                if (!pop.Visible) pop.Show(FindForm());
+                pop.Activate();
+            };
             Timer anim = new Timer(); anim.Interval = 60; anim.Tick += delegate { pb.Step(); };
             Action<bool> start = delegate(bool install)
             {
                 bool wu = chkWu.Checked, vend = chkVend.Checked;
-                if (!wu && !vend) { log.Text = Lang.T("Marque pelo menos uma das origens (Windows Update ou site da fabricante)."); return; }
-                bGo.Enabled = false; bScan.Enabled = false; pb.Marquee = true; anim.Start(); log.Text = "";
+                if (!wu && !vend) { showPop(); log.Text = Lang.T("Marque pelo menos uma das origens (Windows Update ou site da fabricante)."); return; }
+                bGo.Enabled = false; bScan.Enabled = false; pb.Marquee = true; anim.Start(); log.Text = ""; showPop();
                 Action<string> add = delegate(string s) { try { BeginInvoke(new Action(delegate { log.AppendText(Lang.T(s) + "\r\n"); })); } catch (Exception) { } };
                 Action finish = delegate
                 {
@@ -13683,9 +13711,9 @@ namespace BunoTunner
                             {
                                 Invoke(new Action(delegate
                                 {
-                                    yes = Dlg.Show(this, "Estes drivers serao baixados, verificados (assinatura e hash SHA-256) e instalados:\n\n" + lst +
-                                        "\nSera criado um ponto de restauracao antes. A tela pode piscar (driver de video) e pode ser preciso reiniciar o Windows.\n\nContinuar?",
-                                        "BunoTunner - Otimizacoes", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.OK;
+                                    yes = Dlg.Show(this, "Estes drivers serão baixados, verificados (assinatura e hash SHA-256) e instalados:\n\n" + lst +
+                                        "\nSerá criado um ponto de restauração antes. A tela pode piscar (driver de video) e pode ser preciso reiniciar o Windows.\n\nContinuar?",
+                                        "BunoTunner - Otimizações", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.OK;
                                 }));
                             }
                             catch (Exception) { }
@@ -13700,7 +13728,7 @@ namespace BunoTunner
             bGo.Click += delegate { start(true); };
             bScan.Click += delegate { start(false); };
             box.Controls.Add(g);
-            top += 280;
+            top += 158;
         }
 
         static RegistryKey Root(bool machine) { return RegistryKey.OpenBaseKey(machine ? RegistryHive.LocalMachine : RegistryHive.CurrentUser, RegistryView.Registry64); }
@@ -13727,7 +13755,7 @@ namespace BunoTunner
                 k.SetValue("MouseThreshold2", t2, RegistryValueKind.String);
             }
             SystemParametersInfo(0x0004, 0, new int[] { int.Parse(t1), int.Parse(t2), int.Parse(sp) }, 3);
-            return on ? "Aceleracao do mouse ATIVADA." : "Aceleracao do mouse DESATIVADA.";
+            return on ? "Aceleração do mouse ATIVADA." : "Aceleração do mouse DESATIVADA.";
         }
 
         static string Ps(string cmd, string ok)
@@ -13756,7 +13784,7 @@ namespace BunoTunner
                 }
                 catch (Exception) { }
             }
-            return "Concluido: " + files + " arquivo(s) apagado(s), " + (freed / 1048576.0).ToString("0.0") + " MB liberados.";
+            return "Concluído: " + files + " arquivo(s) apagado(s), " + (freed / 1048576.0).ToString("0.0") + " MB liberados.";
         }
 
         Label Add(string title, string desc, string runText, Func<string> run, string undoText, Func<string> undo, Func<string> state, string confirm)
@@ -13782,7 +13810,7 @@ namespace BunoTunner
                     try { BeginInvoke(new Action(delegate { st.Text = r; b1.Enabled = true; if (b2 != null) b2.Enabled = true; })); } catch (Exception) { }
                 });
             };
-            b1.Click += delegate { if (confirm != null && Dlg.Show(confirm, "BunoTunner - Otimizacoes", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) != DialogResult.OK) return; go(run); };
+            b1.Click += delegate { if (confirm != null && Dlg.Show(confirm, "BunoTunner - Otimizações", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) != DialogResult.OK) return; go(run); };
             if (b2 != null) b2.Click += delegate { go(undo); };
             box.Controls.Add(g);
             itms.Add(new Itm { Title = title, Run = run, Undo = undo, St = st });
@@ -13912,9 +13940,9 @@ namespace BunoTunner
             Text = "BunoTunner";
             Size = new Size(772, 706);
 
-            Startup.Mark("MainForm: inicio");
+            Startup.Mark("MainForm: início");
             SensorHub.Open();
-            Startup.Mark("SensorHub.Open concluido");
+            Startup.Mark("SensorHub.Open concluído");
 
             tip.InitialDelay = 200; tip.ReshowDelay = 100; tip.AutoPopDelay = 8000;
 
@@ -13941,18 +13969,18 @@ namespace BunoTunner
             Controls.Add(bar);
 
             // painel lateral: so icones (a descricao aparece ao passar o mouse)
-            btnFan = IconBtn(left, "fan", 12, 262, "Ventoinhas\nAutomatico, manual (% e RPM) e curva de temperatura", delegate { ShowPage(pgFan); });
+            btnFan = IconBtn(left, "fan", 12, 262, "Ventoinhas\nAutomático, manual (% e RPM) e curva de temperatura", delegate { ShowPage(pgFan); });
             btnOc = IconBtn(left, "oc", 12, 312, "Overclock\nCore clock, memory clock, TDP, limite de temperatura e travar clocks", delegate { ShowPage(pgOc); });
-            btnSpec = IconBtn(left, "gpu", 12, 62, "Especificacoes da GPU\nTodos os dados da placa de video", delegate { ShowPage(pgSpec); });
-            btnCpu = IconBtn(left, "chip", 12, 12, "Especificacoes da CPU\nProcessador, nucleos, cache, clocks e conjuntos de instrucoes", delegate { ShowPage(pgCpu); });
-            btnBench = IconBtn(left, "bench", 12, 362, "Benchmark / Estresse\nGPU, CPU, FPU, RAM e SSD com verificacao de erros e limite de temperatura", delegate { ShowPage(pgBench); });
-            btnRam = IconBtn(left, "ram", 12, 112, "Memoria RAM\nVelocidade, canais, voltagem, modulos e timings basicos (tCAS, tRCD, tRP, tRAS, tRC, tRFC, Command Rate)", delegate { ShowPage(pgRam); });
-            btnSto = IconBtn(left, "health", 12, 162, "Saude do armazenamento\nVida util restante, temperatura e S.M.A.R.T. de SSDs NVMe/SATA e HDs", delegate { ShowPage(pgSto); });
-            btnNet = IconBtn(left, "net", 12, 212, "Internet\nTeste de velocidade (ping, download, upload) e informacoes da rede", delegate { ShowPage(pgNet); });
-            btnAff = IconBtn(left, "aff", 12, 412, "Afinidade de processos\nEscolha em quais nucleos cada programa roda; presets e regras automaticas", delegate { ShowPage(pgAff); });
-            btnUnin = IconBtn(left, "trash", 12, 462, "Desinstalador\nRemove programas por completo: pastas, registro, inicializacao, servicos e tarefas que sobram; tambem remove o que se recusa a desinstalar", delegate { ShowPage(pgUnin); });
-            btnOpt = IconBtn(left, "opt", 12, 512, "Otimizacoes do Windows\nLimpeza de temporarios, compressao de memoria e outros ajustes", delegate { ShowPage(pgOpt); });
-            IconBtn(left, "chart", 12, 562, "Sensores\nTudo em uma janela: GPU, CPU, placa-mae, memoria, discos e ventoinhas, com grafico, busca e alertas", delegate { OpenSensors(); });
+            btnSpec = IconBtn(left, "gpu", 12, 62, "Especificações da GPU\nTodos os dados da placa de video", delegate { ShowPage(pgSpec); });
+            btnCpu = IconBtn(left, "chip", 12, 12, "Especificações da CPU\nProcessador, núcleos, cache, clocks e conjuntos de instruções", delegate { ShowPage(pgCpu); });
+            btnBench = IconBtn(left, "bench", 12, 362, "Benchmark / Estresse\nGPU, CPU, FPU, RAM e SSD com verificação de erros e limite de temperatura", delegate { ShowPage(pgBench); });
+            btnRam = IconBtn(left, "ram", 12, 112, "Memória RAM\nVelocidade, canais, voltagem, módulos e timings básicos (tCAS, tRCD, tRP, tRAS, tRC, tRFC, Command Rate)", delegate { ShowPage(pgRam); });
+            btnSto = IconBtn(left, "health", 12, 162, "Saúde do armazenamento\nVida útil restante, temperatura e S.M.A.R.T. de SSDs NVMe/SATA e HDs", delegate { ShowPage(pgSto); });
+            btnNet = IconBtn(left, "net", 12, 212, "Internet\nTeste de velocidade (ping, download, upload) e informações da rede", delegate { ShowPage(pgNet); });
+            btnAff = IconBtn(left, "aff", 12, 412, "Afinidade de processos\nEscolha em quais núcleos cada programa roda; presets e regras automáticas", delegate { ShowPage(pgAff); });
+            btnUnin = IconBtn(left, "trash", 12, 462, "Desinstalador\nRemove programas por completo: pastas, registro, inicialização, serviços e tarefas que sobram; também remove o que se recusa a desinstalar", delegate { ShowPage(pgUnin); });
+            btnOpt = IconBtn(left, "opt", 12, 512, "Otimizações do Windows\nLimpeza de temporários, compressão de memória e outros ajustes", delegate { ShowPage(pgOpt); });
+            IconBtn(left, "chart", 12, 562, "Sensores\nTudo em uma janela: GPU, CPU, placa-mae, memória, discos e ventoinhas, com gráfico, busca e alertas", delegate { OpenSensors(); });
 
             // topo: escolha da GPU
             lblGpuSel = UI.Lbl(right, "Placa de video:", 0, 6, Xp.UiBold);
@@ -13977,7 +14005,7 @@ namespace BunoTunner
             right.Controls.Add(bUpd); bUpd.BringToFront();
             right.Resize += delegate { bUpd.Left = right.ClientSize.Width - 62; };
             bUpd.Left = 676 - 54;
-            tip.SetToolTip(bUpd, "Verificar atualizacoes\nProcura uma versao mais nova do BunoTunner e, se voce quiser, baixa e instala.");
+            tip.SetToolTip(bUpd, "Verificar atualizações\nProcura uma versão mais nova do BunoTunner e, se você quiser, baixa e instala.");
             bUpd.Click += delegate { CheckUpdate(); };
             lblTheme = UI.Lbl(bar, "Tema:", 264, 8, Xp.UiBold);
             cbTheme = new ComboBox(); cbTheme.DropDownStyle = ComboBoxStyle.DropDownList; cbTheme.Font = Xp.Ui; cbTheme.SetBounds(306, 4, 176, 22); cbTheme.DropDownWidth = 230;
@@ -14034,7 +14062,7 @@ namespace BunoTunner
                     try { BeginInvoke(new Action(delegate { FillCpu(rows); })); } catch (Exception) { }
                 });
             };
-            Startup.Mark("MainForm: paginas criadas");
+            Startup.Mark("MainForm: páginas criadas");
             ShowPage(pgCpu);
 
             cmb.SelectedIndexChanged += delegate { LoadGpu(); };
@@ -14063,7 +14091,7 @@ namespace BunoTunner
 
         void Donate(string url, string nome)
         {
-            if (string.IsNullOrEmpty(url)) { Dlg.Show("O link do " + nome + " ainda nao foi configurado.\nEm breve!", "BunoTunner"); return; }
+            if (string.IsNullOrEmpty(url)) { Dlg.Show("O link do " + nome + " ainda não foi configurado.\nEm breve!", "BunoTunner"); return; }
             try { Process.Start(url); } catch (Exception ex) { Dlg.Show(ex.Message, "BunoTunner"); }
         }
 
@@ -14085,7 +14113,7 @@ namespace BunoTunner
             {
                 List<Sn> all = new List<Sn>();
                 all.AddRange(SensorHub.GpuSensors); all.AddRange(SensorHub.PcSensors);
-                sensForm = new SensorForm("BunoTunner - Sensores (GPU, CPU, placa-mae, memoria, discos, ventoinhas...)", all);
+                sensForm = new SensorForm("BunoTunner - Sensores (GPU, CPU, placa-mae, memória, discos, ventoinhas...)", all);
                 sensForm.Show();
             }
             else { if (sensForm.WindowState == FormWindowState.Minimized) sensForm.WindowState = FormWindowState.Normal; sensForm.BringToFront(); }
@@ -14109,7 +14137,7 @@ namespace BunoTunner
             Label warn = new Label();
             warn.SetBounds(14, 22, 648, 34); warn.Tag = "warn"; warn.BackColor = Xp.EditBg; warn.BorderStyle = BorderStyle.FixedSingle;
             warn.ForeColor = Xp.Text;
-            warn.Text = "  AVISO: overclock pode causar travamentos e artefatos. Va aos poucos e teste a estabilidade.\n  Vale ate reiniciar ou clicar em Redefinir. Funciona em NVIDIA, AMD (Overdrive8) e Intel Arc.";
+            warn.Text = "  AVISO: overclock pode causar travamentos e artefatos. Vá aos poucos e teste a estabilidade.\n  Vale até reiniciar ou clicar em Redefinir. Funciona em NVIDIA, AMD (Overdrive8) e Intel Arc.";
             warn.Font = Xp.Ui; g.Controls.Add(warn);
 
             slCore = new XpSlider(); txCore = new XpText();
@@ -14119,13 +14147,13 @@ namespace BunoTunner
             OcRow(g, "Core Clock (offset)", 66, slCore, txCore, out lblUCore, out rgCore);
             OcRow(g, "Memory Clock (offset)", 118, slMem, txMem, out lblUMem, out rgMem);
             OcRow(g, "Power Limit / TDP", 170, slPow, txPow, out lblUPow, out rgPow);
-            OcRow(g, "Temp Limit (alvo termico)", 222, slTemp, txTemp, out lblUTemp, out rgTemp);
+            OcRow(g, "Temp Limit (alvo térmico)", 222, slTemp, txTemp, out lblUTemp, out rgTemp);
 
             ocLock.Clear();
-            ocLock.Add(UI.Lbl(g, "Travar clock do nucleo (MHz):  min", 14, 282));
+            ocLock.Add(UI.Lbl(g, "Travar clock do núcleo (MHz):  min", 14, 282));
             txLockC1 = UI.Txt(g, 210, 278, 50, ""); ocLock.Add(txLockC1); ocLock.Add(UI.Lbl(g, "max", 268, 282)); txLockC2 = UI.Txt(g, 292, 278, 50, ""); ocLock.Add(txLockC2);
             ocLock.Add(UI.Btn(g, "Travar", 352, 276, 70, delegate { LockClocks(true); }));
-            ocLock.Add(UI.Lbl(g, "Travar clock da memoria (MHz):  min", 14, 312));
+            ocLock.Add(UI.Lbl(g, "Travar clock da memória (MHz):  min", 14, 312));
             txLockM1 = UI.Txt(g, 210, 308, 50, ""); ocLock.Add(txLockM1); ocLock.Add(UI.Lbl(g, "max", 268, 312)); txLockM2 = UI.Txt(g, 292, 308, 50, ""); ocLock.Add(txLockM2);
             ocLock.Add(UI.Btn(g, "Travar", 352, 306, 70, delegate { LockClocks(false); }));
             ocLock.Add(UI.Btn(g, "Destravar tudo", 432, 291, 110, delegate { UnlockClocks(); }));
@@ -14140,7 +14168,7 @@ namespace BunoTunner
             lblClocks = UI.Lbl(c, "-", 14, 20);
             lblOcInfo = UI.Lbl(c, "", 14, 42, Xp.Ui, Xp.Dim);
             lblOcInfo.AutoSize = false; lblOcInfo.SetBounds(14, 42, 648, 62);
-            UI.Lbl(c, "Crossbar / Uncore / Fabric clock: nenhuma API publica (NVML, NvAPI, ADL, IGCL) expoe esses clocks, entao nenhum programa de terceiros consegue altera-los.", 14, 100, Xp.Ui, Xp.Dim)
+            UI.Lbl(c, "Crossbar / Uncore / Fabric clock: nenhuma API pública (NVML, NvAPI, ADL, IGCL) expõe esses clocks, então nenhum programa de terceiros consegue alterá-los.", 14, 100, Xp.Ui, Xp.Dim)
                 .MaximumSize = new Size(648, 0);
             p.Controls.Add(c);
             return p;
@@ -14150,7 +14178,7 @@ namespace BunoTunner
         {
             if (cur == null || !cur.Nv) return;
             int mn = UI.Int(core ? txLockC1 : txLockM1, 0), mx = UI.Int(core ? txLockC2 : txLockM2, 0);
-            if (mn <= 0 || mx < mn) { lblOcMsg.Text = "Informe min e max validos."; return; }
+            if (mn <= 0 || mx < mn) { lblOcMsg.Text = "Informe min e max válidos."; return; }
             int r = core ? Nvml.LockGpu(cur.H, (uint)mn, (uint)mx) : Nvml.LockMem(cur.H, (uint)mn, (uint)mx);
             lblOcMsg.Text = r == 0 ? "Clock travado." : "Falhou: " + Nvml.Err(r);
         }
@@ -14177,23 +14205,23 @@ namespace BunoTunner
             else
             {
                 s.Minimum = 0; s.Maximum = 1; s.Value = 0; t.Text = "-";
-                rg.Text = "(indisponivel)";
+                rg.Text = "(indisponível)";
             }
-            tip.SetToolTip(s, c.Ok ? tipText : "Indisponivel: " + c.Why);
+            tip.SetToolTip(s, c.Ok ? tipText : "Indisponível: " + c.Why);
         }
 
         void ApplyOc()
         {
             GpuOc oc = cur == null ? null : cur.Oc;
-            if (oc == null) { lblOcMsg.ForeColor = Xp.Bad; lblOcMsg.Text = "Overclock indisponivel para esta GPU. " + (cur != null ? cur.OcWhy : ""); return; }
+            if (oc == null) { lblOcMsg.ForeColor = Xp.Bad; lblOcMsg.Text = "Overclock indisponível para esta GPU. " + (cur != null ? cur.OcWhy : ""); return; }
             List<string> lines = new List<string>();
             bool bad = false;
-            Action<string, string> add = delegate(string k, string r) { lines.Add(k + ": " + r); if (!GpuOc.IsOk(r) && !r.StartsWith("nao suportado")) bad = true; };
+            Action<string, string> add = delegate(string k, string r) { lines.Add(k + ": " + r); if (!GpuOc.IsOk(r) && !r.StartsWith("não suportado")) bad = true; };
             if (oc.Core.Ok) { add("Core", oc.SetCore(slCore.Value)); }
             if (oc.Mem.Ok) { add("Mem", oc.SetMem(slMem.Value)); }
             if (oc.Power.Ok && slPow.Value != oc.Power.Cur) { string r = oc.SetPower(slPow.Value); if (GpuOc.IsOk(r)) oc.Power.Cur = slPow.Value; add("TDP", r); }
             if (oc.Temp.Ok && slTemp.Value != oc.Temp.Cur) { string r = oc.SetTemp(slTemp.Value); if (GpuOc.IsOk(r)) oc.Temp.Cur = slTemp.Value; add("Temp", r); }
-            if (lines.Count == 0) lines.Add("Nenhum ajuste disponivel nesta placa.");
+            if (lines.Count == 0) lines.Add("Nenhum ajuste disponível nesta placa.");
             lblOcMsg.ForeColor = bad ? Xp.Bad : Xp.Good;
             lblOcMsg.Text = string.Join("\n", lines.ToArray());
         }
@@ -14219,28 +14247,28 @@ namespace BunoTunner
             {
                 oc.Refresh();
                 grpOc.Title = Lang.T("Overclock / limites - ") + oc.Backend;
-                OcSetup(slCore, txCore, rgCore, lblUCore, oc.Core, "Offset do clock do nucleo, em MHz acima do padrao");
-                OcSetup(slMem, txMem, rgMem, lblUMem, oc.Mem, "Offset do clock da memoria, em MHz");
-                OcSetup(slPow, txPow, rgPow, lblUPow, oc.Power, "Limite de potencia (TDP)");
+                OcSetup(slCore, txCore, rgCore, lblUCore, oc.Core, "Offset do clock do núcleo, em MHz acima do padrão");
+                OcSetup(slMem, txMem, rgMem, lblUMem, oc.Mem, "Offset do clock da memória, em MHz");
+                OcSetup(slPow, txPow, rgPow, lblUPow, oc.Power, "Limite de potência (TDP)");
                 OcSetup(slTemp, txTemp, rgTemp, lblUTemp, oc.Temp, "Limite de temperatura");
                 List<string> info = new List<string>();
                 if (!oc.Core.Ok) info.Add("Core: " + oc.Core.Why);
                 else if (oc.Core.Why.Length > 0) info.Add("Core: " + oc.Core.Why);
-                if (!oc.Mem.Ok) info.Add("Memoria: " + oc.Mem.Why);
-                else if (oc.Mem.Why.Length > 0) info.Add("Memoria: " + oc.Mem.Why);
+                if (!oc.Mem.Ok) info.Add("Memória: " + oc.Mem.Why);
+                else if (oc.Mem.Why.Length > 0) info.Add("Memória: " + oc.Mem.Why);
                 if (!oc.Power.Ok) info.Add("TDP: " + oc.Power.Why);
                 if (!oc.Temp.Ok) info.Add("Temperatura: " + oc.Temp.Why);
                 if (oc.Note.Length > 0 && (!oc.Core.Ok || !oc.Mem.Ok)) info.Add(oc.Note);
-                lblOcInfo.Text = info.Count == 0 ? "Esta placa expoe todos os ajustes acima. " + oc.Note : string.Join("\n", info.ToArray());
+                lblOcInfo.Text = info.Count == 0 ? "Esta placa expõe todos os ajustes acima. " + oc.Note : string.Join("\n", info.ToArray());
                 lblOcMsg.Text = "";
             }
             else
             {
                 grpOc.Title = Lang.T("Overclock / limites");
                 XpSlider[] ss = { slCore, slMem, slPow, slTemp }; XpText[] tt = { txCore, txMem, txPow, txTemp }; Label[] rr = { rgCore, rgMem, rgPow, rgTemp };
-                for (int i = 0; i < 4; i++) { ss[i].Enabled = tt[i].Enabled = false; ss[i].Minimum = 0; ss[i].Maximum = 1; ss[i].Value = 0; tt[i].Text = "-"; rr[i].Text = "(indisponivel)"; }
+                for (int i = 0; i < 4; i++) { ss[i].Enabled = tt[i].Enabled = false; ss[i].Minimum = 0; ss[i].Maximum = 1; ss[i].Value = 0; tt[i].Text = "-"; rr[i].Text = "(indisponível)"; }
                 string why = cur == null ? "" : cur.OcWhy;
-                lblOcInfo.Text = "Overclock indisponivel para esta GPU. " + why;
+                lblOcInfo.Text = "Overclock indisponível para esta GPU. " + why;
                 lblOcMsg.ForeColor = Xp.Bad;
                 lblOcMsg.Text = "Nenhum backend de overclock para esta GPU. " + why;
             }
@@ -14250,7 +14278,7 @@ namespace BunoTunner
         Panel BuildSpecPage()
         {
             Panel p = new Panel(); p.Dock = DockStyle.Fill;
-            XpGroup g = new XpGroup(); g.Title = "Especificacoes da GPU selecionada"; g.Dock = DockStyle.Fill; g.Padding = new Padding(10, 22, 10, 40);
+            XpGroup g = new XpGroup(); g.Title = "Especificações da GPU selecionada"; g.Dock = DockStyle.Fill; g.Padding = new Padding(10, 22, 10, 40);
             lvSpec.Dock = DockStyle.Fill; lvSpec.View = View.Details; lvSpec.FullRowSelect = true; lvSpec.GridLines = true;
             lvSpec.BackColor = Xp.EditBg; lvSpec.Font = Xp.Ui;
             lvSpec.Columns.Add("Propriedade", 250); lvSpec.Columns.Add("Valor", 380);
@@ -14281,7 +14309,7 @@ namespace BunoTunner
             if (r[0].StartsWith("---")) it.ForeColor = Xp.GroupText;
             else if (v.StartsWith("Ligado")) it.ForeColor = Xp.Good;
             else if (v.StartsWith("Desligado")) it.ForeColor = Xp.Bad;
-            else if (v.StartsWith("Indisponivel")) it.ForeColor = Xp.Dim;
+            else if (v.StartsWith("Indisponível")) it.ForeColor = Xp.Dim;
             lv.Items.Add(it);
         }
 
@@ -14331,8 +14359,8 @@ namespace BunoTunner
             g.Controls.Add(b); bBtn[k] = b;
             Label d = UI.Lbl(g, desc, 72, 20, Xp.Ui, Xp.Dim);
             d.AutoSize = false; d.SetBounds(72, 20, 300, 46);
-            UI.Lbl(g, "Duracao:", 384, 24);
-            cbDurK[k] = Combo(g, 448, 20, 110, "30 s", "1 min", "5 min", "10 min", "Ate parar"); cbDurK[k].SelectedIndex = 1;
+            UI.Lbl(g, "Duração:", 384, 24);
+            cbDurK[k] = Combo(g, 448, 20, 110, "30 s", "1 min", "5 min", "10 min", "Até parar"); cbDurK[k].SelectedIndex = 1;
             return g;
         }
 
@@ -14347,24 +14375,24 @@ namespace BunoTunner
             tip.SetToolTip(lblBGpu, "A placa e a escolhida la em cima. Se o OpenGL abrir em outra, o teste muda para OpenCL na escolhida.");
             p.Controls.Add(gG);
 
-            XpGroup gC = BenchBlock(1, "CPU  -  ray tracing 3D (estilo Cinebench)", "Renderiza uma cena em todos os nucleos, bloco a bloco. Pontos = Mrays/s x 100.", "chip", "Iniciar / parar o estresse de CPU");
+            XpGroup gC = BenchBlock(1, "CPU  -  ray tracing 3D (estilo Cinebench)", "Renderiza uma cena em todos os núcleos, bloco a bloco. Pontos = Mrays/s x 100.", "chip", "Iniciar / parar o estresse de CPU");
             UI.Lbl(gC, "Threads:", 384, 48);
             cbBThr = Combo(gC, 448, 44, 110, "Todas", "Metade", "1");
             p.Controls.Add(gC);
 
-            XpGroup gF = BenchBlock(2, "FPU  -  campo de ondas em ponto flutuante", "Calculo de ondas com seno/cosseno em todos os nucleos; mostra GFLOPS estimado.", "fpu", "Iniciar / parar o estresse de FPU");
+            XpGroup gF = BenchBlock(2, "FPU  -  campo de ondas em ponto flutuante", "Cálculo de ondas com seno/cosseno em todos os núcleos; mostra GFLOPS estimado.", "fpu", "Iniciar / parar o estresse de FPU");
             UI.Lbl(gF, "Threads:", 384, 48);
             cbBThrF = Combo(gF, 448, 44, 110, "Todas", "Metade", "1");
             cbBThr.SelectedIndexChanged += delegate { if (cbBThrF.SelectedIndex != cbBThr.SelectedIndex) cbBThrF.SelectedIndex = cbBThr.SelectedIndex; };
             cbBThrF.SelectedIndexChanged += delegate { if (cbBThr.SelectedIndex != cbBThrF.SelectedIndex) cbBThr.SelectedIndex = cbBThrF.SelectedIndex; };
             p.Controls.Add(gF);
 
-            XpGroup gR = BenchBlock(3, "RAM  -  escrita e leitura com verificacao", "Grava e le padroes na memoria e confere cada valor; qualquer diferenca conta como erro.", "ram", "Iniciar / parar o estresse de RAM");
+            XpGroup gR = BenchBlock(3, "RAM  -  escrita e leitura com verificação", "Grava e le padrões na memória e confere cada valor; qualquer diferença conta como erro.", "ram", "Iniciar / parar o estresse de RAM");
             UI.Lbl(gR, "Usar (% da livre):", 384, 48);
             cbBRam = Combo(gR, 490, 44, 70, "25%", "50%", "70%"); cbBRam.SelectedIndex = 1;
             p.Controls.Add(gR);
 
-            XpGroup gS = BenchBlock(4, "SSD  -  sequencial + 4K aleatorio", "Usa um arquivo temporario no drive escolhido (apagado ao fim). Em 'Ate parar' gera desgaste.", "ssd", "Iniciar / parar o estresse de SSD");
+            XpGroup gS = BenchBlock(4, "SSD  -  sequencial + 4K aleatório", "Usa um arquivo temporário no drive escolhido (apagado ao fim). Em 'Até parar' gera desgaste.", "ssd", "Iniciar / parar o estresse de SSD");
             UI.Lbl(gS, "Drive:", 384, 48);
             cbBDrive = Combo(gS, 426, 44, 62);
             foreach (DriveInfo d in DriveInfo.GetDrives())
@@ -14381,15 +14409,15 @@ namespace BunoTunner
             p.Controls.Add(gS);
 
             // cartao de controle: seguranca, progresso, sequencia e mensagens
-            XpGroup gK = new XpGroup(); gK.Title = "Controle, seguranca e resultado ao vivo"; gK.SetBounds(0, 376, 676, 208);
+            XpGroup gK = new XpGroup(); gK.Title = "Controle, segurança e resultado ao vivo"; gK.SetBounds(0, 376, 676, 208);
             chkBSafe = UI.Opt(gK, "Parar se passar de", 12, 28, 150, false); chkBSafe.Checked = true;
             txBTemp = UI.Txt(gK, 168, 25, 40, "95");
             UI.Lbl(gK, "\u00B0C", 212, 29);
             pbBench = new XpProgress(); pbBench.SetBounds(12, 60, 316, 18);
             gK.Controls.Add(pbBench);
-            btnBSeq = UI.Btn(gK, "Rodar sequencia (CPU, FPU, RAM, GPU)", 12, 88, 316, delegate { ToggleSeq(); });
+            btnBSeq = UI.Btn(gK, "Rodar sequência (CPU, FPU, RAM, GPU)", 12, 88, 316, delegate { ToggleSeq(); });
             btnBSeq.Height = 28;
-            tip.SetToolTip(btnBSeq, "Roda CPU, FPU, RAM e GPU um apos o outro, cada um com a duracao do seu bloco (o SSD fica de fora para nao gerar desgaste).");
+            tip.SetToolTip(btnBSeq, "Roda CPU, FPU, RAM e GPU um após o outro, cada um com a duração do seu bloco (o SSD fica de fora para não gerar desgaste).");
             p.Controls.Add(gK);
             BenchRestore();
 
@@ -14404,7 +14432,7 @@ namespace BunoTunner
                 vals[i] = UI.Lbl(g3, "-", 100, 68 + i * 15);
             }
             lblBAvg = vals[0]; lblBPeak = vals[1]; lblBTemp = vals[2]; lblBErr = vals[3]; lblBTime = vals[4];
-            lblBMsg = UI.Lbl(g3, "Clique no icone de um teste para iniciar.", 14, 146, Xp.Ui, Xp.Dim);
+            lblBMsg = UI.Lbl(g3, "Clique no ícone de um teste para iniciar.", 14, 146, Xp.Ui, Xp.Dim);
             lblBMsg.AutoSize = false; lblBMsg.SetBounds(14, 146, 232, 54);
             grBench.SetBounds(252, 22, 412, 100); grBench.Window = 120;
             g3.Controls.Add(grBench);
@@ -14435,7 +14463,7 @@ namespace BunoTunner
 
         void ToggleSeq()
         {
-            if (bRunning) { StopBench("Interrompido pelo usuario."); return; }
+            if (bRunning) { StopBench("Interrompido pelo usuário."); return; }
             bQueue = new Queue<int>(new int[] { 1, 2, 3, 0 }); bSeqRun = true;
             ToggleBench(-1);
         }
@@ -14470,7 +14498,7 @@ namespace BunoTunner
         string BenchText(string sep)
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine(string.Join(sep, new string[] { "Teste", "Duracao", "Media", "Pico", "Erros", "Temp max", "Estabilidade", "Variacao" }));
+            sb.AppendLine(string.Join(sep, new string[] { "Teste", "Duração", "Media", "Pico", "Erros", "Temp max", "Estabilidade", "Variação" }));
             for (int i = lvBench.Items.Count - 1; i >= 0; i--)
             {
                 List<string> c = new List<string>();
@@ -14504,7 +14532,7 @@ namespace BunoTunner
 
         void ToggleBench(int pick)
         {
-            if (bRunning) { StopBench("Interrompido pelo usuario."); return; }
+            if (bRunning) { StopBench("Interrompido pelo usuário."); return; }
             if (pick < 0)
             {
                 if (!bSeqRun || bQueue.Count == 0) { bSeqRun = false; return; }
@@ -14523,8 +14551,8 @@ namespace BunoTunner
             string drive = cbBDrive.SelectedItem as string;
             if (kind == 4)
             {
-                if (drive == null) { lblBMsg.Text = "Nenhum drive disponivel para o teste de SSD."; return; }
-                if (bDurSec == 0 && Dlg.Show("Em 'Ate parar' o SSD recebe gravacoes continuas (gera desgaste). Continuar?", "BunoTunner", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
+                if (drive == null) { lblBMsg.Text = "Nenhum drive disponível para o teste de SSD."; return; }
+                if (bDurSec == 0 && Dlg.Show("Em 'Até parar' o SSD recebe gravações contínuas (gera desgaste). Continuar?", "BunoTunner", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
             }
             BenchSave(kind); bGlChecked = false;
             string gname = cur != null ? cur.Name : null;
@@ -14601,7 +14629,7 @@ namespace BunoTunner
             {
                 bExt = false; bU = BUnit[0]; bSc = BScale[0]; bLast = 0; bLastT = DateTime.UtcNow;
                 if (rf.Cv != null) rf.Cv.Unit = bU;
-                lblBMsg.Text = "OpenGL indisponivel (" + rf.Gl.Error + "): usando o teste OpenCL.";
+                lblBMsg.Text = "OpenGL indisponível (" + rf.Gl.Error + "): usando o teste OpenCL.";
                 bFallback();
                 return;
             }
@@ -14644,8 +14672,8 @@ namespace BunoTunner
             if (bDurSec > 0) pbBench.Value = (int)(100 * elapsed / bDurSec); else pbBench.Step();
 
             if (Bench.Fail != null) { StopBench("Falhou: " + Bench.Fail); return; }
-            if (chkBSafe.Checked && t.HasValue && t.Value >= UI.Int(txBTemp, 95)) { StopBench("Parado por seguranca: temperatura de " + t.Value.ToString("0") + " \u00B0C."); return; }
-            if (bDurSec > 0 && elapsed >= bDurSec) { StopBench("Concluido."); return; }
+            if (chkBSafe.Checked && t.HasValue && t.Value >= UI.Int(txBTemp, 95)) { StopBench("Parado por segurança: temperatura de " + t.Value.ToString("0") + " \u00B0C."); return; }
+            if (bDurSec > 0 && elapsed >= bDurSec) { StopBench("Concluído."); return; }
             if (elapsed > 3 && !bExt && !Bench.Alive) { StopBench("Teste finalizado."); return; }
         }
 
@@ -14675,13 +14703,13 @@ namespace BunoTunner
         {
             bool wasRun = bRunning;
             bool okEnd = msg.StartsWith("Conclu");
-            if (!okEnd && bSeqRun) { bSeqRun = false; bQueue.Clear(); msg += " (sequencia cancelada)"; }
+            if (!okEnd && bSeqRun) { bSeqRun = false; bQueue.Clear(); msg += " (sequência cancelada)"; }
             Bench.Stop = true; bRunning = false; tmBench.Stop();
             try { if (rf != null && !rf.IsDisposed) rf.Close(); } catch { }
             rf = null;
             BenchLock(false);
             for (int bi = 0; bi < 5; bi++) { bBtn[bi].Badge = 1; bBtn[bi].Invalidate(); }
-            btnBSeq.Text = bSeqRun && okEnd && bQueue.Count > 0 ? "Parar tudo" : "Rodar sequencia (CPU, FPU, RAM, GPU)";
+            btnBSeq.Text = bSeqRun && okEnd && bQueue.Count > 0 ? "Parar tudo" : "Rodar sequência (CPU, FPU, RAM, GPU)";
             pbBench.Marquee = false;
             double el = (DateTime.UtcNow - bStart).TotalSeconds;
             long errs = Th.Interlocked.Read(ref Bench.Errors);
@@ -14701,22 +14729,22 @@ namespace BunoTunner
                 {
                     Timer nt = new Timer(); nt.Interval = 2500;
                     nt.Tick += delegate { nt.Stop(); nt.Dispose(); if (bSeqRun && !bRunning) ToggleBench(-1); };
-                    nt.Start(); msg += "  Proximo teste em instantes...";
+                    nt.Start(); msg += "  Próximo teste em instantes...";
                 }
-                else { bSeqRun = false; msg += "  Sequencia concluida."; }
+                else { bSeqRun = false; msg += "  Sequência concluída."; }
             }
-            lblBMsg.Text = msg + (errs > 0 ? "  ATENCAO: " + errs + " erro(s) de calculo/verificacao - sistema instavel!" : "");
+            lblBMsg.Text = msg + (errs > 0 ? "  ATENÇÃO: " + errs + " erro(s) de cálculo/verificação - sistema instável!" : "");
         }
 
         // ---------------- pagina de especificacoes da CPU ----------------
         Panel BuildCpuPage()
         {
             Panel p = new Panel(); p.Dock = DockStyle.Fill;
-            XpGroup g = new XpGroup(); g.Title = "Especificacoes da CPU"; g.Dock = DockStyle.Fill; g.Padding = new Padding(10, 22, 10, 40);
+            XpGroup g = new XpGroup(); g.Title = "Especificações da CPU"; g.Dock = DockStyle.Fill; g.Padding = new Padding(10, 22, 10, 40);
             lvCpu.Dock = DockStyle.Fill; lvCpu.View = View.Details; lvCpu.FullRowSelect = true; lvCpu.GridLines = true;
             lvCpu.BackColor = Xp.EditBg; lvCpu.Font = Xp.Ui;
             lvCpu.Columns.Add("Propriedade", 250); lvCpu.Columns.Add("Valor", 380);
-            lvCpu.Items.Add(new ListViewItem(new string[] { "Lendo informacoes da CPU...", "" }));
+            lvCpu.Items.Add(new ListViewItem(new string[] { "Lendo informações da CPU...", "" }));
             g.Controls.Add(lvCpu);
             XpButton copy = new XpButton(); copy.Text = "Copiar tudo"; copy.SetBounds(10, 0, 110, 24);
             copy.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
@@ -14750,7 +14778,7 @@ namespace BunoTunner
             ListViewItem sep = new ListViewItem(new string[] { "--- Ao vivo ---", "" });
             sep.ForeColor = Xp.GroupText;
             lvCpu.Items.Add(sep);
-            string[] live = { "Uso total", "Temperatura", "Consumo do pacote", "Clock medio dos nucleos", "Leitura dos sensores da CPU" };
+            string[] live = { "Uso total", "Temperatura", "Consumo do pacote", "Clock médio dos núcleos", "Leitura dos sensores da CPU" };
             foreach (string n in live)
             {
                 ListViewItem it = new ListViewItem(new string[] { n, "-" });
@@ -14774,10 +14802,10 @@ namespace BunoTunner
             foreach (Sn s in SensorHub.PcSensors)
                 if (s.Group.StartsWith("Processador") && s.Type == "Temperature" && s.Seen)
                 {
-                    if (s.Group.Contains("Zona termica")) acpi = true; else drv = true;
+                    if (s.Group.Contains("Zona térmica")) acpi = true; else drv = true;
                 }
             if (drv) return "Ok - driver de sensores funcionando";
-            if (acpi) return "Driver SEM leitura da CPU (Integridade de memoria/Defender?) - usando zona termica do Windows";
+            if (acpi) return "Driver SEM leitura da CPU (Integridade de memória/Defender?) - usando zona térmica do Windows";
             return "Sem leitura de temperatura - veja o LEIA-ME (driver bloqueado?)";
         }
 
@@ -14821,8 +14849,8 @@ namespace BunoTunner
             if (pgOc.Visible)
             {
                 float? clk = g.Clk(0, "Core"), sm = g.Clk(1, "Shader"), mem = g.Clk(2, "Memory"), vid = g.Clk(3, "Video");
-                lblClocks.Text = "Nucleo: " + (clk.HasValue ? clk.Value.ToString("0") : "-") + " MHz     SM: " + (sm.HasValue ? sm.Value.ToString("0") : "-") +
-                    " MHz     Memoria: " + (mem.HasValue ? mem.Value.ToString("0") : "-") + " MHz     Video: " + (vid.HasValue ? vid.Value.ToString("0") : "-") + " MHz";
+                lblClocks.Text = "Núcleo: " + (clk.HasValue ? clk.Value.ToString("0") : "-") + " MHz     SM: " + (sm.HasValue ? sm.Value.ToString("0") : "-") +
+                    " MHz     Memória: " + (mem.HasValue ? mem.Value.ToString("0") : "-") + " MHz     Video: " + (vid.HasValue ? vid.Value.ToString("0") : "-") + " MHz";
             }
         }
 
@@ -14846,7 +14874,7 @@ namespace BunoTunner
             if (updBusy) return;
             updBusy = true; bUpd.Enabled = false;
             string oldStatus = status.Text;
-            status.Text = Lang.T("Procurando atualizacoes...");
+            status.Text = Lang.T("Procurando atualizações...");
             System.Threading.ThreadPool.QueueUserWorkItem(delegate
             {
                 string tag = null, url = null, sha = null, err = null;
@@ -14866,7 +14894,7 @@ namespace BunoTunner
                         m = Regex.Match(js, "\"name\"\\s*:\\s*\"BunoTunner\\.exe\".*?\"digest\"\\s*:\\s*\"sha256:([0-9a-fA-F]{64})\"", RegexOptions.Singleline);
                         if (m.Success) sha = m.Groups[1].Value;
                     }
-                    if (tag == null || url == null) err = "A versao mais recente nao foi encontrada.";
+                    if (tag == null || url == null) err = "A versão mais recente não foi encontrada.";
                 }
                 catch (Exception ex) { err = ex.Message; }
                 try { BeginInvoke(new Action(delegate { UpdateAnswer(tag, url, sha, err, oldStatus); })); } catch (Exception) { }
@@ -14879,9 +14907,9 @@ namespace BunoTunner
         void UpdateAnswer(string tag, string url, string sha, string err, string oldStatus)
         {
             status.Text = oldStatus; updBusy = false; bUpd.Enabled = true;
-            if (err != null) { Dlg.Show(this, "Nao foi possivel verificar atualizacoes:\n" + err, "BunoTunner", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
-            if (VerOf(tag) <= VerOf(Xp.Version)) { Dlg.Show(this, "Voce ja esta na versao mais recente (" + Xp.Version + ").", "BunoTunner", MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
-            if (Dlg.Show(this, "Nova versao disponivel: " + tag + " (atual: " + Xp.Version + ").\n\nDeseja baixar e atualizar agora?", "BunoTunner", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+            if (err != null) { Dlg.Show(this, "Não foi possível verificar atualizações:\n" + err, "BunoTunner", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
+            if (VerOf(tag) <= VerOf(Xp.Version)) { Dlg.Show(this, "Você já está na versão mais recente (" + Xp.Version + ").", "BunoTunner", MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
+            if (Dlg.Show(this, "Nova versão disponível: " + tag + " (atual: " + Xp.Version + ").\n\nDeseja baixar e atualizar agora?", "BunoTunner", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
             updBusy = true; bUpd.Enabled = false;
             string cur = Application.ExecutablePath, tmp = cur + ".new";
             System.Threading.ThreadPool.QueueUserWorkItem(delegate
@@ -14901,19 +14929,19 @@ namespace BunoTunner
                         {
                             fs.Write(buf, 0, n); got += n;
                             int pct = total > 0 ? (int)(got * 100 / total) : 0;
-                            if (pct != lastPct) { lastPct = pct; SetStatus(Lang.T("Baixando atualizacao...") + " " + pct + "%"); }
+                            if (pct != lastPct) { lastPct = pct; SetStatus(Lang.T("Baixando atualização...") + " " + pct + "%"); }
                         }
                     }
                     FileInfo fi = new FileInfo(tmp);
                     byte[] head = new byte[2];
                     using (FileStream hs = File.OpenRead(tmp)) hs.Read(head, 0, 2);
-                    if (fi.Length < 500000 || head[0] != 'M' || head[1] != 'Z') throw new Exception("O arquivo baixado e invalido.");
+                    if (fi.Length < 500000 || head[0] != 'M' || head[1] != 'Z') throw new Exception("O arquivo baixado e inválido.");
                     if (sha != null)
                     {
                         string h;
                         using (System.Security.Cryptography.SHA256 sh = System.Security.Cryptography.SHA256.Create())
                         using (FileStream hs = File.OpenRead(tmp)) h = BitConverter.ToString(sh.ComputeHash(hs)).Replace("-", "").ToLower();
-                        if (h != sha.ToLower()) throw new Exception("O SHA-256 do arquivo baixado nao confere com o publicado no GitHub; o arquivo foi descartado.");
+                        if (h != sha.ToLower()) throw new Exception("O SHA-256 do arquivo baixado não confere com o publicado no GitHub; o arquivo foi descartado.");
                     }
                 }
                 catch (Exception ex) { e2 = ex.Message; try { File.Delete(tmp); } catch (Exception) { } }
@@ -14923,7 +14951,7 @@ namespace BunoTunner
         void UpdateDone(string err, string tag, string cur, string tmp, bool hashOk, string oldStatus)
         {
             status.Text = oldStatus; updBusy = false; bUpd.Enabled = true;
-            if (err != null) { Dlg.Show(this, "Falha ao baixar a atualizacao:\n" + err, "BunoTunner", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
+            if (err != null) { Dlg.Show(this, "Falha ao baixar a atualização:\n" + err, "BunoTunner", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
             string old = cur + ".old";
             try
             {
@@ -14936,7 +14964,7 @@ namespace BunoTunner
                 try { if (!File.Exists(cur) && File.Exists(old)) File.Move(old, cur); } catch (Exception) { }
                 string alt = Path.Combine(Path.GetDirectoryName(cur), "BunoTunner_" + tag + ".exe");
                 try { if (File.Exists(alt)) File.Delete(alt); File.Move(tmp, alt); } catch (Exception) { alt = tmp; }
-                Dlg.Show(this, "A nova versao foi baixada, mas nao foi possivel substituir o arquivo atual.\nEla foi salva em:\n" + alt, "BunoTunner", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Dlg.Show(this, "A nova versão foi baixada, mas não foi possível substituir o arquivo atual.\nEla foi salva em:\n" + alt, "BunoTunner", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             if (Dlg.Show(this, "Atualizado para " + tag + (hashOk ? " (SHA-256 conferido)." : ".") + "\n\nReiniciar o BunoTunner agora?", "BunoTunner", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
@@ -14966,7 +14994,7 @@ namespace BunoTunner
                     BeginInvoke(new Action(delegate
                     {
                         bWin.Enabled = true; SetAutoBtn(now);
-                        if (!ok) Dlg.Show(this, "Nao foi possivel alterar a inicializacao com o Windows:\n" + err, "BunoTunner", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        if (!ok) Dlg.Show(this, "Não foi possível alterar a inicialização com o Windows:\n" + err, "BunoTunner", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }));
                 }
                 catch (Exception) { }
@@ -15004,7 +15032,7 @@ namespace BunoTunner
                 tray.Icon = Icon; tray.Text = "BunoTunner";
                 ContextMenuStrip cm = new ContextMenuStrip();
                 cm.Items.Add("Abrir BunoTunner", null, delegate { ShowFromTray(); });
-                ToolStripMenuItem mi = new ToolStripMenuItem("Botao - (minimizar) envia para a bandeja");
+                ToolStripMenuItem mi = new ToolStripMenuItem("Botão - (minimizar) envia para a bandeja");
                 mi.CheckOnClick = true; mi.Checked = Settings.Get("tray", "1") == "1";
                 mi.CheckedChanged += delegate { Settings.Set("tray", mi.Checked ? "1" : "0"); };
                 cm.Items.Add(mi);
@@ -15025,7 +15053,7 @@ namespace BunoTunner
             if (!trayTold)
             {
                 trayTold = true;
-                try { tray.ShowBalloonTip(2500, "BunoTunner", Lang.T("Continua rodando na bandeja. Clique duas vezes no icone para abrir."), ToolTipIcon.Info); } catch (Exception) { }
+                try { tray.ShowBalloonTip(2500, "BunoTunner", Lang.T("Continua rodando na bandeja. Clique duas vezes no ícone para abrir."), ToolTipIcon.Info); } catch (Exception) { }
             }
         }
         void ShowFromTray()

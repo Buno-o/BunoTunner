@@ -412,3 +412,8 @@ v1.40.1 (TESTE)
 
 v1.41.0 (TESTE)
 - Otimizacoes: Drivers no topo, depois o Aplicar todos/Desfazer todos, que agora executa TODOS os ajustes da pagina (inclusive Isolamento de nucleo e mitigacoes Spectre/Meltdown, com confirmacao). A secao Seguranca (avancado) foi removida e seus dois ajustes foram para Desempenho em jogos (cada um mantem o proprio aviso ao usar individualmente). Barras de secao do tema Luna (XP) com novo visual azul estilo barra de titulo.
+
+v1.41.1 (TESTE)
+- Drivers: o texto de andamento saiu da pagina; ao clicar em So verificar ou Atualizar drivers abre um popup com o que esta acontecendo.
+- Aplicar todos: nova descricao e o overlay do DLSS nao e executado.
+- Ortografia: acentos e cedilhas corrigidos em todos os textos do programa (portugues).
