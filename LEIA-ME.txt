@@ -435,3 +435,7 @@ v1.42.3 (TESTE)
 
 v1.42.4 (TESTE)
 - Ventoinhas: removidos os textos de comentario em volta (dica abaixo da lista, contador de selecionadas, dica do RPM e dica do Enter); as explicacoes foram para as dicas ao passar o mouse.
+
+v1.43.0 (TESTE)
+- Benchmark de GPU: novo render no estilo "bola de pelos" (furball) dourada, com fundo escuro em teia polar e esfera dourada pixelada no centro.
+- O HUD agora e desenhado sobre o render: titulo e resolucao e dados da GPU (nome, versao OpenGL, fabricante) no canto superior esquerdo; FPS grande, temperatura da GPU e grafico do historico de temperatura no canto superior direito (minimo e maximo); titulo dourado, tempo, erros e FPS medio embaixo a esquerda. Todos os valores sao reais.

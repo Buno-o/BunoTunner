@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.42.4.0")]
-[assembly: AssemblyFileVersion("1.42.4.0")]
-[assembly: AssemblyInformationalVersion("1.42.4")]
+[assembly: AssemblyVersion("1.43.0.0")]
+[assembly: AssemblyFileVersion("1.43.0.0")]
+[assembly: AssemblyInformationalVersion("1.43.0")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -371,6 +371,7 @@ namespace BunoTunner
             "Travar clock da memória (MHz):  min", "Lock memory clock (MHz):  min",
             "Atualizar a cada:", "Update every:" };
         static readonly string[] Pairs2 = {
+            "Temp. GPU: ", "GPU Temp: ", "Mín: ", "Min: ", "Máx: ", "Max: ",
             "Drivers de GPU e Chipset direto da fabricante", "GPU and Chipset drivers straight from the manufacturer",
             "Consulta o site da NVIDIA / AMD e compara com o driver instalado. Se houver versão mais nova, baixa o instalador oficial, confere a assinatura digital e abre a instalação normal para você concluir. Para Intel, abre o Assistente de Drivers da Intel.", "Checks the NVIDIA / AMD website and compares with the installed driver. If a newer version exists, it downloads the official installer, checks its digital signature and opens the normal installation for you to finish. For Intel, it opens Intel's Driver & Support Assistant.",
             "Verificar GPU e Chipset", "Check GPU and Chipset",
@@ -1887,7 +1888,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.42.4";
+        public const string Version = "v1.43.0";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -7979,8 +7980,8 @@ namespace BunoTunner
             Cv = new BenchCanvas(kind, threads);
             if (kind == 0)
             {
-                Cv.HudOnly = true; Cv.Dock = DockStyle.Bottom; Cv.Height = 110;
-                Gl = new GlCanvas(); Gl.Dock = DockStyle.Fill;
+                Cv.HudOnly = true; Cv.Dock = DockStyle.Bottom; Cv.Height = 10; Cv.Visible = false;
+                Gl = new GlCanvas(); Gl.Dock = DockStyle.Fill; Gl.Hud = Cv;
                 Controls.Add(Gl); Controls.Add(Cv);
             }
             else { Cv.Dock = DockStyle.Fill; Controls.Add(Cv); }
@@ -8795,6 +8796,12 @@ namespace BunoTunner
         [DllImport(GL)] static extern IntPtr glGetString(uint n);
         [DllImport(GL)] static extern void glPushMatrix();
         [DllImport(GL)] static extern void glPopMatrix();
+        [DllImport(GL)] static extern void glColor4f(float r, float g, float b, float a);
+        [DllImport(GL)] static extern void glTexCoord2f(float u, float v);
+        [DllImport(GL)] static extern void glGenTextures(int n, out uint t);
+        [DllImport(GL)] static extern void glBindTexture(uint target, uint t);
+        [DllImport(GL)] static extern void glTexParameteri(uint target, uint pn, int v);
+        [DllImport(GL)] static extern void glTexImage2D(uint target, int level, int ifmt, int w, int h, int border, uint fmt, uint type, IntPtr px);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)] delegate uint DCreateShader(uint type);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)] delegate void DShaderSource(uint s, int count, [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPStr)] string[] src, IntPtr len);
@@ -8810,7 +8817,8 @@ namespace BunoTunner
         [UnmanagedFunctionPointer(CallingConvention.StdCall)] delegate int DSwapInterval(int i);
 
         public volatile int State; // 0 iniciando, 1 ok, 2 falhou
-        public string Error = "", Renderer = "";
+        public string Error = "", Renderer = "", GlVersion = "", GlVendor = "";
+        public BenchCanvas Hud;
         volatile bool quit;
         public void StopRender() { quit = true; } volatile int vw = 640, vh = 400;
         Th.Thread th;
@@ -8852,6 +8860,93 @@ namespace BunoTunner
             "for(int i=0;i<600;i++){ if(float(i)>=it) break; q=vec2(sin(q.y*1.7+t)+q.x*0.3, cos(q.x*1.3-t)-q.y*0.3); a+=length(q)*0.01; }\n" +
             "vec3 c=0.5+0.5*sin(a*5.0+vec3(0.0,2.0,4.0)); gl_FragColor=vec4(c*0.32,1.0); }";
 
+        // ---- HUD desenhado sobre o render (texto GDI+ em textura) ----
+        Bitmap hudBmp; byte[] hudPx; GCHandle hudPin; uint hudTex; bool hudOk = true; int hudW, hudH, hudLW = 640, hudLH = 480;
+        DateTime hudT = DateTime.MinValue, frT = DateTime.UtcNow, tHistT = DateTime.MinValue; int frCnt; double fpsNow;
+        List<double> tHist = new List<double>();
+        static readonly Color Gold = Color.FromArgb(255, 196, 40), Orange = Color.FromArgb(255, 140, 20);
+
+        void HudRender(int w, int h, string rend)
+        {
+            hudLW = 640; hudLH = Math.Max(200, Math.Min(512, (int)Math.Round(640.0 * h / Math.Max(1, w))));
+            int LW = hudLW, LH = hudLH;
+            BenchCanvas hd = Hud;
+            double tmp = hd != null ? hd.Temp : double.NaN;
+            if ((DateTime.UtcNow - tHistT).TotalSeconds >= 1)
+            {
+                tHistT = DateTime.UtcNow;
+                if (!double.IsNaN(tmp)) { tHist.Add(tmp); if (tHist.Count > 60) tHist.RemoveAt(0); }
+            }
+            string ts = double.IsNaN(tmp) ? "--" : tmp.ToString("0");
+            int es = hd != null ? (int)hd.Elapsed : 0, tot = hd != null ? (int)hd.Total : 0;
+            string tm2 = (es / 60).ToString("00") + ":" + (es % 60).ToString("00") + (tot > 0 ? " / " + (tot / 60).ToString("00") + ":" + (tot % 60).ToString("00") : "");
+            long errs = hd != null ? hd.Errors : 0;
+            using (Graphics g = Graphics.FromImage(hudBmp))
+            using (Font fT = new Font("Consolas", 11f, FontStyle.Bold), fS = new Font("Consolas", 8.5f, FontStyle.Bold), fBig = new Font("Consolas", 26f, FontStyle.Bold), fMid = new Font("Consolas", 13f, FontStyle.Bold), fGold = new Font("Consolas", 21f, FontStyle.Bold))
+            using (StringFormat far = new StringFormat(StringFormatFlags.NoWrap))
+            using (Pen pn = new Pen(Color.FromArgb(200, 200, 200)), pr = new Pen(Color.FromArgb(235, 40, 40)))
+            {
+                far.Alignment = StringAlignment.Far;
+                g.Clear(Color.Transparent);
+                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixel;
+                g.SmoothingMode = SmoothingMode.None;
+                Color grey = Color.FromArgb(170, 170, 170);
+                using (SolidBrush bGold = new SolidBrush(Gold), bOr = new SolidBrush(Orange), bW = new SolidBrush(Color.White), bG = new SolidBrush(grey), bR = new SolidBrush(Color.FromArgb(235, 40, 40)))
+                {
+                    // esquerda, topo
+                    g.DrawString("FURBALL BENCHMARK " + Xp.Version, fT, bOr, 8, 6);
+                    g.DrawString(w + "x" + h, fT, bW, 8, 24);
+                    string gn = string.IsNullOrEmpty(rend) ? "GPU" : rend;
+                    if (gn.Length > 44) gn = gn.Substring(0, 44);
+                    g.DrawString("GPU: " + gn, fS, bG, 8, 46);
+                    g.DrawString("OpenGL " + GlVersion, fS, bG, 8, 59);
+                    g.DrawString(GlVendor, fS, bG, 8, 72);
+                    // direita, topo
+                    RectangleF rr = new RectangleF(0, 4, LW - 8, 40);
+                    g.DrawString(fpsNow.ToString("0") + " FPS", fBig, bW, rr, far);
+                    float yy = 44;
+                    g.DrawString("Temp. GPU: ", fMid, bW, new RectangleF(0, yy, LW - 8 - 34, 22), far);
+                    g.DrawString(ts + "°C", fMid, bR, new RectangleF(0, yy, LW - 8, 22), far);
+                    // grafico de historico
+                    Rectangle gr = new Rectangle(LW - 8 - 170, 70, 170, 56);
+                    g.FillRectangle(Brushes.Black, gr);
+                    g.DrawRectangle(pn, gr);
+                    double mn = 1e9, mx = -1e9;
+                    foreach (double v in tHist) { if (v < mn) mn = v; if (v > mx) mx = v; }
+                    if (tHist.Count >= 2)
+                    {
+                        double lo = Math.Min(mn, mx - 10), span = Math.Max(10, mx - lo);
+                        Point[] pts = new Point[tHist.Count];
+                        for (int i = 0; i < pts.Length; i++)
+                            pts[i] = new Point(gr.X + 2 + (int)((gr.Width - 4) * (double)i / 59.0), gr.Bottom - 3 - (int)((gr.Height - 6) * (tHist[i] - lo) / span));
+                        g.DrawLines(pr, pts);
+                    }
+                    string mm = tHist.Count > 0 ? "Mín: " + mn.ToString("0") + "°C   Máx: " + mx.ToString("0") + "°C" : "Temp. GPU: " + ts + "°C";
+                    g.DrawString(mm, fS, bR, new RectangleF(0, 130, LW - 8, 16), far);
+                    // embaixo, esquerda
+                    g.DrawString("THE GOLDEN FURBALL", fGold, bGold, 8, LH - 70);
+                    g.DrawString("Tempo: " + tm2 + "    Erros: " + errs, fS, bW, 10, LH - 36);
+                    g.DrawString("FPS médio do teste: " + (hd != null ? hd.Rate.ToString("0") : "0") + "    Carga: pelos 90.000", fS, bW, 10, LH - 21);
+                }
+            }
+            BitmapData bd = hudBmp.LockBits(new Rectangle(0, 0, 1024, 512), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+            try
+            {
+                byte[] src = new byte[bd.Stride * 512];
+                Marshal.Copy(bd.Scan0, src, 0, src.Length);
+                for (int y = 0; y < LH; y++)
+                {
+                    int o = y * 4096;
+                    for (int x = 0; x < LW; x++)
+                    {
+                        int i = o + x * 4;
+                        hudPx[i] = src[i + 2]; hudPx[i + 1] = src[i + 1]; hudPx[i + 2] = src[i]; hudPx[i + 3] = src[i + 3];
+                    }
+                }
+            }
+            finally { hudBmp.UnlockBits(bd); }
+        }
+
         void Run(IntPtr hwnd)
         {
             IntPtr hdc = IntPtr.Zero, rc = IntPtr.Zero;
@@ -8870,53 +8965,48 @@ namespace BunoTunner
                 DSwapInterval swap = null;
                 try { swap = Fn<DSwapInterval>("wglSwapIntervalEXT"); if (swap != null) swap(0); } catch (Exception) { }
 
-                // shader de fragmento pesado (carga de ALU)
-                uint prog = 0; int lT = -1, lRes = -1, lIt = -1;
-                DUse use = null; DUniform1f u1 = null; DUniform2f u2 = null;
-                try
-                {
-                    DCreateShader cs = Fn<DCreateShader>("glCreateShader"); DShaderSource ss = Fn<DShaderSource>("glShaderSource"); DCompile co = Fn<DCompile>("glCompileShader");
-                    DGetiv gsi = Fn<DGetiv>("glGetShaderiv"), gpi = Fn<DGetiv>("glGetProgramiv");
-                    DCreateProgram cp = Fn<DCreateProgram>("glCreateProgram"); DAttach at = Fn<DAttach>("glAttachShader"); DLink lk = Fn<DLink>("glLinkProgram");
-                    DGetUniform gu = Fn<DGetUniform>("glGetUniformLocation");
-                    use = Fn<DUse>("glUseProgram"); u1 = Fn<DUniform1f>("glUniform1f"); u2 = Fn<DUniform2f>("glUniform2f");
-                    if (cs != null && ss != null && co != null && cp != null && at != null && lk != null && gu != null && use != null && u1 != null && u2 != null && gsi != null && gpi != null)
-                    {
-                        uint sh = cs(0x8B30);
-                        ss(sh, 1, new string[] { FS }, IntPtr.Zero); co(sh);
-                        int ok; gsi(sh, 0x8B81, out ok);
-                        if (ok != 0)
-                        {
-                            uint pr = cp(); at(pr, sh); lk(pr);
-                            gpi(pr, 0x8B82, out ok);
-                            if (ok != 0) { prog = pr; lT = gu(pr, "t"); lRes = gu(pr, "res"); lIt = gu(pr, "it"); }
-                        }
-                    }
-                }
-                catch (Exception) { prog = 0; }
+                string ver = "", ven = "";
+                try { ver = Marshal.PtrToStringAnsi(glGetString(0x1F02)); ven = Marshal.PtrToStringAnsi(glGetString(0x1F00)); } catch (Exception) { }
+                GlVersion = ver ?? ""; GlVendor = ven ?? "";
 
-                // pelos: linhas sobre um toro
+                // pelos: bola de pelos dourada (esfera)
                 int N = 90000;
                 float[] pos = new float[N * 6], col = new float[N * 8];
                 Random rnd = new Random(3);
                 for (int i = 0; i < N; i++)
                 {
-                    double u = rnd.NextDouble() * Math.PI * 2, v = rnd.NextDouble() * Math.PI * 2;
-                    double R0 = 1.0, r0 = 0.45;
-                    double nx = Math.Cos(v) * Math.Cos(u), ny = Math.Sin(v), nz = Math.Cos(v) * Math.Sin(u);
-                    double bx = (R0 + r0 * Math.Cos(v)) * Math.Cos(u), by = r0 * Math.Sin(v), bz = (R0 + r0 * Math.Cos(v)) * Math.Sin(u);
-                    double len = 0.16 + rnd.NextDouble() * 0.2;
-                    double ex = bx + nx * len + (rnd.NextDouble() - 0.5) * 0.06, ey = by + ny * len - 0.04, ez = bz + nz * len + (rnd.NextDouble() - 0.5) * 0.06;
+                    double z = rnd.NextDouble() * 2 - 1, ph = rnd.NextDouble() * Math.PI * 2, rr = Math.Sqrt(1 - z * z);
+                    double nx = rr * Math.Cos(ph), ny = z, nz = rr * Math.Sin(ph);
+                    double R0 = 0.58;
+                    double len = 0.22 + rnd.NextDouble() * 0.3;
+                    double bx = nx * R0, by = ny * R0, bz = nz * R0;
+                    double ex = nx * (R0 + len) + (rnd.NextDouble() - 0.5) * 0.08, ey = ny * (R0 + len) - 0.05 * len + (rnd.NextDouble() - 0.5) * 0.08, ez = nz * (R0 + len) + (rnd.NextDouble() - 0.5) * 0.08;
                     pos[i * 6] = (float)bx; pos[i * 6 + 1] = (float)by; pos[i * 6 + 2] = (float)bz;
                     pos[i * 6 + 3] = (float)ex; pos[i * 6 + 4] = (float)ey; pos[i * 6 + 5] = (float)ez;
-                    col[i * 8] = 0.45f; col[i * 8 + 1] = 0.08f; col[i * 8 + 2] = 0.0f; col[i * 8 + 3] = 0.5f;
-                    col[i * 8 + 4] = 1.0f; col[i * 8 + 5] = 0.75f + (float)rnd.NextDouble() * 0.2f; col[i * 8 + 6] = 0.1f; col[i * 8 + 7] = 0.5f;
+                    col[i * 8] = 0.55f; col[i * 8 + 1] = 0.22f; col[i * 8 + 2] = 0.0f; col[i * 8 + 3] = 0.45f;
+                    col[i * 8 + 4] = 1.0f; col[i * 8 + 5] = 0.72f + (float)rnd.NextDouble() * 0.22f; col[i * 8 + 6] = 0.12f; col[i * 8 + 7] = 0.45f;
                 }
+                // esfera dourada pixelada no centro (celulas em unidades de tela)
+                const int SC = 30;
+                List<float> cells = new List<float>();
+                for (int cy = 0; cy < SC; cy++)
+                    for (int cx = 0; cx < SC; cx++)
+                    {
+                        double px = (cx + 0.5) / SC * 2 - 1, py = (cy + 0.5) / SC * 2 - 1, d2 = px * px + py * py;
+                        if (d2 > 1) continue;
+                        double pz = Math.Sqrt(1 - d2);
+                        double lt = px * -0.45 + py * 0.55 + pz * 0.7;
+                        lt += (((cx * 7 + cy * 13) % 5) - 2) * 0.03;
+                        int lev = (int)Math.Max(0, Math.Min(5, Math.Floor((lt + 0.15) * 4.5)));
+                        float k = 0.28f + lev * 0.15f;
+                        cells.Add((float)px); cells.Add((float)py); cells.Add(1.0f * k); cells.Add(0.78f * k); cells.Add(0.2f * k);
+                    }
                 hv = GCHandle.Alloc(pos, GCHandleType.Pinned); hc = GCHandle.Alloc(col, GCHandleType.Pinned);
                 Renderer = rend ?? "";
-                Bench.Extra = rend + (prog != 0 ? "  |  shader + pelos OpenGL" : "  |  pelos OpenGL");
+                Bench.Extra = rend + "  |  bola de pelos OpenGL";
                 State = 1;
                 DateTime t0 = DateTime.UtcNow;
+                hudBmp = new Bitmap(1024, 512, PixelFormat.Format32bppArgb); hudPx = new byte[1024 * 512 * 4]; hudPin = GCHandle.Alloc(hudPx, GCHandleType.Pinned);
                 while (!quit && !Bench.Stop)
                 {
                     float t = (float)(DateTime.UtcNow - t0).TotalSeconds;
@@ -8924,14 +9014,38 @@ namespace BunoTunner
                     glViewport(0, 0, w, h);
                     glClearColor(0.02f, 0.02f, 0.03f, 1f);
                     glClear(0x4000 | 0x100);
-                    glDisable(0xB71); glDisable(0xBE2);
-                    if (prog != 0)
+                    glDisable(0xB71); glDisable(0xBE2); glDisable(0xDE1);
+                    double asp0 = w / (double)h;
+                    glMatrixMode(0x1701); glLoadIdentity(); glMatrixMode(0x1700); glLoadIdentity();
+                    float sx = 1f / (float)asp0;
+                    // teia polar de fundo
+                    glColor4f(0.2f, 0.2f, 0.24f, 1f);
+                    glBegin(1);
+                    for (int sp = 0; sp < 24; sp++)
                     {
-                        glMatrixMode(0x1701); glLoadIdentity(); glMatrixMode(0x1700); glLoadIdentity();
-                        use(prog); u1(lT, t); u2(lRes, w, h); u1(lIt, 500f);
-                        glBegin(7); glVertex2f(-1, -1); glVertex2f(1, -1); glVertex2f(1, 1); glVertex2f(-1, 1); glEnd();
-                        use(0);
+                        double an = sp * Math.PI / 12;
+                        glVertex2f(0, 0); glVertex2f((float)Math.Cos(an) * 2.2f * sx, (float)Math.Sin(an) * 2.2f);
                     }
+                    for (int rg = 1; rg <= 11; rg++)
+                    {
+                        float rad = rg * 0.2f;
+                        for (int sg = 0; sg < 72; sg++)
+                        {
+                            double a1 = sg * Math.PI / 36, a2 = (sg + 1) * Math.PI / 36;
+                            glVertex2f((float)Math.Cos(a1) * rad * sx, (float)Math.Sin(a1) * rad); glVertex2f((float)Math.Cos(a2) * rad * sx, (float)Math.Sin(a2) * rad);
+                        }
+                    }
+                    glEnd();
+                    // esfera pixelada
+                    float cr = 0.34f, cs = cr / SC;
+                    glBegin(7);
+                    for (int ci = 0; ci < cells.Count; ci += 5)
+                    {
+                        float qx = cells[ci] * cr * sx, qy = cells[ci + 1] * cr, hx = cs * sx, hy = cs;
+                        glColor4f(cells[ci + 2], cells[ci + 3], cells[ci + 4], 1f);
+                        glVertex2f(qx - hx, qy - hy); glVertex2f(qx + hx, qy - hy); glVertex2f(qx + hx, qy + hy); glVertex2f(qx - hx, qy + hy);
+                    }
+                    glEnd();
                     double asp = w / (double)h;
                     glMatrixMode(0x1701); glLoadIdentity(); glFrustum(-asp * 0.1, asp * 0.1, -0.1, 0.1, 0.2, 50);
                     glMatrixMode(0x1700); glLoadIdentity();
@@ -8947,6 +9061,31 @@ namespace BunoTunner
                         glPopMatrix();
                     }
                     glDisableClientState(0x8074); glDisableClientState(0x8076);
+                    frCnt++;
+                    if ((DateTime.UtcNow - frT).TotalSeconds >= 0.5) { fpsNow = frCnt / (DateTime.UtcNow - frT).TotalSeconds; frCnt = 0; frT = DateTime.UtcNow; }
+                    if (hudOk)
+                    {
+                        try
+                        {
+                            if (hudTex == 0) { glGenTextures(1, out hudTex); glBindTexture(0xDE1, hudTex); glTexParameteri(0xDE1, 0x2801, 0x2600); glTexParameteri(0xDE1, 0x2800, 0x2600); }
+                            glBindTexture(0xDE1, hudTex);
+                            if ((DateTime.UtcNow - hudT).TotalMilliseconds >= 200 || hudW != w || hudH != h)
+                            {
+                                hudT = DateTime.UtcNow; hudW = w; hudH = h;
+                                HudRender(w, h, rend ?? "");
+                                glTexImage2D(0xDE1, 0, 4, 1024, 512, 0, 0x1908, 0x1401, hudPin.AddrOfPinnedObject());
+                            }
+                            glMatrixMode(0x1701); glLoadIdentity(); glMatrixMode(0x1700); glLoadIdentity();
+                            glDisable(0xB71); glEnable(0xDE1); glEnable(0xBE2); glBlendFunc(0x302, 0x303); glColor4f(1f, 1f, 1f, 1f);
+                            float tu = hudLW / 1024f, tv = hudLH / 512f;
+                            glBegin(7);
+                            glTexCoord2f(0, 0); glVertex2f(-1, 1); glTexCoord2f(tu, 0); glVertex2f(1, 1);
+                            glTexCoord2f(tu, tv); glVertex2f(1, -1); glTexCoord2f(0, tv); glVertex2f(-1, -1);
+                            glEnd();
+                            glDisable(0xDE1);
+                        }
+                        catch (Exception) { hudOk = false; }
+                    }
                     SwapBuffers(hdc);
                     Th.Interlocked.Increment(ref Bench.Counter);
                 }
@@ -8954,7 +9093,7 @@ namespace BunoTunner
             catch (Exception ex) { Error = ex.Message; State = 2; }
             finally
             {
-                try { if (hv.IsAllocated) hv.Free(); if (hc.IsAllocated) hc.Free(); } catch (Exception) { }
+                try { if (hv.IsAllocated) hv.Free(); if (hc.IsAllocated) hc.Free(); if (hudPin.IsAllocated) hudPin.Free(); if (hudBmp != null) hudBmp.Dispose(); } catch (Exception) { }
                 try { wglMakeCurrent(IntPtr.Zero, IntPtr.Zero); if (rc != IntPtr.Zero) wglDeleteContext(rc); if (hdc != IntPtr.Zero) ReleaseDC(hwnd, hdc); } catch (Exception) { }
             }
         }
