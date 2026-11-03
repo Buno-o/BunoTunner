@@ -486,3 +486,6 @@ v1.47.0 (TESTE)
 
 v1.47.1 (TESTE)
 - Memoria RAM > Limpar memoria / Timer Resolution: layout reorganizado com secoes (O que limpar, Atalho e limpeza automatica), dicas ao passar o mouse em cada opcao, estado do timer na linha do botao e o atalho agora e escolhido como no Overlay (clique no botao e aperte a combinacao; Esc cancela, Del remove). Todas as funcoes foram mantidas.
+
+v1.47.2 (TESTE)
+- Memoria RAM: novo layout como no modelo (Atalho e limpeza automatica acima de "O que limpar"), com divisorias entre os blocos (Timer / Latencia / Resumo) e mais espacamento. Removidos os textos de resultado e de estado: o resultado da limpeza aparece por alguns segundos no proprio botao e o estado do atalho no texto do botao; minima/maxima/atual do timer ficaram na dica da caixa de resolucao.

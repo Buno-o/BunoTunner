@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.47.1.0")]
-[assembly: AssemblyFileVersion("1.47.1.0")]
-[assembly: AssemblyInformationalVersion("1.47.1")]
+[assembly: AssemblyVersion("1.47.2.0")]
+[assembly: AssemblyFileVersion("1.47.2.0")]
+[assembly: AssemblyInformationalVersion("1.47.2")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -234,7 +234,7 @@ namespace BunoTunner
             "Limpar o cache de arquivos do sistema", "Clear the system file cache", "Limpar a lista de páginas Modificadas", "Clear the Modified page list", "Limpar memória agora", "Clean memory now",
             "Atalho para limpar:", "Hotkey to clean:", "Remover", "Remove", "Clique na caixa e aperte a combinação desejada.", "Click the box and press the desired combination.",
             "Essa combinação já é usada por outro programa.", "That combination is already used by another program.", "Atalho ativo (funciona também com o programa na bandeja).", "Hotkey active (also works while the app is in the tray).",
-            "Use Ctrl, Shift ou Alt junto com a tecla (ou uma tecla F1 a F24).", "Use Ctrl, Shift or Alt with the key (or an F1-F24 key).",
+            "Use Ctrl, Shift ou Alt junto com a tecla (ou uma tecla F1 a F24).", "Use Ctrl, Shift or Alt with the key (or an F1-F24 key).", "Use Ctrl, Shift ou Alt + tecla (ou F1 a F24)", "Use Ctrl, Shift or Alt + key (or F1-F24)", "Memória limpa", "Memory cleaned",
             "Limpar automaticamente quando a RAM em uso passar de", "Clean automatically when RAM usage goes above", "Limpando...", "Cleaning...",
             "Total", "Total", "Livre", "Free", "Em uso", "In use",
             "Resolução do timer (Timer Resolution)", "Timer resolution", "Resolução desejada:", "Desired resolution:", "Iniciar", "Start", "Parar", "Stop",
@@ -1936,7 +1936,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.47.1";
+        public const string Version = "v1.47.2";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -11344,8 +11344,8 @@ namespace BunoTunner
             "#", "Interface física (PHY)",
             "tPHYWRD", "tPHYWRD:", "tPHYWRL", "tPHYWRL:", "tPHYRDL", "tPHYRDL:", "RDDATAEN", "RdDataEn:", "CmdStgCnt", "CmdStgCnt:", "RcvrWait", "RcvrWait:" };
         string[] curSpec; string lastKind = "";
-        const int Top0 = 404;
-        Label lblMcMem, lblMcRes, lblTrInfo, lblTrState, lblHkState; XpProgress pbMc; ComboBox cbTr, cbMcPct; XpOption chkTrAuto; XpButton btnMc, btnHk; Timer mcTm; bool hkCap; LTip rtip = new LTip();
+        const int Top0 = 366, Sh = 16;
+        Label lblTrState; XpProgress pbMc; Label lblMcMem; ComboBox cbTr, cbMcPct; XpOption chkTrAuto; XpButton btnMc, btnHk; Timer mcTm; bool hkCap; LTip rtip = new LTip();
 
         Label Head(Control g, string t, int x, int y, int w)
         {
@@ -11353,15 +11353,49 @@ namespace BunoTunner
             Label ln = new Label(); ln.BorderStyle = BorderStyle.Fixed3D; ln.SetBounds(x, y + 17, w, 2); g.Controls.Add(ln);
             return l;
         }
+        // divisoria entre blocos
+        void Divider(int y) { Label ln = new Label(); ln.BorderStyle = BorderStyle.Fixed3D; ln.SetBounds(0, y, 656, 2); Controls.Add(ln); }
+
+        // troca o texto de um botao por alguns segundos (retorno de uma acao sem ocupar espaco na tela)
+        void Flash(XpButton b, string txt, int ms, Action restore)
+        {
+            b.Text = txt;
+            Timer t = new Timer(); t.Interval = ms;
+            t.Tick += delegate { t.Stop(); t.Dispose(); if (!IsDisposed) restore(); };
+            t.Start();
+        }
 
         void BuildClean()
         {
             rtip.InitialDelay = 300; rtip.AutoPopDelay = 9000;
-            XpGroup g = new XpGroup(); g.Title = "Limpar memória (Clear Memory)"; g.SetBounds(0, 0, 656, 252);
+            XpGroup g = new XpGroup(); g.Title = "Limpar memória (Clear Memory)"; g.SetBounds(0, 0, 656, 236);
             lblMcMem = UI.Lbl(g, "-", 14, 24, Xp.UiBold, Xp.GroupText); lblMcMem.AutoSize = false; lblMcMem.SetBounds(14, 24, 630, 18);
             pbMc = new XpProgress(); pbMc.SetBounds(14, 44, 628, 12); g.Controls.Add(pbMc);
 
-            Head(g, "O que limpar", 14, 66, 628);
+            Head(g, "Atalho e limpeza automática", 14, 68, 628);
+            btnMc = UI.Btn(g, "Limpar memória agora", 14, 94, 176, delegate { RunClean(); });
+            btnMc.Height = 28;
+            rtip.SetToolTip(btnMc, "Limpa agora, conforme as opções de \"O que limpar\" (abaixo). A memória livre aparece atualizada na barra de cima.");
+            UI.Lbl(g, "Atalho:", 206, 100);
+            btnHk = UI.Btn(g, "", 256, 94, 250, delegate { hkCap = true; MemClean.Pause(true); ShowHk(); });
+            btnHk.Height = 28;
+            btnHk.LostFocus += delegate { if (hkCap) { hkCap = false; MemClean.Pause(false); ShowHk(); } };
+            rtip.SetToolTip(btnHk, "Clique e aperte a combinação (Ctrl, Shift ou Alt + tecla, ou uma tecla F1 a F24). Esc cancela e Del remove. Funciona mesmo com o programa na bandeja e a combinação não chega aos outros programas.");
+            XpButton bRem = UI.Btn(g, "Remover", 514, 94, 80, delegate { MemClean.SetKey(0, 0); hkCap = false; MemClean.Pause(false); ShowHk(); });
+            bRem.Height = 28;
+            rtip.SetToolTip(bRem, "Apaga o atalho.");
+            XpOption oa = UI.Opt(g, "Limpar automaticamente quando a RAM em uso passar de", 14, 132, 330, false);
+            oa.Checked = MemClean.Opt("mc_auto", false);
+            oa.CheckedChanged += delegate { Settings.Set("mc_auto", oa.Checked ? "1" : "0"); };
+            rtip.SetToolTip(oa, "Confere a memória a cada 5 segundos e limpa sozinho quando passar do limite (no máximo uma vez por minuto).");
+            cbMcPct = new ComboBox(); cbMcPct.DropDownStyle = ComboBoxStyle.DropDownList; cbMcPct.Font = Xp.Ui; cbMcPct.SetBounds(350, 130, 64, 22);
+            int pct = 85; int.TryParse(Settings.Get("mc_autopct", "85"), out pct);
+            for (int v = 60; v <= 95; v += 5) { cbMcPct.Items.Add(v + " %"); if (v == pct) cbMcPct.SelectedIndex = cbMcPct.Items.Count - 1; }
+            if (cbMcPct.SelectedIndex < 0) cbMcPct.SelectedIndex = 5;
+            cbMcPct.SelectedIndexChanged += delegate { Settings.Set("mc_autopct", (60 + cbMcPct.SelectedIndex * 5).ToString()); };
+            g.Controls.Add(cbMcPct);
+
+            Head(g, "O que limpar", 14, 164, 628);
             string[][] ops = {
                 new string[] { "mc_ws", "1", "Esvaziar o working set dos processos", "Pede ao Windows para devolver a RAM que os programas abertos não estão usando de verdade. Os programas voltam a pedir o que precisam." },
                 new string[] { "mc_sb", "1", "Limpar a lista Standby", "Esvazia o cache de arquivos já lidos (RAM \"em espera\"). Libera bastante memória, mas os arquivos podem demorar um pouco mais para abrir na próxima vez." },
@@ -11370,35 +11404,25 @@ namespace BunoTunner
             for (int i = 0; i < 4; i++)
             {
                 string key = ops[i][0];
-                XpOption o = UI.Opt(g, ops[i][2], 14 + (i % 2) * 316, 88 + (i / 2) * 22, 308, false);
+                XpOption o = UI.Opt(g, ops[i][2], 14 + (i % 2) * 316, 190 + (i / 2) * 22, 308, false);
                 o.Checked = MemClean.Opt(key, ops[i][1] == "1");
                 o.CheckedChanged += delegate { Settings.Set(key, o.Checked ? "1" : "0"); };
                 rtip.SetToolTip(o, ops[i][3]);
             }
-            btnMc = UI.Btn(g, "Limpar memória agora", 14, 136, 176, delegate { RunClean(); });
-            btnMc.Height = 28;
-            lblMcRes = UI.Lbl(g, "", 200, 143, Xp.Ui, Xp.Dim); lblMcRes.AutoSize = false; lblMcRes.SetBounds(200, 143, 444, 18);
-
-            Head(g, "Atalho e limpeza automática", 14, 176, 628);
-            UI.Lbl(g, "Atalho:", 14, 204);
-            btnHk = UI.Btn(g, "", 64, 199, 250, delegate { hkCap = true; MemClean.Pause(true); ShowHk(); });
-            btnHk.LostFocus += delegate { if (hkCap) { hkCap = false; MemClean.Pause(false); ShowHk(); } };
-            rtip.SetToolTip(btnHk, "Clique e aperte a combinação (Ctrl, Shift ou Alt + tecla, ou uma tecla F1 a F24). Esc cancela e Del remove. Funciona mesmo com o programa na bandeja e a combinação não chega aos outros programas.");
-            XpButton bRem = UI.Btn(g, "Remover", 322, 199, 80, delegate { MemClean.SetKey(0, 0); hkCap = false; MemClean.Pause(false); ShowHk(); });
-            rtip.SetToolTip(bRem, "Apaga o atalho.");
-            lblHkState = UI.Lbl(g, "", 410, 197, Xp.Ui, Xp.Dim); lblHkState.AutoSize = false; lblHkState.SetBounds(410, 197, 236, 30);
-            XpOption oa = UI.Opt(g, "Limpar automaticamente quando a RAM em uso passar de", 14, 228, 330, false);
-            oa.Checked = MemClean.Opt("mc_auto", false);
-            oa.CheckedChanged += delegate { Settings.Set("mc_auto", oa.Checked ? "1" : "0"); };
-            rtip.SetToolTip(oa, "Confere a memória a cada 5 segundos e limpa sozinho quando passar do limite (no máximo uma vez por minuto).");
-            cbMcPct = new ComboBox(); cbMcPct.DropDownStyle = ComboBoxStyle.DropDownList; cbMcPct.Font = Xp.Ui; cbMcPct.SetBounds(350, 226, 64, 22);
-            int pct = 85; int.TryParse(Settings.Get("mc_autopct", "85"), out pct);
-            for (int v = 60; v <= 95; v += 5) { cbMcPct.Items.Add(v + " %"); if (v == pct) cbMcPct.SelectedIndex = cbMcPct.Items.Count - 1; }
-            if (cbMcPct.SelectedIndex < 0) cbMcPct.SelectedIndex = 5;
-            cbMcPct.SelectedIndexChanged += delegate { Settings.Set("mc_autopct", (60 + cbMcPct.SelectedIndex * 5).ToString()); };
-            g.Controls.Add(cbMcPct);
             Controls.Add(g);
-            MemClean.Cleaned += delegate(string r) { try { BeginInvoke(new Action(delegate { lblMcRes.ForeColor = Xp.Good; lblMcRes.Text = Lang.T(r); UpdateMc(); })); } catch (Exception) { } };
+            MemClean.Cleaned += delegate(string r)
+            {
+                try
+                {
+                    BeginInvoke(new Action(delegate
+                    {
+                        UpdateMc(); rtip.SetToolTip(btnMc, Lang.T(r));
+                        string sh = r.StartsWith("Liberado") ? r.Substring(0, r.IndexOf(" MB") + 3) : "Memória limpa";
+                        Flash(btnMc, Lang.T(sh), 4000, delegate { btnMc.Text = Lang.T("Limpar memória agora"); });
+                    }));
+                }
+                catch (Exception) { }
+            };
             mcTm = new Timer(); mcTm.Interval = 1000; mcTm.Tick += delegate { if (Visible) { UpdateMc(); UpdateTr(); } }; mcTm.Start();
             UpdateMc();
             ShowHk();
@@ -11417,7 +11441,7 @@ namespace BunoTunner
                 else
                 {
                     int mods = ((keyData & Keys.Control) != 0 ? 1 : 0) | ((keyData & Keys.Shift) != 0 ? 2 : 0) | ((keyData & Keys.Alt) != 0 ? 4 : 0);
-                    if (mods == 0 && !(code >= Keys.F1 && code <= Keys.F24)) { ShowHk(); lblHkState.ForeColor = Xp.Bad; lblHkState.Text = Lang.T("Use Ctrl, Shift ou Alt junto com a tecla (ou uma tecla F1 a F24)."); return true; }
+                    if (mods == 0 && !(code >= Keys.F1 && code <= Keys.F24)) { Flash(btnHk, Lang.T("Use Ctrl, Shift ou Alt + tecla (ou F1 a F24)"), 2500, delegate { ShowHk(); }); return true; }
                     MemClean.SetKey(mods, (int)code);
                 }
                 ShowHk();
@@ -11428,12 +11452,9 @@ namespace BunoTunner
 
         void ShowHk()
         {
-            if (lblHkState == null) return;
-            if (hkCap) { btnHk.Text = Lang.T("Pressione o atalho...  (Esc cancela, Del limpa)"); lblHkState.ForeColor = Xp.Dim; lblHkState.Text = ""; return; }
+            if (btnHk == null) return;
+            if (hkCap) { btnHk.Text = Lang.T("Pressione o atalho...  (Esc cancela, Del limpa)"); return; }
             btnHk.Text = Lang.T("Limpar memória: ") + (MemClean.Vk == 0 ? Lang.T("(nenhum)") : MemClean.KeyName()) + (MemClean.Vk != 0 && !MemClean.KeyOk ? " " + Lang.T("(em uso!)") : "");
-            if (MemClean.Vk == 0) { lblHkState.ForeColor = Xp.Dim; lblHkState.Text = Lang.T("Sem atalho. Clique no botão ao lado e aperte a combinação."); }
-            else if (!MemClean.KeyOk) { lblHkState.ForeColor = Xp.Bad; lblHkState.Text = Lang.T("Essa combinação já é usada por outro programa."); }
-            else { lblHkState.ForeColor = Xp.Good; lblHkState.Text = Lang.T("Atalho ativo (funciona também com o programa na bandeja)."); }
         }
 
         void UpdateMc()
@@ -11445,36 +11466,35 @@ namespace BunoTunner
 
         void RunClean()
         {
-            btnMc.Enabled = false; lblMcRes.ForeColor = Xp.Dim; lblMcRes.Text = Lang.T("Limpando...");
+            btnMc.Enabled = false; btnMc.Text = Lang.T("Limpando...");
             System.Threading.ThreadPool.QueueUserWorkItem(delegate
             {
-                try { MemClean.CleanSaved(); } catch (Exception ex) { try { BeginInvoke(new Action(delegate { lblMcRes.ForeColor = Xp.Bad; lblMcRes.Text = "Erro: " + ex.Message; })); } catch (Exception) { } }
+                try { MemClean.CleanSaved(); } catch (Exception ex) { try { BeginInvoke(new Action(delegate { Flash(btnMc, "Erro: " + ex.Message, 4000, delegate { btnMc.Text = Lang.T("Limpar memória agora"); }); })); } catch (Exception) { } }
                 try { BeginInvoke(new Action(delegate { btnMc.Enabled = true; })); } catch (Exception) { }
             });
         }
 
         void BuildTimerRes()
         {
-            XpGroup g = new XpGroup(); g.Title = "Resolução do timer (Timer Resolution)"; g.SetBounds(0, 258, 656, 140);
-            lblTrInfo = UI.Lbl(g, "-", 14, 24, Xp.UiBold, Xp.GroupText); lblTrInfo.AutoSize = false; lblTrInfo.SetBounds(14, 24, 630, 18);
-            Head(g, "Resolução do timer", 14, 46, 628);
-            UI.Lbl(g, "Pedir:", 14, 74);
-            cbTr = new ComboBox(); cbTr.DropDownStyle = ComboBoxStyle.DropDownList; cbTr.Font = Xp.Ui; cbTr.SetBounds(60, 70, 230, 22);
+            Divider(240);
+            XpGroup g = new XpGroup(); g.Title = ""; g.SetBounds(0, 252, 656, 100);
+            Head(g, "Resolução do timer", 14, 16, 628);
+            UI.Lbl(g, "Pedir:", 14, 48);
+            cbTr = new ComboBox(); cbTr.DropDownStyle = ComboBoxStyle.DropDownList; cbTr.Font = Xp.Ui; cbTr.SetBounds(60, 44, 230, 22);
             foreach (string n in TimerRes.Names) cbTr.Items.Add(n);
             cbTr.SelectedIndex = TimerRes.Selected;
             cbTr.SelectedIndexChanged += delegate { Settings.Set("tr_idx", cbTr.SelectedIndex.ToString()); if (TimerRes.Active) TrStart(); UpdateTr(); };
             g.Controls.Add(cbTr);
-            XpButton bi = UI.Btn(g, "Iniciar", 300, 69, 90, delegate { TrStart(); });
-            XpButton bp = UI.Btn(g, "Parar", 396, 69, 90, delegate { TimerRes.Stop(); lblTrState.ForeColor = Xp.Dim; UpdateTr(); });
-            rtip.SetToolTip(bi, "Pede ao Windows essa resolução de timer. Vale enquanto o BunoTunner estiver aberto ou até clicar em Parar.");
+            XpButton bi = UI.Btn(g, "Iniciar", 300, 43, 90, delegate { TrStart(); });
+            XpButton bp = UI.Btn(g, "Parar", 396, 43, 90, delegate { TimerRes.Stop(); lblTrState.ForeColor = Xp.Dim; UpdateTr(); });
+            rtip.SetToolTip(bi, "Pede ao Windows essa resolução de timer. Vale enquanto o BunoTunner estiver aberto ou até clicar em Parar. Resoluções menores deixam o Windows mais responsivo (jogos, áudio), mas gastam um pouco mais de energia. No Windows 11 pode valer só para o próprio BunoTunner.");
             rtip.SetToolTip(bp, "Volta ao padrão do Windows (15,625 ms).");
-            lblTrState = UI.Lbl(g, "", 494, 74, Xp.UiBold, Xp.Dim); lblTrState.AutoSize = false; lblTrState.SetBounds(494, 74, 152, 18);
-            chkTrAuto = UI.Opt(g, "Aplicar automaticamente ao abrir o BunoTunner", 14, 100, 380, false);
+            lblTrState = UI.Lbl(g, "", 494, 48, Xp.UiBold, Xp.Dim); lblTrState.AutoSize = false; lblTrState.SetBounds(494, 48, 152, 18);
+            chkTrAuto = UI.Opt(g, "Aplicar automaticamente ao abrir o BunoTunner", 14, 74, 380, false);
             chkTrAuto.Checked = Settings.Get("tr_auto", "0") == "1";
             chkTrAuto.CheckedChanged += delegate { Settings.Set("tr_auto", chkTrAuto.Checked ? "1" : "0"); };
-            Label h = UI.Lbl(g, "Resoluções menores deixam o Windows mais responsivo (jogos, áudio), mas gastam um pouco mais de energia. No Windows 11 a mudança pode valer só para o próprio BunoTunner.", 14, 120, Xp.Ui, Xp.Dim);
-            h.AutoSize = false; h.SetBounds(14, 120, 630, 16);
             Controls.Add(g);
+            Divider(Top0 - 14);
             UpdateTr();
         }
 
@@ -11488,10 +11508,10 @@ namespace BunoTunner
 
         void UpdateTr()
         {
-            if (lblTrInfo == null) return;
+            if (cbTr == null) return;
             double a, b, c;
-            if (!TimerRes.Query(out a, out b, out c)) { lblTrInfo.Text = "-"; return; }
-            lblTrInfo.Text = Lang.T("Mínima") + ": " + a.ToString("0.###") + " ms    " + Lang.T("Máxima (mais fina)") + ": " + b.ToString("0.###") + " ms    " + Lang.T("Atual") + ": " + c.ToString("0.###") + " ms";
+            if (TimerRes.Query(out a, out b, out c))
+                rtip.SetToolTip(cbTr, Lang.T("Mínima") + ": " + a.ToString("0.###") + " ms    " + Lang.T("Máxima (mais fina)") + ": " + b.ToString("0.###") + " ms    " + Lang.T("Atual") + ": " + c.ToString("0.###") + " ms");
             if (lblTrState != null && !lblTrState.ForeColor.Equals(Xp.Bad))
             {
                 lblTrState.ForeColor = TimerRes.Active ? Xp.Good : Xp.Dim;
@@ -11527,7 +11547,7 @@ namespace BunoTunner
             Dock = DockStyle.Fill;
             AutoScroll = true;
             BuildClean(); BuildTimerRes();
-            BuildLatency(); BuildSummary(); BuildMods(); BuildTimings(SpecBasic);
+            BuildLatency(); Divider(Top0 + 142 + 7); BuildSummary(); BuildMods(); BuildTimings(SpecBasic);
             VisibleChanged += delegate { if (Visible && !readOnce) { readOnce = true; ReadAsync(); } };
         }
 
@@ -11664,7 +11684,7 @@ namespace BunoTunner
 
         void BuildSummary()
         {
-            XpGroup g = new XpGroup(); g.Title = "Resumo da memória"; g.SetBounds(0, 148 + Top0, 656, 120);
+            XpGroup g = new XpGroup(); g.Title = "Resumo da memória"; g.SetBounds(0, 148 + Top0 + Sh, 656, 120);
             lblType = Val(g, "Tipo:", 14, 24, 190); lblCap = Val(g, "Capacidade total:", 14, 46, 190); lblSpeed = Val(g, "Velocidade:", 14, 68, 190);
             lblChan = Val(g, "Canais:", 350, 24, 180); lblVolt = Val(g, "Voltagem:", 350, 46, 180); lblRank = Val(g, "Ranks / ECC:", 350, 68, 180);
             lblBw = UI.Lbl(g, "", 14, 92, Xp.Ui, Xp.Dim);
@@ -11674,7 +11694,7 @@ namespace BunoTunner
 
         void BuildMods()
         {
-            ((XpList)lvMod).AutoFit = true; lvMod.SetBounds(0, 274 + Top0, 656, 104); lvMod.View = View.Details; lvMod.FullRowSelect = true; lvMod.GridLines = true;
+            ((XpList)lvMod).AutoFit = true; lvMod.SetBounds(0, 274 + Top0 + Sh, 656, 104); lvMod.View = View.Details; lvMod.FullRowSelect = true; lvMod.GridLines = true;
             lvMod.BackColor = Xp.EditBg; lvMod.Font = Xp.Ui;
             lvMod.Columns.Add("Slot", 140); lvMod.Columns.Add("Cap.", 55); lvMod.Columns.Add("Fabricante", 90); lvMod.Columns.Add("Part number", 150);
             lvMod.Columns.Add("MT/s", 50); lvMod.Columns.Add("Volt", 55); lvMod.Columns.Add("Tipo", 50); lvMod.Columns.Add("Ranks", 50);
@@ -11722,7 +11742,7 @@ namespace BunoTunner
                     try { BeginInvoke(new Action(delegate { try { Clipboard.SetText(d); } catch (Exception) { } Dlg.Show(this, d + "\n(copiado para a área de transferência)", "BunoTunner - diagnóstico dos timings"); })); } catch (Exception) { }
                 });
             });
-            g.SetBounds(0, 384 + Top0, 656, by + 44);
+            g.SetBounds(0, 384 + Top0 + Sh, 656, by + 44);
             Controls.Add(g);
         }
 
