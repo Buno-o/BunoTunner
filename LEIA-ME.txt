@@ -474,3 +474,7 @@ v1.45.2 (TESTE)
 
 v1.45.3 (TESTE)
 - Otimizacoes: a faixa de Drivers ficou verde e o bloco "Aplicar todos os ajustes" ganhou uma faixa azul propria, "Tweaks e DeBloat", ambas com a descricao no lado direito.
+
+v1.46.0 (TESTE)
+- Privacidade: "Desativar telemetria" nao falha mais no item do Defender (envio de amostras): agora grava a politica do Defender no registro (funciona com Protecao contra Adulteracao ou outro antivirus) e so tenta o Set-MpPreference como complemento.
+- Benchmark de FPU: novo visual dourado - malha grande deformada pelo campo de ondas calculado em ponto flutuante, sobre fundo cosmico dourado (galaxias, estrelas, aneis e tensores g e R), HUD em dourado. Janela maior.

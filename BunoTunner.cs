@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.45.3.0")]
-[assembly: AssemblyFileVersion("1.45.3.0")]
-[assembly: AssemblyInformationalVersion("1.45.3")]
+[assembly: AssemblyVersion("1.46.0.0")]
+[assembly: AssemblyFileVersion("1.46.0.0")]
+[assembly: AssemblyInformationalVersion("1.46.0")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1923,7 +1923,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.45.3";
+        public const string Version = "v1.46.0";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -7697,7 +7697,7 @@ namespace BunoTunner
         protected override void Dispose(bool d)
         {
             quit = true; tm.Stop();
-            if (d) { bmp.Dispose(); foreach (Pen p in furPens) p.Dispose(); }
+            if (d) { bmp.Dispose(); foreach (Pen p in furPens) p.Dispose(); if (fpuBg != null) fpuBg.Dispose(); if (meshPen != null) { foreach (Pen p in meshPen) p.Dispose(); foreach (Pen p in meshGlow) p.Dispose(); } }
             base.Dispose(d);
         }
 
@@ -7983,28 +7983,118 @@ namespace BunoTunner
             }
         }
 
+        // FPU: malha dourada deformada pelo campo de ondas calculado (em ponto flutuante) pelas threads, sobre um fundo cosmico dourado
+        Bitmap fpuBg; Size fpuBgSz; Pen[] meshPen, meshGlow;
+
+        Bitmap BuildFpuBg(int w, int h)
+        {
+            Bitmap bm = new Bitmap(w, h, PixelFormat.Format32bppArgb);
+            Random rd = new Random(5);
+            using (Graphics g = Graphics.FromImage(bm))
+            {
+                g.SmoothingMode = SmoothingMode.AntiAlias; g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+                using (GraphicsPath gp = new GraphicsPath())
+                {
+                    gp.AddEllipse(-w * 0.2f, -h * 0.2f, w * 1.4f, h * 1.4f);
+                    using (PathGradientBrush pb = new PathGradientBrush(gp))
+                    {
+                        pb.CenterColor = Color.FromArgb(40, 26, 12); pb.SurroundColors = new Color[] { Color.FromArgb(6, 4, 2) };
+                        g.FillRectangle(pb, 0, 0, w, h);
+                    }
+                }
+                // aneis fracos em volta do centro
+                using (Pen rp = new Pen(Color.FromArgb(26, 255, 190, 90), 2f))
+                    for (int i = 0; i < 5; i++) { float rr = Math.Min(w, h) * (0.3f + i * 0.09f); g.DrawEllipse(rp, w * 0.5f - rr * 1.15f, h * 0.52f - rr, rr * 2.3f, rr * 2); }
+                // galaxias / brilhos
+                double[][] gx = { new double[] { 0.23, 0.35, 70, 0.9 }, new double[] { 0.72, 0.32, 90, 1.0 }, new double[] { 0.485, 0.52, 110, 1.0 }, new double[] { 0.27, 0.71, 95, 1.0 }, new double[] { 0.9, 0.9, 30, 0.6 }, new double[] { 0.1, 0.62, 40, 0.5 } };
+                foreach (double[] q in gx)
+                {
+                    float cx = (float)(q[0] * w), cy = (float)(q[1] * h), rr = (float)(q[2] * Math.Min(w, h) / 900.0 * 2);
+                    using (GraphicsPath gp = new GraphicsPath())
+                    {
+                        gp.AddEllipse(cx - rr, cy - rr * 0.6f, rr * 2, rr * 1.2f);
+                        using (PathGradientBrush pb = new PathGradientBrush(gp))
+                        {
+                            pb.CenterColor = Color.FromArgb((int)(210 * q[3]), 255, 190, 90); pb.SurroundColors = new Color[] { Color.FromArgb(0, 255, 150, 40) };
+                            pb.CenterPoint = new PointF(cx, cy);
+                            g.FillPath(pb, gp);
+                        }
+                    }
+                    using (SolidBrush cb = new SolidBrush(Color.FromArgb((int)(255 * q[3]), 255, 235, 180))) g.FillEllipse(cb, cx - 3, cy - 3, 6, 6);
+                }
+                // estrelas
+                for (int i = 0; i < w * h / 900; i++)
+                {
+                    int x = rd.Next(w), y = rd.Next(h), al = 40 + rd.Next(180);
+                    Color c = rd.Next(5) == 0 ? Color.FromArgb(al, 255, 200, 110) : Color.FromArgb(al, 255, 245, 225);
+                    using (SolidBrush sb = new SolidBrush(c)) g.FillRectangle(sb, x, y, rd.Next(14) == 0 ? 2 : 1, rd.Next(14) == 0 ? 2 : 1);
+                }
+                // tensores da relatividade geral (decoracao)
+                using (Font fi = new Font("Times New Roman", Math.Max(16f, h / 28f), FontStyle.Italic), fs = new Font("Times New Roman", Math.Max(9f, h / 55f), FontStyle.Italic))
+                using (SolidBrush tb = new SolidBrush(Color.FromArgb(150, 205, 170, 105)))
+                {
+                    string[] sym = { "g", "g", "g", "R" }; double[][] pos = { new double[] { 0.08, 0.07 }, new double[] { 0.87, 0.14 }, new double[] { 0.15, 0.8 }, new double[] { 0.75, 0.8 } };
+                    for (int i = 0; i < 4; i++)
+                    {
+                        float px = (float)(pos[i][0] * w), py = (float)(pos[i][1] * h);
+                        g.DrawString(sym[i], fi, tb, px, py);
+                        SizeF sz = g.MeasureString(sym[i], fi);
+                        g.DrawString("μν", fs, tb, px + sz.Width * 0.55f, py + sz.Height * 0.55f);
+                    }
+                }
+                using (Pen cp = new Pen(Color.FromArgb(110, 230, 190, 120)))
+                {
+                    float cx = w * 0.85f, cy = h * 0.65f; g.DrawLine(cp, cx - 9, cy, cx + 9, cy); g.DrawLine(cp, cx, cy - 9, cx, cy + 9);
+                }
+            }
+            return bm;
+        }
+
+        double FieldAt(double u, double v)
+        {
+            if (u < 0) u = 0; else if (u > 1) u = 1; if (v < 0) v = 0; else if (v > 1) v = 1;
+            return field[(int)(u * (FN - 1)) * FN + (int)(v * (FN - 1))];
+        }
+
         void DrawWave(Graphics g, Rectangle r, double t)
         {
-            int n = 30;
-            double ay = t * 0.5, ax = 0.9;
-            double cay = Math.Cos(ay), say = Math.Sin(ay), cax = Math.Cos(ax), sax = Math.Sin(ax);
-            double ox = r.X + r.Width / 2.0, oy = r.Y + r.Height / 2.0 + 20, sc = Math.Min(r.Width, r.Height) * 0.75;
-            PointF[,] pts = new PointF[n, n]; double[,] hh = new double[n, n];
-            for (int i = 0; i < n; i++)
-                for (int j = 0; j < n; j++)
+            if (meshPen == null)
+            {
+                meshPen = new Pen[8]; meshGlow = new Pen[8];
+                for (int i = 0; i < 8; i++)
                 {
-                    double x = (i - n / 2.0) / (n / 2.0) * 1.3, z = (j - n / 2.0) / (n / 2.0) * 1.3;
-                    double h = field[(int)(i * (FN - 1) / (n - 1.0)) * FN + (int)(j * (FN - 1) / (n - 1.0))] * 1.4;
-                    double x1 = x * cay + z * say, z1 = -x * say + z * cay, y1 = h * cax - z1 * sax, z2 = h * sax + z1 * cax, d;
-                    pts[i, j] = Proj(x1, y1, z2, ox, oy, sc, out d); hh[i, j] = h;
+                    double k = i / 7.0;
+                    meshPen[i] = new Pen(Color.FromArgb((int)(150 + 105 * k), (int)(95 + 135 * k), (int)(25 + 105 * k)), 1.6f);
+                    meshGlow[i] = new Pen(Color.FromArgb(34, 255, 175, 60), 5f);
                 }
-            using (Pen p1 = new Pen(Color.FromArgb(60, 200, 90)), p2 = new Pen(Color.FromArgb(120, 255, 140)), p3 = new Pen(Color.FromArgb(220, 255, 200)))
-                for (int i = 0; i < n; i++)
-                    for (int j = 0; j < n; j++)
+            }
+            if (fpuBg == null || fpuBgSz.Width != Width || fpuBgSz.Height != Height)
+            {
+                if (fpuBg != null) fpuBg.Dispose();
+                fpuBgSz = new Size(Math.Max(1, Width), Math.Max(1, Height)); fpuBg = BuildFpuBg(fpuBgSz.Width, fpuBgSz.Height);
+            }
+            g.DrawImageUnscaled(fpuBg, 0, 0);
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            int nc = 44, nr = 26;
+            double cx = r.X + r.Width / 2.0, cy = r.Y + r.Height / 2.0 + 6, Wm = r.Width * 0.88, Hm = r.Height * 0.72;
+            PointF[,] pt = new PointF[nc + 1, nr + 1]; double[,] hv = new double[nc + 1, nr + 1];
+            for (int a = 0; a <= nc; a++)
+                for (int b = 0; b <= nr; b++)
+                {
+                    double u = a / (double)nc, v = b / (double)nr;
+                    double h = FieldAt(u, v), hx = FieldAt(v * 0.9 + 0.05, u * 0.9 + 0.05);
+                    double X = cx + (u - 0.5) * Wm * (1 + 0.1 * h) + hx * Wm * 0.07;
+                    double Y = cy + (v - 0.5) * Hm + h * Hm * 0.55;
+                    pt[a, b] = new PointF((float)X, (float)Y); hv[a, b] = h;
+                }
+            for (int pass = 0; pass < 2; pass++)
+                for (int a = 0; a <= nc; a++)
+                    for (int b = 0; b <= nr; b++)
                     {
-                        Pen p = hh[i, j] > 0.2 ? p3 : (hh[i, j] > 0 ? p2 : p1);
-                        if (i + 1 < n) g.DrawLine(p, pts[i, j], pts[i + 1, j]);
-                        if (j + 1 < n) g.DrawLine(p, pts[i, j], pts[i, j + 1]);
+                        int ci = (int)Math.Max(0, Math.Min(7, (hv[a, b] + 0.45) / 0.9 * 7));
+                        Pen pn = pass == 0 ? meshGlow[ci] : meshPen[ci];
+                        if (a < nc) g.DrawLine(pn, pt[a, b], pt[a + 1, b]);
+                        if (b < nr) g.DrawLine(pn, pt[a, b], pt[a, b + 1]);
                     }
         }
 
@@ -8202,12 +8292,12 @@ namespace BunoTunner
             {
                 TextRenderer.DrawText(g, Lang.T(Names[Kind < 5 ? Kind : 0]), f, new Point(12, 8), Color.FromArgb(255, 200, 60));
                 string rt = Rate.ToString("0.0") + " " + Unit;
-                TextRenderer.DrawText(g, rt, fb, new Point(12, Height - 70), Color.White);
+                TextRenderer.DrawText(g, rt, fb, new Point(12, Height - 70), Kind == 2 ? Color.FromArgb(255, 226, 150) : Color.White);
                 string tt = double.IsNaN(Temp) ? "-" : Temp.ToString("0") + " °C";
                 int es = (int)Elapsed, tot = (int)Total;
                 string tm2 = (es / 60).ToString("00") + ":" + (es % 60).ToString("00") + (tot > 0 ? " / " + (tot / 60).ToString("00") + ":" + (tot % 60).ToString("00") : "");
                 string info = "Temperatura: " + tt + "     Tempo: " + tm2 + "     Erros: " + Errors + (Kind == 0 || Kind == 2 ? "     FPS do render: " + fps.ToString("0") : "") + (Kind == 1 ? "     Pontos: " + (Rate * 100).ToString("0") + " pts" : "");
-                TextRenderer.DrawText(g, Lang.T(info), fs, new Point(12, Height - 36), Color.FromArgb(200, 200, 200));
+                TextRenderer.DrawText(g, Lang.T(info), fs, new Point(12, Height - 36), Kind == 2 ? Color.FromArgb(225, 190, 110) : Color.FromArgb(200, 200, 200));
                 if (!string.IsNullOrEmpty(Extra)) TextRenderer.DrawText(g, Lang.T(Extra), fs, new Point(12, Height - 20), Color.FromArgb(150, 150, 150));
             }
         }
@@ -8219,7 +8309,7 @@ namespace BunoTunner
         public RenderForm(int kind, int threads)
         {
             Text = "BunoTunner - Render do teste (Esc fecha e para)";
-            Size = kind == 1 ? new Size(720, 760) : new Size(700, 560);
+            Size = kind == 1 ? new Size(720, 760) : (kind == 2 ? new Size(900, 740) : new Size(700, 560));
             Cv = new BenchCanvas(kind, threads);
             if (kind == 0)
             {
@@ -14003,9 +14093,21 @@ namespace BunoTunner
                 Svcs = new string[][] { new string[] { "diagtrack", "disabled", "auto" }, new string[] { "WerSvc", "disabled", "demand" } },
                 Extra = delegate(bool on)
                 {
-                    string r = Ps("Set-MpPreference -SubmitSamplesConsent " + (on ? "2" : "1"), "");
-                    Environment.SetEnvironmentVariable("POWERSHELL_TELEMETRY_OPTOUT", on ? "1" : null, EnvironmentVariableTarget.Machine);
-                    return r.Length > 0 ? "Defender: " + r : null;
+                    // politica do Defender (funciona mesmo com Protecao contra Adulteracao ou outro antivirus; Set-MpPreference falha nesses casos)
+                    bool okPol = false;
+                    try
+                    {
+                        using (RegistryKey k = Registry.LocalMachine.CreateSubKey(@"SOFTWARE\Policies\Microsoft\Windows Defender\Spynet"))
+                        {
+                            if (on) { k.SetValue("SubmitSamplesConsent", 2, RegistryValueKind.DWord); k.SetValue("SpynetReporting", 0, RegistryValueKind.DWord); }
+                            else { k.DeleteValue("SubmitSamplesConsent", false); k.DeleteValue("SpynetReporting", false); }
+                            okPol = true;
+                        }
+                    }
+                    catch (Exception) { }
+                    string r = Ps("Set-MpPreference -SubmitSamplesConsent " + (on ? "2" : "1") + " -ErrorAction SilentlyContinue", "");
+                    try { Environment.SetEnvironmentVariable("POWERSHELL_TELEMETRY_OPTOUT", on ? "1" : null, EnvironmentVariableTarget.Machine); } catch (Exception) { }
+                    return (r.Length > 0 && !okPol) ? "Defender: " + r : null;
                 } });
             AddTw(new Tw { Title = "Desativar o Recall (IA que salva prints)", Desc = "Políticas DisableAIDataAnalysis=1 (WindowsAI) e AllowRecallEnablement=0 (Recall): impedem a IA do Windows de capturar e analisar o que aparece na tela.",
                 Regs = new R[] {
