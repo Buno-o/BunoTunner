@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.44.1.0")]
-[assembly: AssemblyFileVersion("1.44.1.0")]
-[assembly: AssemblyInformationalVersion("1.44.1")]
+[assembly: AssemblyVersion("1.45.0.0")]
+[assembly: AssemblyFileVersion("1.45.0.0")]
+[assembly: AssemblyInformationalVersion("1.45.0")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -228,6 +228,7 @@ namespace BunoTunner
             "SSD  -  sequencial + 4K aleatório", "SSD  -  sequential + random 4K",
             "Usa um arquivo temporário no drive escolhido (apagado ao fim). Em 'Até parar' gera desgaste.", "Uses a temporary file on the chosen drive (deleted at the end). 'Until stopped' causes wear.",
             "Duração:", "Duration:",
+            "Unidade de medida", "Unit of measure", "Unidade de medida (todos deste tipo)", "Unit of measure (all of this type)", "Usar o padrão do tipo", "Use the type default",
             "Pelos:", "Fur strands:", "50 mil", "50 thousand", "100 mil", "100 thousand", "250 mil", "250 thousand", "500 mil", "500 thousand", "1 milhão", "1 million",
             "Quantidade de pelos do render. Mais pelos = teste mais pesado (FPS menor).", "Number of fur strands in the render. More strands = heavier test (lower FPS).",
             "Threads:", "Threads:",
@@ -1890,7 +1891,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.44.1";
+        public const string Version = "v1.45.0";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -3161,7 +3162,7 @@ namespace BunoTunner
                 List<string> rows = new List<string>(); List<Color> cols = new List<Color>();
                 rows.Add(k == 0 ? "agora" : "-" + Secs(k * PeriodMs / 1000.0)); cols.Add(Color.Yellow);
                 foreach (Series s in Items)
-                    if (k < s.V.Count) { rows.Add(s.Sn.Name + ": " + Num(s.V[s.V.Count - 1 - k]) + " " + Sn.Unit(s.Sn.Type)); cols.Add(s.Color); }
+                    if (k < s.V.Count) { rows.Add(s.Sn.Name + ": " + Num(s.Sn.Conv(s.V[s.V.Count - 1 - k])) + " " + s.Sn.UName); cols.Add(s.Color); }
                 DrawBox(g, pl, (int)x + 10, pl.Bottom - rows.Count * 14 - 12, rows, cols);
             }
             if (Paused) TextRenderer.DrawText(g, Lang.T("PAUSADO"), Xp.UiBold, new Point(pl.Right - 70, pl.Top + 4), Color.Yellow);
@@ -3682,7 +3683,102 @@ namespace BunoTunner
         public string Fmt(float? v)
         {
             if (!v.HasValue) return "-";
-            return v.Value.ToString("0.##") + " " + Unit(Type);
+            return Conv(v.Value).ToString("0.##") + " " + UName;
+        }
+
+        // ---------- unidades de medida (escolhidas com o botao direito; salvas e usadas tambem no overlay) ----------
+        public class UDef { public string Name; public double Mul, Add; public UDef(string n, double m, double a) { Name = n; Mul = m; Add = a; } }
+        static readonly Dictionary<string, UDef[]> UDefs = new Dictionary<string, UDef[]>
+        {
+            { "Temperature", new UDef[] { new UDef("\u00B0C", 1, 0), new UDef("\u00B0F", 1.8, 32), new UDef("K", 1, 273.15) } },
+            { "Data", new UDef[] { new UDef("GB", 1, 0), new UDef("MB", 1024, 0), new UDef("KB", 1048576, 0), new UDef("TB", 1.0 / 1024, 0) } },
+            { "SmallData", new UDef[] { new UDef("MB", 1, 0), new UDef("KB", 1024, 0), new UDef("GB", 1.0 / 1024, 0) } },
+            { "Throughput", new UDef[] { new UDef("B/s", 1, 0), new UDef("KB/s", 1.0 / 1024, 0), new UDef("MB/s", 1.0 / 1048576, 0), new UDef("Mb/s", 8e-6, 0), new UDef("Gb/s", 8e-9, 0) } },
+            { "Clock", new UDef[] { new UDef("MHz", 1, 0), new UDef("GHz", 0.001, 0) } },
+            { "Frequency", new UDef[] { new UDef("Hz", 1, 0), new UDef("kHz", 0.001, 0), new UDef("MHz", 1e-6, 0) } },
+            { "Power", new UDef[] { new UDef("W", 1, 0), new UDef("mW", 1000, 0), new UDef("kW", 0.001, 0) } },
+            { "Energy", new UDef[] { new UDef("mWh", 1, 0), new UDef("Wh", 0.001, 0), new UDef("kWh", 1e-6, 0) } },
+            { "Fan", new UDef[] { new UDef("RPM", 1, 0), new UDef("RPS", 1.0 / 60, 0) } },
+            { "Voltage", new UDef[] { new UDef("V", 1, 0), new UDef("mV", 1000, 0) } },
+            { "Current", new UDef[] { new UDef("A", 1, 0), new UDef("mA", 1000, 0) } },
+            { "Flow", new UDef[] { new UDef("L/h", 1, 0), new UDef("L/min", 1.0 / 60, 0) } },
+            { "TimeSpan", new UDef[] { new UDef("s", 1, 0), new UDef("min", 1.0 / 60, 0), new UDef("h", 1.0 / 3600, 0) } }
+        };
+        static Dictionary<string, int> unitSel; static int unitVer;
+        int uVer = -1, uCache;
+        public static UDef[] Defs(string type) { UDef[] d; return UDefs.TryGetValue(type, out d) ? d : null; }
+        static void EnsureUnits()
+        {
+            if (unitSel != null) return;
+            unitSel = new Dictionary<string, int>();
+            string v = Settings.Get("units", "");
+            foreach (string e in v.Split(new string[] { "~|~" }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                string[] p = e.Split(new string[] { "~=~" }, StringSplitOptions.None); int n;
+                if (p.Length == 2 && int.TryParse(p[1], out n)) unitSel[p[0]] = n;
+            }
+        }
+        static void SaveUnits()
+        {
+            List<string> l = new List<string>();
+            foreach (KeyValuePair<string, int> kv in unitSel) l.Add(kv.Key + "~=~" + kv.Value);
+            Settings.Set("units", string.Join("~|~", l.ToArray()));
+            unitVer++;
+        }
+        public int UnitIdx
+        {
+            get
+            {
+                if (uVer == unitVer) return uCache;
+                UDef[] d = Defs(Type); int r = 0;
+                if (d != null)
+                {
+                    EnsureUnits(); int v;
+                    if (unitSel.TryGetValue("S|" + Key, out v) || unitSel.TryGetValue("T|" + Type, out v)) r = v >= 0 && v < d.Length ? v : 0;
+                }
+                uCache = r; uVer = unitVer; return r;
+            }
+        }
+        public string UName { get { UDef[] d = Defs(Type); return d == null ? Unit(Type) : d[UnitIdx].Name; } }
+        public float Conv(float v) { UDef[] d = Defs(Type); if (d == null) return v; UDef u = d[UnitIdx]; return (float)(v * u.Mul + u.Add); }
+        public static int TypeUnit(string type) { EnsureUnits(); int v; return unitSel.TryGetValue("T|" + type, out v) ? v : 0; }
+        public static void SetUnit(Sn s, int i) { EnsureUnits(); unitSel["S|" + s.Key] = i; SaveUnits(); }
+        public static void SetTypeUnit(string type, int i)
+        {
+            EnsureUnits();
+            if (i == 0) unitSel.Remove("T|" + type); else unitSel["T|" + type] = i;
+            foreach (Sn x in SensorHub.AllSensors.ToArray()) if (x.Type == type) unitSel.Remove("S|" + x.Key);
+            SaveUnits();
+        }
+        public static void ClearUnit(Sn s) { EnsureUnits(); unitSel.Remove("S|" + s.Key); SaveUnits(); }
+        // monta o submenu de unidades (todos os sensores selecionados devem ser do mesmo tipo do primeiro)
+        public static void FillUnitMenu(ToolStripMenuItem root, List<Sn> sel, bool perType, Action after)
+        {
+            root.DropDownItems.Clear();
+            UDef[] ds = sel.Count > 0 ? Defs(sel[0].Type) : null;
+            root.Enabled = ds != null;
+            if (ds == null) return;
+            Sn s0 = sel[0]; string type = s0.Type;
+            for (int i = 0; i < ds.Length; i++)
+            {
+                int ii = i;
+                ToolStripMenuItem it = new ToolStripMenuItem(ds[i].Name);
+                it.Checked = perType ? TypeUnit(type) == i : s0.UnitIdx == i;
+                it.Click += delegate
+                {
+                    if (perType) SetTypeUnit(type, ii);
+                    else foreach (Sn x in sel) if (x.Type == type) SetUnit(x, ii);
+                    if (after != null) after();
+                };
+                root.DropDownItems.Add(it);
+            }
+            if (!perType)
+            {
+                root.DropDownItems.Add(new ToolStripSeparator());
+                ToolStripMenuItem d0 = new ToolStripMenuItem(Lang.T("Usar o padrão do tipo"));
+                d0.Click += delegate { foreach (Sn x in sel) ClearUnit(x); if (after != null) after(); };
+                root.DropDownItems.Add(d0);
+            }
         }
     }
 
@@ -5167,7 +5263,7 @@ namespace BunoTunner
             foreach (Sn s in all)
             {
                 if (!s.AlertAbove.HasValue || !s.Last.HasValue || s.Last.Value <= s.AlertAbove.Value) continue;
-                txt = "ALERTA: " + s.Name + " = " + s.Fmt(s.Last) + " (limite " + s.AlertAbove.Value.ToString("0.##") + ")";
+                txt = "ALERTA: " + s.Name + " = " + s.Fmt(s.Last) + " (limite " + s.Conv(s.AlertAbove.Value).ToString("0.##") + " " + s.UName + ")";
                 if ((now - s.LastBeep).TotalSeconds > 15)
                 {
                     s.LastBeep = now;
@@ -5842,7 +5938,8 @@ namespace BunoTunner
             float? v = s.Last; if (!v.HasValue) return "-";
             string f = "0";
             if (s.Type == "Voltage" || s.Type == "Current") f = "0.00"; else if (s.Type == "Power" || s.Type == "Data" || s.Type == "SmallData") f = "0.#";
-            return v.Value.ToString(f, CultureInfo.InvariantCulture) + " " + Sn.Unit(s.Type);
+            if (s.UnitIdx != 0 && s.Type != "Temperature") f = "0.##";
+            return s.Conv(v.Value).ToString(f, CultureInfo.InvariantCulture) + " " + s.UName;
         }
 
         static bool Covers(IntPtr fg)
@@ -6395,6 +6492,14 @@ namespace BunoTunner
             ContextMenuStrip cma = new ContextMenuStrip();
             cma.Items.Add(Lang.T("Adicionar ao overlay"), null, delegate { AddSel(); });
             cma.Items.Add(Lang.T("Adicionar todos os resultados da busca"), null, delegate { foreach (ListViewItem it in lvAv.Items) { string k = (string)it.Tag; if (!Overlay.Items.Contains(k)) Overlay.Items.Add(k); } Overlay.Commit(); });
+            ToolStripMenuItem miUa = new ToolStripMenuItem(Lang.T("Unidade de medida")), miUaAll = new ToolStripMenuItem(Lang.T("Unidade de medida (todos deste tipo)"));
+            cma.Items.Add(new ToolStripSeparator()); cma.Items.Add(miUa); cma.Items.Add(miUaAll);
+            cma.Opening += delegate
+            {
+                List<Sn> us = new List<Sn>();
+                foreach (ListViewItem it in lvAv.SelectedItems) { Sn x = Overlay.Find((string)it.Tag); if (x != null) us.Add(x); }
+                Sn.FillUnitMenu(miUa, us, false, delegate { Overlay.Commit(); }); Sn.FillUnitMenu(miUaAll, us, true, delegate { Overlay.Commit(); });
+            };
             lvAv.ContextMenuStrip = cma;
             lvAv.KeyDown += delegate(object o, KeyEventArgs e) { if (e.KeyCode == Keys.A && e.Control) { foreach (ListViewItem it in lvAv.Items) it.Selected = true; e.Handled = true; } };
             chkCompact.CheckedChanged += delegate { if (building) return; Overlay.Compact = chkCompact.Checked; Overlay.Commit(); };
@@ -6427,6 +6532,15 @@ namespace BunoTunner
             cm.Items.Add(new ToolStripSeparator());
             cm.Items.Add(Lang.T("Subir"), null, delegate { MoveSel(-1); });
             cm.Items.Add(Lang.T("Descer"), null, delegate { MoveSel(1); });
+            cm.Items.Add(new ToolStripSeparator());
+            ToolStripMenuItem miUs = new ToolStripMenuItem(Lang.T("Unidade de medida")), miUsAll = new ToolStripMenuItem(Lang.T("Unidade de medida (todos deste tipo)"));
+            cm.Items.Add(miUs); cm.Items.Add(miUsAll);
+            cm.Opening += delegate
+            {
+                List<Sn> us = new List<Sn>(); int ui = SelIdx();
+                if (ui >= 0 && ui < Overlay.Items.Count) { Sn x = Overlay.Find(Overlay.Items[ui]); if (x != null) us.Add(x); }
+                Sn.FillUnitMenu(miUs, us, false, delegate { Overlay.Commit(); }); Sn.FillUnitMenu(miUsAll, us, true, delegate { Overlay.Commit(); });
+            };
             cm.Items.Add(new ToolStripSeparator());
             cm.Items.Add(Lang.T("Remover do overlay"), null, delegate { RemSel(); });
             lbSel.MouseDown += delegate(object o, MouseEventArgs e)
@@ -6935,6 +7049,15 @@ namespace BunoTunner
             menu.Items.Add("Mostrar / ocultar no gráfico", null, delegate { TogglePlot(); });
             menu.Items.Add("Definir alerta (acima de...)", null, delegate { SetAlertDlg(); });
             menu.Items.Add("Remover alerta", null, delegate { RemoveAlert(); });
+            menu.Items.Add(new ToolStripSeparator());
+            ToolStripMenuItem miUnit = new ToolStripMenuItem("Unidade de medida"), miUnitAll = new ToolStripMenuItem("Unidade de medida (todos deste tipo)");
+            menu.Items.Add(miUnit); menu.Items.Add(miUnitAll);
+            menu.Opening += delegate
+            {
+                List<Sn> us = new List<Sn>();
+                foreach (ListViewItem it in lv.SelectedItems) us.Add((Sn)it.Tag);
+                Sn.FillUnitMenu(miUnit, us, false, null); Sn.FillUnitMenu(miUnitAll, us, true, null);
+            };
             menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add("Copiar nome", null, delegate { CopySel(false); });
             menu.Items.Add("Copiar valor", null, delegate { CopySel(true); });

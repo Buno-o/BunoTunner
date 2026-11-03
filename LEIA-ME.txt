@@ -460,3 +460,7 @@ v1.44.0 (TESTE)
 
 v1.44.1 (TESTE)
 - Render de CPU mais parecido com a foto de referencia: floresta densa e escura ao fundo (copas com manchas de sol, troncos em duas camadas, ceu so nas aberturas), grama mais fina e mais clara, e area distante do gramado mais escura.
+
+v1.45.0 (TESTE)
+- Sensores: clique direito em um sensor > "Unidade de medida" para trocar a unidade (temperatura C/F/K; dados KB/MB/GB/TB; taxa B/s, KB/s, MB/s, Mb/s, Gb/s; MHz/GHz; W/mW/kW; V/mV; RPM; etc.). "Unidade de medida (todos deste tipo)" aplica a todos os sensores do mesmo tipo.
+- A conversao e feita num unico ponto (na hora de mostrar o valor): lista, graficos (dica), alertas na barra e overlay usam a mesma unidade. A escolha fica salva e vale tambem no Overlay (que tambem tem o mesmo menu de clique direito).
