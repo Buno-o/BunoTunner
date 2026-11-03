@@ -478,3 +478,8 @@ v1.45.3 (TESTE)
 v1.46.0 (TESTE)
 - Privacidade: "Desativar telemetria" nao falha mais no item do Defender (envio de amostras): agora grava a politica do Defender no registro (funciona com Protecao contra Adulteracao ou outro antivirus) e so tenta o Set-MpPreference como complemento.
 - Benchmark de FPU: novo visual dourado - malha grande deformada pelo campo de ondas calculado em ponto flutuante, sobre fundo cosmico dourado (galaxias, estrelas, aneis e tensores g e R), HUD em dourado. Janela maior.
+
+v1.47.0 (TESTE)
+- Menu Memoria RAM: novo bloco "Limpar memoria (Clear Memory)": esvazia o working set dos processos, a lista Standby, o cache de arquivos do sistema e a lista de paginas Modificadas (voce escolhe quais), mostra quanto foi liberado, tem ATALHO GLOBAL configuravel (Ctrl/Shift/Alt + tecla, funciona com o programa na bandeja) e limpeza automatica quando a RAM em uso passar de um limite.
+- Menu Memoria RAM: novo bloco "Resolucao do timer (Timer Resolution)": mostra minima/maxima/atual e permite pedir 0,5 ms a 15,625 ms (Iniciar/Parar), com opcao de aplicar ao abrir o programa.
+- Funcoes implementadas direto sobre as APIs do Windows (NtSetSystemInformation, SetSystemFileCacheSize, NtSetTimerResolution), inspiradas no app Memory Cleaner.
