@@ -442,3 +442,6 @@ v1.43.0 (TESTE)
 
 v1.43.1 (TESTE)
 - Correcao de um aviso do compilador no HUD do benchmark de GPU (v1.43.0 nao foi publicada como estavel).
+
+v1.43.2 (TESTE)
+- Benchmark de GPU: HUD agora desenhado na resolucao real da janela (texto suave, sem pixelar). Bola de pelos com mistura normal (nao estoura mais em branco) e esfera dourada pixelada visivel no centro.

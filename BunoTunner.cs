@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.43.1.0")]
-[assembly: AssemblyFileVersion("1.43.1.0")]
-[assembly: AssemblyInformationalVersion("1.43.1")]
+[assembly: AssemblyVersion("1.43.2.0")]
+[assembly: AssemblyFileVersion("1.43.2.0")]
+[assembly: AssemblyInformationalVersion("1.43.2")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1888,7 +1888,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.43.1";
+        public const string Version = "v1.43.2";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -8861,15 +8861,17 @@ namespace BunoTunner
             "vec3 c=0.5+0.5*sin(a*5.0+vec3(0.0,2.0,4.0)); gl_FragColor=vec4(c*0.32,1.0); }";
 
         // ---- HUD desenhado sobre o render (texto GDI+ em textura) ----
-        Bitmap hudBmp; byte[] hudPx; GCHandle hudPin; uint hudTex; bool hudOk = true; int hudW, hudH, hudLW = 640, hudLH = 480;
+        Bitmap hudBmp; byte[] hudPx; GCHandle hudPin; uint hudTex; bool hudOk = true; int hudW, hudH, hudLW = 640, hudLH = 480, hudPW = 640, hudPH = 480;
         DateTime hudT = DateTime.MinValue, frT = DateTime.UtcNow, tHistT = DateTime.MinValue; int frCnt; double fpsNow;
         List<double> tHist = new List<double>();
         static readonly Color Gold = Color.FromArgb(255, 196, 40), Orange = Color.FromArgb(255, 140, 20);
 
         void HudRender(int w, int h, string rend)
         {
-            hudLW = 640; hudLH = Math.Max(200, Math.Min(512, (int)Math.Round(640.0 * h / Math.Max(1, w))));
-            int LW = hudLW, LH = hudLH;
+            hudPW = Math.Max(320, Math.Min(2048, w)); hudPH = Math.Max(240, Math.Min(1024, h));
+            float kk = hudPW / 640f;
+            hudLW = hudPW; hudLH = hudPH;
+            int LW = 640, LH = (int)(hudPH / kk);
             BenchCanvas hd = Hud;
             double tmp = hd != null ? hd.Temp : double.NaN;
             if ((DateTime.UtcNow - tHistT).TotalSeconds >= 1)
@@ -8889,8 +8891,9 @@ namespace BunoTunner
             {
                 far.Alignment = StringAlignment.Far;
                 g.Clear(Color.Transparent);
-                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixel;
-                g.SmoothingMode = SmoothingMode.None;
+                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+                g.ScaleTransform(kk, kk);
                 Color grey = Color.FromArgb(170, 170, 170);
                 using (SolidBrush bGold = new SolidBrush(Gold), bOr = new SolidBrush(Orange), bW = new SolidBrush(Color.White), bG = new SolidBrush(grey), bR = new SolidBrush(Color.FromArgb(235, 40, 40)))
                 {
@@ -8906,7 +8909,8 @@ namespace BunoTunner
                     RectangleF rr = new RectangleF(0, 4, LW - 8, 40);
                     g.DrawString(fpsNow.ToString("0") + " FPS", fBig, bW, rr, far);
                     float yy = 44;
-                    g.DrawString("Temp. GPU: ", fMid, bW, new RectangleF(0, yy, LW - 8 - 34, 22), far);
+                    float vw0 = g.MeasureString(ts + "°C", fMid).Width - 6;
+                    g.DrawString("Temp. GPU: ", fMid, bW, new RectangleF(0, yy, LW - 8 - vw0, 22), far);
                     g.DrawString(ts + "°C", fMid, bR, new RectangleF(0, yy, LW - 8, 22), far);
                     // grafico de historico
                     Rectangle gr = new Rectangle(LW - 8 - 170, 70, 170, 56);
@@ -8930,15 +8934,15 @@ namespace BunoTunner
                     g.DrawString("FPS médio do teste: " + avgR.ToString("0") + "    Carga: pelos 90.000", fS, bW, 10, LH - 21);
                 }
             }
-            BitmapData bd = hudBmp.LockBits(new Rectangle(0, 0, 1024, 512), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+            BitmapData bd = hudBmp.LockBits(new Rectangle(0, 0, 2048, 1024), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
             try
             {
-                byte[] src = new byte[bd.Stride * 512];
+                byte[] src = new byte[bd.Stride * 1024];
                 Marshal.Copy(bd.Scan0, src, 0, src.Length);
-                for (int y = 0; y < LH; y++)
+                for (int y = 0; y < hudPH; y++)
                 {
-                    int o = y * 4096;
-                    for (int x = 0; x < LW; x++)
+                    int o = y * 8192;
+                    for (int x = 0; x < hudPW; x++)
                     {
                         int i = o + x * 4;
                         hudPx[i] = src[i + 2]; hudPx[i + 1] = src[i + 1]; hudPx[i + 2] = src[i]; hudPx[i + 3] = src[i + 3];
@@ -8978,17 +8982,17 @@ namespace BunoTunner
                 {
                     double z = rnd.NextDouble() * 2 - 1, ph = rnd.NextDouble() * Math.PI * 2, rr = Math.Sqrt(1 - z * z);
                     double nx = rr * Math.Cos(ph), ny = z, nz = rr * Math.Sin(ph);
-                    double R0 = 0.58;
-                    double len = 0.22 + rnd.NextDouble() * 0.3;
+                    double R0 = 0.54;
+                    double len = 0.2 + rnd.NextDouble() * 0.34;
                     double bx = nx * R0, by = ny * R0, bz = nz * R0;
                     double ex = nx * (R0 + len) + (rnd.NextDouble() - 0.5) * 0.08, ey = ny * (R0 + len) - 0.05 * len + (rnd.NextDouble() - 0.5) * 0.08, ez = nz * (R0 + len) + (rnd.NextDouble() - 0.5) * 0.08;
                     pos[i * 6] = (float)bx; pos[i * 6 + 1] = (float)by; pos[i * 6 + 2] = (float)bz;
                     pos[i * 6 + 3] = (float)ex; pos[i * 6 + 4] = (float)ey; pos[i * 6 + 5] = (float)ez;
-                    col[i * 8] = 0.55f; col[i * 8 + 1] = 0.22f; col[i * 8 + 2] = 0.0f; col[i * 8 + 3] = 0.45f;
-                    col[i * 8 + 4] = 1.0f; col[i * 8 + 5] = 0.72f + (float)rnd.NextDouble() * 0.22f; col[i * 8 + 6] = 0.12f; col[i * 8 + 7] = 0.45f;
+                    col[i * 8] = 0.75f; col[i * 8 + 1] = 0.3f; col[i * 8 + 2] = 0.0f; col[i * 8 + 3] = 0.5f;
+                    col[i * 8 + 4] = 1.0f; col[i * 8 + 5] = 0.72f + (float)rnd.NextDouble() * 0.22f; col[i * 8 + 6] = 0.1f; col[i * 8 + 7] = 0.12f;
                 }
                 // esfera dourada pixelada no centro (celulas em unidades de tela)
-                const int SC = 30;
+                const int SC = 36;
                 List<float> cells = new List<float>();
                 for (int cy = 0; cy < SC; cy++)
                     for (int cx = 0; cx < SC; cx++)
@@ -9007,7 +9011,7 @@ namespace BunoTunner
                 Bench.Extra = rend + "  |  bola de pelos OpenGL";
                 State = 1;
                 DateTime t0 = DateTime.UtcNow;
-                hudBmp = new Bitmap(1024, 512, PixelFormat.Format32bppArgb); hudPx = new byte[1024 * 512 * 4]; hudPin = GCHandle.Alloc(hudPx, GCHandleType.Pinned);
+                hudBmp = new Bitmap(2048, 1024, PixelFormat.Format32bppArgb); hudPx = new byte[2048 * 1024 * 4]; hudPin = GCHandle.Alloc(hudPx, GCHandleType.Pinned);
                 while (!quit && !Bench.Stop)
                 {
                     float t = (float)(DateTime.UtcNow - t0).TotalSeconds;
@@ -9038,7 +9042,7 @@ namespace BunoTunner
                     }
                     glEnd();
                     // esfera pixelada
-                    float cr = 0.34f, cs = cr / SC;
+                    float cr = 0.33f, cs = cr / SC;
                     glBegin(7);
                     for (int ci = 0; ci < cells.Count; ci += 5)
                     {
@@ -9051,11 +9055,11 @@ namespace BunoTunner
                     glMatrixMode(0x1701); glLoadIdentity(); glFrustum(-asp * 0.1, asp * 0.1, -0.1, 0.1, 0.2, 50);
                     glMatrixMode(0x1700); glLoadIdentity();
                     glTranslatef(0, 0, -3.4f); glRotatef(30f + 12f * (float)Math.Sin(t * 0.4), 1, 0, 0); glRotatef(t * 35f, 0, 1, 0);
-                    glEnable(0xBE2); glBlendFunc(0x302, 1);
+                    glEnable(0xBE2); glBlendFunc(0x302, 0x303);
                     glEnableClientState(0x8074); glEnableClientState(0x8076);
                     glVertexPointer(3, 0x1406, 0, hv.AddrOfPinnedObject());
                     glColorPointer(4, 0x1406, 0, hc.AddrOfPinnedObject());
-                    for (int p = 0; p < 4; p++)
+                    for (int p = 0; p < 2; p++)
                     {
                         glPushMatrix(); glRotatef(p * 0.35f, 0, 1, 0);
                         glDrawArrays(1, 0, N * 2);
@@ -9068,17 +9072,17 @@ namespace BunoTunner
                     {
                         try
                         {
-                            if (hudTex == 0) { glGenTextures(1, out hudTex); glBindTexture(0xDE1, hudTex); glTexParameteri(0xDE1, 0x2801, 0x2600); glTexParameteri(0xDE1, 0x2800, 0x2600); }
+                            if (hudTex == 0) { glGenTextures(1, out hudTex); glBindTexture(0xDE1, hudTex); glTexParameteri(0xDE1, 0x2801, 0x2601); glTexParameteri(0xDE1, 0x2800, 0x2601); }
                             glBindTexture(0xDE1, hudTex);
                             if ((DateTime.UtcNow - hudT).TotalMilliseconds >= 200 || hudW != w || hudH != h)
                             {
                                 hudT = DateTime.UtcNow; hudW = w; hudH = h;
                                 HudRender(w, h, rend ?? "");
-                                glTexImage2D(0xDE1, 0, 4, 1024, 512, 0, 0x1908, 0x1401, hudPin.AddrOfPinnedObject());
+                                glTexImage2D(0xDE1, 0, 4, 2048, 1024, 0, 0x1908, 0x1401, hudPin.AddrOfPinnedObject());
                             }
                             glMatrixMode(0x1701); glLoadIdentity(); glMatrixMode(0x1700); glLoadIdentity();
                             glDisable(0xB71); glEnable(0xDE1); glEnable(0xBE2); glBlendFunc(0x302, 0x303); glColor4f(1f, 1f, 1f, 1f);
-                            float tu = hudLW / 1024f, tv = hudLH / 512f;
+                            float tu = hudPW / 2048f, tv = hudPH / 1024f;
                             glBegin(7);
                             glTexCoord2f(0, 0); glVertex2f(-1, 1); glTexCoord2f(tu, 0); glVertex2f(1, 1);
                             glTexCoord2f(tu, tv); glVertex2f(1, -1); glTexCoord2f(0, tv); glVertex2f(-1, -1);
