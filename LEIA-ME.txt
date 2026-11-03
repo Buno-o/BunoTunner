@@ -380,3 +380,8 @@ v1.36.0 (TESTE)
 
 v1.36.1 (TESTE)
 - Overlay: todos os textos agora tem contorno preto em volta, em todos os layouts (a espessura acompanha o tamanho do overlay).
+
+v1.37.0 (TESTE)
+- Overlay: os 25 layouts foram refeitos com mais detalhes (cabecalho com titulo, linhas e faixas alternadas, brilho de vidro, cantos/rebites, linhas de varredura, pontos coloridos e capsulas atras dos valores), mantendo os mesmos nomes e a escolha independente do tema do programa.
+- Otimizar: os drivers de GPU/Chipset da fabricante foram juntados ao "Atualizar drivers" (marque Windows Update e/ou site da fabricante; "So verificar" so lista, sem baixar). Os ajustes do Windows agora estao divididos em categorias com faixa de titulo (Limpeza e manutencao, Desempenho em jogos, Interface do Windows, Seguranca avancada).
+- Ventoinhas: botoes de velocidade rapida (0/25/50/75/100

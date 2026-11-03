@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - codigo aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.36.1.0")]
-[assembly: AssemblyFileVersion("1.36.1.0")]
-[assembly: AssemblyInformationalVersion("1.36.1")]
+[assembly: AssemblyVersion("1.37.0.0")]
+[assembly: AssemblyFileVersion("1.37.0.0")]
+[assembly: AssemblyInformationalVersion("1.37.0")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -375,7 +375,9 @@ namespace BunoTunner
             "Consulta o site da NVIDIA / AMD e compara com o driver instalado. Se houver versao mais nova, baixa o instalador oficial, confere a assinatura digital e abre a instalacao normal para voce concluir. Para Intel, abre o Assistente de Drivers da Intel.", "Checks the NVIDIA / AMD website and compares with the installed driver. If a newer version exists, it downloads the official installer, checks its digital signature and opens the normal installation for you to finish. For Intel, it opens Intel's Driver & Support Assistant.",
             "Verificar GPU e Chipset", "Check GPU and Chipset",
             "Consultando os sites das fabricantes...", "Checking the manufacturers' websites...",
-            "Concluido.", "Done.", "Ignorado.", "Skipped.",
+            "Atualizar drivers (todos os dispositivos, GPU e Chipset)", "Update drivers (all devices, GPU and Chipset)", "Windows Update (todos os dispositivos)", "Windows Update (all devices)", "Site da fabricante (GPU NVIDIA/AMD e chipset AMD)", "Manufacturer website (NVIDIA/AMD GPU and AMD chipset)",
+            "Marque pelo menos uma das origens (Windows Update ou site da fabricante).", "Tick at least one source (Windows Update or manufacturer website).", "---- Windows Update ----", "---- Windows Update ----", "---- Site da fabricante ----", "---- Manufacturer website ----",
+            "Concluido.", "Done.", "Ignorado.", "Skipped.", "Inverter selecao", "Invert selection", "Dica: Enter nos campos de % ou RPM tambem aplica.", "Tip: Enter in the % or RPM boxes also applies.", "Identificar = liga as selecionadas a 100% por 5 s para voce descobrir qual e qual.  Botao direito na lista: selecionar por tipo ou renomear (inclua CPU, Bomba ou Gabinete no nome). Atalhos: Ctrl+A seleciona tudo, F2 ou duplo clique renomeia.", "Identify = runs the selected fans at 100% for 5 s so you can tell which is which.  Right-click the list: select by type or rename (include CPU, Pump or Case in the name). Shortcuts: Ctrl+A selects all, F2 or double-click renames.", "Limpeza e manutencao", "Cleanup and maintenance", "Libera espaco no disco.", "Frees disk space.", "Desempenho em jogos", "Gaming performance", "Ajustes que podem melhorar FPS, tremidas e resposta do mouse.", "Tweaks that can improve FPS, stutter and mouse response.", "Interface do Windows", "Windows interface", "Aparencia e comportamento do sistema.", "System look and behavior.", "Seguranca (avancado)", "Security (advanced)", "Estes ajustes REDUZEM a protecao do PC. Use so se souber o que esta fazendo.", "These tweaks REDUCE the PC's protection. Use only if you know what you are doing.", "Mantenha a GPU, o chipset e os demais dispositivos atualizados.", "Keep the GPU, chipset and other devices up to date.",
             "Instalador fechado.", "Installer closed.",
             "Abrindo o instalador. Conclua a instalacao na janela da fabricante...", "Opening the installer. Finish the installation in the manufacturer's window...",
             "Instalador apagado por seguranca. Nada foi executado.", "Installer deleted for safety. Nothing was run.",
@@ -1885,7 +1887,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.36.1";
+        public const string Version = "v1.37.0";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -5987,6 +5989,7 @@ namespace BunoTunner
         {
             rows = r; scale = sc; scr = screen; edit = ed;
             Fonts();
+            LD d = CurLay(ed);
             float s = sc / 100f; int pad = (int)(9 * s), gap = Overlay.Compact ? 0 : (int)(16 * s), rh = fl.Height + (int)(5 * s);
             int lw = 0, vw = 0;
             foreach (Overlay.Row x in r)
@@ -5994,12 +5997,17 @@ namespace BunoTunner
                 if (!Overlay.Compact) lw = Math.Max(lw, (int)Math.Ceiling(TW(x.Label, fl)));
                 vw = Math.Max(vw, (int)Math.Ceiling(TW(x.Value, fv)));
             }
+            if (!Overlay.Compact && !d.Dot.IsEmpty) lw += (int)(9 * s);
+            if (!d.Pill.IsEmpty) vw += (int)(10 * s);
             int grip = ed ? (int)(14 * s) : 0;
             int w = Math.Max((int)(110 * s), pad * 2 + grip + lw + gap + vw);
             if (ed) w = Math.Max(w, (int)(250 * s));
+            else if (d.Hdr != null) w = Math.Max(w, (int)Math.Ceiling(TW(d.Hdr, fv)) + pad * 2 + 4);
             int y = pad - (int)(2 * s);
             hdrR = Rectangle.Empty; btnR = Rectangle.Empty;
+            hdrH = 0;
             if (ed) { hdrR = new Rectangle(0, 0, w, (int)(22 * s)); y = hdrR.Height + (int)(4 * s); }
+            else if (d.Hdr != null) { hdrH = fv.Height + (int)(4 * s); y += hdrH + (int)(3 * s); }
             rowR.Clear();
             for (int i = 0; i < r.Count; i++) { rowR.Add(new Rectangle(pad, y, w - pad * 2, rh)); y += rh; }
             if (r.Count == 0) y += rh;
@@ -6030,7 +6038,15 @@ namespace BunoTunner
         }
 
         // ---- layouts do overlay (independentes do tema do programa; os 7 "Tema:" usam a paleta de cada tema) ----
-        public class LD { public string Name; public int Rad = -1; public Color Top, Bot, Bd, Bar, Bar2, Lab, Val, Glow; public float BW = 1f; public int BarPos; public bool Shadow, Bevel, Soft; }
+        public class LD
+        {
+            public string Name, Hdr; public int Rad = -1, BarPos, CornerStyle; public float BW = 1f;
+            public Color Top, Bot, Bd, Bar, Bar2, Lab, Val, Glow, HdrA, HdrB, HdrTx, Line, Zebra, Inner, Corner, Pill, PillBd, Dot;
+            public bool Bevel, Soft, Gloss, Scan;
+        }
+        static LD CurLay(bool ed) { return Layouts[ed ? 0 : Math.Max(0, Math.Min(Layouts.Length - 1, Overlay.Layout))]; }
+        static Color Sc(Color c, int bg) { return Color.FromArgb(Math.Max(0, Math.Min(255, c.A * bg / 255)), c); }
+        int hdrH;
         static Color K(int r, int g, int b) { return Color.FromArgb(r, g, b); }
         static Color KA(int a, int r, int g, int b) { return Color.FromArgb(a, r, g, b); }
         static LD N(List<LD> l, string n) { LD d = new LD(); d.Name = n; l.Add(d); return d; }
@@ -6050,33 +6066,33 @@ namespace BunoTunner
         static LD[] BuildLayouts()
         {
             List<LD> l = new List<LD>(); LD d; Pal p;
-            d = N(l, "Padrao (fundo + contorno)"); d.Top = d.Bot = cBg; d.Bd = cBorder; d.Soft = true;
-            d = N(l, "Sem fundo nem contorno"); d.Shadow = true;
-            d = N(l, "So contorno (sem fundo)"); d.Bd = cBorder;
-            d = N(l, "Barra lateral"); d.Top = d.Bot = cBg; d.Rad = 0; d.Bar = K(0, 160, 255); d.BarPos = 1;
-            d = N(l, "Neon"); d.Top = d.Bot = cBg; d.Bd = K(0, 229, 255); d.Glow = K(0, 229, 255);
-            d = N(l, "Terminal (verde)"); d.Top = d.Bot = K(0, 0, 0); d.Rad = 0; d.Bd = K(0, 200, 70); d.Lab = K(50, 170, 80); d.Val = K(110, 255, 140);
+            d = N(l, "Padrao (fundo + contorno)"); d.Top = d.Bot = cBg; d.Bd = cBorder; d.Soft = true; d.Line = KA(30, 255, 255, 255); d.Gloss = true;
+            d = N(l, "Sem fundo nem contorno"); d.Dot = K(0, 229, 255);
+            d = N(l, "So contorno (sem fundo)"); d.Bd = K(235, 238, 245); d.BW = 2f; d.Inner = KA(110, 255, 255, 255); d.Corner = K(255, 255, 255); d.CornerStyle = 1;
+            d = N(l, "Barra lateral"); d.Top = d.Bot = cBg; d.Rad = 0; d.Bar = K(0, 190, 255); d.Bar2 = K(0, 90, 220); d.BarPos = 1; d.Zebra = KA(18, 255, 255, 255); d.Line = KA(36, 255, 255, 255); d.Dot = K(0, 190, 255);
+            d = N(l, "Neon"); d.Top = K(10, 6, 24); d.Bot = K(24, 6, 46); d.Bd = K(0, 229, 255); d.Glow = K(0, 229, 255); d.Hdr = "NEON"; d.HdrA = K(0, 120, 150); d.HdrB = K(10, 6, 24); d.HdrTx = K(0, 245, 255); d.Inner = KA(90, 255, 0, 200); d.Dot = K(255, 0, 200); d.Rad = 8; d.Val = K(230, 250, 255); d.Lab = K(130, 170, 200);
+            d = N(l, "Terminal (verde)"); d.Top = d.Bot = K(0, 6, 0); d.Rad = 0; d.Bd = K(0, 200, 70); d.Hdr = "C:\\> monitor_"; d.HdrA = K(0, 90, 30); d.HdrB = K(0, 50, 16); d.HdrTx = K(110, 255, 140); d.Scan = true; d.Line = KA(70, 0, 200, 70); d.Corner = K(0, 255, 90); d.CornerStyle = 1; d.Lab = K(50, 170, 80); d.Val = K(110, 255, 140);
             // temas do programa (cores vindas da paleta de cada tema, nao do tema ativo)
-            p = Pal.Make(0); d = N(l, "Tema: Luna (XP)"); d.Top = d.Bot = p.Face; d.Bd = p.CapFrame; d.BW = 2f; d.Bar = p.CapA; d.Bar2 = p.CapB; d.BarPos = 2; d.Lab = K(70, 70, 70); d.Val = p.Text;
-            p = Pal.Make(1); d = N(l, "Tema: Frutiger Aero (Win 7)"); d.Top = K(250, 252, 255); d.Bot = p.PaneTop; d.Bd = p.Border; d.Rad = 16; d.Lab = K(60, 80, 110); d.Val = p.GroupText;
-            p = Pal.Make(2); d = N(l, "Tema: Dark / AMOLED"); d.Top = d.Bot = p.Face; d.Bd = p.Border; d.Rad = 10; d.Bar = p.GroupText; d.BarPos = 1; d.Lab = p.Dim; d.Val = p.Text;
-            p = Pal.Make(3); d = N(l, "Tema: Neon / Cyberpunk"); d.Top = d.Bot = p.Face; d.Bd = p.Border; d.Glow = p.GroupText; d.Rad = 6; d.Bar = p.CapA; d.BarPos = 3; d.Lab = p.Dim; d.Val = p.Text;
-            p = Pal.Make(4); d = N(l, "Tema: Steampunk"); d.Top = p.Face; d.Bot = K(170, 118, 64); d.Bd = p.CapFrame; d.BW = 2f; d.Rad = 8; d.Lab = p.Dim; d.Val = p.Text;
-            p = Pal.Make(5); d = N(l, "Tema: Vintage (Win 95)"); d.Top = d.Bot = p.Face; d.Rad = 0; d.Bevel = true; d.Lab = K(64, 64, 64); d.Val = Color.Black;
-            p = Pal.Make(6); d = N(l, "Tema: GTA VI (Vice City)"); d.Top = K(120, 30, 110); d.Bot = K(210, 70, 100); d.Bd = p.Border; d.BW = 2f; d.Bar = p.Hot; d.BarPos = 3; d.Shadow = true; d.Lab = p.Dim; d.Val = p.Text;
+            p = Pal.Make(0); d = N(l, "Tema: Luna (XP)"); d.Top = d.Bot = p.Face; d.Bd = p.CapFrame; d.BW = 2f; d.Hdr = "BunoTunner"; d.HdrA = p.CapA; d.HdrB = p.CapB; d.HdrTx = p.CapText; d.Zebra = KA(120, 255, 255, 255); d.Line = p.GroupLine; d.Lab = K(70, 70, 70); d.Val = p.Text; d.Dot = p.OptMark; d.Rad = 6;
+            p = Pal.Make(1); d = N(l, "Tema: Frutiger Aero (Win 7)"); d.Top = K(250, 252, 255); d.Bot = p.PaneTop; d.Bd = p.Border; d.Rad = 16; d.Hdr = "Sensores"; d.HdrA = K(226, 240, 252); d.HdrB = K(150, 200, 238); d.HdrTx = p.PaneText; d.Gloss = true; d.Inner = KA(170, 255, 255, 255); d.Pill = KA(170, 255, 255, 255); d.PillBd = KA(110, 110, 140, 180); d.Lab = K(60, 80, 110); d.Val = p.GroupText;
+            p = Pal.Make(2); d = N(l, "Tema: Dark / AMOLED"); d.Top = d.Bot = p.Face; d.Bd = p.Border; d.Rad = 10; d.Hdr = "SENSORES"; d.HdrA = p.CapA; d.HdrB = p.CapB; d.HdrTx = p.CapText; d.Bar = p.GroupText; d.BarPos = 1; d.Dot = p.GroupText; d.Line = KA(40, 255, 255, 255); d.Pill = K(30, 30, 38); d.Lab = p.Dim; d.Val = p.Text;
+            p = Pal.Make(3); d = N(l, "Tema: Neon / Cyberpunk"); d.Top = d.Bot = p.Face; d.Bd = p.Border; d.Glow = p.GroupText; d.Rad = 3; d.Hdr = "CYBER//SYS"; d.HdrA = p.CapA; d.HdrB = p.CapB; d.HdrTx = Color.White; d.Corner = p.Border; d.CornerStyle = 1; d.Scan = true; d.Dot = p.GroupText; d.Zebra = KA(46, 180, 0, 200); d.Bar = p.CapA; d.Bar2 = p.Border; d.BarPos = 3; d.Lab = p.Dim; d.Val = p.Text;
+            p = Pal.Make(4); d = N(l, "Tema: Steampunk"); d.Top = p.Face; d.Bot = K(150, 96, 52); d.Bd = p.CapFrame; d.BW = 2f; d.Rad = 8; d.Hdr = "VAPOR"; d.HdrA = p.CapA; d.HdrB = p.CapB; d.HdrTx = p.CapText; d.Inner = KA(200, 236, 190, 110); d.Corner = K(236, 190, 110); d.CornerStyle = 2; d.Pill = KA(210, 248, 238, 212); d.PillBd = K(74, 44, 16); d.Line = KA(90, 74, 44, 16); d.Lab = p.Dim; d.Val = p.Text;
+            p = Pal.Make(5); d = N(l, "Tema: Vintage (Win 95)"); d.Top = d.Bot = p.Face; d.Rad = 0; d.Bevel = true; d.Hdr = "BunoTunner"; d.HdrA = p.CapA; d.HdrB = p.CapB; d.HdrTx = Color.White; d.Pill = Color.White; d.PillBd = K(128, 128, 128); d.Lab = K(64, 64, 64); d.Val = Color.Black;
+            p = Pal.Make(6); d = N(l, "Tema: GTA VI (Vice City)"); d.Top = K(120, 30, 110); d.Bot = K(210, 70, 100); d.Bd = p.Border; d.BW = 2f; d.Hdr = "VICE CITY"; d.HdrA = K(255, 150, 60); d.HdrB = K(210, 40, 130); d.HdrTx = K(255, 246, 230); d.Bar = p.Hot; d.Bar2 = K(255, 110, 150); d.BarPos = 3; d.Inner = KA(110, 255, 200, 120); d.Dot = p.Hot; d.Pill = KA(110, 0, 0, 0); d.Gloss = true; d.Line = KA(50, 255, 220, 200); d.Lab = p.Dim; d.Val = p.Text;
             // outros estilos
-            d = N(l, "Vidro (translucido)"); d.Top = d.Bot = KA(110, 255, 255, 255); d.Bd = KA(150, 255, 255, 255); d.Rad = 14; d.Shadow = true; d.Lab = K(225, 230, 240); d.Val = Color.White;
-            d = N(l, "Pilula"); d.Top = d.Bot = cBg; d.Rad = 60; d.Bd = K(120, 126, 140);
-            d = N(l, "Claro minimalista"); d.Top = d.Bot = K(244, 245, 248); d.Bd = K(190, 194, 204); d.Lab = K(100, 106, 120); d.Val = K(25, 28, 36);
-            d = N(l, "Barra superior"); d.Top = d.Bot = cBg; d.Rad = 8; d.Bar = K(255, 140, 0); d.BarPos = 2;
-            d = N(l, "Barra inferior"); d.Top = d.Bot = cBg; d.Rad = 8; d.Bar = K(60, 200, 110); d.BarPos = 3;
-            d = N(l, "Ambar (monitor antigo)"); d.Top = d.Bot = K(0, 0, 0); d.Rad = 0; d.Bd = K(255, 176, 0); d.Lab = K(190, 120, 0); d.Val = K(255, 190, 40);
-            d = N(l, "HUD ciano"); d.Top = d.Bot = K(2, 22, 32); d.Rad = 0; d.Bd = K(0, 170, 200); d.Bar = K(0, 229, 255); d.BarPos = 1; d.Lab = K(90, 170, 190); d.Val = K(200, 250, 255);
-            d = N(l, "Oceano"); d.Top = K(0, 70, 120); d.Bot = K(0, 20, 50); d.Bd = K(0, 170, 230); d.Rad = 24; d.Lab = K(150, 200, 230); d.Val = Color.White;
-            d = N(l, "Floresta"); d.Top = K(26, 70, 36); d.Bot = K(8, 26, 14); d.Bd = K(100, 190, 110); d.Lab = K(160, 200, 165); d.Val = K(235, 250, 235);
-            d = N(l, "Rosa"); d.Top = K(100, 24, 70); d.Bot = K(36, 8, 28); d.Bd = K(255, 120, 180); d.Lab = K(230, 170, 200); d.Val = Color.White;
-            d = N(l, "Papel"); d.Top = d.Bot = K(250, 244, 225); d.Bd = K(150, 125, 85); d.Rad = 8; d.Lab = K(120, 100, 70); d.Val = K(50, 34, 16);
-            d = N(l, "Faixa escura (sem borda)"); d.Top = d.Bot = K(0, 0, 0); d.Rad = 0;
+            d = N(l, "Vidro (translucido)"); d.Top = d.Bot = KA(110, 255, 255, 255); d.Bd = KA(170, 255, 255, 255); d.Rad = 14; d.Gloss = true; d.Inner = KA(90, 255, 255, 255); d.Pill = KA(60, 255, 255, 255); d.Lab = K(230, 235, 245); d.Val = Color.White;
+            d = N(l, "Pilula"); d.Top = d.Bot = cBg; d.Rad = 60; d.Bd = K(120, 126, 140); d.Dot = K(120, 200, 255); d.Pill = K(38, 42, 56); d.Gloss = true;
+            d = N(l, "Claro minimalista"); d.Top = K(250, 251, 253); d.Bot = K(232, 235, 242); d.Bd = K(190, 194, 204); d.Hdr = "Sensores"; d.HdrA = K(238, 240, 246); d.HdrB = K(214, 218, 228); d.HdrTx = K(60, 66, 80); d.Zebra = KA(14, 0, 0, 0); d.Line = KA(40, 0, 0, 0); d.Pill = KA(22, 0, 0, 0); d.Lab = K(100, 106, 120); d.Val = K(25, 28, 36);
+            d = N(l, "Barra superior"); d.Top = d.Bot = cBg; d.Rad = 8; d.Bar = K(255, 140, 0); d.Bar2 = K(255, 210, 60); d.BarPos = 2; d.Zebra = KA(20, 255, 255, 255); d.Dot = K(255, 170, 30); d.Line = KA(28, 255, 255, 255);
+            d = N(l, "Barra inferior"); d.Top = d.Bot = cBg; d.Rad = 8; d.Bar = K(60, 200, 110); d.Bar2 = K(40, 150, 220); d.BarPos = 3; d.Pill = K(28, 58, 42); d.Dot = K(60, 200, 110); d.Line = KA(28, 255, 255, 255);
+            d = N(l, "Ambar (monitor antigo)"); d.Top = d.Bot = K(10, 6, 0); d.Rad = 0; d.Bd = K(255, 176, 0); d.Hdr = "READY_"; d.HdrA = d.HdrB = K(255, 176, 0); d.HdrTx = K(0, 0, 0); d.Scan = true; d.Corner = K(255, 176, 0); d.CornerStyle = 1; d.Line = KA(70, 255, 176, 0); d.Lab = K(190, 120, 0); d.Val = K(255, 190, 40);
+            d = N(l, "HUD ciano"); d.Top = d.Bot = K(2, 22, 32); d.Rad = 0; d.Bd = K(0, 150, 180); d.Corner = K(0, 229, 255); d.CornerStyle = 1; d.Bar = K(0, 229, 255); d.BarPos = 1; d.Hdr = "SYS//HUD"; d.HdrA = K(0, 80, 100); d.HdrB = K(0, 30, 44); d.HdrTx = K(0, 229, 255); d.Scan = true; d.Zebra = KA(30, 0, 229, 255); d.Lab = K(90, 170, 190); d.Val = K(200, 250, 255);
+            d = N(l, "Oceano"); d.Top = K(0, 70, 120); d.Bot = K(0, 20, 50); d.Bd = K(0, 170, 230); d.Rad = 24; d.Gloss = true; d.Inner = KA(80, 150, 220, 255); d.Hdr = "SENSORES"; d.HdrA = K(0, 130, 190); d.HdrB = K(0, 60, 110); d.HdrTx = Color.White; d.Dot = K(80, 220, 255); d.Pill = KA(50, 255, 255, 255); d.Lab = K(160, 205, 230); d.Val = Color.White;
+            d = N(l, "Floresta"); d.Top = K(26, 70, 36); d.Bot = K(8, 26, 14); d.Bd = K(100, 190, 110); d.Rad = 8; d.Hdr = "SENSORES"; d.HdrA = K(64, 136, 76); d.HdrB = K(26, 70, 36); d.HdrTx = K(235, 250, 235); d.Inner = KA(80, 160, 230, 170); d.Zebra = KA(24, 255, 255, 255); d.Line = KA(50, 150, 220, 160); d.Dot = K(140, 230, 150); d.Lab = K(160, 205, 165); d.Val = K(235, 250, 235);
+            d = N(l, "Rosa"); d.Top = K(100, 24, 70); d.Bot = K(36, 8, 28); d.Bd = K(255, 120, 180); d.Glow = K(255, 120, 180); d.Hdr = "SENSORES"; d.HdrA = K(240, 90, 160); d.HdrB = K(150, 30, 100); d.HdrTx = Color.White; d.Gloss = true; d.Dot = K(255, 150, 200); d.Pill = K(70, 20, 50); d.Lab = K(235, 175, 205); d.Val = Color.White;
+            d = N(l, "Papel"); d.Top = d.Bot = K(250, 244, 225); d.Bd = K(150, 125, 85); d.Rad = 4; d.Line = K(190, 205, 230); d.Bar = K(225, 95, 95); d.BarPos = 1; d.Lab = K(120, 100, 70); d.Val = K(50, 34, 16);
+            d = N(l, "Faixa escura (sem borda)"); d.Top = d.Bot = K(0, 0, 0); d.Rad = 0; d.Bar = K(0, 229, 255); d.Bar2 = K(255, 0, 200); d.BarPos = 2; d.Line = KA(40, 255, 255, 255); d.Dot = Color.White;
             return l.ToArray();
         }
 
@@ -6086,32 +6102,70 @@ namespace BunoTunner
             Fonts(); float s = scale / 100f;
             g.Clear(Color.Transparent);
             Rectangle r = new Rectangle(0, 0, Width - 1, Height - 1);
-            LD d = Layouts[edit ? 0 : Math.Max(0, Math.Min(Layouts.Length - 1, Overlay.Layout))];   // na edicao sempre mostra a caixa padrao para dar para arrastar
+            LD d = CurLay(edit);   // na edicao sempre mostra a caixa padrao para dar para arrastar
             shdOff = Math.Max(1, (int)Math.Round(s));
             int rad = d.Rad < 0 ? (Xp.Rad + 2) * 2 : Math.Min(d.Rad, Math.Min(Width, Height) - 1);
             using (GraphicsPath gp = Round(r, rad))
             {
                 if (!d.Top.IsEmpty)
                 {
-                    int fa = Math.Max(0, Math.Min(255, d.Top.A * bgAlpha / 255)), fb = Math.Max(0, Math.Min(255, d.Bot.A * bgAlpha / 255));
-                    using (LinearGradientBrush lb = new LinearGradientBrush(new Rectangle(0, 0, Width, Height), Color.FromArgb(fa, d.Top), Color.FromArgb(fb, d.Bot), 90f)) g.FillPath(lb, gp);
+                    using (LinearGradientBrush lb = new LinearGradientBrush(new Rectangle(0, 0, Width, Height), Sc(d.Top, bgAlpha), Sc(d.Bot, bgAlpha), 90f)) g.FillPath(lb, gp);
                 }
                 if (!edit)
                 {
-                    if (d.Bevel) BevelBox(g, r);
                     if (!d.Glow.IsEmpty) using (Pen gl = new Pen(Color.FromArgb(70, d.Glow), 5f)) g.DrawPath(gl, gp);
+                    g.SetClip(gp);
+                    for (int i = 0; i < rowR.Count && i < rows.Count; i++)
+                    {
+                        Rectangle rr = rowR[i];
+                        if (!d.Zebra.IsEmpty && (i & 1) == 1) using (SolidBrush zb = new SolidBrush(Sc(d.Zebra, bgAlpha))) g.FillRectangle(zb, 1, rr.Top, Width - 2, rr.Height);
+                        if (!d.Line.IsEmpty && i < rows.Count - 1) using (Pen lp = new Pen(Sc(d.Line, bgAlpha))) g.DrawLine(lp, rr.Left, rr.Bottom, rr.Right, rr.Bottom);
+                    }
+                    if (hdrH > 0 && d.Hdr != null)
+                    {
+                        Rectangle hr = d.Bevel ? new Rectangle(3, 3, Width - 7, hdrH - 3) : new Rectangle(0, 0, Width, hdrH);
+                        using (LinearGradientBrush hb = new LinearGradientBrush(hr, Sc(d.HdrA, bgAlpha), Sc(d.HdrB, bgAlpha), 90f)) g.FillRectangle(hb, hr);
+                        if (!d.Bd.IsEmpty && !d.Bevel) using (Pen hp = new Pen(Color.FromArgb(120, d.Bd))) g.DrawLine(hp, 0, hdrH - 1, Width, hdrH - 1);
+                        DT(g, d.Hdr, fv, hr, d.HdrTx, StringAlignment.Center);
+                    }
+                    if (d.Gloss) using (LinearGradientBrush gb2 = new LinearGradientBrush(new Rectangle(0, 0, Width, Math.Max(2, Height / 2)), Sc(KA(70, 255, 255, 255), bgAlpha), Color.FromArgb(0, 255, 255, 255), 90f)) g.FillRectangle(gb2, 0, 0, Width, Math.Max(2, Height / 2));
+                    if (d.Scan) using (Pen sp2 = new Pen(Sc(KA(60, 0, 0, 0), bgAlpha))) for (int yy = 1; yy < Height; yy += 3) g.DrawLine(sp2, 0, yy, Width, yy);
                     if (d.BarPos > 0)
                     {
                         int t = Math.Max(3, (int)(4 * s));
                         Rectangle br = d.BarPos == 1 ? new Rectangle(0, 0, t, Height) : d.BarPos == 2 ? new Rectangle(0, 0, Width, t) : new Rectangle(0, Height - t - 1, Width, t + 1);
-                        g.SetClip(gp);
                         if (d.Bar2.IsEmpty) using (SolidBrush ab = new SolidBrush(d.Bar)) g.FillRectangle(ab, br);
                         else using (LinearGradientBrush ab = new LinearGradientBrush(br, d.Bar, d.Bar2, d.BarPos == 1 ? 90f : 0f)) g.FillRectangle(ab, br);
-                        g.ResetClip();
+                    }
+                    g.ResetClip();
+                    if (d.Bevel) BevelBox(g, r);
+                    if (!d.Inner.IsEmpty)
+                    {
+                        Rectangle ir = new Rectangle(3, hdrH + 3, Math.Max(2, Width - 7), Math.Max(2, Height - hdrH - 7));
+                        using (GraphicsPath ip = Round(ir, Math.Max(0, rad - 6))) using (Pen inp = new Pen(d.Inner)) g.DrawPath(inp, ip);
+                    }
+                    if (!d.Corner.IsEmpty)
+                    {
+                        int ln = Math.Max(5, (int)(8 * s)), x0 = 3, y0 = hdrH + 3, x1 = Width - 4, y1 = Height - 4;
+                        using (Pen cp = new Pen(d.Corner, 2f))
+                        {
+                            if (d.CornerStyle == 2)
+                            {
+                                int rv = Math.Max(2, (int)(2.5 * s));
+                                using (SolidBrush rb = new SolidBrush(d.Corner))
+                                    foreach (Point q in new Point[] { new Point(x0 + 4, y0 + 4), new Point(x1 - 4, y0 + 4), new Point(x0 + 4, y1 - 4), new Point(x1 - 4, y1 - 4) })
+                                    { g.FillEllipse(rb, q.X - rv, q.Y - rv, rv * 2, rv * 2); g.DrawEllipse(Pens.Black, q.X - rv, q.Y - rv, rv * 2, rv * 2); }
+                            }
+                            else
+                            {
+                                g.DrawLine(cp, x0, y0, x0 + ln, y0); g.DrawLine(cp, x0, y0, x0, y0 + ln); g.DrawLine(cp, x1, y0, x1 - ln, y0); g.DrawLine(cp, x1, y0, x1, y0 + ln);
+                                g.DrawLine(cp, x0, y1, x0 + ln, y1); g.DrawLine(cp, x0, y1, x0, y1 - ln); g.DrawLine(cp, x1, y1, x1 - ln, y1); g.DrawLine(cp, x1, y1, x1, y1 - ln);
+                            }
+                        }
                     }
                 }
                 if (edit) using (Pen ep = new Pen(cAccent, 2f)) { ep.DashStyle = DashStyle.Dash; g.DrawPath(ep, gp); }
-                else if (!d.Bd.IsEmpty) using (Pen bp = new Pen(Color.FromArgb(d.Soft ? bgAlpha : 255, d.Bd), d.BW)) g.DrawPath(bp, gp);
+                else if (!d.Bd.IsEmpty && !d.Bevel) using (Pen bp = new Pen(Color.FromArgb(d.Soft ? bgAlpha : 255, d.Bd), d.BW)) g.DrawPath(bp, gp);
             }
             int grip = edit ? (int)(14 * s) : 0;
             if (edit)
@@ -6128,11 +6182,30 @@ namespace BunoTunner
                     using (SolidBrush gb = new SolidBrush(cGrip))
                         for (int k = 0; k < 3; k++) g.FillRectangle(gb, rr.Left + 1, rr.Top + rr.Height / 2 - (int)(4 * s) + k * (int)(4 * s), (int)(8 * s), Math.Max(1, (int)(2 * s)));
                 }
-                Rectangle lr = new Rectangle(rr.Left + grip, rr.Top, rr.Width - grip, rr.Height);
+                int dotW = (!Overlay.Compact && !d.Dot.IsEmpty) ? (int)(9 * s) : 0;
+                Rectangle lr = new Rectangle(rr.Left + grip + dotW, rr.Top, rr.Width - grip - dotW, rr.Height);
+                if (dotW > 0)
+                {
+                    int ds = Math.Max(4, (int)(5 * s));
+                    using (SolidBrush db = new SolidBrush(x.Hot ? cHot : d.Dot)) g.FillEllipse(db, rr.Left + grip + 1, rr.Top + (rr.Height - ds) / 2, ds, ds);
+                    g.DrawEllipse(Pens.Black, rr.Left + grip + 1, rr.Top + (rr.Height - ds) / 2, ds, ds);
+                }
+                int pp = d.Pill.IsEmpty ? 0 : (int)(5 * s);
+                Rectangle vr = new Rectangle(lr.Left + (Overlay.Compact ? pp : 0), lr.Top, lr.Width - pp - (Overlay.Compact ? pp : 0), lr.Height);
+                if (pp > 0)
+                {
+                    int tw = (int)Math.Ceiling(TW(x.Value, fv));
+                    Rectangle pr = new Rectangle(Overlay.Compact ? lr.Left : lr.Right - pp * 2 - tw, rr.Top + 1, tw + pp * 2, Math.Max(4, rr.Height - 2));
+                    using (GraphicsPath pg = Round(pr, Math.Min(pr.Height, 12)))
+                    {
+                        using (SolidBrush pb = new SolidBrush(Sc(d.Pill, bgAlpha))) g.FillPath(pb, pg);
+                        if (!d.PillBd.IsEmpty) using (Pen pbp = new Pen(d.PillBd)) g.DrawPath(pbp, pg);
+                    }
+                }
                 Color vc = x.Hot ? cHot : (x.HasCol ? x.Col : (d.Val.IsEmpty ? cValue : d.Val));
                 Color lc = (Overlay.ColName && x.HasCol && !x.Hot) ? x.Col : (d.Lab.IsEmpty ? cLabel : d.Lab);
                 if (!Overlay.Compact) DT(g, x.Label, fl, lr, lc, StringAlignment.Near);
-                DT(g, x.Value, fv, lr, vc, Overlay.Compact ? StringAlignment.Near : StringAlignment.Far);
+                DT(g, x.Value, fv, vr, vc, Overlay.Compact ? StringAlignment.Near : StringAlignment.Far);
             }
             if (edit)
             {
@@ -9345,7 +9418,7 @@ namespace BunoTunner
         ListView lv = new ListView();
         XpOption optAuto, optManual, chkSafe, chkRestore;
         XpSlider sl; XpText txPct, txRpm, txSafe;
-        Label lblMsg;
+        Label lblMsg, lblSel;
         Dictionary<FanCh, ListViewItem> items = new Dictionary<FanCh, ListViewItem>();
         List<FanCh> identList = new List<FanCh>();
         DateTime identUntil = DateTime.MinValue;
@@ -9357,7 +9430,34 @@ namespace BunoTunner
             FanHub.Build();
             tip.InitialDelay = 300; tip.AutoPopDelay = 9000;
             BuildList(); BuildMode(); BuildApply(); BuildMenu();
-            optAuto.Checked = true;
+            LoadUi();
+            lv.SelectedIndexChanged += delegate { UpdateSel(); };
+            UpdateSel();
+        }
+
+        // lembra a ultima configuracao da tela (modo, %, seguranca) entre as aberturas do programa
+        void LoadUi()
+        {
+            int v;
+            if (int.TryParse(Settings.Get("fan.ui.pct", "50"), out v)) sl.Value = Math.Max(0, Math.Min(100, v));
+            chkSafe.Checked = Settings.Get("fan.ui.safe", "1") == "1";
+            chkRestore.Checked = Settings.Get("fan.ui.restore", "1") == "1";
+            if (int.TryParse(Settings.Get("fan.ui.safet", "85"), out v)) txSafe.Text = Math.Max(60, Math.Min(100, v)).ToString();
+            if (Settings.Get("fan.ui.mode", "0") == "1") optManual.Checked = true; else optAuto.Checked = true;
+            sl.ValueChanged += delegate { Settings.Set("fan.ui.pct", sl.Value.ToString()); };
+            chkSafe.CheckedChanged += delegate { Settings.Set("fan.ui.safe", chkSafe.Checked ? "1" : "0"); };
+            chkRestore.CheckedChanged += delegate { Settings.Set("fan.ui.restore", chkRestore.Checked ? "1" : "0"); };
+            optManual.CheckedChanged += delegate { Settings.Set("fan.ui.mode", optManual.Checked ? "1" : "0"); };
+            txSafe.Box.Leave += delegate { int t = Math.Max(60, Math.Min(100, UI.Int(txSafe, 85))); txSafe.Text = t.ToString(); Settings.Set("fan.ui.safet", t.ToString()); };
+        }
+
+        void UpdateSel()
+        {
+            int n = 0, tot = 0;
+            foreach (FanCh c in FanHub.All) if (c.Controllable) tot++;
+            foreach (ListViewItem it in lv.SelectedItems) { FanCh c = it.Tag as FanCh; if (c != null && c.Controllable) n++; }
+            lblSel.Text = n + Lang.Pick(" de ", " of ") + tot + Lang.Pick(" controlaveis selecionadas", " controllable selected");
+            lblSel.ForeColor = n > 0 ? Xp.GroupText : Xp.Dim;
         }
 
         public void SetGpu(Gpu g) { cur = g; }
@@ -9383,9 +9483,12 @@ namespace BunoTunner
             XpButton bPawn = UI.Btn(g, PawnIo.Installed() ? "PawnIO instalado" : "Instalar PawnIO", 10, 164, 140, delegate { PawnIo.InstallNow(this); });
             bPawn.Enabled = !PawnIo.Installed();
             tip.SetToolTip(bPawn, "PawnIO: driver usado pelo LibreHardwareMonitor para ler sensores da CPU/placa-mae e controlar as ventoinhas da placa-mae. Clique para baixar e instalar.");
+            lblSel = UI.Lbl(g, "", 160, 169, Xp.UiBold, Xp.Dim); lblSel.AutoSize = false; lblSel.SetBounds(160, 168, 250, 18);
+            lv.DoubleClick += delegate { Rename(); };
+            lv.KeyDown += delegate(object o, KeyEventArgs e) { if (e.Control && e.KeyCode == Keys.A) { foreach (ListViewItem x in lv.Items) x.Selected = true; e.Handled = true; } else if (e.KeyCode == Keys.F2) { Rename(); e.Handled = true; } };
             UI.Btn(g, "Identificar", 416, 164, 80, delegate { Identify(); });
             UI.Btn(g, "Tudo automatico", 502, 164, 120, delegate { AllAuto(); });
-            Label h = UI.Lbl(g, "Identificar = liga as selecionadas a 100% por 5 s para voce descobrir qual e qual.  Botao direito na lista: selecionar por tipo (CPU, bombas, gabinete) ou renomear (inclua CPU, Bomba ou Gabinete no nome).", 10, 190, Xp.Ui, Xp.Dim);
+            Label h = UI.Lbl(g, "Identificar = liga as selecionadas a 100% por 5 s para voce descobrir qual e qual.  Botao direito na lista: selecionar por tipo ou renomear (inclua CPU, Bomba ou Gabinete no nome). Atalhos: Ctrl+A seleciona tudo, F2 ou duplo clique renomeia.", 10, 190, Xp.Ui, Xp.Dim);
             h.MaximumSize = new Size(650, 0);
             tip.SetToolTip(lv, "RPM = giros por minuto. % = potencia enviada. \"so leitura\" = a placa-mae nao permite controle por software.");
             Controls.Add(g);
@@ -9399,6 +9502,7 @@ namespace BunoTunner
             {
                 foreach (ListViewItem x in lv.Items) { FanCh f = x.Tag as FanCh; x.Selected = f != null && f.Controllable; }
             });
+            m.Items.Add("Inverter selecao", null, delegate { foreach (ListViewItem x in lv.Items) x.Selected = !x.Selected; });
             m.Items.Add(new ToolStripSeparator());
             m.Items.Add("Selecionar: CPU", null, delegate { SelectRole("CPU"); });
             m.Items.Add("Selecionar: bombas / AIO", null, delegate { SelectRole("Bomba/AIO"); });
@@ -9418,8 +9522,16 @@ namespace BunoTunner
             sl = new XpSlider(); sl.SetBounds(34, 60, 280, 32); sl.Minimum = 0; sl.Maximum = 100; sl.Value = 50; g.Controls.Add(sl);
             txPct = UI.Txt(g, 322, 66, 44, "50"); UI.Lbl(g, "%", 370, 70);
             UI.Bind(sl, txPct);
+            int px = 400;
+            foreach (int pv in new int[] { 0, 25, 50, 75, 100 })
+            {
+                int vv = pv;
+                UI.Btn(g, pv + "%", px, 62, 50, delegate { sl.Value = vv; optManual.Checked = true; }).Height = 24; px += 54;
+            }
+            txPct.Box.KeyDown += delegate(object o, KeyEventArgs e) { if (e.KeyCode == Keys.Enter) { optManual.Checked = true; ApplySel(); } };
             UI.Lbl(g, "RPM alvo:", 34, 110);
             txRpm = UI.Txt(g, 96, 106, 60, "1200");
+            txRpm.Box.KeyDown += delegate(object o, KeyEventArgs e) { if (e.KeyCode == Keys.Enter) ByRpm(); };
             UI.Btn(g, "Definir por RPM", 166, 104, 112, delegate { ByRpm(); });
             UI.Lbl(g, "(use \"Identificar\" antes: ele mede o RPM maximo de cada ventoinha)", 288, 110, Xp.Ui, Xp.Dim);
             tip.SetToolTip(optAuto, "A propria placa-mae ou o driver controla a velocidade pela temperatura.");
@@ -9431,6 +9543,7 @@ namespace BunoTunner
         {
             XpGroup g = new XpGroup(); g.Title = "3) Aplicar"; g.SetBounds(0, 388, 676, 80);
             UI.Btn(g, "Aplicar nas selecionadas", 10, 20, 170, delegate { ApplySel(); }).Height = 26;
+            UI.Lbl(g, "Dica: Enter nos campos de % ou RPM tambem aplica.", 190, 26, Xp.Ui, Xp.Dim);
             chkSafe = UI.Opt(g, "Seguranca: forcar 100% se a temperatura passar de", 10, 54, 320, false); chkSafe.Checked = true;
             txSafe = UI.Txt(g, 336, 51, 40, "85"); UI.Lbl(g, "\u00B0C", 380, 55);
             chkRestore = UI.Opt(g, "Voltar tudo ao automatico ao fechar", 420, 54, 250, false); chkRestore.Checked = true;
@@ -9581,6 +9694,8 @@ namespace BunoTunner
                 SetSub(it, 3, r.HasValue ? r.Value.ToString() : "-");
                 SetSub(it, 4, p.HasValue ? p.Value + "%" : "-");
                 SetSub(it, 5, !c.Controllable ? "-" : (c.Boost ? "SEGURANCA" : (c.Mode == 0 ? "Automatico" : "Manual " + c.Manual + "%")));
+                Color rc = !c.Controllable ? Xp.Dim : c.Boost ? Xp.Bad : (c.Mode == 1 ? Xp.GroupText : (r.HasValue && r.Value == 0 && p.HasValue && p.Value >= 25 ? Xp.Bad : Xp.Text));   // vermelho = seguranca ou ventoinha parada com potencia
+                if (it.ForeColor != rc) it.ForeColor = rc;
             }
         }
     }
@@ -12947,17 +13062,18 @@ namespace BunoTunner
             try { ProcessStartInfo psi = new ProcessStartInfo(url); psi.UseShellExecute = true; Process.Start(psi); } catch (Exception) { }
         }
 
-        static void Offer(VItem it, Action<string> log, Func<string, bool> confirm)
+        static void Offer(VItem it, bool install, Action<string> log, Func<string, bool> confirm)
         {
             if (it.Latest == null || it.Url == null)
             {
                 log(it.Title + ": nao foi possivel consultar a versao automaticamente.");
-                if (it.Page != null && confirm("Nao consegui consultar a versao mais recente de:\n" + it.Title + "\n\nAbrir a pagina oficial de downloads no navegador?")) OpenPage(it.Page);
+                if (install && it.Page != null && confirm("Nao consegui consultar a versao mais recente de:\n" + it.Title + "\n\nAbrir a pagina oficial de downloads no navegador?")) OpenPage(it.Page);
                 return;
             }
             bool known = it.Inst != null;
             if (known && Cmp(it.Inst, it.Latest) >= 0) { log(it.Title + ": ja esta atualizado (" + it.Inst + ")."); return; }
             log(it.Title + ": instalada " + (known ? it.Inst : "(nao identificada)") + " -> mais recente " + it.Latest + ".");
+            if (!install) return;
             if (!confirm(it.Title + "\n\nVersao instalada: " + (known ? it.Inst : "nao identificada") + "\nVersao mais recente no site da fabricante: " + it.Latest +
                 "\n\nBaixar o instalador oficial e abrir a instalacao normal para voce concluir?")) { log("Ignorado."); return; }
             string file = Download(it, log);
@@ -12972,7 +13088,7 @@ namespace BunoTunner
             catch (Exception ex) { log("Nao foi possivel abrir o instalador: " + ex.Message); }
         }
 
-        public static void Run(Action<string> log, Func<string, bool> confirm, Action done)
+        public static void Run(bool install, Action<string> log, Func<string, bool> confirm, Action done)
         {
             try
             {
@@ -12998,13 +13114,13 @@ namespace BunoTunner
                 if (items.Count == 0 && !intel) log("Nenhuma placa de video NVIDIA/AMD ou chipset AMD identificado.");
                 foreach (VItem it in items)
                 {
-                    try { Offer(it, log, confirm); }
+                    try { Offer(it, install, log, confirm); }
                     catch (Exception ex) { log(it.Title + ": falhou (" + ex.Message + ")."); }
                 }
                 if (intel)
                 {
                     log("Intel: a Intel nao oferece consulta publica confiavel de versoes; o Assistente de Drivers e Suporte da Intel faz isso.");
-                    if (confirm("Foi detectado hardware Intel (video e/ou chipset).\n\nA Intel nao permite consultar a versao mais recente automaticamente. Abrir a pagina oficial do Assistente de Drivers e Suporte da Intel, que detecta e instala os drivers?")) OpenPage(IntelPage);
+                    if (install && confirm("Foi detectado hardware Intel (video e/ou chipset).\n\nA Intel nao permite consultar a versao mais recente automaticamente. Abrir a pagina oficial do Assistente de Drivers e Suporte da Intel, que detecta e instala os drivers?")) OpenPage(IntelPage);
                 }
                 log("Concluido.");
             }
@@ -13024,40 +13140,43 @@ namespace BunoTunner
             Dock = DockStyle.Fill;
             box.Dock = DockStyle.Fill; box.AutoScroll = true; Controls.Add(box);
             AddDrivers();
-            AddVendor();
+            Section("Limpeza e manutencao", "Libera espaco no disco.", false);
             Add("Limpar arquivos temporarios", "Apaga C:\\Windows\\Temp, Prefetch e a pasta %temp% do usuario (itens em uso sao ignorados). Nenhum documento pessoal e tocado.",
                 "Limpar", delegate { return Clean(); }, null, null, null, null);
+            Add("Hibernacao", "Liga ou desliga a hibernacao (powercfg /hibernate). Desligada, apaga o hiberfil.dat (libera varios GB no disco) e tambem desativa a Inicializacao Rapida.",
+                "Desativar", delegate { return Pc("off", "Hibernacao DESATIVADA (hiberfil.sys removido)."); },
+                "Ativar", delegate { return Pc("on", "Hibernacao ATIVADA."); },
+                delegate { object v = Get(true, @"SYSTEM\CurrentControlSet\Control\Power", "HibernateEnabled"); return v != null && Convert.ToInt32(v) == 0 ? "Estado: DESATIVADA" : "Estado: ativada"; }, null);
+            Section("Desempenho em jogos", "Ajustes que podem melhorar FPS, tremidas e resposta do mouse.", false);
+            Add("Aceleracao do mouse (Aprimorar precisao do ponteiro)", "Desligada, o ponteiro anda sempre a mesma distancia para o mesmo movimento da mao (recomendado para jogos). Aplica na hora, sem reiniciar.",
+                "Desativar", delegate { return Mouse(false); },
+                "Ativar", delegate { return Mouse(true); },
+                delegate { using (RegistryKey k = Root(false).OpenSubKey(@"Control Panel\Mouse")) { object v = k == null ? null : k.GetValue("MouseSpeed"); return v != null && v.ToString() != "0" ? "Estado: ATIVADA" : "Estado: desativada"; } }, null);
+            Add("Desativar MPO (Multiplane Overlay)", "Define OverlayTestMode=5 no DWM. Ajuda a resolver tremidas, telas piscando e telas pretas em alguns monitores/placas NVIDIA e AMD. Reinicie o PC para valer.",
+                "Desativar MPO", delegate { Sub(true, @"SOFTWARE\Microsoft\Windows\Dwm", "OverlayTestMode", 5); return "MPO desativado. Reinicie o PC."; },
+                "Reativar", delegate { Del(true, @"SOFTWARE\Microsoft\Windows\Dwm", "OverlayTestMode"); return "MPO restaurado ao padrao. Reinicie o PC."; },
+                delegate { object v = Get(true, @"SOFTWARE\Microsoft\Windows\Dwm", "OverlayTestMode"); return v != null && Convert.ToInt32(v) == 5 ? "Estado: MPO DESATIVADO" : "Estado: MPO padrao (ativo)"; }, null);
             Add("Desativar compressao de memoria", "Executa Disable-MMAgent -mc: o Windows deixa de comprimir a RAM (usa um pouco menos de CPU, um pouco mais de RAM). Vale apos reiniciar o PC.",
                 "Desativar", delegate { return Ps("Disable-MMAgent -mc", "Compressao de memoria desativada. Reinicie o Windows para valer."); },
                 "Reativar", delegate { return Ps("Enable-MMAgent -mc", "Compressao de memoria reativada. Reinicie o Windows para valer."); },
                 delegate { int c; string o = Proc.Run("powershell.exe", "-NoProfile -NonInteractive -Command \"(Get-MMAgent).MemoryCompression\"", 20000, out c); return o.Trim() == "True" ? "Estado: compressao ATIVADA" : o.Trim() == "False" ? "Estado: compressao DESATIVADA" : ""; }, null);
+            Add("Overlay DLSS (indicador na tela)", "Mostra no canto do jogo um indicador quando o DLSS esta em uso (so placas NVIDIA RTX). Aplica na proxima vez que abrir o jogo.",
+                "Ativar", delegate { Sub(true, @"SOFTWARE\NVIDIA Corporation\Global\NGXCore", "ShowDlssIndicator", 0x400); return "Overlay do DLSS ativado."; },
+                "Desativar", delegate { Sub(true, @"SOFTWARE\NVIDIA Corporation\Global\NGXCore", "ShowDlssIndicator", 0); return "Overlay do DLSS desativado."; },
+                delegate { object v = Get(true, @"SOFTWARE\NVIDIA Corporation\Global\NGXCore", "ShowDlssIndicator"); return v != null && Convert.ToInt32(v) == 0x400 ? "Estado: overlay ATIVO" : "Estado: overlay desligado"; }, null);
+            Section("Interface do Windows", "Aparencia e comportamento do sistema.", false);
             const string ClickKey = @"Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}";
             Add("Menu de clique direito do Windows 10", "No Windows 11, traz de volta o menu de clique direito completo e classico do Windows 10 (sem o \"Mostrar mais opcoes\"). Vale ao reiniciar o Explorer ou fazer logoff.",
                 "Ativar", delegate { using (RegistryKey k = Root(false).CreateSubKey(ClickKey + "\\InprocServer32")) { k.SetValue("", ""); } return "Menu classico ativado. Reinicie o Explorer ou faca logoff."; },
                 "Desfazer", delegate { Root(false).DeleteSubKeyTree(ClickKey, false); return "Menu padrao do Windows 11 restaurado. Reinicie o Explorer ou faca logoff."; },
                 delegate { using (RegistryKey k = Root(false).OpenSubKey(ClickKey + "\\InprocServer32")) return k != null ? "Estado: menu classico ATIVO" : "Estado: menu padrao do Windows 11"; }, null);
-            Add("Desativar MPO (Multiplane Overlay)", "Define OverlayTestMode=5 no DWM. Ajuda a resolver tremidas, telas piscando e telas pretas em alguns monitores/placas NVIDIA e AMD. Reinicie o PC para valer.",
-                "Desativar MPO", delegate { Sub(true, @"SOFTWARE\Microsoft\Windows\Dwm", "OverlayTestMode", 5); return "MPO desativado. Reinicie o PC."; },
-                "Reativar", delegate { Del(true, @"SOFTWARE\Microsoft\Windows\Dwm", "OverlayTestMode"); return "MPO restaurado ao padrao. Reinicie o PC."; },
-                delegate { object v = Get(true, @"SOFTWARE\Microsoft\Windows\Dwm", "OverlayTestMode"); return v != null && Convert.ToInt32(v) == 5 ? "Estado: MPO DESATIVADO" : "Estado: MPO padrao (ativo)"; }, null);
-            Add("Overlay DLSS (indicador na tela)", "Mostra no canto do jogo um indicador quando o DLSS esta em uso (so placas NVIDIA RTX). Aplica na proxima vez que abrir o jogo.",
-                "Ativar", delegate { Sub(true, @"SOFTWARE\NVIDIA Corporation\Global\NGXCore", "ShowDlssIndicator", 0x400); return "Overlay do DLSS ativado."; },
-                "Desativar", delegate { Sub(true, @"SOFTWARE\NVIDIA Corporation\Global\NGXCore", "ShowDlssIndicator", 0); return "Overlay do DLSS desativado."; },
-                delegate { object v = Get(true, @"SOFTWARE\NVIDIA Corporation\Global\NGXCore", "ShowDlssIndicator"); return v != null && Convert.ToInt32(v) == 0x400 ? "Estado: overlay ATIVO" : "Estado: overlay desligado"; }, null);
+            Section("Seguranca (avancado)", "Estes ajustes REDUZEM a protecao do PC. Use so se souber o que esta fazendo.", true);
             const string HvKey = @"SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity";
             Add("Isolamento de nucleo (Integridade de memoria)", "Recurso de seguranca do Windows (HVCI) que isola o nucleo do sistema usando virtualizacao. Desativar pode dar mais FPS em jogos e liberar drivers antigos, mas reduz a protecao. Reinicie o PC.",
                 "Desativar", delegate { Sub(true, HvKey, "Enabled", 0); return "Isolamento de nucleo DESATIVADO. Reinicie o PC."; },
                 "Ativar", delegate { Sub(true, HvKey, "Enabled", 1); return "Isolamento de nucleo ATIVADO. Reinicie o PC."; },
                 delegate { object v = Get(true, HvKey, "Enabled"); return v != null && Convert.ToInt32(v) == 1 ? "Estado: ATIVADO" : "Estado: desativado"; },
                 "Desativar o Isolamento de nucleo reduz a protecao contra malware que ataca o nucleo do Windows. Desativar mesmo assim?");
-            Add("Hibernacao", "Liga ou desliga a hibernacao (powercfg /hibernate). Desligada, apaga o hiberfil.dat (libera varios GB no disco) e tambem desativa a Inicializacao Rapida.",
-                "Desativar", delegate { return Pc("off", "Hibernacao DESATIVADA (hiberfil.sys removido)."); },
-                "Ativar", delegate { return Pc("on", "Hibernacao ATIVADA."); },
-                delegate { object v = Get(true, @"SYSTEM\CurrentControlSet\Control\Power", "HibernateEnabled"); return v != null && Convert.ToInt32(v) == 0 ? "Estado: DESATIVADA" : "Estado: ativada"; }, null);
-            Add("Aceleracao do mouse (Aprimorar precisao do ponteiro)", "Desligada, o ponteiro anda sempre a mesma distancia para o mesmo movimento da mao (recomendado para jogos). Aplica na hora, sem reiniciar.",
-                "Desativar", delegate { return Mouse(false); },
-                "Ativar", delegate { return Mouse(true); },
-                delegate { using (RegistryKey k = Root(false).OpenSubKey(@"Control Panel\Mouse")) { object v = k == null ? null : k.GetValue("MouseSpeed"); return v != null && v.ToString() != "0" ? "Estado: ATIVADA" : "Estado: desativada"; } }, null);
             const string MmKey = @"SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management";
             Add("Mitigacoes do Windows (Spectre / Meltdown)", "Desativa as mitigacoes de execucao especulativa (FeatureSettingsOverride=3) para ganhar desempenho. REDUZ A SEGURANCA do PC; use so em maquina de jogos sem dados sensiveis. Reinicie o PC.",
                 "Desativar", delegate { Sub(true, MmKey, "FeatureSettingsOverride", 3); Sub(true, MmKey, "FeatureSettingsOverrideMask", 3); return "Mitigacoes DESATIVADAS. Reinicie o PC."; },
@@ -13066,27 +13185,74 @@ namespace BunoTunner
                 "ATENCAO: desativar as mitigacoes de Spectre/Meltdown deixa o PC mais vulneravel a ataques que leem memoria (por exemplo, por codigo malicioso no navegador). O ganho de desempenho costuma ser pequeno em CPUs recentes.\n\nDesativar mesmo assim?");
         }
 
-        // primeiro item da lista: atualiza os drivers de todos os dispositivos
+        // faixa de categoria: separa os grupos de ajustes (a de seguranca usa a cor de alerta)
+        void Section(string title, string sub, bool warn)
+        {
+            top += 6;
+            SecBar b = new SecBar(title, sub, warn); b.SetBounds(0, top, 650, 30);
+            box.Controls.Add(b); top += 38;
+        }
+
+        class SecBar : Control
+        {
+            string t, sub; bool warn;
+            public SecBar(string title, string subtitle, bool w) { t = title; sub = subtitle; warn = w; SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw, true); }
+            protected override void OnPaint(PaintEventArgs e)
+            {
+                Graphics g = e.Graphics; Rectangle r = new Rectangle(0, 0, Width - 1, Height - 1);
+                Color a = warn ? Xp.Bad : Xp.PaneTop, bcol = warn ? Color.FromArgb(Math.Max(0, Xp.Bad.R - 60), Math.Max(0, Xp.Bad.G - 30), Math.Max(0, Xp.Bad.B - 30)) : Xp.PaneBot;
+                using (LinearGradientBrush br = new LinearGradientBrush(r, a, bcol, 0f)) g.FillRectangle(br, r);
+                using (Pen p = new Pen(Xp.Border)) g.DrawRectangle(p, r);
+                Color tc = warn ? Color.White : Xp.PaneText;
+                TextRenderer.DrawText(g, Lang.T(t), Xp.UiBold, new Rectangle(10, 0, 230, Height), tc, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix | TextFormatFlags.EndEllipsis);
+                TextRenderer.DrawText(g, Lang.T(sub), Xp.Ui, new Rectangle(240, 0, Width - 250, Height), tc, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix | TextFormatFlags.EndEllipsis);
+            }
+        }
+
+        // primeiro item da lista: atualiza os drivers (Windows Update + site da NVIDIA/AMD)
         void AddDrivers()
         {
-            XpGroup g = new XpGroup(); g.Title = "Atualizar drivers de todos os dispositivos"; g.SetBounds(0, 0, 650, 246);
-            Label d = UI.Lbl(g, "Analisa todos os dispositivos do PC e procura no Windows Update os drivers mais novos. Antes de instalar, cria um ponto de restauracao e confere a assinatura digital e o hash SHA-256 dos arquivos baixados; se algum estiver alterado, nada e instalado.", 12, 22, Xp.Ui, Xp.Dim);
-            d.AutoSize = false; d.SetBounds(12, 22, 624, 44);
-            XpButton bGo = UI.Btn(g, "Atualizar drivers", 12, 70, 150, null);
-            XpButton bScan = UI.Btn(g, "So verificar", 170, 70, 120, null);
+            Section("Drivers", "Mantenha a GPU, o chipset e os demais dispositivos atualizados.", false);
+            XpGroup g = new XpGroup(); g.Title = "Atualizar drivers (todos os dispositivos, GPU e Chipset)"; g.SetBounds(12, top, 638, 270);
+            Label d = UI.Lbl(g, "Analisa o PC e procura drivers mais novos no Windows Update e, para a placa de video (NVIDIA / AMD) e o chipset AMD, direto no site da fabricante. Antes de instalar, cria um ponto de restauracao e confere a assinatura digital (e o hash SHA-256 no Windows Update); se algo estiver alterado, nada e instalado. Os instaladores da fabricante sao baixados e abertos para voce concluir; para Intel, abre o Assistente de Drivers da Intel.", 12, 22, Xp.Ui, Xp.Dim);
+            d.AutoSize = false; d.SetBounds(12, 22, 624, 58);
+            XpButton bGo = UI.Btn(g, "Atualizar drivers", 12, 86, 150, null);
+            XpButton bScan = UI.Btn(g, "So verificar", 170, 86, 120, null);
             bGo.Height = 24; bScan.Height = 24;
-            XpProgress pb = new XpProgress(); pb.SetBounds(300, 75, 336, 14); g.Controls.Add(pb);
+            XpProgress pb = new XpProgress(); pb.SetBounds(300, 91, 336, 14); g.Controls.Add(pb);
+            XpOption chkWu = UI.Opt(g, "Windows Update (todos os dispositivos)", 12, 116, 300, false); chkWu.Checked = true;
+            XpOption chkVend = UI.Opt(g, "Site da fabricante (GPU NVIDIA/AMD e chipset AMD)", 316, 116, 320, false); chkVend.Checked = true;
             TextBox log = new TextBox(); log.Multiline = true; log.ReadOnly = true; log.ScrollBars = ScrollBars.Vertical; log.WordWrap = true;
-            log.Font = Xp.Ui; log.BackColor = Xp.EditBg; log.ForeColor = Xp.Text; log.SetBounds(12, 100, 624, 138);
+            log.Font = Xp.Ui; log.BackColor = Xp.EditBg; log.ForeColor = Xp.Text; log.SetBounds(12, 142, 624, 120);
             log.Text = "Clique em 'Atualizar drivers' para analisar e instalar, ou em 'So verificar' para apenas listar o que esta desatualizado.";
             g.Controls.Add(log);
             Timer anim = new Timer(); anim.Interval = 60; anim.Tick += delegate { pb.Step(); };
             Action<bool> start = delegate(bool install)
             {
+                bool wu = chkWu.Checked, vend = chkVend.Checked;
+                if (!wu && !vend) { log.Text = Lang.T("Marque pelo menos uma das origens (Windows Update ou site da fabricante)."); return; }
                 bGo.Enabled = false; bScan.Enabled = false; pb.Marquee = true; anim.Start(); log.Text = "";
                 Action<string> add = delegate(string s) { try { BeginInvoke(new Action(delegate { log.AppendText(Lang.T(s) + "\r\n"); })); } catch (Exception) { } };
+                Action finish = delegate
+                {
+                    try { BeginInvoke(new Action(delegate { anim.Stop(); pb.Marquee = false; pb.Value = 0; pb.Invalidate(); bGo.Enabled = true; bScan.Enabled = true; })); } catch (Exception) { }
+                };
+                Func<string, bool> askVendor = delegate(string msg)
+                {
+                    bool yes = false;
+                    try { Invoke(new Action(delegate { yes = Dlg.Show(this, msg, "BunoTunner - Drivers", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes; })); }
+                    catch (Exception) { }
+                    return yes;
+                };
+                Action runVendor = delegate
+                {
+                    if (wu) add("---- Site da fabricante ----");
+                    VendorDrivers.Run(install, add, askVendor, finish);
+                };
                 System.Threading.ThreadPool.QueueUserWorkItem(delegate
                 {
+                    if (!wu) { runVendor(); return; }
+                    add("---- Windows Update ----");
                     DriverUpdater.Run(install, add,
                         delegate(string lst)
                         {
@@ -13105,46 +13271,14 @@ namespace BunoTunner
                         },
                         delegate(string r)
                         {
-                            try { BeginInvoke(new Action(delegate { anim.Stop(); pb.Marquee = false; pb.Value = 0; pb.Invalidate(); bGo.Enabled = true; bScan.Enabled = true; })); } catch (Exception) { }
+                            if (vend) runVendor(); else finish();
                         });
                 });
             };
             bGo.Click += delegate { start(true); };
             bScan.Click += delegate { start(false); };
             box.Controls.Add(g);
-            top = 254;
-        }
-
-        // segundo item: drivers de GPU e chipset direto do site da fabricante
-        void AddVendor()
-        {
-            XpGroup g = new XpGroup(); g.Title = "Drivers de GPU e Chipset direto da fabricante"; g.SetBounds(0, 254, 650, 196);
-            Label d = UI.Lbl(g, "Consulta o site da NVIDIA / AMD e compara com o driver instalado. Se houver versao mais nova, baixa o instalador oficial, confere a assinatura digital e abre a instalacao normal para voce concluir. Para Intel, abre o Assistente de Drivers da Intel.", 12, 22, Xp.Ui, Xp.Dim);
-            d.AutoSize = false; d.SetBounds(12, 22, 624, 44);
-            XpButton bGo = UI.Btn(g, "Verificar GPU e Chipset", 12, 70, 190, null);
-            bGo.Height = 24;
-            TextBox log = new TextBox(); log.Multiline = true; log.ReadOnly = true; log.ScrollBars = ScrollBars.Vertical; log.WordWrap = true;
-            log.Font = Xp.Ui; log.BackColor = Xp.EditBg; log.ForeColor = Xp.Text; log.SetBounds(12, 100, 624, 88);
-            g.Controls.Add(log);
-            bGo.Click += delegate
-            {
-                bGo.Enabled = false; log.Text = "";
-                Action<string> add = delegate(string s) { try { BeginInvoke(new Action(delegate { log.AppendText(Lang.T(s) + "\r\n"); })); } catch (Exception) { } };
-                System.Threading.ThreadPool.QueueUserWorkItem(delegate
-                {
-                    VendorDrivers.Run(add,
-                        delegate(string msg)
-                        {
-                            bool yes = false;
-                            try { Invoke(new Action(delegate { yes = Dlg.Show(this, msg, "BunoTunner - Drivers", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes; })); }
-                            catch (Exception) { }
-                            return yes;
-                        },
-                        delegate { try { BeginInvoke(new Action(delegate { bGo.Enabled = true; })); } catch (Exception) { } });
-                });
-            };
-            box.Controls.Add(g);
-            top = 458;
+            top += 280;
         }
 
         static RegistryKey Root(bool machine) { return RegistryKey.OpenBaseKey(machine ? RegistryHive.LocalMachine : RegistryHive.CurrentUser, RegistryView.Registry64); }
@@ -13205,7 +13339,7 @@ namespace BunoTunner
 
         void Add(string title, string desc, string runText, Func<string> run, string undoText, Func<string> undo, Func<string> state, string confirm)
         {
-            XpGroup g = new XpGroup(); g.Title = title; g.SetBounds(0, top, 650, 78); top += 84;
+            XpGroup g = new XpGroup(); g.Title = title; g.SetBounds(12, top, 638, 78); top += 88;
             Label d = UI.Lbl(g, desc, 12, 22, Xp.Ui, Xp.Dim);
             d.AutoSize = false; d.SetBounds(12, 22, 500, 32);
             Label st = UI.Lbl(g, "", 12, 56, Xp.Ui, Xp.GroupText);
