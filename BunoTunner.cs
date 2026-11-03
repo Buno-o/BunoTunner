@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - codigo aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.39.1.0")]
-[assembly: AssemblyFileVersion("1.39.1.0")]
-[assembly: AssemblyInformationalVersion("1.39.1")]
+[assembly: AssemblyVersion("1.39.2.0")]
+[assembly: AssemblyFileVersion("1.39.2.0")]
+[assembly: AssemblyInformationalVersion("1.39.2")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1887,7 +1887,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.39.1";
+        public const string Version = "v1.39.2";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -5845,6 +5845,7 @@ namespace BunoTunner
                 fpsPid = pid; fpsAt = DateTime.UtcNow; fpsApi = null; fpsVal = 0;
                 bool ownRender = pid == myPid && Control.FromHandle(fg) is RenderForm;   // janela de render do Benchmark (OpenGL) tambem e medida
                 fpsGame = (pid != myPid || ownRender) && pid != 0 && FpsMon.Get(pid, out fpsVal, out fpsApi);
+                if (ownRender && fpsGame && ((RenderForm)Control.FromHandle(fg)).Gl != null) fpsApi = "OpenGL";   // o proprio render sabe qual API usa (o processo tambem carrega D3D11 por causa da interface)
             }
             int fps = fpsVal; string api = fpsApi; bool game = fpsGame;
             if (Hidden && !Editing) { if (win != null && win.Visible) win.Hide(); return; }

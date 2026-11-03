@@ -400,3 +400,6 @@ v1.39.0 (TESTE)
 v1.39.1 (TESTE)
 - Botao Instalar PawnIO movido da pagina de ventoinhas para a barra superior, ao lado da escolha da placa de video.
 - Overlay: a janela de render do proprio Benchmark (OpenGL) agora tambem e medida (FPS e API). Antes o overlay ignorava qualquer janela do BunoTunner e mostrava -- FPS.
+
+v1.39.2 (TESTE)
+- Overlay: no render de GPU do Benchmark a API agora aparece como OpenGL (antes aparecia DX11, pois o processo tambem carrega D3D11).
