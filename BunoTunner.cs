@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.43.3.0")]
-[assembly: AssemblyFileVersion("1.43.3.0")]
-[assembly: AssemblyInformationalVersion("1.43.3")]
+[assembly: AssemblyVersion("1.43.4.0")]
+[assembly: AssemblyFileVersion("1.43.4.0")]
+[assembly: AssemblyInformationalVersion("1.43.4")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -218,7 +218,7 @@ namespace BunoTunner
             "Desativar MPO", "Disable MPO",
             "Executando...", "Running...",
             "GPU  -  render 3D (estilo FurMark)", "GPU  -  3D render (FurMark style)",
-            "Abre uma janela OpenGL com shader e pelos e mostra o FPS. Fechar a janela para o teste.", "Opens an OpenGL window with shaders and fur and shows FPS. Closing the window stops the test.",
+            "Janela OpenGL com bola de pelos e shader; mostra o FPS. Fechar a janela para o teste.", "Opens an OpenGL window with shaders and fur and shows FPS. Closing the window stops the test.",
             "CPU  -  ray tracing 3D (estilo Cinebench)", "CPU  -  3D ray tracing (Cinebench style)",
             "Renderiza uma cena em todos os núcleos, bloco a bloco. Pontos = Mrays/s x 100.", "Renders a scene on all cores, block by block. Points = Mrays/s x 100.",
             "FPU  -  campo de ondas em ponto flutuante", "FPU  -  floating-point wave field",
@@ -228,6 +228,8 @@ namespace BunoTunner
             "SSD  -  sequencial + 4K aleatório", "SSD  -  sequential + random 4K",
             "Usa um arquivo temporário no drive escolhido (apagado ao fim). Em 'Até parar' gera desgaste.", "Uses a temporary file on the chosen drive (deleted at the end). 'Until stopped' causes wear.",
             "Duração:", "Duration:",
+            "Pelos:", "Fur strands:", "50 mil", "50 thousand", "100 mil", "100 thousand", "250 mil", "250 thousand", "500 mil", "500 thousand", "1 milhão", "1 million",
+            "Quantidade de pelos do render. Mais pelos = teste mais pesado (FPS menor).", "Number of fur strands in the render. More strands = heavier test (lower FPS).",
             "Threads:", "Threads:",
             "Usar (% da livre):", "Use (% of free):",
             "Drive:", "Drive:",
@@ -1888,7 +1890,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.43.3";
+        public const string Version = "v1.43.4";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -9004,7 +9006,7 @@ namespace BunoTunner
                     }
                 }
                 catch (Exception) { prog = 0; }
-                const int NSTR = 250000; const float SHIT = 1200f;
+                int NSTR = Math.Max(10000, Math.Min(1000000, Bench.FurCount)); const float SHIT = 1200f;
                 LoadTxt = NSTR.ToString("N0", CultureInfo.GetCultureInfo("pt-BR")) + " pelos" + (prog != 0 ? " + shader " + ((int)SHIT) + " it" : "");
 
                 // pelos: bola de pelos dourada (esfera)
@@ -9183,6 +9185,7 @@ namespace BunoTunner
     static class Bench
     {
         public static volatile bool Stop;
+        public static int FurCount = 250000;
         static readonly string[] VendorWords = { "nvidia", "amd", "intel", "corporation", "graphics", "series", "generation", "laptop", "gpu", "pcie", "sse2", "microsoft" };
         static List<string> NameTokens(string s)
         {
@@ -14679,7 +14682,7 @@ namespace BunoTunner
 
         // ---------------- pagina de benchmark / estresse ----------------
         XpIconButton[] bBtn = new XpIconButton[5];
-        ComboBox[] cbDurK = new ComboBox[5];
+        ComboBox[] cbDurK = new ComboBox[5]; ComboBox cbBFur; static readonly int[] FurSteps = { 50000, 100000, 250000, 500000, 1000000 };
         ComboBox cbBThrF;
         XpButton btnBSeq;
 
@@ -14703,10 +14706,13 @@ namespace BunoTunner
         {
             Panel p = new Panel(); p.Dock = DockStyle.Fill;
 
-            XpGroup gG = BenchBlock(0, "GPU  -  render 3D (estilo FurMark)", "Abre uma janela OpenGL com shader e pelos e mostra o FPS. Fechar a janela para o teste.", "gpu", "Iniciar / parar o estresse de GPU");
-            UI.Lbl(gG, "Placa:", 384, 48);
-            lblBGpu = UI.Lbl(gG, cur != null ? cur.Name : "-", 430, 48, Xp.UiBold, Xp.GroupText);
-            lblBGpu.AutoSize = false; lblBGpu.SetBounds(430, 48, 236, 16);
+            XpGroup gG = BenchBlock(0, "GPU  -  render 3D (estilo FurMark)", "Janela OpenGL com bola de pelos e shader; mostra o FPS. Fechar a janela para o teste.", "gpu", "Iniciar / parar o estresse de GPU");
+            UI.Lbl(gG, "Pelos:", 384, 48);
+            cbBFur = Combo(gG, 448, 44, 110, "50 mil", "100 mil", "250 mil", "500 mil", "1 milhão"); cbBFur.SelectedIndex = 2;
+            tip.SetToolTip(cbBFur, "Quantidade de pelos do render. Mais pelos = teste mais pesado (FPS menor).");
+            UI.Lbl(gG, "Placa:", 72, 54);
+            lblBGpu = UI.Lbl(gG, cur != null ? cur.Name : "-", 112, 54, Xp.UiBold, Xp.GroupText);
+            lblBGpu.AutoSize = false; lblBGpu.SetBounds(112, 54, 260, 14);
             tip.SetToolTip(lblBGpu, "A placa e a escolhida la em cima. Se o OpenGL abrir em outra, o teste muda para OpenCL na escolhida.");
             p.Controls.Add(gG);
 
@@ -14809,6 +14815,8 @@ namespace BunoTunner
         {
             try
             {
+                int fv;
+                if (int.TryParse(Settings.Get("benchFur", "2"), out fv) && fv >= 0 && fv < cbBFur.Items.Count) cbBFur.SelectedIndex = fv;
                 string st = Settings.Get("bench", "");
                 string[] a = st.Split(',');
                 if (a.Length < 7) return;
@@ -14862,7 +14870,7 @@ namespace BunoTunner
         void BenchLock(bool run)
         {
             for (int i = 0; i < 5; i++) { bBtn[i].Enabled = !run || i == bKind; cbDurK[i].Enabled = !run; }
-            cbBThrF.Enabled = !run; cbBThr.Enabled = !run; cbBRam.Enabled = !run; cbBDrive.Enabled = !run; cbBSize.Enabled = !run;
+            cbBThrF.Enabled = !run; cbBThr.Enabled = !run; cbBFur.Enabled = !run; cbBRam.Enabled = !run; cbBDrive.Enabled = !run; cbBSize.Enabled = !run;
         }
 
         void ToggleBench(int pick)
@@ -14879,6 +14887,8 @@ namespace BunoTunner
             int[] durs = { 30, 60, 300, 600, 0 };
             int di = cbDurK[kind].SelectedIndex; if (bSeqRun && di == 4) di = 1;
             bDurSec = durs[di];
+            Bench.FurCount = FurSteps[Math.Max(0, Math.Min(FurSteps.Length - 1, cbBFur.SelectedIndex))];
+            Settings.Set("benchFur", cbBFur.SelectedIndex.ToString());
             int cores = Environment.ProcessorCount;
             int thr = cbBThr.SelectedIndex == 0 ? cores : (cbBThr.SelectedIndex == 1 ? Math.Max(1, cores / 2) : 1);   // CPU e FPU compartilham
             int ramPct = new int[] { 25, 50, 70 }[cbBRam.SelectedIndex];

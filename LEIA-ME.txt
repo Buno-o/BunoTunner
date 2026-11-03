@@ -449,3 +449,6 @@ v1.43.2 (TESTE)
 v1.43.3 (TESTE)
 - Benchmark de GPU mais proximo do exemplo: esfera dourada pixelada opaca no centro (esconde os pelos de tras), anel de pelos longos marrom->dourado->creme em volta e teia polar de fundo desenhada por shader.
 - Teste bem mais pesado: 250.000 pelos (linhas mais grossas, 2 passadas) + shader de fundo com carga fixa de ALU (1200 iteracoes por pixel), igual para todas as placas para o FPS ser comparavel. O FPS depende do tamanho da janela (como no FurMark).
+
+v1.43.4 (TESTE)
+- Benchmark de GPU: novo campo "Pelos" abaixo da duracao para escolher a quantidade de pelos do render (50 mil, 100 mil, 250 mil, 500 mil ou 1 milhao). Padrao 250 mil; a escolha e lembrada. A linha "Placa:" foi para baixo da descricao.
