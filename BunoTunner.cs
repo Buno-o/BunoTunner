@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.45.1.0")]
-[assembly: AssemblyFileVersion("1.45.1.0")]
-[assembly: AssemblyInformationalVersion("1.45.1")]
+[assembly: AssemblyVersion("1.45.2.0")]
+[assembly: AssemblyFileVersion("1.45.2.0")]
+[assembly: AssemblyInformationalVersion("1.45.2")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -228,6 +228,7 @@ namespace BunoTunner
             "SSD  -  sequencial + 4K aleatório", "SSD  -  sequential + random 4K",
             "Usa um arquivo temporário no drive escolhido (apagado ao fim). Em 'Até parar' gera desgaste.", "Uses a temporary file on the chosen drive (deleted at the end). 'Until stopped' causes wear.",
             "Duração:", "Duration:",
+            "Todos os ajustes", "All tweaks", "Aplica ou desfaz todos os ajustes desta página de uma vez.", "Applies or undoes every tweak on this page at once.",
             "Unidade de medida", "Unit of measure", "Unidade de medida (todos deste tipo)", "Unit of measure (all of this type)", "Usar o padrão do tipo", "Use the type default",
             "Pelos:", "Fur strands:", "50 mil", "50 thousand", "100 mil", "100 thousand", "250 mil", "250 thousand", "500 mil", "500 thousand", "1 milhão", "1 million",
             "Quantidade de pelos do render. Mais pelos = teste mais pesado (FPS menor).", "Number of fur strands in the render. More strands = heavier test (lower FPS).",
@@ -1922,7 +1923,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.45.1";
+        public const string Version = "v1.45.2";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -14039,6 +14040,8 @@ namespace BunoTunner
         // logo abaixo dos drivers: executa TODOS os ajustes da pagina (inclusive os de seguranca) com 1 clique
         void AddAll()
         {
+            top += 12;   // afasta do bloco de Drivers: sao funcoes separadas
+            Section("Todos os ajustes", "Aplica ou desfaz todos os ajustes desta página de uma vez.", false, true);
             XpGroup g = new XpGroup(); g.Title = "Aplicar todos os ajustes (1 clique)"; g.SetBounds(12, top, 638, 84); top += 94;
             Label d = UI.Lbl(g, "Executa TODOS os ajustes desta página, um após o outro. O overlay do DLSS não vai ser executado.", 12, 22, Xp.Ui, Xp.Dim);
             d.AutoSize = false; d.SetBounds(12, 22, 500, 34);
@@ -14076,16 +14079,17 @@ namespace BunoTunner
         }
 
         // faixa de categoria: separa os grupos de ajustes (a de seguranca usa a cor de alerta)
-        void Section(string title, string sub, bool warn)
+        void Section(string title, string sub, bool warn) { Section(title, sub, warn, false); }
+        void Section(string title, string sub, bool warn, bool alt)
         {
             top += 6;
-            SecBar b = new SecBar(title, sub, warn); b.SetBounds(0, top, 650, 30);
+            SecBar b = new SecBar(title, sub, warn); b.Alt = alt; b.SetBounds(0, top, 650, 30);
             box.Controls.Add(b); top += 38;
         }
 
         class SecBar : Control
         {
-            string t, sub; bool warn;
+            string t, sub; bool warn; public bool Alt;
             public SecBar(string title, string subtitle, bool w) { t = title; sub = subtitle; warn = w; SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw, true); }
             protected override void OnPaint(PaintEventArgs e)
             {
@@ -14093,17 +14097,17 @@ namespace BunoTunner
                 if (Xp.Theme == 0)
                 {
                     // Luna: barra no estilo da barra de titulo do XP (azul vivo, brilho no topo, texto branco)
-                    using (LinearGradientBrush br = new LinearGradientBrush(r, Color.FromArgb(78, 130, 236), Color.FromArgb(30, 82, 206), 90f)) g.FillRectangle(br, r);
-                    using (Pen hl = new Pen(Color.FromArgb(140, 178, 248))) g.DrawLine(hl, 1, 1, Width - 3, 1);
-                    using (Pen p = new Pen(Color.FromArgb(0, 48, 152))) g.DrawRectangle(p, r);
+                    using (LinearGradientBrush br = new LinearGradientBrush(r, Alt ? Color.FromArgb(104, 188, 72) : Color.FromArgb(78, 130, 236), Alt ? Color.FromArgb(44, 132, 30) : Color.FromArgb(30, 82, 206), 90f)) g.FillRectangle(br, r);
+                    using (Pen hl = new Pen(Alt ? Color.FromArgb(170, 226, 140) : Color.FromArgb(140, 178, 248))) g.DrawLine(hl, 1, 1, Width - 3, 1);
+                    using (Pen p = new Pen(Alt ? Color.FromArgb(18, 92, 12) : Color.FromArgb(0, 48, 152))) g.DrawRectangle(p, r);
                     TextRenderer.DrawText(g, Lang.T(t), Xp.UiBold, new Rectangle(10, 0, 230, Height), Color.White, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix | TextFormatFlags.EndEllipsis);
                     TextRenderer.DrawText(g, Lang.T(sub), Xp.Ui, new Rectangle(240, 0, Width - 250, Height), Color.FromArgb(222, 234, 255), TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix | TextFormatFlags.EndEllipsis);
                     return;
                 }
-                Color a = warn ? Xp.Bad : Xp.PaneTop, bcol = warn ? Color.FromArgb(Math.Max(0, Xp.Bad.R - 60), Math.Max(0, Xp.Bad.G - 30), Math.Max(0, Xp.Bad.B - 30)) : Xp.PaneBot;
+                Color a = warn ? Xp.Bad : (Alt ? Color.FromArgb(70, 150, 80) : Xp.PaneTop), bcol = warn ? Color.FromArgb(Math.Max(0, Xp.Bad.R - 60), Math.Max(0, Xp.Bad.G - 30), Math.Max(0, Xp.Bad.B - 30)) : (Alt ? Color.FromArgb(34, 100, 48) : Xp.PaneBot);
                 using (LinearGradientBrush br = new LinearGradientBrush(r, a, bcol, 0f)) g.FillRectangle(br, r);
                 using (Pen p = new Pen(Xp.Border)) g.DrawRectangle(p, r);
-                Color tc = warn ? Color.White : Xp.PaneText;
+                Color tc = (warn || Alt) ? Color.White : Xp.PaneText;
                 TextRenderer.DrawText(g, Lang.T(t), Xp.UiBold, new Rectangle(10, 0, 230, Height), tc, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix | TextFormatFlags.EndEllipsis);
                 TextRenderer.DrawText(g, Lang.T(sub), Xp.Ui, new Rectangle(240, 0, Width - 250, Height), tc, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix | TextFormatFlags.EndEllipsis);
             }

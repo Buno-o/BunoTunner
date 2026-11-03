@@ -468,3 +468,6 @@ v1.45.0 (TESTE)
 v1.45.1 (TESTE)
 - Teste de internet: os valores grandes (ex.: "253,4 Mbps") nao sao mais cortados; a fonte diminui sozinha para caber no cartao.
 - Instancia unica: se o BunoTunner ja esta aberto (ou na bandeja) e o usuario abre de novo pelo menu iniciar, nao abre uma segunda copia; a janela que ja existe aparece.
+
+v1.45.2 (TESTE)
+- Otimizacoes: o bloco "Aplicar todos os ajustes (1 clique)" ganhou a propria faixa verde ("Todos os ajustes") e um espaco maior, separado do bloco azul de Drivers, para ficar claro que sao funcoes diferentes.
