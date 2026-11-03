@@ -392,3 +392,7 @@ v1.37.1 (TESTE)
 v1.38.0 (TESTE)
 - Saude de armazenamento: tela reorganizada (lista de discos mais compacta, detalhes ocupam o resto da janela), novas colunas e cores de situacao (OK / Atencao / Ruim) nos atributos S.M.A.R.T., filtro de texto, "Mostrar so alertas" e botoes para copiar ou salvar o relatorio do disco em .txt.
 - Benchmark / estresse: os 5 testes (GPU, CPU, FPU, RAM, SSD) agora sao linhas largas com a duracao e as opcoes ao lado, e o cartao de controle passou para baixo com a taxa atual, media, pico, temperatura, erros e tempo do teste em andamento sempre visiveis.
+
+v1.39.0 (TESTE)
+- Internet: novo visual com cartoes coloridos (Ping, Jitter, Download, Upload) cuja faixa de cor indica a qualidade, avaliacao em texto da conexao e historico dos ultimos testes (copiar/limpar).
+- Benchmark: conferido o que cada janela de render mostra. GPU (OpenGL), CPU (ray tracing por blocos) e FPU (campo de ondas) ja eram desenhados a partir do proprio calculo. RAM e SSD eram animacoes decorativas; agora mostram o estado real: RAM = mapa dos blocos de 64 MB (gravando / conferindo / ok / erro), padrao em uso e palavras lidas da memoria; SSD = mapa do arquivo de teste com a posicao real do cabecote, fase atual e regioes 4K realmente lidas. O render da CPU passou a recomecar em 0,8 s (antes 2 s) para a carga nao cair entre uma imagem e outra.

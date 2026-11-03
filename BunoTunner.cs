@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - codigo aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.38.0.0")]
-[assembly: AssemblyFileVersion("1.38.0.0")]
-[assembly: AssemblyInformationalVersion("1.38.0")]
+[assembly: AssemblyVersion("1.39.0.0")]
+[assembly: AssemblyFileVersion("1.39.0.0")]
+[assembly: AssemblyInformationalVersion("1.39.0")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -377,7 +377,7 @@ namespace BunoTunner
             "Consultando os sites das fabricantes...", "Checking the manufacturers' websites...",
             "Atualizar drivers (todos os dispositivos, GPU e Chipset)", "Update drivers (all devices, GPU and Chipset)", "Windows Update (todos os dispositivos)", "Windows Update (all devices)", "Site da fabricante (GPU NVIDIA/AMD e chipset AMD)", "Manufacturer website (NVIDIA/AMD GPU and AMD chipset)",
             "Marque pelo menos uma das origens (Windows Update ou site da fabricante).", "Tick at least one source (Windows Update or manufacturer website).", "---- Windows Update ----", "---- Windows Update ----", "---- Site da fabricante ----", "---- Manufacturer website ----",
-            "Concluido.", "Done.", "Ignorado.", "Skipped.", "Controle, seguranca e resultado ao vivo", "Controls, safety and live results", "Taxa atual", "Current rate", "Copiar relatorio", "Copy report", "Salvar relatorio...", "Save report...", "Mostrar so alertas", "Show alerts only", "Filtrar:", "Filter:", "Situacao", "Status", "Selecione um disco primeiro.", "Select a disk first.", "Relatorio copiado para a area de transferencia.", "Report copied to the clipboard.", "Relatorio salvo.", "Report saved.", "Inverter selecao", "Invert selection", "Dica: Enter nos campos de % ou RPM tambem aplica.", "Tip: Enter in the % or RPM boxes also applies.", "Identificar = liga as selecionadas a 100% por 5 s para voce descobrir qual e qual.  Botao direito na lista: selecionar por tipo ou renomear (inclua CPU, Bomba ou Gabinete no nome). Atalhos: Ctrl+A seleciona tudo, F2 ou duplo clique renomeia.", "Identify = runs the selected fans at 100% for 5 s so you can tell which is which.  Right-click the list: select by type or rename (include CPU, Pump or Case in the name). Shortcuts: Ctrl+A selects all, F2 or double-click renames.", "Limpeza e manutencao", "Cleanup and maintenance", "Libera espaco no disco.", "Frees disk space.", "Desempenho em jogos", "Gaming performance", "Ajustes que podem melhorar FPS, tremidas e resposta do mouse.", "Tweaks that can improve FPS, stutter and mouse response.", "Interface do Windows", "Windows interface", "Aparencia e comportamento do sistema.", "System look and behavior.", "Seguranca (avancado)", "Security (advanced)", "Estes ajustes REDUZEM a protecao do PC. Use so se souber o que esta fazendo.", "These tweaks REDUCE the PC's protection. Use only if you know what you are doing.", "Mantenha a GPU, o chipset e os demais dispositivos atualizados.", "Keep the GPU, chipset and other devices up to date.",
+            "Concluido.", "Done.", "Ignorado.", "Skipped.", "gravando", "writing", "conferindo", "verifying", "conferido sem erro", "verified, no error", "erro", "error", "Padrao", "Pattern", "Passagem", "Pass", "Blocos", "Blocks", "Reservando a memoria do teste...", "Reserving the test memory...", "Escrita sequencial (1 MB)", "Sequential write (1 MB)", "Leitura sequencial + conferencia", "Sequential read + verification", "Leitura aleatoria 4K", "Random 4K read", "Historico de testes", "Test history", "Data e hora", "Date and time", "Avaliacao da conexao", "Connection rating", "Faca um teste para ver se a sua conexao serve para jogos, streaming e chamadas.", "Run a test to see whether your connection suits gaming, streaming and calls.", "Medindo...", "Measuring...", "Controle, seguranca e resultado ao vivo", "Controls, safety and live results", "Taxa atual", "Current rate", "Copiar relatorio", "Copy report", "Salvar relatorio...", "Save report...", "Mostrar so alertas", "Show alerts only", "Filtrar:", "Filter:", "Situacao", "Status", "Selecione um disco primeiro.", "Select a disk first.", "Relatorio copiado para a area de transferencia.", "Report copied to the clipboard.", "Relatorio salvo.", "Report saved.", "Inverter selecao", "Invert selection", "Dica: Enter nos campos de % ou RPM tambem aplica.", "Tip: Enter in the % or RPM boxes also applies.", "Identificar = liga as selecionadas a 100% por 5 s para voce descobrir qual e qual.  Botao direito na lista: selecionar por tipo ou renomear (inclua CPU, Bomba ou Gabinete no nome). Atalhos: Ctrl+A seleciona tudo, F2 ou duplo clique renomeia.", "Identify = runs the selected fans at 100% for 5 s so you can tell which is which.  Right-click the list: select by type or rename (include CPU, Pump or Case in the name). Shortcuts: Ctrl+A selects all, F2 or double-click renames.", "Limpeza e manutencao", "Cleanup and maintenance", "Libera espaco no disco.", "Frees disk space.", "Desempenho em jogos", "Gaming performance", "Ajustes que podem melhorar FPS, tremidas e resposta do mouse.", "Tweaks that can improve FPS, stutter and mouse response.", "Interface do Windows", "Windows interface", "Aparencia e comportamento do sistema.", "System look and behavior.", "Seguranca (avancado)", "Security (advanced)", "Estes ajustes REDUZEM a protecao do PC. Use so se souber o que esta fazendo.", "These tweaks REDUCE the PC's protection. Use only if you know what you are doing.", "Mantenha a GPU, o chipset e os demais dispositivos atualizados.", "Keep the GPU, chipset and other devices up to date.",
             "Instalador fechado.", "Installer closed.",
             "Abrindo o instalador. Conclua a instalacao na janela da fabricante...", "Opening the installer. Finish the installation in the manufacturer's window...",
             "Instalador apagado por seguranca. Nada foi executado.", "Installer deleted for safety. Nothing was run.",
@@ -1887,7 +1887,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.38.0";
+        public const string Version = "v1.39.0";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -7638,7 +7638,7 @@ namespace BunoTunner
                     order = l.ToArray(); SetupPass();
                 }
                 if (nextB < NB) { int b = order[nextB++]; bstate[b] = 1; return b; }
-                if (doneB >= NB && (DateTime.UtcNow - finishedAt).TotalSeconds > 2.0)
+                if (doneB >= NB && (DateTime.UtcNow - finishedAt).TotalSeconds > 0.8)
                 {
                     pass++; SetupPass();
                     nextB = 0; doneB = 0; passStart = DateTime.UtcNow;
@@ -7761,67 +7761,90 @@ namespace BunoTunner
             TextRenderer.DrawText(g, Lang.T(st), SystemFonts.DefaultFont, new Point((int)x0 + 4, (int)y0 + 4), Color.White, Color.FromArgb(150, 0, 0, 0));
         }
 
-        // RAM: modulo de memoria com chips sendo preenchidos + fluxo de palavras hexadecimais sendo gravadas/conferidas
+        static Color Mix(Color a, Color b, double t) { t = Math.Max(0, Math.Min(1, t)); return Color.FromArgb((int)(a.R + (b.R - a.R) * t), (int)(a.G + (b.G - a.G) * t), (int)(a.B + (b.B - a.B) * t)); }
+
+        // RAM: mapa REAL dos blocos de 64 MB que o teste esta usando (cada quadrado = um bloco) + palavras reais lidas da memoria
         void DrawRam(Graphics g, Rectangle r, double t)
         {
-            g.SmoothingMode = SmoothingMode.AntiAlias;
-            int ph = (int)(t / 4);
-            Color[] pal = { Color.FromArgb(40, 140, 255), Color.FromArgb(60, 200, 90), Color.FromArgb(240, 190, 40), Color.FromArgb(200, 90, 220) };
-            Color pc = pal[ph % pal.Length];
-            Rectangle mod = new Rectangle(r.X + 10, r.Y + 6, r.Width - 20, Math.Max(60, r.Height * 2 / 5));
-            using (LinearGradientBrush pg = new LinearGradientBrush(mod, Color.FromArgb(30, 120, 70), Color.FromArgb(10, 70, 40), 90f)) g.FillRectangle(pg, mod);
-            g.DrawRectangle(Pens.DarkGreen, mod);
-            int chips = 8; float cw = (mod.Width - 20) / (float)chips;
-            for (int i = 0; i < chips; i++)
+            g.SmoothingMode = SmoothingMode.None;
+            byte[] st = Bench.RamState; int[] pr = Bench.RamProg; int nb = st.Length;
+            Color dark = Color.FromArgb(30, 30, 34), cWrite = Color.FromArgb(50, 140, 255), cVer = Color.FromArgb(240, 190, 40), cOk = Color.FromArgb(50, 190, 90), cBad = Color.FromArgb(235, 50, 50);
+            Rectangle map = new Rectangle(r.X + 10, r.Y + 6, r.Width - 20, Math.Max(60, r.Height * 11 / 20));
+            using (SolidBrush bg = new SolidBrush(Color.FromArgb(16, 16, 20))) g.FillRectangle(bg, map);
+            if (nb == 0)
             {
-                RectangleF c = new RectangleF(mod.X + 10 + i * cw + 4, mod.Y + 14, cw - 8, mod.Height - 40);
-                g.FillRectangle(Brushes.Black, c);
-                double lv = (t * 0.45 + i * 0.13) % 1.0;
-                bool verify = ((int)(t * 0.45 + i * 0.13) & 1) == 1;
-                using (SolidBrush fb = new SolidBrush(verify ? Color.FromArgb(230, 230, 230) : pc))
-                    g.FillRectangle(fb, c.X + 2, c.Bottom - 2 - (c.Height - 4) * (float)lv, c.Width - 4, (c.Height - 4) * (float)lv);
-                g.DrawRectangle(Pens.DimGray, c.X, c.Y, c.Width, c.Height);
+                TextRenderer.DrawText(g, Lang.T("Reservando a memoria do teste..."), SystemFonts.DefaultFont, new Point(map.X + 8, map.Y + 8), Color.Gray);
             }
-            using (SolidBrush gold = new SolidBrush(Color.FromArgb(235, 190, 60)))
-                for (int i = 0; i < 40; i++) g.FillRectangle(gold, mod.X + 8 + i * (mod.Width - 16) / 40f, mod.Bottom - 10, (mod.Width - 16) / 40f * 0.6f, 10);
-            string mode = (Extra ?? "");
-            using (Font f = new Font("Consolas", 10f, FontStyle.Bold))
+            else
             {
-                int rows = Math.Max(4, (r.Bottom - mod.Bottom - 16) / 16);
-                uint seed = (uint)(t * 9);
-                for (int ry = 0; ry < rows; ry++)
-                {
-                    StringBuilder sb = new StringBuilder();
-                    for (int k = 0; k < 10; k++)
+                int cols = Math.Max(1, (int)Math.Ceiling(Math.Sqrt(nb * map.Width / (double)map.Height)));
+                int rows = (int)Math.Ceiling(nb / (double)cols);
+                float cw = map.Width / (float)cols, ch = map.Height / (float)rows;
+                using (SolidBrush br = new SolidBrush(dark))
+                    for (int i = 0; i < nb; i++)
                     {
-                        uint v = unchecked((seed + (uint)ry * 2654435761u + (uint)k * 40503u) * 2246822519u); v ^= v >> 15;
-                        sb.Append(((ph + ry) & 1) == 0 ? (k % 2 == 0 ? "AAAAAAAA " : "55555555 ") : v.ToString("X8") + " ");
+                        float x = map.X + (i % cols) * cw, y = map.Y + (i / cols) * ch;
+                        byte s0 = st[i]; int pg = i < pr.Length ? pr[i] : 0;
+                        br.Color = s0 == 3 ? cOk : s0 == 4 ? cBad : dark; g.FillRectangle(br, x + 1, y + 1, Math.Max(1, cw - 2), Math.Max(1, ch - 2));
+                        if (s0 == 1 || s0 == 2)
+                        {
+                            br.Color = s0 == 1 ? cWrite : cVer;
+                            float hh = Math.Max(1, (ch - 2) * pg / 1000f);
+                            g.FillRectangle(br, x + 1, y + 1 + (ch - 2) - hh, Math.Max(1, cw - 2), hh);
+                        }
                     }
-                    int a = 255 - ry * 255 / (rows + 2);
-                    TextRenderer.DrawText(g, sb.ToString(), f, new Point(r.X + 14, mod.Bottom + 10 + ry * 16), Color.FromArgb(a / 2 + 40, pc.R, pc.G, pc.B));
-                }
             }
+            using (Pen fp = new Pen(Color.FromArgb(90, 90, 100))) g.DrawRectangle(fp, map);
+            // legenda
+            int lx = map.X, ly = map.Bottom + 6;
+            string[] lt = { "gravando", "conferindo", "conferido sem erro", "erro" }; Color[] lc = { cWrite, cVer, cOk, cBad };
+            for (int i = 0; i < 4; i++)
+            {
+                using (SolidBrush lb = new SolidBrush(lc[i])) g.FillRectangle(lb, lx, ly + 3, 10, 10);
+                string tx = Lang.T(lt[i]); TextRenderer.DrawText(g, tx, SystemFonts.DefaultFont, new Point(lx + 14, ly), Color.Silver);
+                lx += 14 + TextRenderer.MeasureText(tx, SystemFonts.DefaultFont).Width + 14;
+            }
+            string info = Lang.T("Padrao") + ": 0x" + Bench.RamPattern.ToString("X16") + "     " + Lang.T("Passagem") + " " + Bench.RamRound + "     " + Lang.T("Blocos") + ": " + nb + " x 64 MB";
+            TextRenderer.DrawText(g, info, new Font("Consolas", 9f, FontStyle.Bold), new Point(map.X, ly + 20), Color.FromArgb(255, 200, 60));
+            // palavras reais da memoria que esta sendo gravada/conferida agora
+            long[] view = Bench.RamView; int vp = Bench.RamViewPos;
+            if (view != null)
+                using (Font f = new Font("Consolas", 9f))
+                {
+                    int top = ly + 40, rowsHex = Math.Max(0, (r.Bottom - top) / 15);
+                    for (int row = 0; row < rowsHex; row++)
+                    {
+                        int idx = vp + row * 2;
+                        if (idx + 1 >= view.Length) break;
+                        string ln = "+0x" + ((long)idx * 8).ToString("X8") + "   0x" + view[idx].ToString("X16") + "   0x" + view[idx + 1].ToString("X16");
+                        TextRenderer.DrawText(g, ln, f, new Point(map.X, top + row * 15), Color.FromArgb(Math.Max(70, 230 - row * 25), 120, 220, 140));
+                    }
+                }
         }
 
         List<double> ssdHist = new List<double>(); DateTime ssdHistT = DateTime.MinValue;
-        // SSD: faixa sequencial com cabecote, grafico de velocidade ao vivo e mapa de acessos 4K aleatorios
+        // SSD: mapa REAL do arquivo de teste (gravado / lido e conferido / erro), cabecote na posicao real, regioes 4K acessadas e velocidade ao vivo
         void DrawSsd(Graphics g, Rectangle r, double t)
         {
             g.SmoothingMode = SmoothingMode.AntiAlias;
             if ((DateTime.UtcNow - ssdHistT).TotalMilliseconds >= 150) { ssdHistT = DateTime.UtcNow; ssdHist.Add(Rate); if (ssdHist.Count > 160) ssdHist.RemoveAt(0); }
-            string ex = Extra ?? "";
-            bool rnd = ex.IndexOf("4K") >= 0, read = ex.IndexOf("Leitura") >= 0 && !rnd;
-            Color acc = rnd ? Color.FromArgb(240, 200, 40) : (read ? Color.FromArgb(60, 200, 110) : Color.FromArgb(70, 150, 255));
-            // 1) faixa do arquivo (setores) com o cabecote
-            Rectangle lane = new Rectangle(r.X + 10, r.Y + 8, r.Width - 20, 34);
+            int ph = Bench.SsdPhase, smb = Math.Max(1, Bench.SsdMb); byte[] map = Bench.SsdMap; int[] hits = Bench.SsdHit;
+            Color cW = Color.FromArgb(70, 150, 255), cR = Color.FromArgb(60, 200, 110), cK = Color.FromArgb(240, 200, 40), cE = Color.FromArgb(235, 50, 50);
+            Color acc = ph == 2 ? cK : (ph == 1 ? cR : cW);
+            string[] pn = { "Escrita sequencial (1 MB)", "Leitura sequencial + conferencia", "Leitura aleatoria 4K" };
+            TextRenderer.DrawText(g, Lang.T(pn[Math.Max(0, Math.Min(2, ph))]), SystemFonts.DefaultFont, new Point(r.X + 12, r.Y + 2), acc);
+            // 1) faixa do arquivo: cada segmento e uma fatia real do arquivo de teste
+            Rectangle lane = new Rectangle(r.X + 10, r.Y + 22, r.Width - 20, 30);
             using (SolidBrush lb = new SolidBrush(Color.FromArgb(24, 24, 28))) g.FillRectangle(lb, lane);
-            int segs = 80; float sw = lane.Width / (float)segs; int head = (int)(t * 18) % segs;
+            int segs = 128; float sw = lane.Width / (float)segs;
             for (int i = 0; i < segs; i++)
             {
-                bool done = rnd ? (((i * 2654435761u) >> 7) + (uint)(t * 5)) % 5 == 0 : i < head;
-                using (SolidBrush sb = new SolidBrush(done ? Color.FromArgb(150, acc) : Color.FromArgb(40, 40, 46))) g.FillRectangle(sb, lane.X + i * sw + 1, lane.Y + 3, sw - 2, lane.Height - 6);
+                byte v = i < map.Length ? map[i] : (byte)0;
+                if (v == 0) continue;
+                using (SolidBrush sb = new SolidBrush(v == 3 ? cE : v == 2 ? cR : cW)) g.FillRectangle(sb, lane.X + i * sw, lane.Y + 2, Math.Max(1, sw - 0.5f), lane.Height - 4);
             }
-            if (!rnd) using (Pen hp = new Pen(Color.White, 2f)) g.DrawLine(hp, lane.X + head * sw, lane.Y, lane.X + head * sw, lane.Bottom);
+            if (ph < 2)
+                using (Pen hp = new Pen(Color.White, 2f)) { float hx = lane.X + Math.Min(Bench.SsdPos + 1, smb) * lane.Width / (float)smb; g.DrawLine(hp, hx, lane.Y - 2, hx, lane.Bottom + 2); }
             g.DrawRectangle(Pens.DimGray, lane);
             // 2) grafico de velocidade
             Rectangle gr = new Rectangle(r.X + 10, lane.Bottom + 12, (r.Width - 30) * 3 / 5, r.Bottom - lane.Bottom - 20);
@@ -7837,15 +7860,25 @@ namespace BunoTunner
                 using (Pen lp = new Pen(acc, 2f)) { PointF[] ln = new PointF[ssdHist.Count]; Array.Copy(pts, 1, ln, 0, ln.Length); g.DrawLines(lp, ln); }
             }
             g.DrawRectangle(Pens.DimGray, gr);
-            // 3) mapa de blocos 4K acessados
+            // 3) mapa das regioes: nas fases sequenciais mostra o progresso real; na fase 4K acende as regioes realmente lidas
             Rectangle mp = new Rectangle(gr.Right + 10, gr.Y, r.Right - gr.Right - 20, gr.Height);
             int cols = 24, rows = Math.Max(4, mp.Height / 12); float cw = mp.Width / (float)cols, ch = mp.Height / (float)rows;
+            int now = Environment.TickCount;
             using (SolidBrush mb = new SolidBrush(Color.Black))
                 for (int i = 0; i < cols * rows; i++)
                 {
-                    int hsh = (int)(unchecked((uint)(i + (int)(t * (rnd ? 14 : 3))) * 2654435761u) >> 24);
-                    bool on = rnd ? hsh < 70 : (i % cols) < ((int)(t * 6) % cols) && (i / cols) == ((int)(t * 6) / cols) % rows;
-                    mb.Color = on ? acc : Color.FromArgb(30, 30, 36);
+                    Color c = Color.FromArgb(30, 30, 36);
+                    if (ph == 2)
+                    {
+                        int hh = hits[(int)((long)i * 512 / (cols * rows))];
+                        if (hh != 0) { int age = unchecked(now - hh); if (age >= 0 && age < 1500) c = Mix(cK, Color.FromArgb(30, 30, 36), age / 1500.0); }
+                    }
+                    else
+                    {
+                        byte v = map[Math.Min(map.Length - 1, (int)((long)i * 128 / (cols * rows)))];
+                        c = v == 3 ? cE : v == 2 ? cR : v == 1 ? cW : c;
+                    }
+                    mb.Color = c;
                     g.FillRectangle(mb, mp.X + (i % cols) * cw + 1, mp.Y + (i / cols) * ch + 1, cw - 2, ch - 2);
                 }
         }
@@ -8959,6 +8992,15 @@ namespace BunoTunner
         }
         public static long Counter, Errors;
         public static volatile string Extra = "", Fail;
+        // estado REAL dos testes de RAM e SSD (o desenho do render le estes campos)
+        public const int RamChunk = 8 * 1024 * 1024;                    // palavras de 8 bytes por bloco (64 MB)
+        public static volatile byte[] RamState = new byte[0];            // por bloco: 0 parado, 1 gravando, 2 conferindo, 3 conferido sem erro, 4 com erro
+        public static volatile int[] RamProg = new int[0];               // 0..1000 dentro da fase atual do bloco
+        public static volatile int RamRound, RamViewPos; public static long RamPattern;
+        public static volatile long[] RamView;                           // bloco que a primeira thread esta gravando/conferindo agora
+        public static volatile byte[] SsdMap = new byte[128];            // mapa do arquivo de teste: 0 intocado, 1 gravado, 2 lido e conferido, 3 erro
+        public static int[] SsdHit = new int[512];                       // ultimo acesso 4K aleatorio por regiao do arquivo (TickCount)
+        public static volatile int SsdPhase, SsdMb, SsdPos;              // fase: 0 escrita seq, 1 leitura seq, 2 leitura 4K aleatoria
         static int alive;
         public static bool Alive { get { return Th.Interlocked.CompareExchange(ref alive, 0, 0) > 0; } }
 
@@ -9018,7 +9060,9 @@ namespace BunoTunner
                         if (total < 128L * 1048576L) { Fail = "Memoria livre insuficiente para o teste."; break; }
                         int th = Math.Max(1, Math.Min(4, Environment.ProcessorCount / 2));
                         long per = total / th;
-                        for (int i = 0; i < th; i++) Spawn(delegate(object o) { RamWorker(per); }, i, "bench-ram");
+                        int nPer = (int)Math.Max(1, per / (RamChunk * 8L));
+                        RamState = new byte[th * nPer]; RamProg = new int[th * nPer]; RamRound = 0; RamView = null; RamViewPos = 0;
+                        for (int i = 0; i < th; i++) { int bi = i * nPer; Spawn(delegate(object o) { RamWorker(per, bi, nPer); }, i, "bench-ram"); }
                         Extra = "Usando " + (total >> 20) + " MB em " + th + " thread(s)";
                         break;
                     }
@@ -9083,25 +9127,39 @@ namespace BunoTunner
         }
 
         // ---------- RAM ----------
-        static void RamWorker(long bytes)
+        static void RamWorker(long bytes, int baseIdx, int n)
         {
-            int chunk = 8 * 1024 * 1024;   // 64 MB por bloco
-            int n = (int)Math.Max(1, bytes / (chunk * 8L));
+            int chunk = RamChunk;
             List<long[]> bufs = new List<long[]>();
             for (int i = 0; i < n && !Stop; i++) bufs.Add(new long[chunk]);
             ulong[] pats = { 0xAAAAAAAAAAAAAAAAUL, 0x5555555555555555UL, 0xFFFFFFFF00000000UL, 0x00000000FFFFFFFFUL };
-            int round = 0;
+            int round = 0; const int SL = 1 << 16;
             while (!Stop)
             {
                 long p = (long)pats[round++ & 3];
-                foreach (long[] b in bufs)
+                if (baseIdx == 0) { RamPattern = p; RamRound = round; }
+                for (int bi = 0; bi < bufs.Count; bi++)
                 {
+                    long[] b = bufs[bi]; int idx = baseIdx + bi;
                     if (Stop) break;
-                    for (int i = 0; i < b.Length; i++) b[i] = p ^ i;
+                    RamState[idx] = 1; if (baseIdx == 0) RamView = b;
+                    for (int s0 = 0; s0 < b.Length && !Stop; s0 += SL)
+                    {
+                        int e0 = Math.Min(b.Length, s0 + SL);
+                        for (int i = s0; i < e0; i++) b[i] = p ^ i;
+                        RamProg[idx] = (int)(e0 * 1000L / b.Length); if (baseIdx == 0) RamViewPos = s0;
+                    }
                     Th.Interlocked.Add(ref Counter, (long)b.Length * 8);
+                    RamState[idx] = 2; RamProg[idx] = 0;
                     long bad = 0;
-                    for (int i = 0; i < b.Length; i++) if (b[i] != (p ^ i)) bad++;
+                    for (int s0 = 0; s0 < b.Length && !Stop; s0 += SL)
+                    {
+                        int e0 = Math.Min(b.Length, s0 + SL);
+                        for (int i = s0; i < e0; i++) if (b[i] != (p ^ i)) bad++;
+                        RamProg[idx] = (int)(e0 * 1000L / b.Length); if (baseIdx == 0) RamViewPos = s0;
+                    }
                     if (bad > 0) Th.Interlocked.Add(ref Errors, bad);
+                    RamState[idx] = (byte)(bad > 0 ? 4 : 3);
                     Th.Interlocked.Add(ref Counter, (long)b.Length * 8);
                 }
             }
@@ -9132,8 +9190,10 @@ namespace BunoTunner
                 Random rand = new Random();
                 double w = 0, rd = 0, iops = 0;
                 long np; uint done;
+                SsdMap = new byte[128]; Array.Clear(SsdHit, 0, SsdHit.Length); SsdMb = mb; SsdPos = 0; SsdPhase = 0;
                 while (!Stop)
                 {
+                    Array.Clear(SsdMap, 0, SsdMap.Length); SsdPhase = 0; SsdPos = 0;
                     SetFilePointerEx(h, 0, out np, 0);
                     Stopwatch sw = Stopwatch.StartNew();
                     int wrote = 0;
@@ -9142,30 +9202,34 @@ namespace BunoTunner
                         Marshal.WriteInt32(buf, 0, i); Marshal.WriteInt32(buf, 4, ~i);
                         if (!WriteFile(h, buf, BLK, out done, IntPtr.Zero)) { Fail = "Erro de escrita (" + Marshal.GetLastWin32Error() + ")"; return; }
                         Th.Interlocked.Add(ref Counter, done); wrote++;
+                        SsdPos = i; SsdMap[Math.Min(127, (int)((long)i * 128 / mb))] = 1;
                     }
                     w = wrote / Math.Max(0.001, sw.Elapsed.TotalSeconds);
                     Extra = "Escrita seq " + w.ToString("0") + " MB/s";
                     if (Stop) break;
 
                     SetFilePointerEx(h, 0, out np, 0);
-                    sw.Restart();
+                    sw.Restart(); SsdPhase = 1; SsdPos = 0;
                     for (int i = 0; i < mb && !Stop; i++)
                     {
                         if (!ReadFile(h, buf, BLK, out done, IntPtr.Zero)) { Fail = "Erro de leitura (" + Marshal.GetLastWin32Error() + ")"; return; }
-                        if (Marshal.ReadInt32(buf, 0) != i || Marshal.ReadInt32(buf, 4) != ~i) Th.Interlocked.Increment(ref Errors);
+                        bool badBlk = Marshal.ReadInt32(buf, 0) != i || Marshal.ReadInt32(buf, 4) != ~i;
+                        if (badBlk) Th.Interlocked.Increment(ref Errors);
                         Th.Interlocked.Add(ref Counter, done);
+                        SsdPos = i; int mc = Math.Min(127, (int)((long)i * 128 / mb)); if (badBlk) SsdMap[mc] = 3; else if (SsdMap[mc] != 3) SsdMap[mc] = 2;
                     }
                     rd = mb / Math.Max(0.001, sw.Elapsed.TotalSeconds);
                     Extra = "Escrita seq " + w.ToString("0") + " MB/s | Leitura seq " + rd.ToString("0") + " MB/s";
                     if (Stop) break;
 
-                    sw.Restart();
+                    sw.Restart(); SsdPhase = 2;
                     int ops = 0;
                     while (sw.ElapsedMilliseconds < 3000 && !Stop)
                     {
-                        long off = (long)rand.Next(0, mb * 256) * 4096L;
+                        int uidx = rand.Next(0, mb * 256);
+                        long off = (long)uidx * 4096L;
                         SetFilePointerEx(h, off, out np, 0);
-                        if (ReadFile(h, buf, 4096, out done, IntPtr.Zero)) { ops++; Th.Interlocked.Add(ref Counter, done); }
+                        if (ReadFile(h, buf, 4096, out done, IntPtr.Zero)) { ops++; Th.Interlocked.Add(ref Counter, done); SsdHit[(int)(uidx * 512L / (mb * 256L))] = Environment.TickCount | 1; }
                     }
                     iops = ops / Math.Max(0.001, sw.Elapsed.TotalSeconds);
                     Extra = "Escrita seq " + w.ToString("0") + " MB/s | Leitura seq " + rd.ToString("0") + " MB/s | 4K aleatorio " + iops.ToString("0") + " IOPS";
@@ -12082,10 +12146,40 @@ namespace BunoTunner
         }
     }
 
+    // cartao de resultado (ping, jitter, download, upload...): valor grande, titulo e faixa de cor de qualidade
+    class StatCard : Control
+    {
+        public string Caption = "", Value = "-"; public bool Small; Color accent = Color.Empty;
+        public Color Accent { get { return accent; } set { accent = value; Invalidate(); } }
+        public override string Text { get { return Value; } set { Value = value ?? ""; Invalidate(); } }
+        public StatCard() { SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw, true); }
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            Graphics g = e.Graphics; g.SmoothingMode = SmoothingMode.AntiAlias; g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+            g.Clear(Parent != null ? Parent.BackColor : Xp.Face);
+            Rectangle r = new Rectangle(0, 0, Width - 1, Height - 1);
+            using (GraphicsPath gp = new GraphicsPath())
+            {
+                int d = Math.Max(2, Xp.Rad * 2 + 2);
+                gp.AddArc(r.X, r.Y, d, d, 180, 90); gp.AddArc(r.Right - d, r.Y, d, d, 270, 90); gp.AddArc(r.Right - d, r.Bottom - d, d, d, 0, 90); gp.AddArc(r.X, r.Bottom - d, d, d, 90, 90); gp.CloseFigure();
+                using (LinearGradientBrush fb = new LinearGradientBrush(r, Xp.EditBg, Color.FromArgb(Math.Max(0, Xp.EditBg.R - 14), Math.Max(0, Xp.EditBg.G - 14), Math.Max(0, Xp.EditBg.B - 14)), 90f)) g.FillPath(fb, gp);
+                Color ac = accent.IsEmpty ? Xp.Sel : accent;
+                g.SetClip(gp);
+                using (SolidBrush ab = new SolidBrush(ac)) g.FillRectangle(ab, 0, 0, 5, Height);
+                g.ResetClip();
+                using (Pen bp = new Pen(Xp.TextBorder)) g.DrawPath(bp, gp);
+            }
+            TextRenderer.DrawText(g, Lang.T(Caption), Xp.UiBold, new Rectangle(12, 5, Width - 16, 16), Xp.GroupText, TextFormatFlags.Left | TextFormatFlags.NoPrefix | TextFormatFlags.EndEllipsis);
+            Font vf = Small ? Xp.Ui : Xp.Big;
+            TextRenderer.DrawText(g, Lang.T(Value), vf, new Rectangle(12, 22, Width - 16, Height - 24), Xp.Text, TextFormatFlags.Left | TextFormatFlags.WordBreak | TextFormatFlags.NoPrefix | (Small ? TextFormatFlags.Top : TextFormatFlags.VerticalCenter));
+        }
+    }
+
     class NetPage : Panel
     {
         SpeedGauge gauge = new SpeedGauge();
-        Label lblPing, lblJit, lblDown, lblUp, lblMsg, lblHint;
+        StatCard lblPing, lblJit, lblDown, lblUp, lblQual; Label lblMsg, lblHint;
+        ListView lvHist = new ListView(); double hPing = double.NaN, hJit = double.NaN, hDown = double.NaN, hUp = double.NaN;
         XpButton bStart, bInfo, bCopy, bHide;
         TextBox tbInfo = new TextBox();
         volatile bool running, cancel;
@@ -12094,32 +12188,98 @@ namespace BunoTunner
 
         public NetPage()
         {
-            Dock = DockStyle.Fill;
-            XpGroup g1 = new XpGroup(); g1.Title = "Teste de velocidade da internet"; g1.SetBounds(0, 0, 676, 318);
-            gauge.SetBounds(10, 24, 420, 280); gauge.Caption = "Pronto"; g1.Controls.Add(gauge);
-            UI.Lbl(g1, "Ping", 450, 30, Xp.UiBold); lblPing = UI.Lbl(g1, "-", 450, 46, Xp.Big, Xp.GroupText);
-            UI.Lbl(g1, "Jitter", 560, 30, Xp.UiBold); lblJit = UI.Lbl(g1, "-", 560, 46, Xp.Big, Xp.GroupText);
-            UI.Lbl(g1, "Download", 450, 100, Xp.UiBold); lblDown = UI.Lbl(g1, "-", 450, 116, Xp.Big, Xp.GroupText);
-            UI.Lbl(g1, "Upload", 450, 170, Xp.UiBold); lblUp = UI.Lbl(g1, "-", 450, 186, Xp.Big, Xp.GroupText);
-            bStart = UI.Btn(g1, "Iniciar teste", 450, 236, 210, delegate { Toggle(); });
+            Size = new Size(676, 586); Dock = DockStyle.Fill;   // tamanho inicial = o da area da pagina, para os ancoramentos funcionarem
+            XpGroup g1 = new XpGroup(); g1.Title = "Teste de velocidade da internet"; g1.SetBounds(0, 0, 676, 300); g1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            gauge.SetBounds(10, 24, 404, 266); gauge.Caption = "Pronto"; g1.Controls.Add(gauge);
+            lblPing = Card(g1, "Ping", 426, 26, 118, 62); lblJit = Card(g1, "Jitter", 546, 26, 118, 62);
+            lblDown = Card(g1, "Download", 426, 94, 118, 62); lblUp = Card(g1, "Upload", 546, 94, 118, 62);
+            lblQual = Card(g1, "Avaliacao da conexao", 426, 162, 238, 60); lblQual.Small = true; lblQual.Text = "Faca um teste para ver se a sua conexao serve para jogos, streaming e chamadas.";
+            bStart = UI.Btn(g1, "Iniciar teste", 426, 230, 238, delegate { Toggle(); });
             bStart.Height = 32;
-            lblMsg = UI.Lbl(g1, "Mede ping, download e upload de verdade (servidor da Cloudflare).", 450, 274, Xp.Ui, Xp.Dim);
-            lblMsg.AutoSize = false; lblMsg.SetBounds(450, 272, 214, 40);
+            lblMsg = UI.Lbl(g1, "Mede ping, download e upload de verdade (servidor da Cloudflare).", 426, 268, Xp.Ui, Xp.Dim);
+            lblMsg.AutoSize = false; lblMsg.SetBounds(426, 266, 238, 30);
             Controls.Add(g1);
 
-            XpGroup g2 = new XpGroup(); g2.Title = "Informacoes da rede"; g2.SetBounds(0, 326, 676, 258);
-            bInfo = UI.Btn(g2, "Mostrar informacoes da rede", 12, 26, 220, delegate { ShowInfo(); });
-            bInfo.Height = 28;
-            bCopy = UI.Btn(g2, "Copiar", 238, 26, 80, delegate { try { if (tbInfo.Text.Length > 0) Clipboard.SetText(tbInfo.Text); } catch (Exception) { } });
-            bHide = UI.Btn(g2, "Ocultar", 324, 26, 80, delegate { tbInfo.Text = ""; tbInfo.Visible = false; lblHint.Visible = true; });
-            bCopy.Height = bHide.Height = 28;
-            lblHint = UI.Lbl(g2, "Por privacidade, nada e mostrado ate voce clicar. Ao clicar aparecem dados pessoais (IPs, MAC, provedor, cidade, nome do Wi-Fi).", 12, 70, Xp.Ui, Xp.Dim);
-            lblHint.AutoSize = false; lblHint.SetBounds(12, 66, 650, 40);
+            XpGroup gh = new XpGroup(); gh.Title = "Historico de testes"; gh.SetBounds(0, 306, 676, 118); gh.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            lvHist.SetBounds(12, 24, 560, 84); lvHist.View = View.Details; lvHist.FullRowSelect = true; lvHist.GridLines = true; lvHist.HideSelection = false;
+            lvHist.BackColor = Xp.EditBg; lvHist.Font = Xp.Ui;
+            lvHist.Columns.Add("Data e hora", 150); lvHist.Columns.Add("Ping", 80); lvHist.Columns.Add("Jitter", 80); lvHist.Columns.Add("Download", 120); lvHist.Columns.Add("Upload", 120);
+            UI.DoubleBuffer(lvHist); gh.Controls.Add(lvHist);
+            UI.Btn(gh, "Copiar", 580, 24, 84, delegate { CopyHist(); }).Height = 26;
+            UI.Btn(gh, "Limpar", 580, 56, 84, delegate { lvHist.Items.Clear(); SaveHist(); }).Height = 26;
+            Controls.Add(gh);
+            LoadHist();
+
+            XpGroup g2 = new XpGroup(); g2.Title = "Informacoes da rede"; g2.SetBounds(0, 430, 676, 156); g2.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            bInfo = UI.Btn(g2, "Mostrar informacoes da rede", 12, 24, 220, delegate { ShowInfo(); });
+            bInfo.Height = 26;
+            bCopy = UI.Btn(g2, "Copiar", 238, 24, 80, delegate { try { if (tbInfo.Text.Length > 0) Clipboard.SetText(tbInfo.Text); } catch (Exception) { } });
+            bHide = UI.Btn(g2, "Ocultar", 324, 24, 80, delegate { tbInfo.Text = ""; tbInfo.Visible = false; lblHint.Visible = true; });
+            bCopy.Height = bHide.Height = 26;
+            lblHint = UI.Lbl(g2, "Por privacidade, nada e mostrado ate voce clicar. Ao clicar aparecem dados pessoais (IPs, MAC, provedor, cidade, nome do Wi-Fi).", 12, 60, Xp.Ui, Xp.Dim);
+            lblHint.AutoSize = false; lblHint.SetBounds(12, 58, 650, 36);
             tbInfo.Multiline = true; tbInfo.ReadOnly = true; tbInfo.ScrollBars = ScrollBars.Vertical; tbInfo.Font = new Font("Consolas", 9f);
-            tbInfo.BackColor = Xp.EditBg; tbInfo.ForeColor = Xp.Text; tbInfo.SetBounds(12, 62, 652, 186); tbInfo.Visible = false;
+            tbInfo.BackColor = Xp.EditBg; tbInfo.ForeColor = Xp.Text; tbInfo.SetBounds(12, 56, 652, 90); tbInfo.Visible = false; tbInfo.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             g2.Controls.Add(tbInfo);
             Controls.Add(g2);
             tm.Interval = 200; tm.Tick += delegate { Sample(); };
+        }
+
+        StatCard Card(Control parent, string caption, int x, int y, int w, int h)
+        {
+            StatCard c = new StatCard(); c.Caption = caption; c.SetBounds(x, y, w, h); parent.Controls.Add(c); return c;
+        }
+
+        static Color Q(double v, double good, double ok, bool lowerBetter)
+        {
+            bool g = lowerBetter ? v <= good : v >= good, o = lowerBetter ? v <= ok : v >= ok;
+            return g ? Color.FromArgb(40, 190, 80) : o ? Color.FromArgb(235, 190, 30) : Color.FromArgb(235, 90, 40);
+        }
+
+        // texto de avaliacao a partir dos resultados
+        string Verdict()
+        {
+            if (double.IsNaN(hDown) && double.IsNaN(hPing)) return "-";
+            List<string> l = new List<string>();
+            if (!double.IsNaN(hPing)) l.Add(hPing <= 20 ? "Latencia excelente para jogos online" : hPing <= 50 ? "Latencia boa para jogos" : hPing <= 100 ? "Latencia regular (jogos competitivos podem sofrer)" : "Latencia alta");
+            if (!double.IsNaN(hDown)) l.Add(hDown >= 100 ? "download otimo (4K e downloads rapidos)" : hDown >= 25 ? "download bom para streaming em HD" : hDown >= 5 ? "download basico" : "download lento");
+            if (!double.IsNaN(hUp) && hUp < 3) l.Add("upload baixo (chamadas de video e envios podem engasgar)");
+            return string.Join("; ", l.ToArray()) + ".";
+        }
+
+        void LoadHist()
+        {
+            foreach (string row in Settings.Get("net.hist", "").Split(new string[] { "~|~" }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                string[] f = row.Split('|'); if (f.Length < 5) continue;
+                lvHist.Items.Add(new ListViewItem(f));
+            }
+        }
+        void SaveHist()
+        {
+            List<string> rows = new List<string>();
+            foreach (ListViewItem it in lvHist.Items)
+            {
+                List<string> f = new List<string>(); foreach (ListViewItem.ListViewSubItem x in it.SubItems) f.Add(x.Text.Replace("|", "/").Replace("~", ""));
+                rows.Add(string.Join("|", f.ToArray()));
+            }
+            Settings.Set("net.hist", string.Join("~|~", rows.ToArray()));
+        }
+        void AddHist()
+        {
+            ListViewItem it = new ListViewItem(new string[] { DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
+                double.IsNaN(hPing) ? "-" : hPing.ToString("0") + " ms", double.IsNaN(hJit) ? "-" : hJit.ToString("0.0") + " ms",
+                double.IsNaN(hDown) ? "-" : hDown.ToString("0.0") + " Mbps", double.IsNaN(hUp) ? "-" : hUp.ToString("0.0") + " Mbps" });
+            lvHist.Items.Insert(0, it);
+            while (lvHist.Items.Count > 10) lvHist.Items.RemoveAt(lvHist.Items.Count - 1);
+            SaveHist();
+        }
+        void CopyHist()
+        {
+            if (lvHist.Items.Count == 0) return;
+            StringBuilder sb = new StringBuilder();
+            foreach (ListViewItem it in lvHist.Items) { List<string> f = new List<string>(); foreach (ListViewItem.ListViewSubItem x in it.SubItems) f.Add(x.Text); sb.AppendLine(string.Join("\t", f.ToArray())); }
+            try { Clipboard.SetText(sb.ToString()); } catch (Exception) { }
         }
 
         // ---------- teste ----------
@@ -12128,7 +12288,9 @@ namespace BunoTunner
             if (running) { cancel = true; lblMsg.Text = "Cancelando..."; return; }
             running = true; cancel = false;
             bStart.Text = "Cancelar";
-            lblPing.Text = lblJit.Text = lblDown.Text = lblUp.Text = "-";
+            lblPing.Text = lblJit.Text = lblDown.Text = lblUp.Text = "-"; lblQual.Text = "Medindo...";
+            lblPing.Accent = lblJit.Accent = lblDown.Accent = lblUp.Accent = Color.Empty;
+            hPing = hJit = hDown = hUp = double.NaN;
             gauge.Reset();
             System.Threading.ThreadPool.QueueUserWorkItem(delegate { Run(); });
         }
@@ -12159,11 +12321,12 @@ namespace BunoTunner
                     double mn = double.MaxValue, jit = 0; foreach (double d in rt) mn = Math.Min(mn, d);
                     for (int i = 1; i < rt.Count; i++) jit += Math.Abs(rt[i] - rt[i - 1]);
                     jit = rt.Count > 1 ? jit / (rt.Count - 1) : 0;
-                    UI2(delegate { lblPing.Text = mn.ToString("0") + " ms"; lblJit.Text = jit.ToString("0.0") + " ms"; });
+                    hPing = mn; hJit = jit;
+                    UI2(delegate { lblPing.Text = mn.ToString("0") + " ms"; lblJit.Text = jit.ToString("0.0") + " ms"; lblPing.Accent = Q(mn, 30, 80, true); lblJit.Accent = Q(jit, 5, 15, true); });
                 }
                 // 2) download   3) upload
-                if (!cancel) { double d = Phase(false); UI2(delegate { lblDown.Text = d.ToString("0.0") + " Mbps"; }); }
-                if (!cancel) { double u = Phase(true); UI2(delegate { lblUp.Text = u.ToString("0.0") + " Mbps"; }); }
+                if (!cancel) { double d = Phase(false); hDown = d; UI2(delegate { lblDown.Text = d.ToString("0.0") + " Mbps"; lblDown.Accent = Q(d, 50, 10, false); }); }
+                if (!cancel) { double u = Phase(true); hUp = u; UI2(delegate { lblUp.Text = u.ToString("0.0") + " Mbps"; lblUp.Accent = Q(u, 20, 5, false); }); }
             }
             catch (Exception ex) { err = ex.Message; }
             UI2(delegate
@@ -12171,6 +12334,7 @@ namespace BunoTunner
                 tm.Stop(); running = false; bStart.Text = "Iniciar teste";
                 gauge.Caption = err != null ? "Falhou" : (cancel ? "Cancelado" : "Concluido"); gauge.Unit = "Mbps";
                 lblMsg.Text = err != null ? "Nao foi possivel medir (sem internet ou bloqueio de rede?): " + err : (cancel ? "Teste cancelado." : "Teste concluido.");
+                if (err == null && !cancel) { lblQual.Text = Verdict(); AddHist(); } else lblQual.Text = "-";
             });
         }
 
