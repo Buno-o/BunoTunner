@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - codigo aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.39.2.0")]
-[assembly: AssemblyFileVersion("1.39.2.0")]
-[assembly: AssemblyInformationalVersion("1.39.2")]
+[assembly: AssemblyVersion("1.40.0.0")]
+[assembly: AssemblyFileVersion("1.40.0.0")]
+[assembly: AssemblyInformationalVersion("1.40.0")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1887,7 +1887,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.39.2";
+        public const string Version = "v1.40.0";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -13371,6 +13371,7 @@ namespace BunoTunner
         {
             Dock = DockStyle.Fill;
             box.Dock = DockStyle.Fill; box.AutoScroll = true; Controls.Add(box);
+            AddAll();
             AddDrivers();
             Section("Limpeza e manutencao", "Libera espaco no disco.", false);
             Add("Limpar arquivos temporarios", "Apaga C:\\Windows\\Temp, Prefetch e a pasta %temp% do usuario (itens em uso sao ignorados). Nenhum documento pessoal e tocado.",
@@ -13402,6 +13403,7 @@ namespace BunoTunner
                 "Ativar", delegate { using (RegistryKey k = Root(false).CreateSubKey(ClickKey + "\\InprocServer32")) { k.SetValue("", ""); } return "Menu classico ativado. Reinicie o Explorer ou faca logoff."; },
                 "Desfazer", delegate { Root(false).DeleteSubKeyTree(ClickKey, false); return "Menu padrao do Windows 11 restaurado. Reinicie o Explorer ou faca logoff."; },
                 delegate { using (RegistryKey k = Root(false).OpenSubKey(ClickKey + "\\InprocServer32")) return k != null ? "Estado: menu classico ATIVO" : "Estado: menu padrao do Windows 11"; }, null);
+            AddPrivacy();
             Section("Seguranca (avancado)", "Estes ajustes REDUZEM a protecao do PC. Use so se souber o que esta fazendo.", true);
             const string HvKey = @"SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity";
             Add("Isolamento de nucleo (Integridade de memoria)", "Recurso de seguranca do Windows (HVCI) que isola o nucleo do sistema usando virtualizacao. Desativar pode dar mais FPS em jogos e liberar drivers antigos, mas reduz a protecao. Reinicie o PC.",
@@ -13415,6 +13417,179 @@ namespace BunoTunner
                 "Padrao do Windows", delegate { Del(true, MmKey, "FeatureSettingsOverride"); Del(true, MmKey, "FeatureSettingsOverrideMask"); Del(true, @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Virtualization", "MinVmVersionForCpuBasedMitigations"); return "Mitigacoes restauradas ao padrao do Windows. Reinicie o PC."; },
                 delegate { object v = Get(true, MmKey, "FeatureSettingsOverride"); return v != null ? "Estado: personalizado (FeatureSettingsOverride=" + v + ")" : "Estado: padrao do Windows (mitigacoes ativas)"; },
                 "ATENCAO: desativar as mitigacoes de Spectre/Meltdown deixa o PC mais vulneravel a ataques que leem memoria (por exemplo, por codigo malicioso no navegador). O ganho de desempenho costuma ser pequeno em CPUs recentes.\n\nDesativar mesmo assim?");
+        }
+
+
+        // ---------- Privacidade e telemetria: ajustes declarativos (registro + servicos + comandos) ----------
+        class R
+        {
+            public bool M; public string Path, Name; public object Val, Orig;   // Val/Orig null = remover o valor
+            public R(bool m, string p, string n, object v, object o) { M = m; Path = p; Name = n; Val = v; Orig = o; }
+        }
+        class Tw
+        {
+            public string Title, Desc, Confirm; public R[] Regs = new R[0]; public string[][] Svcs = new string[0][];   // servico: {nome, iniciar ao aplicar, iniciar ao desfazer}
+            public Func<bool, string> Extra; public Label St;
+        }
+        readonly List<Tw> tws = new List<Tw>();
+        static bool batch;   // durante "Aplicar todos" o Explorer so reinicia uma vez, no fim
+
+        static void SetR(R r, bool apply)
+        {
+            object v = apply ? r.Val : r.Orig;
+            if (v == null) { Del(r.M, r.Path, r.Name); return; }
+            using (RegistryKey k = Root(r.M).CreateSubKey(r.Path)) k.SetValue(r.Name, v, v is int ? RegistryValueKind.DWord : RegistryValueKind.String);
+        }
+
+        static string TwState(Tw t)
+        {
+            if (t.Regs.Length == 0) return "";
+            int on = 0;
+            foreach (R r in t.Regs)
+            {
+                object cur = Get(r.M, r.Path, r.Name);
+                if (r.Val == null ? cur == null : (cur != null && cur.ToString() == r.Val.ToString())) on++;
+            }
+            return on == t.Regs.Length ? "Estado: APLICADO" : on == 0 ? "Estado: padrao do Windows" : "Estado: parcialmente aplicado";
+        }
+
+        static string RunTw(Tw t, bool apply)
+        {
+            List<string> bad = new List<string>();
+            foreach (R r in t.Regs) { try { SetR(r, apply); } catch (Exception ex) { bad.Add(r.Name + ": " + ex.Message); } }
+            foreach (string[] sv in t.Svcs)
+            {
+                try
+                {
+                    int c; Proc.Run("sc.exe", "config " + sv[0] + " start= " + (apply ? sv[1] : sv[2]), 20000, out c);
+                    if (c != 0 && c != 1060) bad.Add("servico " + sv[0] + " (codigo " + c + ")");
+                    if (apply) { int c2; Proc.Run("sc.exe", "stop " + sv[0], 20000, out c2); }
+                }
+                catch (Exception ex) { bad.Add(sv[0] + ": " + ex.Message); }
+            }
+            if (t.Extra != null) { try { string e = t.Extra(apply); if (!string.IsNullOrEmpty(e)) bad.Add(e); } catch (Exception ex) { bad.Add(ex.Message); } }
+            string ok = apply ? "Aplicado." : "Revertido ao padrao do Windows.";
+            string st = ""; try { st = TwState(t); } catch (Exception) { }
+            return bad.Count == 0 ? ok + (st.Length > 0 ? "  [" + st + "]" : "") : "Concluido com avisos (execute como administrador): " + string.Join("; ", bad.ToArray());
+        }
+
+        static void RestartExplorer()
+        {
+            int c; Proc.Run("taskkill.exe", "/f /im explorer.exe", 15000, out c);
+            System.Threading.Thread.Sleep(2500);   // o Windows reinicia o Explorer sozinho
+            if (Process.GetProcessesByName("explorer").Length == 0) { try { Process.Start("explorer.exe"); } catch (Exception) { } }
+        }
+
+        void AddTw(Tw t)
+        {
+            tws.Add(t);
+            t.St = Add(t.Title, t.Desc, "Aplicar", delegate { return RunTw(t, true); }, "Desfazer", delegate { return RunTw(t, false); },
+                t.Regs.Length > 0 ? new Func<string>(delegate { return TwState(t); }) : null, t.Confirm);
+        }
+
+        static R[] Brave()
+        {
+            const string P = @"SOFTWARE\Policies\BraveSoftware\Brave";
+            string[] on = { "BraveRewardsDisabled", "BraveWalletDisabled", "BraveVPNDisabled", "BraveNewsDisabled", "BraveTalkDisabled", "TorDisabled" };
+            string[] off = { "BraveAIChatEnabled", "BraveStatsPingEnabled", "BraveP3AEnabled", "UrlKeyedAnonymizedDataCollectionEnabled", "SafeBrowsingExtendedReportingEnabled", "MetricsReportingEnabled" };
+            List<R> l = new List<R>();
+            foreach (string n in on) l.Add(new R(true, P, n, 1, null));
+            foreach (string n in off) l.Add(new R(true, P, n, 0, null));
+            return l.ToArray();
+        }
+
+        void AddPrivacy()
+        {
+            Section("Privacidade e telemetria", "Corta recomendacoes, rastreamento, anuncios e coleta de dados da Microsoft.", false);
+            AddTw(new Tw { Title = "Desativar recomendacoes da Microsoft", Desc = "Impede o Windows de instalar apps sugeridos sozinho e de mostrar recomendacoes e dicas (DisableWindowsConsumerFeatures e SilentInstalledAppsEnabled).",
+                Regs = new R[] {
+                    new R(true, @"SOFTWARE\Policies\Microsoft\Windows\CloudContent", "DisableWindowsConsumerFeatures", 1, null),
+                    new R(false, @"SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SilentInstalledAppsEnabled", 0, 1) } });
+            AddTw(new Tw { Title = "Desativar telemetria", Desc = "Desliga os servicos DiagTrack e WerSvc, a coleta de diagnostico, ID de publicidade, historico de atividades, envio automatico de amostras do Defender e a telemetria do PowerShell 7.",
+                Regs = new R[] {
+                    new R(false, @"SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo", "Enabled", 0, null),
+                    new R(false, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Privacy", "TailoredExperiencesWithDiagnosticDataEnabled", 0, null),
+                    new R(false, @"SOFTWARE\Microsoft\Speech_OneCore\Settings\OnlineSpeechPrivacy", "HasAccepted", 0, null),
+                    new R(false, @"SOFTWARE\Microsoft\Input\TIPC", "Enabled", 0, null),
+                    new R(false, @"SOFTWARE\Microsoft\InputPersonalization", "RestrictImplicitInkCollection", 1, null),
+                    new R(false, @"SOFTWARE\Microsoft\InputPersonalization", "RestrictImplicitTextCollection", 1, null),
+                    new R(false, @"SOFTWARE\Microsoft\InputPersonalization\TrainedDataStore", "HarvestContacts", 0, null),
+                    new R(false, @"SOFTWARE\Microsoft\Personalization\Settings", "AcceptedPrivacyPolicy", 0, null),
+                    new R(true, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection", "AllowTelemetry", 0, null),
+                    new R(false, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "Start_TrackProgs", 0, null),
+                    new R(true, @"SOFTWARE\Policies\Microsoft\Windows\System", "PublishUserActivities", 0, null),
+                    new R(false, @"SOFTWARE\Microsoft\Siuf\Rules", "NumberOfSIUFInPeriod", 0, null),
+                    new R(false, @"SOFTWARE\Microsoft\Siuf\Rules", "PeriodInNanoSeconds", null, null) },
+                Svcs = new string[][] { new string[] { "diagtrack", "disabled", "auto" }, new string[] { "WerSvc", "disabled", "demand" } },
+                Extra = delegate(bool on)
+                {
+                    string r = Ps("Set-MpPreference -SubmitSamplesConsent " + (on ? "2" : "1"), "");
+                    Environment.SetEnvironmentVariable("POWERSHELL_TELEMETRY_OPTOUT", on ? "1" : null, EnvironmentVariableTarget.Machine);
+                    return r.Length > 0 ? "Defender: " + r : null;
+                } });
+            AddTw(new Tw { Title = "Desativar o Recall (IA que salva prints)", Desc = "Politicas DisableAIDataAnalysis=1 (WindowsAI) e AllowRecallEnablement=0 (Recall): impedem a IA do Windows de capturar e analisar o que aparece na tela.",
+                Regs = new R[] {
+                    new R(true, @"SOFTWARE\Policies\Microsoft\Windows\WindowsAI", "DisableAIDataAnalysis", 1, null),
+                    new R(true, @"SOFTWARE\Policies\Microsoft\Windows\Recall", "AllowRecallEnablement", 0, null) } });
+            AddTw(new Tw { Title = "Desativar apps em segundo plano", Desc = "Impede que os apps da Microsoft Store rodem em segundo plano (BackgroundAccessApplications\\GlobalUserDisabled). Alguns apps deixam de notificar com o programa fechado.",
+                Regs = new R[] { new R(false, @"SOFTWARE\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications", "GlobalUserDisabled", 1, 0) } });
+            AddTw(new Tw { Title = "Desativar rastreamento de localizacao", Desc = "Nega o acesso a localizacao, desliga o servico lfsvc, o sensor de localizacao e a atualizacao automatica de mapas.",
+                Regs = new R[] {
+                    new R(true, @"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location", "Value", "Deny", "Allow"),
+                    new R(true, @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Sensor\Overrides\{BFA794E4-F964-4FDB-90F6-51056BFE4B44}", "SensorPermissionState", 0, 1),
+                    new R(true, @"SYSTEM\Maps", "AutoUpdateEnabled", 0, 1) },
+                Svcs = new string[][] { new string[] { "lfsvc", "disabled", "demand" } } });
+            AddTw(new Tw { Title = "Desativar pesquisa com Bing e sugestoes no Iniciar", Desc = "Pesquisar no menu Iniciar passa a buscar so no PC (sem Bing, sem sugestoes da web e sem Cortana). O Explorer e reiniciado para valer: a barra de tarefas pisca por um instante.",
+                Regs = new R[] {
+                    new R(false, @"SOFTWARE\Policies\Microsoft\Windows\Explorer", "DisableSearchBoxSuggestions", 1, null),
+                    new R(false, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Search", "BingSearchEnabled", 0, 1),
+                    new R(false, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Search", "CortanaConsent", 0, null) },
+                Extra = delegate(bool on) { if (!batch) RestartExplorer(); return null; } });
+            AddTw(new Tw { Title = "Desativar recomendacoes da Microsoft Store na pesquisa", Desc = "Bloqueia o arquivo store.db da Microsoft Store (icacls /deny) para o Iniciar parar de sugerir apps da loja ao pesquisar. Se o arquivo ainda nao existir, abra a Store uma vez.",
+                Extra = delegate(bool on)
+                {
+                    string f = Path.Combine(Environment.GetEnvironmentVariable("LOCALAPPDATA") ?? "", @"Packages\Microsoft.WindowsStore_8wekyb3d8bbwe\LocalState\store.db");
+                    if (!File.Exists(f)) return "store.db nao encontrado (abra a Microsoft Store uma vez e tente de novo)";
+                    int c; string o = Proc.Run("icacls.exe", "\"" + f + "\" " + (on ? "/deny" : "/grant") + " *S-1-1-0:F", 20000, out c);
+                    return c == 0 ? null : "icacls falhou: " + o.Trim();
+                } });
+            AddTw(new Tw { Title = "Brave - remover recursos extras", Desc = "Politicas do Brave: desliga Rewards, Carteira, VPN, Leo (IA), News, Talk, Tor, estatisticas, P3A e relatorios de metricas. Vale ao reabrir o Brave.",
+                Regs = Brave() });
+        }
+
+        // primeiro item da lista: aplica (ou desfaz) todos os ajustes de privacidade com 1 clique
+        void AddAll()
+        {
+            XpGroup g = new XpGroup(); g.Title = "Aplicar todos os ajustes de privacidade e telemetria (1 clique)"; g.SetBounds(12, top, 638, 100); top += 110;
+            Label d = UI.Lbl(g, "Aplica de uma vez todos os ajustes da secao \"Privacidade e telemetria\" mais abaixo: recomendacoes, telemetria, Recall, apps em segundo plano, localizacao, pesquisa com Bing, recomendacoes da Store e Brave. Os ajustes de seguranca avancados NAO entram aqui.", 12, 22, Xp.Ui, Xp.Dim);
+            d.AutoSize = false; d.SetBounds(12, 22, 500, 46);
+            Label st = UI.Lbl(g, "", 12, 74, Xp.Ui, Xp.GroupText); st.AutoSize = false; st.SetBounds(12, 74, 500, 18);
+            XpButton bAll = UI.Btn(g, "Aplicar todos", 524, 22, 112, null); bAll.Height = 28;
+            XpButton bUn = UI.Btn(g, "Desfazer todos", 524, 56, 112, null);
+            Action<bool> go = delegate(bool apply)
+            {
+                if (apply && Dlg.Show(this, "Serao aplicados todos os ajustes de privacidade e telemetria (registro do Windows, servicos DiagTrack, WerSvc e lfsvc, Recall, Brave e pesquisa do Iniciar). O Explorer sera reiniciado no fim.\n\nContinuar?", "BunoTunner - Otimizacoes", MessageBoxButtons.OKCancel, MessageBoxIcon.Question) != DialogResult.OK) return;
+                bAll.Enabled = false; bUn.Enabled = false;
+                List<Tw> list = new List<Tw>(tws);
+                System.Threading.ThreadPool.QueueUserWorkItem(delegate
+                {
+                    batch = true; int n = 0, warn = 0;
+                    foreach (Tw t in list)
+                    {
+                        n++; Tw tt = t; int k = n;
+                        try { BeginInvoke(new Action(delegate { st.Text = Lang.T(apply ? "Aplicando" : "Desfazendo") + " " + k + "/" + list.Count + ": " + Lang.T(tt.Title); if (tt.St != null) tt.St.Text = Lang.T("Executando..."); })); } catch (Exception) { }
+                        string r; try { r = RunTw(t, apply); } catch (Exception ex) { r = "Erro: " + ex.Message; }
+                        if (r.StartsWith("Concluido com avisos") || r.StartsWith("Erro")) warn++;
+                        try { BeginInvoke(new Action(delegate { if (tt.St != null) tt.St.Text = r; })); } catch (Exception) { }
+                    }
+                    batch = false;
+                    if (apply) { try { BeginInvoke(new Action(delegate { st.Text = Lang.T("Reiniciando o Explorer..."); })); } catch (Exception) { } RestartExplorer(); }
+                    try { BeginInvoke(new Action(delegate { st.Text = Lang.T(apply ? "Todos aplicados" : "Todos desfeitos") + ": " + (list.Count - warn) + "/" + list.Count + (warn > 0 ? "  (" + warn + " " + Lang.T("com aviso, veja a lista abaixo") + ")" : ""); bAll.Enabled = true; bUn.Enabled = true; })); } catch (Exception) { }
+                });
+            };
+            bAll.Click += delegate { go(true); };
+            bUn.Click += delegate { go(false); };
+            box.Controls.Add(g);
         }
 
         // faixa de categoria: separa os grupos de ajustes (a de seguranca usa a cor de alerta)
@@ -13569,7 +13744,7 @@ namespace BunoTunner
             return "Concluido: " + files + " arquivo(s) apagado(s), " + (freed / 1048576.0).ToString("0.0") + " MB liberados.";
         }
 
-        void Add(string title, string desc, string runText, Func<string> run, string undoText, Func<string> undo, Func<string> state, string confirm)
+        Label Add(string title, string desc, string runText, Func<string> run, string undoText, Func<string> undo, Func<string> state, string confirm)
         {
             XpGroup g = new XpGroup(); g.Title = title; g.SetBounds(12, top, 638, 78); top += 88;
             Label d = UI.Lbl(g, desc, 12, 22, Xp.Ui, Xp.Dim);
@@ -13595,6 +13770,7 @@ namespace BunoTunner
             b1.Click += delegate { if (confirm != null && Dlg.Show(confirm, "BunoTunner - Otimizacoes", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) != DialogResult.OK) return; go(run); };
             if (b2 != null) b2.Click += delegate { go(undo); };
             box.Controls.Add(g);
+            return st;
         }
     }
 

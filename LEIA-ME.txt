@@ -403,3 +403,6 @@ v1.39.1 (TESTE)
 
 v1.39.2 (TESTE)
 - Overlay: no render de GPU do Benchmark a API agora aparece como OpenGL (antes aparecia DX11, pois o processo tambem carrega D3D11).
+
+v1.40.0 (TESTE)
+- Otimizacoes: novo botao no topo da lista, Aplicar todos / Desfazer todos, que aplica de uma vez a nova secao Privacidade e telemetria (cada ajuste tambem tem Aplicar/Desfazer e mostra o estado): recomendacoes da Microsoft, telemetria (DiagTrack, WerSvc, Defender, PowerShell 7), Recall (IA), apps em segundo plano, localizacao, pesquisa com Bing/Cortana (reinicia o Explorer), recomendacoes da Microsoft Store e Brave (Rewards, Leo, VPN, etc.). Os ajustes de seguranca avancados nao entram no Aplicar todos.
