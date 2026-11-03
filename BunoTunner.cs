@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.43.4.0")]
-[assembly: AssemblyFileVersion("1.43.4.0")]
-[assembly: AssemblyInformationalVersion("1.43.4")]
+[assembly: AssemblyVersion("1.44.0.0")]
+[assembly: AssemblyFileVersion("1.44.0.0")]
+[assembly: AssemblyInformationalVersion("1.44.0")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1890,7 +1890,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.43.4";
+        public const string Version = "v1.44.0";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -7490,7 +7490,7 @@ namespace BunoTunner
         double[] hu = new double[HN], hv = new double[HN], hs = new double[HN];
         Pen[] furPens = new Pen[8];
         // render por blocos (ray tracing)
-        const int W = 1280, H = 800, B = 40, NBX = W / B, NBY = H / B, NB = NBX * NBY;
+        const int W = 1024, H = 1024, B = 32, NBX = W / B, NBY = H / B, NB = NBX * NBY;
         int[] pix = new int[W * H]; int[] bstate = new int[NB];
         double lastPass, bestPass; DateTime passStart = DateTime.UtcNow;
         int nextB, doneB, pass; DateTime finishedAt = DateTime.MinValue; volatile bool quit; object lk = new object();
@@ -7571,15 +7571,14 @@ namespace BunoTunner
         }
 
         // ---------- CPU: ray tracing 3D por blocos (como o Cinebench / Blender), todas as threads renderizando ----------
-        static readonly double[] SX = { 0, -2.2, 2.1, -0.8, 0.9 }, SY = { 1.0, 0.7, 0.7, 0.35, 0.45 }, SZ = { 0, 0.6, 0.5, -1.8, -1.6 }, SRd = { 1.0, 0.7, 0.7, 0.35, 0.45 };
-        static readonly double[] SCR = { 0.9, 0.2, 0.9, 0.2, 0.85 }, SCG = { 0.25, 0.5, 0.8, 0.85, 0.85 }, SCB = { 0.2, 0.9, 0.2, 0.4, 0.9 }, SRF = { 0.35, 0.5, 0.25, 0.6, 0.8 };
-        double camE0, camE1, camE2, camF0, camF1, camF2, camR0, camR2, camU0, camU1, camU2; int[] order; const int SPP = 32;
+        // Cena: esfera de ouro espelhada sobre grama, floresta ao fundo (tudo procedural; os reflexos sao calculados por ray tracing na CPU)
+        double camE0, camE1, camE2, camF0, camF1, camF2, camR0, camR2, camU0, camU1, camU2; int[] order; const int SPP = 256;
+        const double LX = -0.6061, LY = 0.3435, LZ = 0.7274;   // direcao do sol (normalizada)
 
         void SetupPass()
         {
-            double a = 0.7 + pass * 0.85;
-            camE0 = Math.Sin(a) * 6.2; camE1 = 2.3 + 0.8 * Math.Sin(pass * 1.3); camE2 = -Math.Cos(a) * 6.2;
-            double tx = 0, ty = 0.8, tz = 0;
+            camE0 = 0; camE1 = 1.3; camE2 = -5.2;
+            double tx = 0, ty = 0.25, tz = 0;
             double fx = tx - camE0, fy = ty - camE1, fz = tz - camE2, fl = Math.Sqrt(fx * fx + fy * fy + fz * fz);
             camF0 = fx / fl; camF1 = fy / fl; camF2 = fz / fl;
             double rl = Math.Sqrt(camF0 * camF0 + camF2 * camF2);
@@ -7587,61 +7586,126 @@ namespace BunoTunner
             camU0 = -camR2 * camF1; camU1 = camR2 * camF0 - camR0 * camF2; camU2 = camR0 * camF1;
         }
 
-        static bool Occluded(double ox, double oy, double oz, double dx, double dy, double dz)
+        static double H2(int x, int y)
         {
-            for (int i = 0; i < 5; i++)
+            unchecked
             {
-                double lx = ox - SX[i], ly = oy - SY[i], lz = oz - SZ[i];
-                double b = lx * dx + ly * dy + lz * dz, c = lx * lx + ly * ly + lz * lz - SRd[i] * SRd[i], disc = b * b - c;
-                if (disc > 0 && -b - Math.Sqrt(disc) > 1e-4) return true;
+                int n = x * 374761393 + y * 668265263;
+                n = (n ^ (n >> 13)) * 1274126177; n ^= n >> 16;
+                return (n & 0xFFFFFF) / 16777216.0;
             }
-            return false;
+        }
+        static double Noise(double x, double y)
+        {
+            double fx = Math.Floor(x), fy = Math.Floor(y); int xi = (int)fx, yi = (int)fy;
+            double u = x - fx, v = y - fy; u = u * u * (3 - 2 * u); v = v * v * (3 - 2 * v);
+            double a = H2(xi, yi), b = H2(xi + 1, yi), c = H2(xi, yi + 1), d = H2(xi + 1, yi + 1);
+            return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
+        }
+        static double Fbm(double x, double y, int oct)
+        {
+            double sum = 0, amp = 0.5, tot = 0;
+            for (int i = 0; i < oct; i++) { sum += amp * Noise(x, y); tot += amp; x = x * 2.03 + 17.1; y = y * 2.03 + 5.3; amp *= 0.5; }
+            return sum / tot;
+        }
+        static double Sm(double a, double b, double x) { double t = (x - a) / (b - a); if (t < 0) t = 0; else if (t > 1) t = 1; return t * t * (3 - 2 * t); }
+
+        // ambiente: ceu quente + floresta (troncos e copas) ao redor, com o sol baixo
+        static void Env(double dx, double dy, double dz, out double R, out double G, out double Bl)
+        {
+            double e = Math.Abs(dy);
+            double sd = dx * LX + dy * LY + dz * LZ; if (sd < 0) sd = 0;
+            double k = Sm(0, 0.9, e);
+            double sr = 0.95 - 0.38 * k, sg = 0.9 - 0.2 * k, sb = 0.78 + 0.17 * k;
+            double glow = Math.Pow(sd, 10) * 0.9;
+            sr += glow * 1.0; sg += glow * 0.75; sb += glow * 0.4;
+            if (sd > 0.9992) { sr += 9; sg += 7.5; sb += 5; }
+            double phi = Math.Atan2(dz, dx);
+            double dens = Fbm(phi * 9, e * 8, 4) + (0.16 - e) * 2.4 - 0.06;
+            double thr = 0.45 + e * 0.85;
+            double fol = Sm(thr - 0.05, thr + 0.05, dens);
+            double sun = Fbm(phi * 14 + 3, e * 14, 3) * 1.5 + 0.55 * sd;
+            double lit = Math.Max(0, Math.Min(1, sun - 0.25));
+            double fr = 0.04 + 0.55 * lit, fg = 0.11 + 0.58 * lit, fb = 0.025 + 0.1 * lit;
+            double kk = phi / 0.17; double ci = Math.Floor(kk), hh = H2((int)ci, 7);
+            double tr = 0, tg = 0, tb = 0, tw = 0;
+            if (hh > 0.3 && e < 0.7)
+            {
+                double ctr = ci + 0.25 + 0.5 * H2((int)ci, 9), wd = 0.07 + 0.05 * H2((int)ci, 11) - e * 0.06;
+                double dd = Math.Abs(kk - ctr);
+                if (dd < wd) { tw = 1 - Sm(wd * 0.7, wd, dd); double side = 0.35 + 0.65 * (1 - dd / wd) * (0.4 + sd); tr = 0.12 + 0.4 * side; tg = 0.08 + 0.27 * side; tb = 0.04 + 0.12 * side; }
+            }
+            R = sr * (1 - fol) + fr * fol; G = sg * (1 - fol) + fg * fol; Bl = sb * (1 - fol) + fb * fol;
+            if (tw > 0) { R = R * (1 - tw) + tr * tw; G = G * (1 - tw) + tg * tw; Bl = Bl * (1 - tw) + tb * tw; }
+            if (dy < 0) { double f = 0.55; R *= f; G *= f; Bl *= f; }
         }
 
-        static void Trace(double ox, double oy, double oz, double dx, double dy, double dz, ref long rays, out double R, out double G, out double Bl)
+        static bool HitSphere(double ox, double oy, double oz, double dx, double dy, double dz, out double t)
         {
-            double ar = 0, ag = 0, ab = 0, att = 1;
-            const double LX = 0.5121, LY = 0.8193, LZ = -0.2561;
-            for (int depth = 0; depth < 5; depth++)
+            double lx = ox, ly = oy - 1.0, lz = oz;
+            double b = lx * dx + ly * dy + lz * dz, c = lx * lx + ly * ly + lz * lz - 1.0, disc = b * b - c;
+            t = 0;
+            if (disc <= 0) return false;
+            t = -b - Math.Sqrt(disc);
+            return t > 1e-4;
+        }
+
+        static void Trace(double ox, double oy, double oz, double dx, double dy, double dz, Random rnd, ref long rays, out double R, out double G, out double Bl)
+        {
+            double ar = 0, ag = 0, ab = 0, tr = 1, tg = 1, tb = 1;
+            for (int depth = 0; depth < 4; depth++)
             {
                 rays++;
-                double bt = 1e30; int hit = -2;
-                for (int i = 0; i < 5; i++)
+                double ts, tgd = 1e30; bool hs = HitSphere(ox, oy, oz, dx, dy, dz, out ts);
+                if (dy < -1e-6) tgd = -oy / dy;
+                if (!hs) ts = 1e30;
+                if (ts >= 1e29 && (tgd > 70 || tgd < 1e-4))
                 {
-                    double lx = ox - SX[i], ly = oy - SY[i], lz = oz - SZ[i];
-                    double b = lx * dx + ly * dy + lz * dz, c = lx * lx + ly * ly + lz * lz - SRd[i] * SRd[i], disc = b * b - c;
-                    if (disc > 0) { double t = -b - Math.Sqrt(disc); if (t > 1e-4 && t < bt) { bt = t; hit = i; } }
+                    double er, eg, eb; Env(dx, dy, dz, out er, out eg, out eb);
+                    ar += tr * er; ag += tg * eg; ab += tb * eb; break;
                 }
-                if (dy < -1e-6) { double t = -oy / dy; if (t > 1e-4 && t < bt) { bt = t; hit = -1; } }
-                if (hit == -2)
+                if (hs && ts < tgd)
                 {
-                    double k = 0.5 * (dy + 1);
-                    ar += att * (0.75 - 0.35 * k); ag += att * (0.85 - 0.25 * k); ab += att * (1.0 - 0.1 * k);
+                    double px = ox + dx * ts, py = oy + dy * ts, pz = oz + dz * ts, nx = px, ny = py - 1.0, nz = pz;
+                    double dn = dx * nx + dy * ny + dz * nz;
+                    double cs = -dn; if (cs < 0) cs = 0; double fw = Math.Pow(1 - cs, 5) * 0.5;
+                    tr *= (1.0 + (1 - 1.0) * fw) * 0.97; tg *= (0.78 + (1 - 0.78) * fw) * 0.97; tb *= (0.34 + (1 - 0.34) * fw) * 0.97;
+                    double rx = dx - 2 * dn * nx + (rnd.NextDouble() - 0.5) * 0.006, ry = dy - 2 * dn * ny + (rnd.NextDouble() - 0.5) * 0.006, rz = dz - 2 * dn * nz + (rnd.NextDouble() - 0.5) * 0.006;
+                    double rl = Math.Sqrt(rx * rx + ry * ry + rz * rz);
+                    ox = px + nx * 1e-3; oy = py + ny * 1e-3; oz = pz + nz * 1e-3; dx = rx / rl; dy = ry / rl; dz = rz / rl;
+                    continue;
+                }
+                {
+                    double px = ox + dx * tgd, pz = oz + dz * tgd;
+                    // grama procedural (varias oitavas de ruido = lamina fina + manchas grandes)
+                    double big = Fbm(px * 1.1, pz * 1.1, 3), bl = Fbm(px * 34, pz * 22, 4), bl2 = Fbm(px * 90 + 3, pz * 60, 2);
+                    double gl = 0.15 + 0.6 * bl + 0.3 * big + 0.15 * bl2; if (gl > 1) gl = 1;
+                    double cr = 0.06 + 0.34 * gl, cg = 0.2 + 0.42 * gl, cb = 0.03 + 0.09 * gl;
+                    double ex = Fbm(px * 34 + 0.7, pz * 22, 3) - bl, ez = Fbm(px * 34, pz * 22 + 0.7, 3) - bl;
+                    double nx = -ex * 9, nz = -ez * 9, ny = 1, nl = Math.Sqrt(nx * nx + ny * ny + nz * nz); nx /= nl; ny /= nl; nz /= nl;
+                    double diff = nx * LX + ny * LY + nz * LZ; if (diff < 0) diff = 0;
+                    // sombra da esfera (sol com tamanho: raio de sombra sorteado) e sombra das arvores (faixas alongadas)
+                    double vis = 1, st;
+                    rays++;
+                    double jx = LX + (rnd.NextDouble() - 0.5) * 0.07, jy = LY + (rnd.NextDouble() - 0.5) * 0.07, jz = LZ + (rnd.NextDouble() - 0.5) * 0.07, jl = Math.Sqrt(jx * jx + jy * jy + jz * jz);
+                    if (HitSphere(px, 1e-3, pz, jx / jl, jy / jl, jz / jl, out st)) vis = 0.05;
+                    double aa = px * 0.7673 + pz * 0.6413, bb = -px * 0.6413 + pz * 0.7673;
+                    double mask = 0.18 + 0.82 * Sm(0.38, 0.55, Fbm(aa * 0.55 + 4, bb * 0.14, 3));
+                    // oclusao ambiente por 3 raios + luz dourada refletida pela esfera
+                    double occ = 0, gold = 0;
+                    for (int q = 0; q < 3; q++)
+                    {
+                        rays++;
+                        double u1 = rnd.NextDouble(), u2 = rnd.NextDouble(), rr = Math.Sqrt(u1), ang = 6.2831853 * u2;
+                        double hx = rr * Math.Cos(ang), hz = rr * Math.Sin(ang), hy = Math.Sqrt(1 - u1);
+                        double qt;
+                        if (HitSphere(px, 1e-3, pz, hx, hy, hz, out qt)) { occ += 1; gold += 1; }
+                    }
+                    double ao = 1 - 0.55 * occ / 3.0, gb = gold / 3.0;
+                    double wr = diff * vis * mask * 1.55 + ao * 0.34 + gb * 0.55, wg = diff * vis * mask * 1.3 + ao * 0.4 + gb * 0.4, wb = diff * vis * mask * 0.85 + ao * 0.46 + gb * 0.12;
+                    ar += tr * cr * wr; ag += tg * cg * wg; ab += tb * cb * wb;
                     break;
                 }
-                double px = ox + dx * bt, py = oy + dy * bt, pz = oz + dz * bt, nx, ny, nz, cr, cg, cb, refl;
-                if (hit == -1)
-                {
-                    nx = 0; ny = 1; nz = 0;
-                    int ck = ((int)Math.Floor(px) + (int)Math.Floor(pz)) & 1;
-                    cr = cg = cb = ck == 0 ? 0.85 : 0.18; refl = 0.22;
-                }
-                else
-                {
-                    nx = (px - SX[hit]) / SRd[hit]; ny = (py - SY[hit]) / SRd[hit]; nz = (pz - SZ[hit]) / SRd[hit];
-                    cr = SCR[hit]; cg = SCG[hit]; cb = SCB[hit]; refl = SRF[hit];
-                }
-                double diff = nx * LX + ny * LY + nz * LZ;
-                if (diff < 0) diff = 0;
-                if (diff > 0) { rays++; if (Occluded(px + nx * 1e-3, py + ny * 1e-3, pz + nz * 1e-3, LX, LY, LZ)) diff *= 0.2; }
-                double dn = dx * nx + dy * ny + dz * nz;
-                double rx = dx - 2 * dn * nx, ry = dy - 2 * dn * ny, rz = dz - 2 * dn * nz;
-                double spec = rx * LX + ry * LY + rz * LZ; spec = spec > 0 ? Math.Pow(spec, 40) * 0.6 : 0;
-                double lum = 0.2 + 0.8 * diff, w = att * (1 - refl);
-                ar += w * (cr * lum + spec); ag += w * (cg * lum + spec); ab += w * (cb * lum + spec);
-                att *= refl;
-                if (att < 0.03) break;
-                ox = px; oy = py; oz = pz; dx = rx; dy = ry; dz = rz;
             }
             R = ar; G = ag; Bl = ab;
         }
@@ -7652,13 +7716,24 @@ namespace BunoTunner
             {
                 if (order == null)
                 {
+                    // espiral no sentido horario, do centro para fora
                     List<int> l = new List<int>();
-                    for (int i = 0; i < NB; i++) l.Add(i);
-                    l.Sort(delegate(int p, int q)
+                    int[] sdx = { 1, 0, -1, 0 }, sdy = { 0, 1, 0, -1 };
+                    int sx = NBX / 2, sy = NBY / 2, sdir = 0, slen = 1, guard = 0;
+                    l.Add(sy * NBX + sx);
+                    while (l.Count < NB && guard++ < 10000)
                     {
-                        double dp = Math.Pow(p % NBX - NBX / 2.0 + 0.5, 2) + Math.Pow(p / NBX - NBY / 2.0 + 0.5, 2), dq = Math.Pow(q % NBX - NBX / 2.0 + 0.5, 2) + Math.Pow(q / NBX - NBY / 2.0 + 0.5, 2);
-                        return dp.CompareTo(dq);
-                    });
+                        for (int k = 0; k < 2; k++)
+                        {
+                            for (int st = 0; st < slen; st++)
+                            {
+                                sx += sdx[sdir]; sy += sdy[sdir];
+                                if (sx >= 0 && sx < NBX && sy >= 0 && sy < NBY) l.Add(sy * NBX + sx);
+                            }
+                            sdir = (sdir + 1) & 3;
+                        }
+                        slen++;
+                    }
                     order = l.ToArray(); SetupPass();
                 }
                 if (nextB < NB) { int b = order[nextB++]; bstate[b] = 1; return b; }
@@ -7681,7 +7756,7 @@ namespace BunoTunner
                 if (b < 0) { Th.Thread.Sleep(30); continue; }
                 int x0 = (b % NBX) * B, y0 = (b / NBX) * B; long rays = 0;
                 double ex = camE0, ey = camE1, ez = camE2, fx = camF0, fy = camF1, fz = camF2, rx = camR0, rz = camR2, ux = camU0, uy = camU1, uz = camU2;
-                double th = 0.45, asp = W / (double)H;
+                double th = 0.56, asp = W / (double)H;
                 for (int y = y0; y < y0 + B && !quit && !Bench.Stop; y++)
                     for (int x = x0; x < x0 + B; x++)
                     {
@@ -7691,10 +7766,10 @@ namespace BunoTunner
                             double u = ((x + rnd.NextDouble()) / W * 2 - 1) * asp * th, v = (1 - (y + rnd.NextDouble()) / H * 2) * th;
                             double dx = fx + rx * u + ux * v, dy = fy + uy * v, dz = fz + rz * u + uz * v, dl = Math.Sqrt(dx * dx + dy * dy + dz * dz);
                             double cr, cg, cb;
-                            Trace(ex, ey, ez, dx / dl, dy / dl, dz / dl, ref rays, out cr, out cg, out cb);
+                            Trace(ex, ey, ez, dx / dl, dy / dl, dz / dl, rnd, ref rays, out cr, out cg, out cb);
                             sr += cr; sg += cg; sb += cb;
                         }
-                        int ir = (int)(255 * Math.Sqrt(Math.Min(1, sr / SPP))), ig = (int)(255 * Math.Sqrt(Math.Min(1, sg / SPP))), ib = (int)(255 * Math.Sqrt(Math.Min(1, sb / SPP)));
+                        int ir = (int)(255 * Math.Sqrt(Math.Min(1, 0.85 * sr / SPP))), ig = (int)(255 * Math.Sqrt(Math.Min(1, 0.85 * sg / SPP))), ib = (int)(255 * Math.Sqrt(Math.Min(1, 0.85 * sb / SPP)));
                         pix[y * W + x] = unchecked((int)0xFF000000) | (ir << 16) | (ig << 8) | ib;
                     }
                 Th.Interlocked.Add(ref Bench.Counter, rays);
@@ -7774,13 +7849,13 @@ namespace BunoTunner
             bmp.UnlockBits(d);
             float s = Math.Min(r.Width / (float)W, r.Height / (float)H);
             float w = W * s, h = H * s, x0 = r.X + (r.Width - w) / 2, y0 = r.Y + (r.Height - h) / 2;
-            g.InterpolationMode = InterpolationMode.NearestNeighbor;
+            g.InterpolationMode = s < 1f ? InterpolationMode.HighQualityBilinear : InterpolationMode.NearestNeighbor;
             g.DrawImage(bmp, x0, y0, w, h);
             using (Pen p = new Pen(Color.White, 2f))
                 for (int b = 0; b < NB; b++)
                     if (bstate[b] == 1) g.DrawRectangle(p, x0 + (b % NBX) * B * s, y0 + (b / NBX) * B * s, B * s, B * s);
             using (Pen fr = new Pen(Color.FromArgb(120, 120, 120))) g.DrawRectangle(fr, x0, y0, w, h);
-            string st = "Render #" + (pass + 1) + "   blocos: " + doneB + "/" + NB + "   tempo: " + (doneB >= NB ? lastPass : (DateTime.UtcNow - passStart).TotalSeconds).ToString("0.0") + " s";
+            string st = "Render #" + (pass + 1) + "   " + SPP + " amostras/pixel   blocos: " + doneB + "/" + NB + "   tempo: " + (doneB >= NB ? lastPass : (DateTime.UtcNow - passStart).TotalSeconds).ToString("0.0") + " s";
             if (lastPass > 0) st += "   último: " + lastPass.ToString("0.0") + " s   melhor: " + bestPass.ToString("0.0") + " s";
             TextRenderer.DrawText(g, Lang.T(st), SystemFonts.DefaultFont, new Point((int)x0 + 4, (int)y0 + 4), Color.White, Color.FromArgb(150, 0, 0, 0));
         }
@@ -7978,7 +8053,7 @@ namespace BunoTunner
         public RenderForm(int kind, int threads)
         {
             Text = "BunoTunner - Render do teste (Esc fecha e para)";
-            Size = new Size(700, 560);
+            Size = kind == 1 ? new Size(720, 760) : new Size(700, 560);
             Cv = new BenchCanvas(kind, threads);
             if (kind == 0)
             {

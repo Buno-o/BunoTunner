@@ -452,3 +452,8 @@ v1.43.3 (TESTE)
 
 v1.43.4 (TESTE)
 - Benchmark de GPU: novo campo "Pelos" abaixo da duracao para escolher a quantidade de pelos do render (50 mil, 100 mil, 250 mil, 500 mil ou 1 milhao). Padrao 250 mil; a escolha e lembrada. A linha "Placa:" foi para baixo da descricao.
+
+v1.44.0 (TESTE)
+- Benchmark de CPU: novo render por ray tracing de uma esfera de ouro espelhada sobre grama, com floresta e sol baixo ao fundo (cena procedural). Os reflexos da esfera (ceu, arvores, grama), as sombras suaves do sol, a oclusao ambiente e a luz dourada refletida na grama sao calculados pela CPU.
+- Os blocos sao renderizados em espiral no sentido horario, do centro para a borda.
+- Teste bem mais pesado: imagem 1024x1024 com 256 amostras por pixel (antes 32), grama com varias oitavas de ruido e varios raios por ponto.
