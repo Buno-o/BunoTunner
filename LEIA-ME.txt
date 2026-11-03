@@ -445,3 +445,7 @@ v1.43.1 (TESTE)
 
 v1.43.2 (TESTE)
 - Benchmark de GPU: HUD agora desenhado na resolucao real da janela (texto suave, sem pixelar). Bola de pelos com mistura normal (nao estoura mais em branco) e esfera dourada pixelada visivel no centro.
+
+v1.43.3 (TESTE)
+- Benchmark de GPU mais proximo do exemplo: esfera dourada pixelada opaca no centro (esconde os pelos de tras), anel de pelos longos marrom->dourado->creme em volta e teia polar de fundo desenhada por shader.
+- Teste bem mais pesado: 250.000 pelos (linhas mais grossas, 2 passadas) + shader de fundo com carga fixa de ALU (1200 iteracoes por pixel), igual para todas as placas para o FPS ser comparavel. O FPS depende do tamanho da janela (como no FurMark).
