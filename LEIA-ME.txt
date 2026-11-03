@@ -428,3 +428,7 @@ v1.42.0 (TESTE)
 
 v1.42.1 (TESTE)
 - Saude do armazenamento: a lista de atributos S.M.A.R.T. voltou ao tamanho fixo (ficava com 1 linha e escondia o relatorio). As outras listas com altura automatica nao encolhem mais quando estao vazias nem ficam presas num tamanho pequeno.
+
+v1.42.3 (TESTE)
+- Ventoinhas: o menu agora se empilha logo abaixo da lista (lista, dica, modo, aplicar, mensagem), sem espaco vazio; a lista tem a altura exata do numero de ventoinhas.
+- Drivers: se o usuario tentar fechar o popup de andamento antes do fim, aparece um aviso de seguranca (fechar nao interrompe a operacao; nao desligue o PC).

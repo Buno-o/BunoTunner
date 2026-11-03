@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.42.1.0")]
-[assembly: AssemblyFileVersion("1.42.1.0")]
-[assembly: AssemblyInformationalVersion("1.42.1")]
+[assembly: AssemblyVersion("1.42.3.0")]
+[assembly: AssemblyFileVersion("1.42.3.0")]
+[assembly: AssemblyInformationalVersion("1.42.3")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1887,7 +1887,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.42.1";
+        public const string Version = "v1.42.3";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -9503,7 +9503,7 @@ namespace BunoTunner
         ListView lv = new XpList();
         XpOption optAuto, optManual, chkSafe, chkRestore;
         XpSlider sl; XpText txPct, txRpm, txSafe;
-        Label lblMsg, lblSel;
+        Label lblMsg, lblSel, lblHint; XpGroup gList, gMode, gApply;
         Dictionary<FanCh, ListViewItem> items = new Dictionary<FanCh, ListViewItem>();
         List<FanCh> identList = new List<FanCh>();
         DateTime identUntil = DateTime.MinValue;
@@ -9549,8 +9549,8 @@ namespace BunoTunner
 
         void BuildList()
         {
-            XpGroup g = new XpGroup(); g.Title = "Ventoinhas detectadas (Ctrl/Shift = várias)"; g.SetBounds(0, 0, 676, 286); g.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
-            ((XpList)lv).AutoFit = true; lv.SetBounds(10, 54, 656, 188); lv.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom; lv.View = View.Details; lv.FullRowSelect = true; lv.GridLines = true;
+            XpGroup g = new XpGroup(); gList = g; g.Title = "Ventoinhas detectadas (Ctrl/Shift = várias)"; g.SetBounds(0, 0, 676, 286); g.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            ((XpList)lv).AutoFit = true; ((XpList)lv).SelfLayout = true; ((XpList)lv).Fitted += delegate { Relayout(); }; lv.SetBounds(10, 54, 656, 188); lv.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right; lv.View = View.Details; lv.FullRowSelect = true; lv.GridLines = true;
             lv.MultiSelect = true; lv.HideSelection = false; lv.BackColor = Xp.EditBg; lv.Font = Xp.Ui;
             lv.Columns.Add("Ventoinha", 180); lv.Columns.Add("Tipo", 90); lv.Columns.Add("Origem", 170); lv.Columns.Add("RPM", 60);
             lv.Columns.Add("%", 50); lv.Columns.Add("Modo", 102);
@@ -9571,7 +9571,7 @@ namespace BunoTunner
             XpButton bId = UI.Btn(g, "Identificar", 420, 22, 100, delegate { Identify(); }); bId.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             XpButton bAuto = UI.Btn(g, "Tudo automático", 526, 22, 140, delegate { AllAuto(); }); bAuto.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             Label h = UI.Lbl(g, "Identificar = liga as selecionadas a 100% por 5 s para você descobrir qual é qual.  Botão direito na lista: selecionar por tipo (CPU, bombas, gabinete) ou renomear (inclua CPU, Bomba ou Gabinete no nome).", 10, 248, Xp.Ui, Xp.Dim);
-            h.MaximumSize = new Size(650, 0); h.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            lblHint = h; h.AutoSize = false; h.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right; h.SetBounds(10, 248, 656, 32);
             tip.SetToolTip(lv, "RPM = giros por minuto. % = potência enviada. \"só leitura\" = a placa-mae não permite controle por software. Atalhos: Ctrl+A seleciona tudo; F2 ou duplo clique renomeia.");
             Controls.Add(g);
         }
@@ -9598,7 +9598,7 @@ namespace BunoTunner
 
         void BuildMode()
         {
-            XpGroup g = new XpGroup(); g.Title = "Modo de funcionamento das selecionadas"; g.SetBounds(0, 292, 676, 166); g.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            XpGroup g = new XpGroup(); g.Title = "Modo de funcionamento das selecionadas"; g.SetBounds(0, 292, 676, 166); g.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right; gMode = g;
             optAuto = UI.Opt(g, "Automático - a placa/BIOS decide (recomendado no dia a dia)", 14, 22, 520, true);
             optManual = UI.Opt(g, "Manual - velocidade fixa em %:", 14, 44, 300, true);
             sl = new XpSlider(); sl.SetBounds(34, 60, 280, 32); sl.Minimum = 0; sl.Maximum = 100; sl.Value = 50; g.Controls.Add(sl);
@@ -9623,7 +9623,7 @@ namespace BunoTunner
 
         void BuildApply()
         {
-            XpGroup g = new XpGroup(); g.Title = "Aplicar"; g.SetBounds(0, 464, 676, 80); g.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            XpGroup g = new XpGroup(); g.Title = "Aplicar"; g.SetBounds(0, 464, 676, 80); g.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right; gApply = g;
             UI.Btn(g, "Aplicar nas selecionadas", 10, 20, 170, delegate { ApplySel(); }).Height = 26;
             UI.Lbl(g, "Dica: Enter nos campos de % ou RPM também aplica.", 190, 26, Xp.Ui, Xp.Dim);
             chkSafe = UI.Opt(g, "Segurança: forcar 100% se a temperatura passar de", 10, 54, 320, false); chkSafe.Checked = true;
@@ -9632,7 +9632,21 @@ namespace BunoTunner
             tip.SetToolTip(chkSafe, "Se esquentar demais, as ventoinhas vão a 100% mesmo no modo manual.");
             Controls.Add(g);
             lblMsg = UI.Lbl(this, "", 0, 474, Xp.UiBold, Xp.Good);
-            lblMsg.AutoSize = false; lblMsg.SetBounds(0, 548, 676, 38); lblMsg.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            lblMsg.AutoSize = false; lblMsg.SetBounds(0, 548, 676, 38); lblMsg.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            Relayout();
+        }
+
+        // empilha os blocos logo abaixo da lista (sem espaco vazio): lista -> dica -> modo -> aplicar -> mensagem
+        void Relayout()
+        {
+            if (gList == null || gMode == null || gApply == null || lblHint == null) return;
+            SuspendLayout();
+            lblHint.Top = lv.Bottom + 6;
+            gList.Height = lblHint.Bottom + 8;
+            gMode.Top = gList.Bottom + 6;
+            gApply.Top = gMode.Bottom + 6;
+            if (lblMsg != null) lblMsg.Top = gApply.Bottom + 4;
+            ResumeLayout(true);
         }
 
         void Msg(string t, bool err) { lblMsg.ForeColor = err ? Xp.Bad : Xp.Good; lblMsg.Text = t; }
@@ -13665,14 +13679,20 @@ namespace BunoTunner
             XpOption chkVend = UI.Opt(g, "Site da fabricante (GPU NVIDIA/AMD e chipset AMD)", 316, 116, 320, false); chkVend.Checked = true;
             // o andamento aparece num popup (aberto ao clicar em "So verificar" ou "Atualizar drivers")
             TextBox log = null;   // um novo TextBox a cada popup (fechar o popup descarta o anterior)
-            XpForm pop = null;
+            XpForm pop = null; bool busy = false;
             Action showPop = delegate
             {
                 if (pop == null || pop.IsDisposed)
                 {
                     log = new TextBox(); log.Multiline = true; log.ReadOnly = true; log.ScrollBars = ScrollBars.Vertical; log.WordWrap = true;
                     log.Font = Xp.Ui; log.BackColor = Xp.EditBg; log.ForeColor = Xp.Text; log.Dock = DockStyle.Fill;
-                    pop = new XpForm(); pop.Text = Lang.T("Atualizar drivers - andamento"); pop.Size = new Size(660, 440); pop.StartPosition = FormStartPosition.CenterParent;
+                    pop = new XpForm(); pop.Text = Lang.T("Atualizar drivers - andamento");
+                    pop.FormClosing += delegate(object so, FormClosingEventArgs fe)
+                    {
+                        if (busy && fe.CloseReason == CloseReason.UserClosing &&
+                            Dlg.Show(pop, "ATENÇÃO: o processo ainda não terminou.\n\nFechar esta janela NÃO interrompe a operação: ela continua em segundo plano. Não desligue nem reinicie o PC e não feche o BunoTunner até o fim: interromper a instalação de um driver pode deixar o Windows ou a placa de vídeo instáveis.\n\nFechar a janela mesmo assim?", "BunoTunner - Aviso de segurança", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                            fe.Cancel = true;
+                    }; pop.Size = new Size(660, 440); pop.StartPosition = FormStartPosition.CenterParent;
                     Panel bot = new Panel(); bot.Dock = DockStyle.Bottom; bot.Height = 36; bot.BackColor = Color.Transparent;
                     XpButton bClose = UI.Btn(bot, "Fechar", 0, 6, 100, delegate { pop.Close(); }); bClose.Anchor = AnchorStyles.Top | AnchorStyles.Right; bClose.Left = 640 - 8 - 100 - 8;
                     pop.Controls.Add(log); pop.Controls.Add(bot); log.BringToFront();
@@ -13685,11 +13705,11 @@ namespace BunoTunner
             {
                 bool wu = chkWu.Checked, vend = chkVend.Checked;
                 if (!wu && !vend) { showPop(); log.Text = Lang.T("Marque pelo menos uma das origens (Windows Update ou site da fabricante)."); return; }
-                bGo.Enabled = false; bScan.Enabled = false; pb.Marquee = true; anim.Start(); showPop(); log.Text = "";
+                busy = true; bGo.Enabled = false; bScan.Enabled = false; pb.Marquee = true; anim.Start(); showPop(); log.Text = "";
                 Action<string> add = delegate(string s) { try { BeginInvoke(new Action(delegate { if (log != null && !log.IsDisposed) log.AppendText(Lang.T(s) + "\r\n"); })); } catch (Exception) { } };
                 Action finish = delegate
                 {
-                    try { BeginInvoke(new Action(delegate { anim.Stop(); pb.Marquee = false; pb.Value = 0; pb.Invalidate(); bGo.Enabled = true; bScan.Enabled = true; })); } catch (Exception) { }
+                    try { BeginInvoke(new Action(delegate { busy = false; anim.Stop(); pb.Marquee = false; pb.Value = 0; pb.Invalidate(); bGo.Enabled = true; bScan.Enabled = true; })); } catch (Exception) { }
                 };
                 Func<string, bool> askVendor = delegate(string msg)
                 {
@@ -13858,7 +13878,8 @@ namespace BunoTunner
         [DllImport("user32.dll")] static extern IntPtr SendMessage(IntPtr h, int msg, IntPtr w, IntPtr l);
         [DllImport("user32.dll")] static extern bool GetWindowRect(IntPtr h, out RCT r);
         [StructLayout(LayoutKind.Sequential)] struct RCT { public int L, T, R, B; }
-        public bool AutoFit;
+        public bool AutoFit, SelfLayout;   // SelfLayout: quem usa a lista reposiciona o resto (evento Fitted)
+        public event EventHandler Fitted;
         int maxH = -1; bool fitting, pending;
         ContextMenuStrip own;
 
@@ -13948,7 +13969,7 @@ namespace BunoTunner
             if (nh == Height) return;
             int delta = nh - Height, oldBottom = Bottom;
             fitting = true;
-            try { Height = nh; Reflow(this, oldBottom, delta); }
+            try { Height = nh; if (SelfLayout) { if (Fitted != null) Fitted(this, EventArgs.Empty); } else Reflow(this, oldBottom, delta); }
             finally { fitting = false; }
         }
 
