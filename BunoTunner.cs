@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.45.0.0")]
-[assembly: AssemblyFileVersion("1.45.0.0")]
-[assembly: AssemblyInformationalVersion("1.45.0")]
+[assembly: AssemblyVersion("1.45.1.0")]
+[assembly: AssemblyFileVersion("1.45.1.0")]
+[assembly: AssemblyInformationalVersion("1.45.1")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1548,7 +1548,38 @@ namespace BunoTunner
             }
             catch (Exception) { }
             AppDomain.CurrentDomain.AssemblyResolve += Resolve;
+            // instancia unica: se o programa ja estiver aberto (inclusive na bandeja), so traz a janela dele para frente
+            try
+            {
+                bool created;
+                // permissao para todos: assim uma copia sem admin enxerga a copia com admin (e vice-versa)
+                SecurityIdentifier world = new SecurityIdentifier(WellKnownSidType.WorldSid, null);
+                System.Security.AccessControl.MutexSecurity ms = new System.Security.AccessControl.MutexSecurity();
+                ms.AddAccessRule(new System.Security.AccessControl.MutexAccessRule(world, System.Security.AccessControl.MutexRights.FullControl, System.Security.AccessControl.AccessControlType.Allow));
+                Mx = new System.Threading.Mutex(true, "Local\\BunoTunner_SingleInstance", out created, ms);
+                bool createdE;
+                System.Security.AccessControl.EventWaitHandleSecurity es = new System.Security.AccessControl.EventWaitHandleSecurity();
+                es.AddAccessRule(new System.Security.AccessControl.EventWaitHandleAccessRule(world, System.Security.AccessControl.EventWaitHandleRights.FullControl, System.Security.AccessControl.AccessControlType.Allow));
+                ShowEv = new System.Threading.EventWaitHandle(false, System.Threading.EventResetMode.AutoReset, "Local\\BunoTunner_ShowWindow", out createdE, es);
+                if (!created) { try { ShowEv.Set(); } catch (Exception) { } return; }
+            }
+            catch (Exception) { }
             Start();
+        }
+
+        public static System.Threading.Mutex Mx; public static System.Threading.EventWaitHandle ShowEv;
+        public static void ListenShow(Control c, Action show)
+        {
+            if (ShowEv == null) return;
+            System.Threading.Thread t = new System.Threading.Thread(delegate()
+            {
+                while (true)
+                {
+                    try { ShowEv.WaitOne(); } catch (Exception) { return; }
+                    try { if (c.IsDisposed) return; c.BeginInvoke(show); } catch (Exception) { return; }
+                }
+            });
+            t.IsBackground = true; t.Name = "single-instance"; t.Start();
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -1891,7 +1922,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.45.0";
+        public const string Version = "v1.45.1";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -12606,8 +12637,18 @@ namespace BunoTunner
                 using (Pen bp = new Pen(Xp.TextBorder)) g.DrawPath(bp, gp);
             }
             TextRenderer.DrawText(g, Lang.T(Caption), Xp.UiBold, new Rectangle(12, 5, Width - 16, 16), Xp.GroupText, TextFormatFlags.Left | TextFormatFlags.NoPrefix | TextFormatFlags.EndEllipsis);
-            Font vf = Small ? Xp.Ui : Xp.Big;
+            Font vf = Small ? Xp.Ui : Xp.Big; Font own = null;
+            if (!Small)
+            {
+                string vt = Lang.T(Value); float sz = Xp.Big.Size; int avail = Width - 18;
+                while (sz > 8f && TextRenderer.MeasureText(g, vt, vf, new Size(10000, 100), TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding).Width > avail)
+                {
+                    sz -= 0.5f; if (own != null) own.Dispose();
+                    own = new Font(Xp.Big.FontFamily, sz, Xp.Big.Style); vf = own;
+                }
+            }
             TextRenderer.DrawText(g, Lang.T(Value), vf, new Rectangle(12, 22, Width - 16, Height - 24), Xp.Text, TextFormatFlags.Left | TextFormatFlags.WordBreak | TextFormatFlags.NoPrefix | (Small ? TextFormatFlags.Top : TextFormatFlags.VerticalCenter));
+            if (own != null) own.Dispose();
         }
     }
 
@@ -15596,6 +15637,7 @@ namespace BunoTunner
                 tray.ContextMenuStrip = cm;
                 tray.DoubleClick += delegate { ShowFromTray(); };
                 tray.Visible = true;
+                Program.ListenShow(this, delegate { ShowFromTray(); });
             }
             catch (Exception) { tray = null; }
         }
