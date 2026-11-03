@@ -471,3 +471,6 @@ v1.45.1 (TESTE)
 
 v1.45.2 (TESTE)
 - Otimizacoes: o bloco "Aplicar todos os ajustes (1 clique)" ganhou a propria faixa verde ("Todos os ajustes") e um espaco maior, separado do bloco azul de Drivers, para ficar claro que sao funcoes diferentes.
+
+v1.45.3 (TESTE)
+- Otimizacoes: a faixa de Drivers ficou verde e o bloco "Aplicar todos os ajustes" ganhou uma faixa azul propria, "Tweaks e DeBloat", ambas com a descricao no lado direito.

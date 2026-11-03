@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.45.2.0")]
-[assembly: AssemblyFileVersion("1.45.2.0")]
-[assembly: AssemblyInformationalVersion("1.45.2")]
+[assembly: AssemblyVersion("1.45.3.0")]
+[assembly: AssemblyFileVersion("1.45.3.0")]
+[assembly: AssemblyInformationalVersion("1.45.3")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -228,7 +228,7 @@ namespace BunoTunner
             "SSD  -  sequencial + 4K aleatório", "SSD  -  sequential + random 4K",
             "Usa um arquivo temporário no drive escolhido (apagado ao fim). Em 'Até parar' gera desgaste.", "Uses a temporary file on the chosen drive (deleted at the end). 'Until stopped' causes wear.",
             "Duração:", "Duration:",
-            "Todos os ajustes", "All tweaks", "Aplica ou desfaz todos os ajustes desta página de uma vez.", "Applies or undoes every tweak on this page at once.",
+            "Tweaks e DeBloat", "Tweaks and DeBloat", "Aplique ou desfaça todos os ajustes desta página de uma vez.", "Apply or undo every tweak on this page at once.",
             "Unidade de medida", "Unit of measure", "Unidade de medida (todos deste tipo)", "Unit of measure (all of this type)", "Usar o padrão do tipo", "Use the type default",
             "Pelos:", "Fur strands:", "50 mil", "50 thousand", "100 mil", "100 thousand", "250 mil", "250 thousand", "500 mil", "500 thousand", "1 milhão", "1 million",
             "Quantidade de pelos do render. Mais pelos = teste mais pesado (FPS menor).", "Number of fur strands in the render. More strands = heavier test (lower FPS).",
@@ -1923,7 +1923,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.45.2";
+        public const string Version = "v1.45.3";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -14041,7 +14041,7 @@ namespace BunoTunner
         void AddAll()
         {
             top += 12;   // afasta do bloco de Drivers: sao funcoes separadas
-            Section("Todos os ajustes", "Aplica ou desfaz todos os ajustes desta página de uma vez.", false, true);
+            Section("Tweaks e DeBloat", "Aplique ou desfaça todos os ajustes desta página de uma vez.", false, false);
             XpGroup g = new XpGroup(); g.Title = "Aplicar todos os ajustes (1 clique)"; g.SetBounds(12, top, 638, 84); top += 94;
             Label d = UI.Lbl(g, "Executa TODOS os ajustes desta página, um após o outro. O overlay do DLSS não vai ser executado.", 12, 22, Xp.Ui, Xp.Dim);
             d.AutoSize = false; d.SetBounds(12, 22, 500, 34);
@@ -14116,7 +14116,7 @@ namespace BunoTunner
         // primeiro item da lista: atualiza os drivers (Windows Update + site da NVIDIA/AMD)
         void AddDrivers()
         {
-            Section("Drivers", "Mantenha a GPU, o chipset e os demais dispositivos atualizados.", false);
+            Section("Drivers", "Mantenha a GPU, o chipset e os demais dispositivos atualizados.", false, true);
             XpGroup g = new XpGroup(); g.Title = "Atualizar drivers (todos os dispositivos, GPU e Chipset)"; g.SetBounds(12, top, 638, 148);
             Label d = UI.Lbl(g, "Analisa o PC e procura drivers mais novos no Windows Update e, para a placa de video (NVIDIA / AMD) e o chipset AMD, direto no site da fabricante. Antes de instalar, cria um ponto de restauração e confere a assinatura digital (e o hash SHA-256 no Windows Update); se algo estiver alterado, nada é instalado. Os instaladores da fabricante são baixados e abertos para você concluir; para Intel, abre o Assistente de Drivers da Intel.", 12, 22, Xp.Ui, Xp.Dim);
             d.AutoSize = false; d.SetBounds(12, 22, 624, 58);
