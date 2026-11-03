@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.42.3.0")]
-[assembly: AssemblyFileVersion("1.42.3.0")]
-[assembly: AssemblyInformationalVersion("1.42.3")]
+[assembly: AssemblyVersion("1.42.4.0")]
+[assembly: AssemblyFileVersion("1.42.4.0")]
+[assembly: AssemblyInformationalVersion("1.42.4")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1887,7 +1887,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.42.3";
+        public const string Version = "v1.42.4";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -9565,14 +9565,14 @@ namespace BunoTunner
             }
             if (FanHub.All.Count == 0)
                 lv.Items.Add(new ListViewItem(new string[] { "Nenhuma ventoinha encontrada", "", "A placa-mae pode não expor as ventoinhas ao Windows", "", "", "" }));
-            lblSel = UI.Lbl(g, "", 10, 27, Xp.UiBold, Xp.Dim); lblSel.AutoSize = false; lblSel.SetBounds(10, 27, 400, 18);
+            lblSel = UI.Lbl(g, "", 10, 27, Xp.UiBold, Xp.Dim); lblSel.AutoSize = false; lblSel.SetBounds(10, 27, 400, 18); lblSel.Visible = false;
             lv.DoubleClick += delegate { Rename(); };
             lv.KeyDown += delegate(object o, KeyEventArgs e) { if (e.Control && e.KeyCode == Keys.A) { foreach (ListViewItem x in lv.Items) x.Selected = true; e.Handled = true; } else if (e.KeyCode == Keys.F2) { Rename(); e.Handled = true; } };
             XpButton bId = UI.Btn(g, "Identificar", 420, 22, 100, delegate { Identify(); }); bId.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             XpButton bAuto = UI.Btn(g, "Tudo automático", 526, 22, 140, delegate { AllAuto(); }); bAuto.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             Label h = UI.Lbl(g, "Identificar = liga as selecionadas a 100% por 5 s para você descobrir qual é qual.  Botão direito na lista: selecionar por tipo (CPU, bombas, gabinete) ou renomear (inclua CPU, Bomba ou Gabinete no nome).", 10, 248, Xp.Ui, Xp.Dim);
-            lblHint = h; h.AutoSize = false; h.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right; h.SetBounds(10, 248, 656, 32);
-            tip.SetToolTip(lv, "RPM = giros por minuto. % = potência enviada. \"só leitura\" = a placa-mae não permite controle por software. Atalhos: Ctrl+A seleciona tudo; F2 ou duplo clique renomeia.");
+            lblHint = h; h.Visible = false; h.AutoSize = false; h.SetBounds(10, 248, 656, 32);
+            tip.SetToolTip(lv, "Identificar = liga as selecionadas a 100% por 5 s para você descobrir qual é qual. Botão direito: selecionar por tipo ou renomear. RPM = giros por minuto. % = potência enviada. \"só leitura\" = a placa-mae não permite controle por software. Atalhos: Ctrl+A seleciona tudo; F2 ou duplo clique renomeia.");
             Controls.Add(g);
         }
 
@@ -9614,8 +9614,10 @@ namespace BunoTunner
             UI.Lbl(g, "RPM alvo:", 34, 110);
             txRpm = UI.Txt(g, 96, 106, 60, "1200");
             txRpm.Box.KeyDown += delegate(object o, KeyEventArgs e) { if (e.KeyCode == Keys.Enter) ByRpm(); };
-            UI.Btn(g, "Definir por RPM", 166, 104, 112, delegate { ByRpm(); });
-            UI.Lbl(g, "(use \"Identificar\" antes: ele mede o RPM máximo de cada ventoinha)", 288, 110, Xp.Ui, Xp.Dim);
+            XpButton bRpm = UI.Btn(g, "Definir por RPM", 166, 104, 112, delegate { ByRpm(); });
+            tip.SetToolTip(bRpm, "Use \"Identificar\" antes: ele mede o RPM máximo de cada ventoinha. Enter no campo de RPM também aplica.");
+            tip.SetToolTip(txRpm, "RPM desejado. Enter também aplica.");
+            tip.SetToolTip(txPct, "Velocidade fixa em %. Enter também aplica.");
             tip.SetToolTip(optAuto, "A própria placa-mae ou o driver controla a velocidade pela temperatura.");
             tip.SetToolTip(optManual, "A ventoinha fica sempre na mesma velocidade, não importa a temperatura.");
             Controls.Add(g);
@@ -9625,7 +9627,6 @@ namespace BunoTunner
         {
             XpGroup g = new XpGroup(); g.Title = "Aplicar"; g.SetBounds(0, 464, 676, 80); g.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right; gApply = g;
             UI.Btn(g, "Aplicar nas selecionadas", 10, 20, 170, delegate { ApplySel(); }).Height = 26;
-            UI.Lbl(g, "Dica: Enter nos campos de % ou RPM também aplica.", 190, 26, Xp.Ui, Xp.Dim);
             chkSafe = UI.Opt(g, "Segurança: forcar 100% se a temperatura passar de", 10, 54, 320, false); chkSafe.Checked = true;
             txSafe = UI.Txt(g, 336, 51, 40, "85"); UI.Lbl(g, "\u00B0C", 380, 55);
             chkRestore = UI.Opt(g, "Voltar tudo ao automático ao fechar", 420, 54, 250, false); chkRestore.Checked = true;
@@ -9641,8 +9642,7 @@ namespace BunoTunner
         {
             if (gList == null || gMode == null || gApply == null || lblHint == null) return;
             SuspendLayout();
-            lblHint.Top = lv.Bottom + 6;
-            gList.Height = lblHint.Bottom + 8;
+            gList.Height = lv.Bottom + 10;
             gMode.Top = gList.Bottom + 6;
             gApply.Top = gMode.Bottom + 6;
             if (lblMsg != null) lblMsg.Top = gApply.Bottom + 4;

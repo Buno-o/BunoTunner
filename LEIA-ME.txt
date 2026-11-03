@@ -432,3 +432,6 @@ v1.42.1 (TESTE)
 v1.42.3 (TESTE)
 - Ventoinhas: o menu agora se empilha logo abaixo da lista (lista, dica, modo, aplicar, mensagem), sem espaco vazio; a lista tem a altura exata do numero de ventoinhas.
 - Drivers: se o usuario tentar fechar o popup de andamento antes do fim, aparece um aviso de seguranca (fechar nao interrompe a operacao; nao desligue o PC).
+
+v1.42.4 (TESTE)
+- Ventoinhas: removidos os textos de comentario em volta (dica abaixo da lista, contador de selecionadas, dica do RPM e dica do Enter); as explicacoes foram para as dicas ao passar o mouse.
