@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - codigo aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.39.0.0")]
-[assembly: AssemblyFileVersion("1.39.0.0")]
-[assembly: AssemblyInformationalVersion("1.39.0")]
+[assembly: AssemblyVersion("1.39.1.0")]
+[assembly: AssemblyFileVersion("1.39.1.0")]
+[assembly: AssemblyInformationalVersion("1.39.1")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1887,7 +1887,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.39.0";
+        public const string Version = "v1.39.1";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -5843,7 +5843,8 @@ namespace BunoTunner
             if (pid != fpsPid || (DateTime.UtcNow - fpsAt).TotalMilliseconds >= 480)
             {
                 fpsPid = pid; fpsAt = DateTime.UtcNow; fpsApi = null; fpsVal = 0;
-                fpsGame = pid != myPid && pid != 0 && FpsMon.Get(pid, out fpsVal, out fpsApi);
+                bool ownRender = pid == myPid && Control.FromHandle(fg) is RenderForm;   // janela de render do Benchmark (OpenGL) tambem e medida
+                fpsGame = (pid != myPid || ownRender) && pid != 0 && FpsMon.Get(pid, out fpsVal, out fpsApi);
             }
             int fps = fpsVal; string api = fpsApi; bool game = fpsGame;
             if (Hidden && !Editing) { if (win != null && win.Visible) win.Hide(); return; }
@@ -9544,10 +9545,7 @@ namespace BunoTunner
             }
             if (FanHub.All.Count == 0)
                 lv.Items.Add(new ListViewItem(new string[] { "Nenhuma ventoinha encontrada", "", "A placa-mae pode nao expor as ventoinhas ao Windows", "", "", "" }));
-            XpButton bPawn = UI.Btn(g, PawnIo.Installed() ? "PawnIO instalado" : "Instalar PawnIO", 10, 22, 140, delegate { PawnIo.InstallNow(this); });
-            bPawn.Enabled = !PawnIo.Installed();
-            tip.SetToolTip(bPawn, "PawnIO: driver usado pelo LibreHardwareMonitor para ler sensores da CPU/placa-mae e controlar as ventoinhas da placa-mae. Clique para baixar e instalar.");
-            lblSel = UI.Lbl(g, "", 160, 27, Xp.UiBold, Xp.Dim); lblSel.AutoSize = false; lblSel.SetBounds(160, 27, 250, 18);
+            lblSel = UI.Lbl(g, "", 10, 27, Xp.UiBold, Xp.Dim); lblSel.AutoSize = false; lblSel.SetBounds(10, 27, 400, 18);
             lv.DoubleClick += delegate { Rename(); };
             lv.KeyDown += delegate(object o, KeyEventArgs e) { if (e.Control && e.KeyCode == Keys.A) { foreach (ListViewItem x in lv.Items) x.Selected = true; e.Handled = true; } else if (e.KeyCode == Keys.F2) { Rename(); e.Handled = true; } };
             XpButton bId = UI.Btn(g, "Identificar", 420, 22, 100, delegate { Identify(); }); bId.Anchor = AnchorStyles.Top | AnchorStyles.Right;
@@ -13768,6 +13766,12 @@ namespace BunoTunner
             cmb.DropDownStyle = ComboBoxStyle.DropDownList; cmb.Font = Xp.Ui;
             cmb.SetBounds(95, 2, 330, 22);
             right.Controls.Add(cmb);
+            // PawnIO (ao lado da escolha da GPU)
+            XpButton bPawn = new XpButton(); bPawn.Text = PawnIo.Installed() ? "PawnIO instalado" : "Instalar PawnIO";
+            bPawn.SetBounds(440, 2, 150, 22); bPawn.Enabled = !PawnIo.Installed();
+            bPawn.Click += delegate { PawnIo.InstallNow(this); };
+            right.Controls.Add(bPawn);
+            tip.SetToolTip(bPawn, "PawnIO: driver usado pelo LibreHardwareMonitor para ler sensores da CPU/placa-mae e controlar as ventoinhas da placa-mae. Clique para baixar e instalar.");
             // iniciar com o Windows (canto superior direito, mesmo tamanho dos botoes PayPal/LivePix)
             bWin = new XpIconButton("win10", 24); bWin.Top = 2;
             right.Controls.Add(bWin); bWin.BringToFront();
