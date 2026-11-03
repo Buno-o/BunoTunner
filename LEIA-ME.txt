@@ -388,3 +388,7 @@ v1.37.0 (TESTE)
 
 v1.37.1 (TESTE)
 - Ventoinhas: removida a numeracao (1, 2, 3) dos titulos; a lista de ventoinhas ficou maior, com os botoes no topo, e o menu acompanha o tamanho da janela (lista cresce, modo/aplicar ficam embaixo).
+
+v1.38.0 (TESTE)
+- Saude de armazenamento: tela reorganizada (lista de discos mais compacta, detalhes ocupam o resto da janela), novas colunas e cores de situacao (OK / Atencao / Ruim) nos atributos S.M.A.R.T., filtro de texto, "Mostrar so alertas" e botoes para copiar ou salvar o relatorio do disco em .txt.
+- Benchmark / estresse: os 5 testes (GPU, CPU, FPU, RAM, SSD) agora sao linhas largas com a duracao e as opcoes ao lado, e o cartao de controle passou para baixo com a taxa atual, media, pico, temperatura, erros e tempo do teste em andamento sempre visiveis.

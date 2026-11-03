@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - codigo aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.37.1.0")]
-[assembly: AssemblyFileVersion("1.37.1.0")]
-[assembly: AssemblyInformationalVersion("1.37.1")]
+[assembly: AssemblyVersion("1.38.0.0")]
+[assembly: AssemblyFileVersion("1.38.0.0")]
+[assembly: AssemblyInformationalVersion("1.38.0")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -377,7 +377,7 @@ namespace BunoTunner
             "Consultando os sites das fabricantes...", "Checking the manufacturers' websites...",
             "Atualizar drivers (todos os dispositivos, GPU e Chipset)", "Update drivers (all devices, GPU and Chipset)", "Windows Update (todos os dispositivos)", "Windows Update (all devices)", "Site da fabricante (GPU NVIDIA/AMD e chipset AMD)", "Manufacturer website (NVIDIA/AMD GPU and AMD chipset)",
             "Marque pelo menos uma das origens (Windows Update ou site da fabricante).", "Tick at least one source (Windows Update or manufacturer website).", "---- Windows Update ----", "---- Windows Update ----", "---- Site da fabricante ----", "---- Manufacturer website ----",
-            "Concluido.", "Done.", "Ignorado.", "Skipped.", "Inverter selecao", "Invert selection", "Dica: Enter nos campos de % ou RPM tambem aplica.", "Tip: Enter in the % or RPM boxes also applies.", "Identificar = liga as selecionadas a 100% por 5 s para voce descobrir qual e qual.  Botao direito na lista: selecionar por tipo ou renomear (inclua CPU, Bomba ou Gabinete no nome). Atalhos: Ctrl+A seleciona tudo, F2 ou duplo clique renomeia.", "Identify = runs the selected fans at 100% for 5 s so you can tell which is which.  Right-click the list: select by type or rename (include CPU, Pump or Case in the name). Shortcuts: Ctrl+A selects all, F2 or double-click renames.", "Limpeza e manutencao", "Cleanup and maintenance", "Libera espaco no disco.", "Frees disk space.", "Desempenho em jogos", "Gaming performance", "Ajustes que podem melhorar FPS, tremidas e resposta do mouse.", "Tweaks that can improve FPS, stutter and mouse response.", "Interface do Windows", "Windows interface", "Aparencia e comportamento do sistema.", "System look and behavior.", "Seguranca (avancado)", "Security (advanced)", "Estes ajustes REDUZEM a protecao do PC. Use so se souber o que esta fazendo.", "These tweaks REDUCE the PC's protection. Use only if you know what you are doing.", "Mantenha a GPU, o chipset e os demais dispositivos atualizados.", "Keep the GPU, chipset and other devices up to date.",
+            "Concluido.", "Done.", "Ignorado.", "Skipped.", "Controle, seguranca e resultado ao vivo", "Controls, safety and live results", "Taxa atual", "Current rate", "Copiar relatorio", "Copy report", "Salvar relatorio...", "Save report...", "Mostrar so alertas", "Show alerts only", "Filtrar:", "Filter:", "Situacao", "Status", "Selecione um disco primeiro.", "Select a disk first.", "Relatorio copiado para a area de transferencia.", "Report copied to the clipboard.", "Relatorio salvo.", "Report saved.", "Inverter selecao", "Invert selection", "Dica: Enter nos campos de % ou RPM tambem aplica.", "Tip: Enter in the % or RPM boxes also applies.", "Identificar = liga as selecionadas a 100% por 5 s para voce descobrir qual e qual.  Botao direito na lista: selecionar por tipo ou renomear (inclua CPU, Bomba ou Gabinete no nome). Atalhos: Ctrl+A seleciona tudo, F2 ou duplo clique renomeia.", "Identify = runs the selected fans at 100% for 5 s so you can tell which is which.  Right-click the list: select by type or rename (include CPU, Pump or Case in the name). Shortcuts: Ctrl+A selects all, F2 or double-click renames.", "Limpeza e manutencao", "Cleanup and maintenance", "Libera espaco no disco.", "Frees disk space.", "Desempenho em jogos", "Gaming performance", "Ajustes que podem melhorar FPS, tremidas e resposta do mouse.", "Tweaks that can improve FPS, stutter and mouse response.", "Interface do Windows", "Windows interface", "Aparencia e comportamento do sistema.", "System look and behavior.", "Seguranca (avancado)", "Security (advanced)", "Estes ajustes REDUZEM a protecao do PC. Use so se souber o que esta fazendo.", "These tweaks REDUCE the PC's protection. Use only if you know what you are doing.", "Mantenha a GPU, o chipset e os demais dispositivos atualizados.", "Keep the GPU, chipset and other devices up to date.",
             "Instalador fechado.", "Installer closed.",
             "Abrindo o instalador. Conclua a instalacao na janela da fabricante...", "Opening the installer. Finish the installation in the manufacturer's window...",
             "Instalador apagado por seguranca. Nada foi executado.", "Installer deleted for safety. Nothing was run.",
@@ -1887,7 +1887,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.37.1";
+        public const string Version = "v1.38.0";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -12364,26 +12364,29 @@ namespace BunoTunner
         ListView lvD = new ListView(), lvA = new ListView();
         Label lblHealth, lblLife, lblTemp, lblAdvice, lblMsg;
         XpProgress pbLife, pbTemp;
+        XpOption chkAlert; XpText txFilter; List<string[]> allRows = new List<string[]>();
         List<DiskInfo> disks = new List<DiskInfo>();
         DiskInfo cur; bool loading, loadedOnce;
         Timer tm = new Timer();
 
         public StoragePage()
         {
-            Dock = DockStyle.Fill;
-            XpGroup g1 = new XpGroup(); g1.Title = "Seus discos"; g1.SetBounds(0, 0, 676, 178);
-            lvD.SetBounds(12, 24, 652, 112); lvD.View = View.Details; lvD.FullRowSelect = true; lvD.GridLines = true; lvD.HideSelection = false; lvD.MultiSelect = false;
+            Size = new Size(676, 586); Dock = DockStyle.Fill;   // tamanho inicial = o da area da pagina, para os ancoramentos funcionarem
+            XpGroup g1 = new XpGroup(); g1.Title = "Seus discos"; g1.SetBounds(0, 0, 676, 156); g1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            lvD.SetBounds(12, 24, 652, 88); lvD.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right; lvD.View = View.Details; lvD.FullRowSelect = true; lvD.GridLines = true; lvD.HideSelection = false; lvD.MultiSelect = false;
             lvD.BackColor = Xp.EditBg; lvD.Font = Xp.Ui;
-            lvD.Columns.Add("Disco", 210); lvD.Columns.Add("Tipo", 90); lvD.Columns.Add("Tamanho", 70); lvD.Columns.Add("Saude", 70); lvD.Columns.Add("Vida", 60); lvD.Columns.Add("Temp.", 60); lvD.Columns.Add("Horas", 60);
+            lvD.Columns.Add("Disco", 232); lvD.Columns.Add("Tipo", 90); lvD.Columns.Add("Tamanho", 70); lvD.Columns.Add("Saude", 70); lvD.Columns.Add("Vida", 60); lvD.Columns.Add("Temp.", 60); lvD.Columns.Add("Horas", 60);
             UI.DoubleBuffer(lvD);
             lvD.SelectedIndexChanged += delegate { cur = lvD.SelectedItems.Count > 0 ? lvD.SelectedItems[0].Tag as DiskInfo : null; ShowDetail(); };
             g1.Controls.Add(lvD);
-            UI.Btn(g1, "Atualizar", 12, 144, 90, delegate { Load(); });
-            lblMsg = UI.Lbl(g1, "", 112, 148, Xp.Ui, Xp.Dim);
-            lblMsg.AutoSize = false; lblMsg.SetBounds(112, 146, 550, 26);
+            UI.Btn(g1, "Atualizar", 12, 120, 90, delegate { Load(); });
+            UI.Btn(g1, "Copiar relatorio", 108, 120, 120, delegate { CopyReport(); });
+            UI.Btn(g1, "Salvar relatorio...", 234, 120, 130, delegate { SaveReport(); });
+            lblMsg = UI.Lbl(g1, "", 374, 118, Xp.Ui, Xp.Dim);
+            lblMsg.AutoSize = false; lblMsg.SetBounds(374, 116, 290, 32);
             Controls.Add(g1);
 
-            XpGroup g2 = new XpGroup(); g2.Title = "Detalhes do disco selecionado"; g2.SetBounds(0, 186, 676, 398);
+            XpGroup g2 = new XpGroup(); g2.Title = "Detalhes do disco selecionado"; g2.SetBounds(0, 162, 676, 424); g2.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
             UI.Lbl(g2, "Saude geral:", 14, 28, Xp.UiBold);
             lblHealth = UI.Lbl(g2, "-", 130, 24, Xp.Big, Xp.GroupText);
             UI.Lbl(g2, "Vida util restante:", 14, 62, Xp.UiBold);
@@ -12394,9 +12397,14 @@ namespace BunoTunner
             lblTemp = UI.Lbl(g2, "-", 490, 92, Xp.UiBold, Xp.GroupText);
             lblAdvice = UI.Lbl(g2, "Selecione um disco na lista acima.", 14, 120, Xp.Ui, Xp.Dim);
             lblAdvice.AutoSize = false; lblAdvice.SetBounds(14, 120, 648, 44);
-            lvA.SetBounds(12, 168, 652, 220); lvA.View = View.Details; lvA.FullRowSelect = true; lvA.GridLines = true;
+            chkAlert = UI.Opt(g2, "Mostrar so alertas", 14, 166, 170, false);
+            UI.Lbl(g2, "Filtrar:", 220, 170);
+            txFilter = UI.Txt(g2, 266, 165, 200, "");
+            chkAlert.CheckedChanged += delegate { FillAttrs(); };
+            txFilter.Box.TextChanged += delegate { FillAttrs(); };
+            lvA.SetBounds(12, 194, 652, 220); lvA.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom; lvA.View = View.Details; lvA.FullRowSelect = true; lvA.GridLines = true;
             lvA.BackColor = Xp.EditBg; lvA.Font = Xp.Ui;
-            lvA.Columns.Add("Atributo / sensor", 330); lvA.Columns.Add("Valor", 300);
+            lvA.Columns.Add("Atributo / sensor", 290); lvA.Columns.Add("Valor", 270); lvA.Columns.Add("Situacao", 80);
             UI.DoubleBuffer(lvA);
             g2.Controls.Add(lvA);
             Controls.Add(g2);
@@ -12517,7 +12525,7 @@ namespace BunoTunner
         void ShowDetail()
         {
             lvA.Items.Clear();
-            if (cur == null) { lblHealth.Text = "-"; lblLife.Text = "-"; lblTemp.Text = "-"; pbLife.Value = 0; pbTemp.Value = 0; return; }
+            if (cur == null) { lblHealth.Text = "-"; lblLife.Text = "-"; lblTemp.Text = "-"; pbLife.Value = 0; pbTemp.Value = 0; allRows.Clear(); return; }
             DiskInfo d = cur; string h = HealthText(d);
             lblHealth.Text = h; lblHealth.ForeColor = HealthColor(h);
             if (double.IsNaN(d.Life)) { pbLife.Value = 0; lblLife.Text = d.IsSsd ? "indisponivel" : "n/a (HDD)"; } else { pbLife.Value = (int)d.Life; lblLife.Text = d.Life.ToString("0") + "% restante"; }
@@ -12543,13 +12551,74 @@ namespace BunoTunner
                 string unit = s.Type == "Temperature" ? " C" : s.Type == "Load" || s.Type == "Level" ? " %" : s.Type == "Data" ? " GB" : s.Type == "Throughput" ? " B/s" : "";
                 rows.Add(new string[] { "S.M.A.R.T. - " + s.Name, v.Value.ToString("0.##") + unit });
             }
-            foreach (string[] r in rows) lvA.Items.Add(new ListViewItem(r));
+            allRows.Clear();
+            foreach (string[] r in rows)
+            {
+                string st = "";
+                if (r[0].StartsWith("S.M.A.R.T. ") && r[1].StartsWith("bruto"))
+                {
+                    Match mm = Regex.Match(r[0], "S\\.M\\.A\\.R\\.T\\. (\\d+) "); int id = mm.Success ? int.Parse(mm.Groups[1].Value) : 0;
+                    DiskInfo.Attr at = null; foreach (DiskInfo.Attr x in d.Smart) if (x.Id == id) at = x;
+                    st = "OK";
+                    if (at != null)
+                    {
+                        if (at.Thr > 0 && at.Val <= at.Thr) st = "Ruim";
+                        else if ((id == 5 || id == 10 || id == 184 || id == 187 || id == 188 || id == 196 || id == 197 || id == 198) && (at.Raw & 0xFFFFFFFFL) > 0) st = "Atencao";
+                    }
+                }
+                else if ((r[0].StartsWith("Erros de leitura") || r[0].StartsWith("Erros de escrita")) && r[1] != "-" && r[1] != "0") st = "Atencao";
+                allRows.Add(new string[] { r[0], r[1], st });
+            }
+            FillAttrs();
             string adv;
             if (h == "Ruim") adv = "ATENCAO: o disco indica falha iminente ou pouca vida util" + (d.Reason.Length > 0 ? " (" + d.Reason + ")" : "") + ". Faca backup AGORA e planeje a troca.";
             else if (h == "Atencao") adv = "Ha sinais de desgaste, erros ou temperatura alta" + (d.Reason.Length > 0 ? " (" + d.Reason + ")" : "") + ". Mantenha backup em dia e acompanhe.";
             else if (h == "Boa") adv = d.IsSsd ? "Tudo certo. SSDs perdem vida conforme a quantidade de dados gravados; valores abaixo de 30% pedem atencao." : "Tudo certo. Em HDDs, observe erros e temperatura (ideal abaixo de 50 C).";
             else adv = "O Windows nao informou S.M.A.R.T. deste disco (comum em discos USB e controladoras RAID).";
             lblAdvice.Text = adv; lblAdvice.ForeColor = h == "Ruim" || h == "Atencao" ? Xp.Bad : Xp.Dim;
+        }
+
+        void FillAttrs()
+        {
+            string f = (txFilter == null ? "" : txFilter.Text).Trim();
+            bool only = chkAlert != null && chkAlert.Checked;
+            lvA.BeginUpdate(); lvA.Items.Clear();
+            foreach (string[] r in allRows)
+            {
+                if (only && r[2] != "Ruim" && r[2] != "Atencao") continue;
+                if (f.Length > 0 && r[0].IndexOf(f, StringComparison.OrdinalIgnoreCase) < 0 && r[1].IndexOf(f, StringComparison.OrdinalIgnoreCase) < 0) continue;
+                ListViewItem it = new ListViewItem(new string[] { r[0], r[1], r[2] });
+                if (r[2] == "Ruim") it.ForeColor = Xp.Bad; else if (r[2] == "Atencao") it.ForeColor = Color.FromArgb(214, 140, 0);
+                lvA.Items.Add(it);
+            }
+            lvA.EndUpdate();
+        }
+
+        string Report()
+        {
+            if (cur == null) return "";
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("BunoTunner - relatorio de saude do disco  (" + DateTime.Now.ToString("yyyy-MM-dd HH:mm") + ")");
+            sb.AppendLine("Disco: " + cur.Name + "   Saude geral: " + HealthText(cur));
+            sb.AppendLine(lblLife.Text.Length > 0 ? "Vida util: " + lblLife.Text + "   Temperatura: " + lblTemp.Text : "");
+            sb.AppendLine(lblAdvice.Text); sb.AppendLine();
+            foreach (string[] r in allRows) sb.AppendLine(r[0] + ": " + r[1] + (r[2].Length > 0 && r[2] != "OK" ? "   [" + r[2] + "]" : ""));
+            return sb.ToString();
+        }
+        void CopyReport()
+        {
+            if (cur == null) { lblMsg.Text = "Selecione um disco primeiro."; return; }
+            try { Clipboard.SetText(Report()); lblMsg.Text = "Relatorio copiado para a area de transferencia."; } catch (Exception ex) { lblMsg.Text = "Nao foi possivel copiar: " + ex.Message; }
+        }
+        void SaveReport()
+        {
+            if (cur == null) { lblMsg.Text = "Selecione um disco primeiro."; return; }
+            using (SaveFileDialog sd = new SaveFileDialog())
+            {
+                sd.Filter = "Texto (*.txt)|*.txt"; sd.FileName = "saude-disco-" + Regex.Replace(cur.Name, "[^A-Za-z0-9]+", "_") + ".txt";
+                if (sd.ShowDialog(FindForm()) != DialogResult.OK) return;
+                try { File.WriteAllText(sd.FileName, Report(), Encoding.UTF8); lblMsg.Text = "Relatorio salvo."; } catch (Exception ex) { lblMsg.Text = "Nao foi possivel salvar: " + ex.Message; }
+            }
         }
 
         void LiveTemp()
@@ -13893,16 +13962,16 @@ namespace BunoTunner
         // um cartao por teste (grade de 2 colunas): icone que inicia/para, descricao, duracao e opcoes do teste
         XpGroup BenchBlock(int k, string title, string desc, string icon, string tipText)
         {
-            XpGroup g = new XpGroup(); g.Title = title; g.SetBounds((k % 2) * 342, (k / 2) * 192, 334, 184);
-            XpIconButton b = new XpIconButton(icon, 48); b.Location = new Point(12, 30); b.Badge = 1;
+            XpGroup g = new XpGroup(); g.Title = title; g.SetBounds(0, k * 74, 676, 70);
+            XpIconButton b = new XpIconButton(icon, 48); b.Location = new Point(12, 19); b.Badge = 1;
             int kk = k;
             b.Click += delegate { ToggleBench(kk); };
             tip.SetToolTip(b, tipText);
             g.Controls.Add(b); bBtn[k] = b;
-            Label d = UI.Lbl(g, desc, 72, 28, Xp.Ui, Xp.Dim);
-            d.AutoSize = false; d.SetBounds(72, 28, 252, 58);
-            UI.Lbl(g, "Duracao:", 12, 96);
-            cbDurK[k] = Combo(g, 76, 92, 110, "30 s", "1 min", "5 min", "10 min", "Ate parar"); cbDurK[k].SelectedIndex = 1;
+            Label d = UI.Lbl(g, desc, 72, 20, Xp.Ui, Xp.Dim);
+            d.AutoSize = false; d.SetBounds(72, 20, 300, 46);
+            UI.Lbl(g, "Duracao:", 384, 24);
+            cbDurK[k] = Combo(g, 448, 20, 110, "30 s", "1 min", "5 min", "10 min", "Ate parar"); cbDurK[k].SelectedIndex = 1;
             return g;
         }
 
@@ -13911,33 +13980,32 @@ namespace BunoTunner
             Panel p = new Panel(); p.Dock = DockStyle.Fill;
 
             XpGroup gG = BenchBlock(0, "GPU  -  render 3D (estilo FurMark)", "Abre uma janela OpenGL com shader e pelos e mostra o FPS. Fechar a janela para o teste.", "gpu", "Iniciar / parar o estresse de GPU");
-            UI.Lbl(gG, "Placa:", 12, 128);
-            lblBGpu = UI.Lbl(gG, cur != null ? cur.Name : "-", 56, 128, Xp.UiBold, Xp.GroupText);
-            lblBGpu.AutoSize = false; lblBGpu.SetBounds(56, 128, 268, 16);
-            Label gn = UI.Lbl(gG, "A placa e a escolhida la em cima. Se o OpenGL abrir em outra, o teste muda para OpenCL na escolhida.", 12, 150, Xp.Ui, Xp.Dim);
-            gn.AutoSize = false; gn.SetBounds(12, 150, 312, 30);
+            UI.Lbl(gG, "Placa:", 384, 48);
+            lblBGpu = UI.Lbl(gG, cur != null ? cur.Name : "-", 430, 48, Xp.UiBold, Xp.GroupText);
+            lblBGpu.AutoSize = false; lblBGpu.SetBounds(430, 48, 236, 16);
+            tip.SetToolTip(lblBGpu, "A placa e a escolhida la em cima. Se o OpenGL abrir em outra, o teste muda para OpenCL na escolhida.");
             p.Controls.Add(gG);
 
             XpGroup gC = BenchBlock(1, "CPU  -  ray tracing 3D (estilo Cinebench)", "Renderiza uma cena em todos os nucleos, bloco a bloco. Pontos = Mrays/s x 100.", "chip", "Iniciar / parar o estresse de CPU");
-            UI.Lbl(gC, "Threads:", 12, 128);
-            cbBThr = Combo(gC, 76, 124, 110, "Todas", "Metade", "1");
+            UI.Lbl(gC, "Threads:", 384, 48);
+            cbBThr = Combo(gC, 448, 44, 110, "Todas", "Metade", "1");
             p.Controls.Add(gC);
 
             XpGroup gF = BenchBlock(2, "FPU  -  campo de ondas em ponto flutuante", "Calculo de ondas com seno/cosseno em todos os nucleos; mostra GFLOPS estimado.", "fpu", "Iniciar / parar o estresse de FPU");
-            UI.Lbl(gF, "Threads:", 12, 128);
-            cbBThrF = Combo(gF, 76, 124, 110, "Todas", "Metade", "1");
+            UI.Lbl(gF, "Threads:", 384, 48);
+            cbBThrF = Combo(gF, 448, 44, 110, "Todas", "Metade", "1");
             cbBThr.SelectedIndexChanged += delegate { if (cbBThrF.SelectedIndex != cbBThr.SelectedIndex) cbBThrF.SelectedIndex = cbBThr.SelectedIndex; };
             cbBThrF.SelectedIndexChanged += delegate { if (cbBThr.SelectedIndex != cbBThrF.SelectedIndex) cbBThr.SelectedIndex = cbBThrF.SelectedIndex; };
             p.Controls.Add(gF);
 
             XpGroup gR = BenchBlock(3, "RAM  -  escrita e leitura com verificacao", "Grava e le padroes na memoria e confere cada valor; qualquer diferenca conta como erro.", "ram", "Iniciar / parar o estresse de RAM");
-            UI.Lbl(gR, "Usar (% da livre):", 12, 128);
-            cbBRam = Combo(gR, 124, 124, 70, "25%", "50%", "70%"); cbBRam.SelectedIndex = 1;
+            UI.Lbl(gR, "Usar (% da livre):", 384, 48);
+            cbBRam = Combo(gR, 490, 44, 70, "25%", "50%", "70%"); cbBRam.SelectedIndex = 1;
             p.Controls.Add(gR);
 
             XpGroup gS = BenchBlock(4, "SSD  -  sequencial + 4K aleatorio", "Usa um arquivo temporario no drive escolhido (apagado ao fim). Em 'Ate parar' gera desgaste.", "ssd", "Iniciar / parar o estresse de SSD");
-            UI.Lbl(gS, "Drive:", 12, 128);
-            cbBDrive = Combo(gS, 56, 124, 70);
+            UI.Lbl(gS, "Drive:", 384, 48);
+            cbBDrive = Combo(gS, 426, 44, 62);
             foreach (DriveInfo d in DriveInfo.GetDrives())
             {
                 try { if (d.DriveType == DriveType.Fixed && d.IsReady) cbBDrive.Items.Add(d.Name); } catch (Exception) { }
@@ -13947,18 +14015,18 @@ namespace BunoTunner
                 int si = cbBDrive.Items.IndexOf(Path.GetPathRoot(Environment.SystemDirectory));
                 cbBDrive.SelectedIndex = si >= 0 ? si : 0;
             }
-            UI.Lbl(gS, "Tamanho:", 146, 128);
-            cbBSize = Combo(gS, 206, 124, 90, "512 MB", "1 GB", "2 GB", "4 GB"); cbBSize.SelectedIndex = 1;
+            UI.Lbl(gS, "Tamanho:", 496, 48);
+            cbBSize = Combo(gS, 556, 44, 90, "512 MB", "1 GB", "2 GB", "4 GB"); cbBSize.SelectedIndex = 1;
             p.Controls.Add(gS);
 
             // cartao de controle: seguranca, progresso, sequencia e mensagens
-            XpGroup gK = new XpGroup(); gK.Title = "Controle e seguranca"; gK.SetBounds(342, 384, 334, 184);
+            XpGroup gK = new XpGroup(); gK.Title = "Controle, seguranca e resultado ao vivo"; gK.SetBounds(0, 376, 676, 208);
             chkBSafe = UI.Opt(gK, "Parar se passar de", 12, 28, 150, false); chkBSafe.Checked = true;
             txBTemp = UI.Txt(gK, 168, 25, 40, "95");
             UI.Lbl(gK, "\u00B0C", 212, 29);
-            pbBench = new XpProgress(); pbBench.SetBounds(12, 60, 310, 18);
+            pbBench = new XpProgress(); pbBench.SetBounds(12, 60, 316, 18);
             gK.Controls.Add(pbBench);
-            btnBSeq = UI.Btn(gK, "Rodar sequencia (CPU, FPU, RAM, GPU)", 12, 88, 310, delegate { ToggleSeq(); });
+            btnBSeq = UI.Btn(gK, "Rodar sequencia (CPU, FPU, RAM, GPU)", 12, 88, 316, delegate { ToggleSeq(); });
             btnBSeq.Height = 28;
             tip.SetToolTip(btnBSeq, "Roda CPU, FPU, RAM e GPU um apos o outro, cada um com a duracao do seu bloco (o SSD fica de fora para nao gerar desgaste).");
             p.Controls.Add(gK);
@@ -13968,10 +14036,10 @@ namespace BunoTunner
             UI.Lbl(g3, "Taxa atual", 14, 22, Xp.UiBold);
             lblBRate = UI.Lbl(g3, "-", 14, 36, Xp.Big, Xp.GroupText);
             string[] caps = { "Media:", "Pico:", "Temperatura:", "Erros:", "Tempo:" };
-            Label[] vals = new Label[5];
+            Label[] vals = new Label[5], capL = new Label[5];
             for (int i = 0; i < 5; i++)
             {
-                UI.Lbl(g3, caps[i], 14, 68 + i * 15, Xp.UiBold);
+                capL[i] = UI.Lbl(g3, caps[i], 14, 68 + i * 15, Xp.UiBold);
                 vals[i] = UI.Lbl(g3, "-", 100, 68 + i * 15);
             }
             lblBAvg = vals[0]; lblBPeak = vals[1]; lblBTemp = vals[2]; lblBErr = vals[3]; lblBTime = vals[4];
@@ -13989,7 +14057,15 @@ namespace BunoTunner
             XpButton bClr = UI.Btn(g3, "Limpar", 420, 178, 64, delegate { lvBench.Items.Clear(); });
             bCopy.Height = bCsv.Height = bClr.Height = 22;
             // "Resultado ao vivo" fica fora da tela (os controles continuam existindo); so a linha de status aparece, no cartao de controle
-            lblBMsg.Parent = gK; lblBMsg.SetBounds(12, 122, 310, 58);
+            lblBMsg.Parent = gK; lblBMsg.SetBounds(12, 124, 316, 72);
+            // taxa e estatisticas do teste em andamento ficam visiveis no cartao de controle
+            UI.Lbl(gK, "Taxa atual", 352, 26, Xp.UiBold);
+            lblBRate.Parent = gK; lblBRate.AutoSize = false; lblBRate.SetBounds(352, 42, 310, 30);
+            for (int i = 0; i < 5; i++)
+            {
+                capL[i].Parent = gK; capL[i].SetBounds(352, 84 + i * 21, 100, 18);
+                vals[i].Parent = gK; vals[i].AutoSize = false; vals[i].SetBounds(456, 84 + i * 21, 206, 18);
+            }
 
             tmBench.Interval = 1000;
             tmBench.Tick += delegate { try { BenchTick(); } catch (Exception) { } };
