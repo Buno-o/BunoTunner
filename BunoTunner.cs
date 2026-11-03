@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.41.1.0")]
-[assembly: AssemblyFileVersion("1.41.1.0")]
-[assembly: AssemblyInformationalVersion("1.41.1")]
+[assembly: AssemblyVersion("1.41.2.0")]
+[assembly: AssemblyFileVersion("1.41.2.0")]
+[assembly: AssemblyInformationalVersion("1.41.2")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1887,7 +1887,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.41.1";
+        public const string Version = "v1.41.2";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -13661,13 +13661,14 @@ namespace BunoTunner
             XpOption chkWu = UI.Opt(g, "Windows Update (todos os dispositivos)", 12, 116, 300, false); chkWu.Checked = true;
             XpOption chkVend = UI.Opt(g, "Site da fabricante (GPU NVIDIA/AMD e chipset AMD)", 316, 116, 320, false); chkVend.Checked = true;
             // o andamento aparece num popup (aberto ao clicar em "So verificar" ou "Atualizar drivers")
-            TextBox log = new TextBox(); log.Multiline = true; log.ReadOnly = true; log.ScrollBars = ScrollBars.Vertical; log.WordWrap = true;
-            log.Font = Xp.Ui; log.BackColor = Xp.EditBg; log.ForeColor = Xp.Text; log.Dock = DockStyle.Fill;
+            TextBox log = null;   // um novo TextBox a cada popup (fechar o popup descarta o anterior)
             XpForm pop = null;
             Action showPop = delegate
             {
                 if (pop == null || pop.IsDisposed)
                 {
+                    log = new TextBox(); log.Multiline = true; log.ReadOnly = true; log.ScrollBars = ScrollBars.Vertical; log.WordWrap = true;
+                    log.Font = Xp.Ui; log.BackColor = Xp.EditBg; log.ForeColor = Xp.Text; log.Dock = DockStyle.Fill;
                     pop = new XpForm(); pop.Text = Lang.T("Atualizar drivers - andamento"); pop.Size = new Size(660, 440); pop.StartPosition = FormStartPosition.CenterParent;
                     Panel bot = new Panel(); bot.Dock = DockStyle.Bottom; bot.Height = 36; bot.BackColor = Color.Transparent;
                     XpButton bClose = UI.Btn(bot, "Fechar", 0, 6, 100, delegate { pop.Close(); }); bClose.Anchor = AnchorStyles.Top | AnchorStyles.Right; bClose.Left = 640 - 8 - 100 - 8;
@@ -13681,8 +13682,8 @@ namespace BunoTunner
             {
                 bool wu = chkWu.Checked, vend = chkVend.Checked;
                 if (!wu && !vend) { showPop(); log.Text = Lang.T("Marque pelo menos uma das origens (Windows Update ou site da fabricante)."); return; }
-                bGo.Enabled = false; bScan.Enabled = false; pb.Marquee = true; anim.Start(); log.Text = ""; showPop();
-                Action<string> add = delegate(string s) { try { BeginInvoke(new Action(delegate { log.AppendText(Lang.T(s) + "\r\n"); })); } catch (Exception) { } };
+                bGo.Enabled = false; bScan.Enabled = false; pb.Marquee = true; anim.Start(); showPop(); log.Text = "";
+                Action<string> add = delegate(string s) { try { BeginInvoke(new Action(delegate { if (log != null && !log.IsDisposed) log.AppendText(Lang.T(s) + "\r\n"); })); } catch (Exception) { } };
                 Action finish = delegate
                 {
                     try { BeginInvoke(new Action(delegate { anim.Stop(); pb.Marquee = false; pb.Value = 0; pb.Invalidate(); bGo.Enabled = true; bScan.Enabled = true; })); } catch (Exception) { }

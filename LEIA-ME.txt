@@ -417,3 +417,6 @@ v1.41.1 (TESTE)
 - Drivers: o texto de andamento saiu da pagina; ao clicar em So verificar ou Atualizar drivers abre um popup com o que esta acontecendo.
 - Aplicar todos: nova descricao e o overlay do DLSS nao e executado.
 - Ortografia: acentos e cedilhas corrigidos em todos os textos do programa (portugues).
+
+v1.41.2 (TESTE)
+- Drivers: corrigido o erro ao fechar o popup de andamento (X) antes do fim e abrir de novo; o processo continua normalmente em segundo plano.
