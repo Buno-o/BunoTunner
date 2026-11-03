@@ -409,3 +409,6 @@ v1.40.0 (TESTE)
 
 v1.40.1 (TESTE)
 - Correcao interna (aviso do compilador) na nova secao de privacidade; sem mudanca visual.
+
+v1.41.0 (TESTE)
+- Otimizacoes: Drivers no topo, depois o Aplicar todos/Desfazer todos, que agora executa TODOS os ajustes da pagina (inclusive Isolamento de nucleo e mitigacoes Spectre/Meltdown, com confirmacao). A secao Seguranca (avancado) foi removida e seus dois ajustes foram para Desempenho em jogos (cada um mantem o proprio aviso ao usar individualmente). Barras de secao do tema Luna (XP) com novo visual azul estilo barra de titulo.

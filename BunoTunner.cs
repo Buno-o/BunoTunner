@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - codigo aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.40.1.0")]
-[assembly: AssemblyFileVersion("1.40.1.0")]
-[assembly: AssemblyInformationalVersion("1.40.1")]
+[assembly: AssemblyVersion("1.41.0.0")]
+[assembly: AssemblyFileVersion("1.41.0.0")]
+[assembly: AssemblyInformationalVersion("1.41.0")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1887,7 +1887,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.40.1";
+        public const string Version = "v1.41.0";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -13371,8 +13371,8 @@ namespace BunoTunner
         {
             Dock = DockStyle.Fill;
             box.Dock = DockStyle.Fill; box.AutoScroll = true; Controls.Add(box);
-            AddAll();
             AddDrivers();
+            AddAll();
             Section("Limpeza e manutencao", "Libera espaco no disco.", false);
             Add("Limpar arquivos temporarios", "Apaga C:\\Windows\\Temp, Prefetch e a pasta %temp% do usuario (itens em uso sao ignorados). Nenhum documento pessoal e tocado.",
                 "Limpar", delegate { return Clean(); }, null, null, null, null);
@@ -13397,14 +13397,6 @@ namespace BunoTunner
                 "Ativar", delegate { Sub(true, @"SOFTWARE\NVIDIA Corporation\Global\NGXCore", "ShowDlssIndicator", 0x400); return "Overlay do DLSS ativado."; },
                 "Desativar", delegate { Sub(true, @"SOFTWARE\NVIDIA Corporation\Global\NGXCore", "ShowDlssIndicator", 0); return "Overlay do DLSS desativado."; },
                 delegate { object v = Get(true, @"SOFTWARE\NVIDIA Corporation\Global\NGXCore", "ShowDlssIndicator"); return v != null && Convert.ToInt32(v) == 0x400 ? "Estado: overlay ATIVO" : "Estado: overlay desligado"; }, null);
-            Section("Interface do Windows", "Aparencia e comportamento do sistema.", false);
-            const string ClickKey = @"Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}";
-            Add("Menu de clique direito do Windows 10", "No Windows 11, traz de volta o menu de clique direito completo e classico do Windows 10 (sem o \"Mostrar mais opcoes\"). Vale ao reiniciar o Explorer ou fazer logoff.",
-                "Ativar", delegate { using (RegistryKey k = Root(false).CreateSubKey(ClickKey + "\\InprocServer32")) { k.SetValue("", ""); } return "Menu classico ativado. Reinicie o Explorer ou faca logoff."; },
-                "Desfazer", delegate { Root(false).DeleteSubKeyTree(ClickKey, false); return "Menu padrao do Windows 11 restaurado. Reinicie o Explorer ou faca logoff."; },
-                delegate { using (RegistryKey k = Root(false).OpenSubKey(ClickKey + "\\InprocServer32")) return k != null ? "Estado: menu classico ATIVO" : "Estado: menu padrao do Windows 11"; }, null);
-            AddPrivacy();
-            Section("Seguranca (avancado)", "Estes ajustes REDUZEM a protecao do PC. Use so se souber o que esta fazendo.", true);
             const string HvKey = @"SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity";
             Add("Isolamento de nucleo (Integridade de memoria)", "Recurso de seguranca do Windows (HVCI) que isola o nucleo do sistema usando virtualizacao. Desativar pode dar mais FPS em jogos e liberar drivers antigos, mas reduz a protecao. Reinicie o PC.",
                 "Desativar", delegate { Sub(true, HvKey, "Enabled", 0); return "Isolamento de nucleo DESATIVADO. Reinicie o PC."; },
@@ -13417,6 +13409,13 @@ namespace BunoTunner
                 "Padrao do Windows", delegate { Del(true, MmKey, "FeatureSettingsOverride"); Del(true, MmKey, "FeatureSettingsOverrideMask"); Del(true, @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Virtualization", "MinVmVersionForCpuBasedMitigations"); return "Mitigacoes restauradas ao padrao do Windows. Reinicie o PC."; },
                 delegate { object v = Get(true, MmKey, "FeatureSettingsOverride"); return v != null ? "Estado: personalizado (FeatureSettingsOverride=" + v + ")" : "Estado: padrao do Windows (mitigacoes ativas)"; },
                 "ATENCAO: desativar as mitigacoes de Spectre/Meltdown deixa o PC mais vulneravel a ataques que leem memoria (por exemplo, por codigo malicioso no navegador). O ganho de desempenho costuma ser pequeno em CPUs recentes.\n\nDesativar mesmo assim?");
+            Section("Interface do Windows", "Aparencia e comportamento do sistema.", false);
+            const string ClickKey = @"Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}";
+            Add("Menu de clique direito do Windows 10", "No Windows 11, traz de volta o menu de clique direito completo e classico do Windows 10 (sem o \"Mostrar mais opcoes\"). Vale ao reiniciar o Explorer ou fazer logoff.",
+                "Ativar", delegate { using (RegistryKey k = Root(false).CreateSubKey(ClickKey + "\\InprocServer32")) { k.SetValue("", ""); } return "Menu classico ativado. Reinicie o Explorer ou faca logoff."; },
+                "Desfazer", delegate { Root(false).DeleteSubKeyTree(ClickKey, false); return "Menu padrao do Windows 11 restaurado. Reinicie o Explorer ou faca logoff."; },
+                delegate { using (RegistryKey k = Root(false).OpenSubKey(ClickKey + "\\InprocServer32")) return k != null ? "Estado: menu classico ATIVO" : "Estado: menu padrao do Windows 11"; }, null);
+            AddPrivacy();
         }
 
 
@@ -13432,6 +13431,8 @@ namespace BunoTunner
             public Func<bool, string> Extra; public Label St;
         }
         readonly List<Tw> tws = new List<Tw>();
+        class Itm { public string Title; public Func<string> Run, Undo; public Label St; }
+        readonly List<Itm> itms = new List<Itm>();
         static bool batch;   // durante "Aplicar todos" o Explorer so reinicia uma vez, no fim
 
         static void SetR(R r, bool apply)
@@ -13557,30 +13558,34 @@ namespace BunoTunner
                 Regs = Brave() });
         }
 
-        // primeiro item da lista: aplica (ou desfaz) todos os ajustes de privacidade com 1 clique
+        // logo abaixo dos drivers: executa TODOS os ajustes da pagina (inclusive os de seguranca) com 1 clique
         void AddAll()
         {
-            XpGroup g = new XpGroup(); g.Title = "Aplicar todos os ajustes de privacidade e telemetria (1 clique)"; g.SetBounds(12, top, 638, 100); top += 110;
-            Label d = UI.Lbl(g, "Aplica de uma vez todos os ajustes da secao \"Privacidade e telemetria\" mais abaixo: recomendacoes, telemetria, Recall, apps em segundo plano, localizacao, pesquisa com Bing, recomendacoes da Store e Brave. Os ajustes de seguranca avancados NAO entram aqui.", 12, 22, Xp.Ui, Xp.Dim);
-            d.AutoSize = false; d.SetBounds(12, 22, 500, 46);
-            Label st = UI.Lbl(g, "", 12, 74, Xp.Ui, Xp.GroupText); st.AutoSize = false; st.SetBounds(12, 74, 500, 18);
+            XpGroup g = new XpGroup(); g.Title = "Aplicar todos os ajustes (1 clique)"; g.SetBounds(12, top, 638, 100); top += 110;
+            Label d = UI.Lbl(g, "Executa TODOS os ajustes desta pagina, um apos o outro: limpeza, hibernacao, mouse, MPO, compressao de memoria, DLSS, menu classico, Isolamento de nucleo, mitigacoes Spectre/Meltdown e toda a secao Privacidade e telemetria. Alguns reduzem a protecao do PC.", 12, 22, Xp.Ui, Xp.Dim);
+            d.AutoSize = false; d.SetBounds(12, 22, 500, 48);
+            Label st = UI.Lbl(g, "", 12, 76, Xp.Ui, Xp.GroupText); st.AutoSize = false; st.SetBounds(12, 76, 500, 18);
             XpButton bAll = UI.Btn(g, "Aplicar todos", 524, 22, 112, null); bAll.Height = 28;
-            XpButton bUn = UI.Btn(g, "Desfazer todos", 524, 56, 112, null);
+            XpButton bUn = UI.Btn(g, "Desfazer todos", 524, 58, 112, null);
             Action<bool> go = delegate(bool apply)
             {
-                if (apply && Dlg.Show(this, "Serao aplicados todos os ajustes de privacidade e telemetria (registro do Windows, servicos DiagTrack, WerSvc e lfsvc, Recall, Brave e pesquisa do Iniciar). O Explorer sera reiniciado no fim.\n\nContinuar?", "BunoTunner - Otimizacoes", MessageBoxButtons.OKCancel, MessageBoxIcon.Question) != DialogResult.OK) return;
+                string msg = apply
+                    ? "Serao executados TODOS os ajustes desta pagina, incluindo os que REDUZEM A SEGURANCA: Isolamento de nucleo (HVCI) e mitigacoes Spectre/Meltdown desativados, hibernacao desligada, limpeza de temporarios, privacidade/telemetria (servicos, Recall, Brave, pesquisa) e outros. O Explorer sera reiniciado no fim e alguns itens pedem reiniciar o PC.\n\nContinuar?"
+                    : "Serao desfeitos todos os ajustes desta pagina que tem opcao de desfazer (a limpeza de temporarios nao tem). Alguns itens pedem reiniciar o PC.\n\nContinuar?";
+                if (Dlg.Show(this, msg, "BunoTunner - Otimizacoes", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) != DialogResult.OK) return;
                 bAll.Enabled = false; bUn.Enabled = false;
-                List<Tw> list = new List<Tw>(tws);
+                List<Itm> list = new List<Itm>();
+                foreach (Itm it in itms) if (apply ? it.Run != null : it.Undo != null) list.Add(it);
                 System.Threading.ThreadPool.QueueUserWorkItem(delegate
                 {
                     batch = true; int n = 0, warn = 0;
-                    foreach (Tw t in list)
+                    foreach (Itm t in list)
                     {
-                        n++; Tw tt = t; int k = n;
-                        try { BeginInvoke(new Action(delegate { st.Text = Lang.T(apply ? "Aplicando" : "Desfazendo") + " " + k + "/" + list.Count + ": " + Lang.T(tt.Title); if (tt.St != null) tt.St.Text = Lang.T("Executando..."); })); } catch (Exception) { }
-                        string r; try { r = RunTw(t, apply); } catch (Exception ex) { r = "Erro: " + ex.Message; }
-                        if (r.StartsWith("Concluido com avisos") || r.StartsWith("Erro")) warn++;
-                        try { BeginInvoke(new Action(delegate { if (tt.St != null) tt.St.Text = r; })); } catch (Exception) { }
+                        n++; Itm tt = t; int k = n;
+                        try { BeginInvoke(new Action(delegate { st.Text = Lang.T(apply ? "Aplicando" : "Desfazendo") + " " + k + "/" + list.Count + ": " + Lang.T(tt.Title); tt.St.Text = Lang.T("Executando..."); })); } catch (Exception) { }
+                        string r; try { r = (apply ? t.Run : t.Undo)(); } catch (Exception ex) { r = "Erro: " + ex.Message; }
+                        if (r.StartsWith("Concluido com avisos") || r.StartsWith("Erro") || r.StartsWith("Falhou")) warn++;
+                        try { BeginInvoke(new Action(delegate { tt.St.Text = r; })); } catch (Exception) { }
                     }
                     batch = false;
                     if (apply) { try { BeginInvoke(new Action(delegate { st.Text = Lang.T("Reiniciando o Explorer..."); })); } catch (Exception) { } RestartExplorer(); }
@@ -13607,6 +13612,16 @@ namespace BunoTunner
             protected override void OnPaint(PaintEventArgs e)
             {
                 Graphics g = e.Graphics; Rectangle r = new Rectangle(0, 0, Width - 1, Height - 1);
+                if (Xp.Theme == 0)
+                {
+                    // Luna: barra no estilo da barra de titulo do XP (azul vivo, brilho no topo, texto branco)
+                    using (LinearGradientBrush br = new LinearGradientBrush(r, Color.FromArgb(78, 130, 236), Color.FromArgb(30, 82, 206), 90f)) g.FillRectangle(br, r);
+                    using (Pen hl = new Pen(Color.FromArgb(140, 178, 248))) g.DrawLine(hl, 1, 1, Width - 3, 1);
+                    using (Pen p = new Pen(Color.FromArgb(0, 48, 152))) g.DrawRectangle(p, r);
+                    TextRenderer.DrawText(g, Lang.T(t), Xp.UiBold, new Rectangle(10, 0, 230, Height), Color.White, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix | TextFormatFlags.EndEllipsis);
+                    TextRenderer.DrawText(g, Lang.T(sub), Xp.Ui, new Rectangle(240, 0, Width - 250, Height), Color.FromArgb(222, 234, 255), TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix | TextFormatFlags.EndEllipsis);
+                    return;
+                }
                 Color a = warn ? Xp.Bad : Xp.PaneTop, bcol = warn ? Color.FromArgb(Math.Max(0, Xp.Bad.R - 60), Math.Max(0, Xp.Bad.G - 30), Math.Max(0, Xp.Bad.B - 30)) : Xp.PaneBot;
                 using (LinearGradientBrush br = new LinearGradientBrush(r, a, bcol, 0f)) g.FillRectangle(br, r);
                 using (Pen p = new Pen(Xp.Border)) g.DrawRectangle(p, r);
@@ -13770,6 +13785,7 @@ namespace BunoTunner
             b1.Click += delegate { if (confirm != null && Dlg.Show(confirm, "BunoTunner - Otimizacoes", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) != DialogResult.OK) return; go(run); };
             if (b2 != null) b2.Click += delegate { go(undo); };
             box.Controls.Add(g);
+            itms.Add(new Itm { Title = title, Run = run, Undo = undo, St = st });
             return st;
         }
     }
