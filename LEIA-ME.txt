@@ -385,3 +385,6 @@ v1.37.0 (TESTE)
 - Overlay: os 25 layouts foram refeitos com mais detalhes (cabecalho com titulo, linhas e faixas alternadas, brilho de vidro, cantos/rebites, linhas de varredura, pontos coloridos e capsulas atras dos valores), mantendo os mesmos nomes e a escolha independente do tema do programa.
 - Otimizar: os drivers de GPU/Chipset da fabricante foram juntados ao "Atualizar drivers" (marque Windows Update e/ou site da fabricante; "So verificar" so lista, sem baixar). Os ajustes do Windows agora estao divididos em categorias com faixa de titulo (Limpeza e manutencao, Desempenho em jogos, Interface do Windows, Seguranca avancada).
 - Ventoinhas: botoes de velocidade rapida (0/25/50/75/100 por cento), Enter nos campos de % e RPM aplica, contador de selecionadas, duplo clique/F2 renomeia, Ctrl+A seleciona tudo, "Inverter selecao", cores na lista (azul = manual, vermelho = seguranca ou parada) e a tela lembra a ultima configuracao.
+
+v1.37.1 (TESTE)
+- Ventoinhas: removida a numeracao (1, 2, 3) dos titulos; a lista de ventoinhas ficou maior, com os botoes no topo, e o menu acompanha o tamanho da janela (lista cresce, modo/aplicar ficam embaixo).

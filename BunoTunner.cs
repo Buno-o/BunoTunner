@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - codigo aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.37.0.0")]
-[assembly: AssemblyFileVersion("1.37.0.0")]
-[assembly: AssemblyInformationalVersion("1.37.0")]
+[assembly: AssemblyVersion("1.37.1.0")]
+[assembly: AssemblyFileVersion("1.37.1.0")]
+[assembly: AssemblyInformationalVersion("1.37.1")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -339,9 +339,9 @@ namespace BunoTunner
             "Essenciais", "Essentials",
             "1a metade", "1st half",
             "2a metade", "2nd half",
-            "1) Ventoinhas detectadas (Ctrl/Shift = varias)", "1) Detected fans (Ctrl/Shift = several)",
-            "2) Como as selecionadas devem trabalhar?", "2) How should the selected fans work?",
-            "3) Aplicar", "3) Apply",
+            "Ventoinhas detectadas (Ctrl/Shift = varias)", "Detected fans (Ctrl/Shift = several)",
+            "Modo de funcionamento das selecionadas", "Operating mode of the selected fans",
+            "Aplicar", "Apply",
             "Aplicar nas selecionadas", "Apply to selected",
             "Tudo automatico", "All automatic",
             "Identificar", "Identify",
@@ -1887,7 +1887,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.37.0";
+        public const string Version = "v1.37.1";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -9426,7 +9426,7 @@ namespace BunoTunner
 
         public FanPage()
         {
-            Dock = DockStyle.Fill;
+            Size = new Size(676, 586); Dock = DockStyle.Fill;   // tamanho inicial = o da area da pagina, para os ancoramentos (Anchor) funcionarem
             FanHub.Build();
             tip.InitialDelay = 300; tip.AutoPopDelay = 9000;
             BuildList(); BuildMode(); BuildApply(); BuildMenu();
@@ -9464,11 +9464,11 @@ namespace BunoTunner
 
         void BuildList()
         {
-            XpGroup g = new XpGroup(); g.Title = "1) Ventoinhas detectadas (Ctrl/Shift = varias)"; g.SetBounds(0, 0, 676, 214);
-            lv.SetBounds(10, 22, 656, 136); lv.View = View.Details; lv.FullRowSelect = true; lv.GridLines = true;
+            XpGroup g = new XpGroup(); g.Title = "Ventoinhas detectadas (Ctrl/Shift = varias)"; g.SetBounds(0, 0, 676, 286); g.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
+            lv.SetBounds(10, 54, 656, 188); lv.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom; lv.View = View.Details; lv.FullRowSelect = true; lv.GridLines = true;
             lv.MultiSelect = true; lv.HideSelection = false; lv.BackColor = Xp.EditBg; lv.Font = Xp.Ui;
-            lv.Columns.Add("Ventoinha", 160); lv.Columns.Add("Tipo", 75); lv.Columns.Add("Origem", 170); lv.Columns.Add("RPM", 55);
-            lv.Columns.Add("%", 50); lv.Columns.Add("Modo", 110);
+            lv.Columns.Add("Ventoinha", 180); lv.Columns.Add("Tipo", 90); lv.Columns.Add("Origem", 170); lv.Columns.Add("RPM", 60);
+            lv.Columns.Add("%", 50); lv.Columns.Add("Modo", 102);
             UI.DoubleBuffer(lv);
             g.Controls.Add(lv);
             foreach (FanCh c in FanHub.All)
@@ -9480,16 +9480,16 @@ namespace BunoTunner
             }
             if (FanHub.All.Count == 0)
                 lv.Items.Add(new ListViewItem(new string[] { "Nenhuma ventoinha encontrada", "", "A placa-mae pode nao expor as ventoinhas ao Windows", "", "", "" }));
-            XpButton bPawn = UI.Btn(g, PawnIo.Installed() ? "PawnIO instalado" : "Instalar PawnIO", 10, 164, 140, delegate { PawnIo.InstallNow(this); });
+            XpButton bPawn = UI.Btn(g, PawnIo.Installed() ? "PawnIO instalado" : "Instalar PawnIO", 10, 22, 140, delegate { PawnIo.InstallNow(this); });
             bPawn.Enabled = !PawnIo.Installed();
             tip.SetToolTip(bPawn, "PawnIO: driver usado pelo LibreHardwareMonitor para ler sensores da CPU/placa-mae e controlar as ventoinhas da placa-mae. Clique para baixar e instalar.");
-            lblSel = UI.Lbl(g, "", 160, 169, Xp.UiBold, Xp.Dim); lblSel.AutoSize = false; lblSel.SetBounds(160, 168, 250, 18);
+            lblSel = UI.Lbl(g, "", 160, 27, Xp.UiBold, Xp.Dim); lblSel.AutoSize = false; lblSel.SetBounds(160, 27, 250, 18);
             lv.DoubleClick += delegate { Rename(); };
             lv.KeyDown += delegate(object o, KeyEventArgs e) { if (e.Control && e.KeyCode == Keys.A) { foreach (ListViewItem x in lv.Items) x.Selected = true; e.Handled = true; } else if (e.KeyCode == Keys.F2) { Rename(); e.Handled = true; } };
-            UI.Btn(g, "Identificar", 416, 164, 80, delegate { Identify(); });
-            UI.Btn(g, "Tudo automatico", 502, 164, 120, delegate { AllAuto(); });
-            Label h = UI.Lbl(g, "Identificar = liga as selecionadas a 100% por 5 s para voce descobrir qual e qual.  Botao direito na lista: selecionar por tipo (CPU, bombas, gabinete) ou renomear (inclua CPU, Bomba ou Gabinete no nome).", 10, 190, Xp.Ui, Xp.Dim);
-            h.MaximumSize = new Size(650, 0);
+            XpButton bId = UI.Btn(g, "Identificar", 420, 22, 100, delegate { Identify(); }); bId.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            XpButton bAuto = UI.Btn(g, "Tudo automatico", 526, 22, 140, delegate { AllAuto(); }); bAuto.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            Label h = UI.Lbl(g, "Identificar = liga as selecionadas a 100% por 5 s para voce descobrir qual e qual.  Botao direito na lista: selecionar por tipo (CPU, bombas, gabinete) ou renomear (inclua CPU, Bomba ou Gabinete no nome).", 10, 248, Xp.Ui, Xp.Dim);
+            h.MaximumSize = new Size(650, 0); h.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             tip.SetToolTip(lv, "RPM = giros por minuto. % = potencia enviada. \"so leitura\" = a placa-mae nao permite controle por software. Atalhos: Ctrl+A seleciona tudo; F2 ou duplo clique renomeia.");
             Controls.Add(g);
         }
@@ -9516,7 +9516,7 @@ namespace BunoTunner
 
         void BuildMode()
         {
-            XpGroup g = new XpGroup(); g.Title = "2) Como as selecionadas devem trabalhar?"; g.SetBounds(0, 218, 676, 166);
+            XpGroup g = new XpGroup(); g.Title = "Modo de funcionamento das selecionadas"; g.SetBounds(0, 292, 676, 166); g.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             optAuto = UI.Opt(g, "Automatico - a placa/BIOS decide (recomendado no dia a dia)", 14, 22, 520, true);
             optManual = UI.Opt(g, "Manual - velocidade fixa em %:", 14, 44, 300, true);
             sl = new XpSlider(); sl.SetBounds(34, 60, 280, 32); sl.Minimum = 0; sl.Maximum = 100; sl.Value = 50; g.Controls.Add(sl);
@@ -9541,7 +9541,7 @@ namespace BunoTunner
 
         void BuildApply()
         {
-            XpGroup g = new XpGroup(); g.Title = "3) Aplicar"; g.SetBounds(0, 388, 676, 80);
+            XpGroup g = new XpGroup(); g.Title = "Aplicar"; g.SetBounds(0, 464, 676, 80); g.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             UI.Btn(g, "Aplicar nas selecionadas", 10, 20, 170, delegate { ApplySel(); }).Height = 26;
             UI.Lbl(g, "Dica: Enter nos campos de % ou RPM tambem aplica.", 190, 26, Xp.Ui, Xp.Dim);
             chkSafe = UI.Opt(g, "Seguranca: forcar 100% se a temperatura passar de", 10, 54, 320, false); chkSafe.Checked = true;
@@ -9550,7 +9550,7 @@ namespace BunoTunner
             tip.SetToolTip(chkSafe, "Se esquentar demais, as ventoinhas vao a 100% mesmo no modo manual.");
             Controls.Add(g);
             lblMsg = UI.Lbl(this, "", 0, 474, Xp.UiBold, Xp.Good);
-            lblMsg.AutoSize = false; lblMsg.SetBounds(0, 474, 676, 40);
+            lblMsg.AutoSize = false; lblMsg.SetBounds(0, 548, 676, 38); lblMsg.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         }
 
         void Msg(string t, bool err) { lblMsg.ForeColor = err ? Xp.Bad : Xp.Good; lblMsg.Text = t; }
