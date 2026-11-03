@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.43.0.0")]
-[assembly: AssemblyFileVersion("1.43.0.0")]
-[assembly: AssemblyInformationalVersion("1.43.0")]
+[assembly: AssemblyVersion("1.43.1.0")]
+[assembly: AssemblyFileVersion("1.43.1.0")]
+[assembly: AssemblyInformationalVersion("1.43.1")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1888,7 +1888,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.43.0";
+        public const string Version = "v1.43.1";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -8881,6 +8881,7 @@ namespace BunoTunner
             int es = hd != null ? (int)hd.Elapsed : 0, tot = hd != null ? (int)hd.Total : 0;
             string tm2 = (es / 60).ToString("00") + ":" + (es % 60).ToString("00") + (tot > 0 ? " / " + (tot / 60).ToString("00") + ":" + (tot % 60).ToString("00") : "");
             long errs = hd != null ? hd.Errors : 0;
+            double avgR = hd != null ? hd.Rate : 0;
             using (Graphics g = Graphics.FromImage(hudBmp))
             using (Font fT = new Font("Consolas", 11f, FontStyle.Bold), fS = new Font("Consolas", 8.5f, FontStyle.Bold), fBig = new Font("Consolas", 26f, FontStyle.Bold), fMid = new Font("Consolas", 13f, FontStyle.Bold), fGold = new Font("Consolas", 21f, FontStyle.Bold))
             using (StringFormat far = new StringFormat(StringFormatFlags.NoWrap))
@@ -8926,7 +8927,7 @@ namespace BunoTunner
                     // embaixo, esquerda
                     g.DrawString("THE GOLDEN FURBALL", fGold, bGold, 8, LH - 70);
                     g.DrawString("Tempo: " + tm2 + "    Erros: " + errs, fS, bW, 10, LH - 36);
-                    g.DrawString("FPS médio do teste: " + (hd != null ? hd.Rate.ToString("0") : "0") + "    Carga: pelos 90.000", fS, bW, 10, LH - 21);
+                    g.DrawString("FPS médio do teste: " + avgR.ToString("0") + "    Carga: pelos 90.000", fS, bW, 10, LH - 21);
                 }
             }
             BitmapData bd = hudBmp.LockBits(new Rectangle(0, 0, 1024, 512), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
