@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.42.0.0")]
-[assembly: AssemblyFileVersion("1.42.0.0")]
-[assembly: AssemblyInformationalVersion("1.42.0")]
+[assembly: AssemblyVersion("1.42.1.0")]
+[assembly: AssemblyFileVersion("1.42.1.0")]
+[assembly: AssemblyInformationalVersion("1.42.1")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1887,7 +1887,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.42.0";
+        public const string Version = "v1.42.1";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -12584,7 +12584,7 @@ namespace BunoTunner
             txFilter = UI.Txt(g2, 266, 165, 200, "");
             chkAlert.CheckedChanged += delegate { FillAttrs(); };
             txFilter.Box.TextChanged += delegate { FillAttrs(); };
-            ((XpList)lvA).AutoFit = true; lvA.SetBounds(12, 194, 652, 220); lvA.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom; lvA.View = View.Details; lvA.FullRowSelect = true; lvA.GridLines = true;
+            lvA.SetBounds(12, 194, 652, 220); lvA.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom; lvA.View = View.Details; lvA.FullRowSelect = true; lvA.GridLines = true;
             lvA.BackColor = Xp.EditBg; lvA.Font = Xp.Ui;
             lvA.Columns.Add("Atributo / sensor", 290); lvA.Columns.Add("Valor", 270); lvA.Columns.Add("Situação", 80);
             UI.DoubleBuffer(lvA);
@@ -13911,7 +13911,7 @@ namespace BunoTunner
         // ---- altura = numero de linhas ----
         protected override void OnHandleCreated(EventArgs e) { base.OnHandleCreated(e); QueueFit(); }
         protected override void OnVisibleChanged(EventArgs e) { base.OnVisibleChanged(e); if (Visible) QueueFit(); }
-        protected override void OnResize(EventArgs e) { base.OnResize(e); if (!fitting && AutoFit && IsHandleCreated) { maxH = Height; QueueFit(); } }
+        protected override void OnResize(EventArgs e) { base.OnResize(e); if (!fitting && AutoFit && IsHandleCreated) { if (Height > maxH) maxH = Height; QueueFit(); } }
         protected override void WndProc(ref Message m)
         {
             base.WndProc(ref m);
@@ -13935,7 +13935,8 @@ namespace BunoTunner
         public void FitRows()
         {
             if (!AutoFit || Dock != DockStyle.None || !IsHandleCreated || Parent == null || View != View.Details || Groups.Count > 0) return;
-            if (maxH < 0) maxH = Height;
+            if (Height > maxH) maxH = Height;   // o limite so cresce: nunca fica preso num tamanho pequeno
+            if (Items.Count == 0) return;       // lista vazia (ex.: sendo recarregada): mantem a altura atual
             int rowH = Items.Count > 0 ? Items[0].GetBounds(ItemBoundsPortion.Entire).Height : Font.Height + 4;
             if (rowH < 10) rowH = Font.Height + 4;
             int colW = 0; foreach (ColumnHeader c in Columns) colW += c.Width;
