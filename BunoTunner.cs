@@ -9488,9 +9488,9 @@ namespace BunoTunner
             lv.KeyDown += delegate(object o, KeyEventArgs e) { if (e.Control && e.KeyCode == Keys.A) { foreach (ListViewItem x in lv.Items) x.Selected = true; e.Handled = true; } else if (e.KeyCode == Keys.F2) { Rename(); e.Handled = true; } };
             UI.Btn(g, "Identificar", 416, 164, 80, delegate { Identify(); });
             UI.Btn(g, "Tudo automatico", 502, 164, 120, delegate { AllAuto(); });
-            Label h = UI.Lbl(g, "Identificar = liga as selecionadas a 100% por 5 s para voce descobrir qual e qual.  Botao direito na lista: selecionar por tipo ou renomear (inclua CPU, Bomba ou Gabinete no nome). Atalhos: Ctrl+A seleciona tudo, F2 ou duplo clique renomeia.", 10, 190, Xp.Ui, Xp.Dim);
+            Label h = UI.Lbl(g, "Identificar = liga as selecionadas a 100% por 5 s para voce descobrir qual e qual.  Botao direito na lista: selecionar por tipo (CPU, bombas, gabinete) ou renomear (inclua CPU, Bomba ou Gabinete no nome).", 10, 190, Xp.Ui, Xp.Dim);
             h.MaximumSize = new Size(650, 0);
-            tip.SetToolTip(lv, "RPM = giros por minuto. % = potencia enviada. \"so leitura\" = a placa-mae nao permite controle por software.");
+            tip.SetToolTip(lv, "RPM = giros por minuto. % = potencia enviada. \"so leitura\" = a placa-mae nao permite controle por software. Atalhos: Ctrl+A seleciona tudo; F2 ou duplo clique renomeia.");
             Controls.Add(g);
         }
 
