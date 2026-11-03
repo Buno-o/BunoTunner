@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - codigo aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.40.0.0")]
-[assembly: AssemblyFileVersion("1.40.0.0")]
-[assembly: AssemblyInformationalVersion("1.40.0")]
+[assembly: AssemblyVersion("1.40.1.0")]
+[assembly: AssemblyFileVersion("1.40.1.0")]
+[assembly: AssemblyInformationalVersion("1.40.1")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1887,7 +1887,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.40.0";
+        public const string Version = "v1.40.1";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -13428,7 +13428,7 @@ namespace BunoTunner
         }
         class Tw
         {
-            public string Title, Desc, Confirm; public R[] Regs = new R[0]; public string[][] Svcs = new string[0][];   // servico: {nome, iniciar ao aplicar, iniciar ao desfazer}
+            public string Title, Desc; public R[] Regs = new R[0]; public string[][] Svcs = new string[0][];   // servico: {nome, iniciar ao aplicar, iniciar ao desfazer}
             public Func<bool, string> Extra; public Label St;
         }
         readonly List<Tw> tws = new List<Tw>();
@@ -13484,7 +13484,7 @@ namespace BunoTunner
         {
             tws.Add(t);
             t.St = Add(t.Title, t.Desc, "Aplicar", delegate { return RunTw(t, true); }, "Desfazer", delegate { return RunTw(t, false); },
-                t.Regs.Length > 0 ? new Func<string>(delegate { return TwState(t); }) : null, t.Confirm);
+                t.Regs.Length > 0 ? new Func<string>(delegate { return TwState(t); }) : null, null);
         }
 
         static R[] Brave()
