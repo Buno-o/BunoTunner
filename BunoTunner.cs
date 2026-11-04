@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.12.0")]
-[assembly: AssemblyFileVersion("1.49.12.0")]
-[assembly: AssemblyInformationalVersion("1.49.12")]
+[assembly: AssemblyVersion("1.49.13.0")]
+[assembly: AssemblyFileVersion("1.49.13.0")]
+[assembly: AssemblyInformationalVersion("1.49.13")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1732,6 +1732,8 @@ namespace BunoTunner
                     p.SelA = C(246, 190, 130); p.SelB = C(196, 118, 56); p.OptA = C(228, 176, 120); p.OptB = C(246, 222, 184);
                     p.ThumbA = C(236, 170, 100); p.ThumbB = C(150, 80, 32); p.Prog1 = C(240, 170, 80); p.Prog2 = C(170, 80, 20);
                     p.Hi = C(255, 232, 186); p.Dim = C(104, 66, 34);
+                    // mais contraste nos textos
+                    p.Text = C(18, 8, 0); p.Dim = C(66, 34, 10); p.GroupText = C(62, 20, 0); p.Good = C(8, 66, 16); p.Bad = C(120, 8, 4);
                     p.Rad = 3;
                     break;
                 case 5: // Retro / Vintage (Windows 95/98)
@@ -1936,7 +1938,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.12";
+        public const string Version = "v1.49.13";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {

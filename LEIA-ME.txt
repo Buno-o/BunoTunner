@@ -538,3 +538,6 @@ v1.49.11 (TESTE)
 
 v1.49.12 (TESTE)
 - Menu Ventoinhas: a parte vazia de baixo agora e transparente (mostra o fundo do tema em vez de um retangulo liso).
+
+v1.49.13 (TESTE)
+- Tema Steampunk: mais contraste nos textos (texto normal, secundario, titulos, OK e erro mais escuros).
