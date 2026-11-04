@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.14.0")]
-[assembly: AssemblyFileVersion("1.49.14.0")]
-[assembly: AssemblyInformationalVersion("1.49.14")]
+[assembly: AssemblyVersion("1.49.15.0")]
+[assembly: AssemblyFileVersion("1.49.15.0")]
+[assembly: AssemblyInformationalVersion("1.49.15")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1938,7 +1938,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.14";
+        public const string Version = "v1.49.15";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -6265,7 +6265,7 @@ namespace BunoTunner
         {
             public string Name, Hdr; public int Rad = -1, BarPos, CornerStyle; public float BW = 1f;
             public Color Top, Bot, Bd, Bar, Bar2, Lab, Val, Glow, HdrA, HdrB, HdrTx, Line, Zebra, Inner, Corner, Pill, PillBd, Dot;
-            public bool Bevel, Soft, Gloss, Scan;
+            public bool Bevel, Soft, Gloss, Scan, Steam;
         }
         static LD CurLay(bool ed) { return Layouts[ed ? 0 : Math.Max(0, Math.Min(Layouts.Length - 1, Overlay.Layout))]; }
         static Color Sc(Color c, int bg) { return Color.FromArgb(Math.Max(0, Math.Min(255, c.A * bg / 255)), c); }
@@ -6273,6 +6273,21 @@ namespace BunoTunner
         static Color K(int r, int g, int b) { return Color.FromArgb(r, g, b); }
         static Color KA(int a, int r, int g, int b) { return Color.FromArgb(a, r, g, b); }
         static LD N(List<LD> l, string n) { LD d = new LD(); d.Name = n; l.Add(d); return d; }
+        // engrenagem simples (tema Steampunk)
+        static void Gear(Graphics g, float cx, float cy, float r, Color c)
+        {
+            int n = 8; PointF[] pts = new PointF[n * 4]; double ri = r * 0.74, w = Math.PI / n * 0.5;
+            for (int i = 0; i < n; i++)
+            {
+                double a0 = i * 2 * Math.PI / n;
+                double[] an = { a0 - w, a0 - w * 0.55, a0 + w * 0.55, a0 + w }; double[] rr = { ri, r, r, ri };
+                for (int k = 0; k < 4; k++) pts[i * 4 + k] = new PointF(cx + (float)(Math.Cos(an[k]) * rr[k]), cy + (float)(Math.Sin(an[k]) * rr[k]));
+            }
+            using (SolidBrush b = new SolidBrush(c)) g.FillPolygon(b, pts);
+            using (Pen p = new Pen(Color.FromArgb(120, 40, 20, 4), 1f)) g.DrawPolygon(p, pts);
+            float h = r * 0.34f;
+            using (SolidBrush hb = new SolidBrush(Color.FromArgb(40, 20, 8))) g.FillEllipse(hb, cx - h, cy - h, h * 2, h * 2);
+        }
         static void BevelBox(Graphics g, Rectangle r)
         {
             SmoothingMode sm = g.SmoothingMode; g.SmoothingMode = SmoothingMode.None;
@@ -6300,7 +6315,7 @@ namespace BunoTunner
             p = Pal.Make(1); d = N(l, "Tema: Frutiger Aero (Win 7)"); d.Top = K(250, 252, 255); d.Bot = p.PaneTop; d.Bd = p.Border; d.Rad = 16; d.Hdr = "Sensores"; d.HdrA = K(226, 240, 252); d.HdrB = K(150, 200, 238); d.HdrTx = p.PaneText; d.Gloss = true; d.Inner = KA(170, 255, 255, 255); d.Pill = KA(170, 255, 255, 255); d.PillBd = KA(110, 110, 140, 180); d.Lab = K(60, 80, 110); d.Val = p.GroupText;
             p = Pal.Make(2); d = N(l, "Tema: Dark / AMOLED"); d.Top = d.Bot = p.Face; d.Bd = p.Border; d.Rad = 10; d.Hdr = "SENSORES"; d.HdrA = p.CapA; d.HdrB = p.CapB; d.HdrTx = p.CapText; d.Bar = p.GroupText; d.BarPos = 1; d.Dot = p.GroupText; d.Line = KA(40, 255, 255, 255); d.Pill = K(30, 30, 38); d.Lab = p.Dim; d.Val = p.Text;
             p = Pal.Make(3); d = N(l, "Tema: Neon / Cyberpunk"); d.Top = d.Bot = p.Face; d.Bd = p.Border; d.Glow = p.GroupText; d.Rad = 3; d.Hdr = "CYBER//SYS"; d.HdrA = p.CapA; d.HdrB = p.CapB; d.HdrTx = Color.White; d.Corner = p.Border; d.CornerStyle = 1; d.Scan = true; d.Dot = p.GroupText; d.Zebra = KA(46, 180, 0, 200); d.Bar = p.CapA; d.Bar2 = p.Border; d.BarPos = 3; d.Lab = p.Dim; d.Val = p.Text;
-            p = Pal.Make(4); d = N(l, "Tema: Steampunk"); d.Top = p.Face; d.Bot = K(150, 96, 52); d.Bd = p.CapFrame; d.BW = 2f; d.Rad = 8; d.Hdr = "VAPOR"; d.HdrA = p.CapA; d.HdrB = p.CapB; d.HdrTx = p.CapText; d.Inner = KA(200, 236, 190, 110); d.Corner = K(236, 190, 110); d.CornerStyle = 2; d.Pill = KA(210, 248, 238, 212); d.PillBd = K(74, 44, 16); d.Line = KA(90, 74, 44, 16); d.Lab = p.Dim; d.Val = p.Text;
+            p = Pal.Make(4); d = N(l, "Tema: Steampunk"); d.Steam = true; d.Top = K(78, 46, 22); d.Bot = K(34, 18, 8); d.Bd = K(214, 160, 70); d.BW = 2.5f; d.Rad = 10; d.Hdr = "VAPOR"; d.HdrA = K(122, 68, 28); d.HdrB = K(58, 30, 10); d.HdrTx = K(255, 228, 150); d.Inner = KA(170, 150, 100, 40); d.Corner = K(236, 190, 110); d.CornerStyle = 2; d.Pill = KA(235, 18, 10, 4); d.PillBd = K(176, 120, 50); d.Line = KA(70, 214, 160, 70); d.Zebra = KA(16, 255, 200, 120); d.Lab = K(240, 212, 166); d.Val = K(255, 216, 120); d.Dot = K(214, 160, 70);
             p = Pal.Make(5); d = N(l, "Tema: Vintage (Win 95)"); d.Top = d.Bot = p.Face; d.Rad = 0; d.Bevel = true; d.Hdr = "BunoTunner"; d.HdrA = p.CapA; d.HdrB = p.CapB; d.HdrTx = Color.White; d.Pill = Color.White; d.PillBd = K(128, 128, 128); d.Lab = K(64, 64, 64); d.Val = Color.Black;
             p = Pal.Make(6); d = N(l, "Tema: GTA VI (Vice City)"); d.Top = K(120, 30, 110); d.Bot = K(210, 70, 100); d.Bd = p.Border; d.BW = 2f; d.Hdr = "VICE CITY"; d.HdrA = K(255, 150, 60); d.HdrB = K(210, 40, 130); d.HdrTx = K(255, 246, 230); d.Bar = p.Hot; d.Bar2 = K(255, 110, 150); d.BarPos = 3; d.Inner = KA(110, 255, 200, 120); d.Dot = p.Hot; d.Pill = KA(110, 0, 0, 0); d.Gloss = true; d.Line = KA(50, 255, 220, 200); d.Lab = p.Dim; d.Val = p.Text;
             // outros estilos
@@ -6346,9 +6361,16 @@ namespace BunoTunner
                     }
                     if (hdrH > 0 && d.Hdr != null)
                     {
-                        Rectangle hr = d.Bevel ? new Rectangle(3, 3, Width - 7, hdrH - 3) : new Rectangle(0, 0, Width, hdrH);
+                        Rectangle hr = d.Bevel ? new Rectangle(3, 3, Width - 7, hdrH - 3) : d.Steam ? new Rectangle(5, 5, Width - 11, hdrH - 1) : new Rectangle(0, 0, Width, hdrH);
                         using (LinearGradientBrush hb = new LinearGradientBrush(hr, Sc(d.HdrA, bgAlpha), Sc(d.HdrB, bgAlpha), 90f)) g.FillRectangle(hb, hr);
                         if (!d.Bd.IsEmpty && !d.Bevel) using (Pen hp = new Pen(Color.FromArgb(120, d.Bd))) g.DrawLine(hp, 0, hdrH - 1, Width, hdrH - 1);
+                        if (d.Steam)
+                        {
+                            using (GraphicsPath hpp = Round(hr, 6)) using (Pen hbp = new Pen(d.Bd, 1.5f)) g.DrawPath(hbp, hpp);
+                            float gr = hr.Height * 0.36f;
+                            Gear(g, hr.Left + gr + 5, hr.Top + hr.Height / 2f, gr, Sc(K(226, 170, 80), bgAlpha));
+                            Gear(g, hr.Right - gr - 5, hr.Top + hr.Height / 2f, gr, Sc(K(226, 170, 80), bgAlpha));
+                        }
                         DT(g, d.Hdr, fv, hr, d.HdrTx, StringAlignment.Center);
                     }
                     if (d.Gloss) using (LinearGradientBrush gb2 = new LinearGradientBrush(new Rectangle(0, 0, Width, Math.Max(2, Height / 2)), Sc(KA(70, 255, 255, 255), bgAlpha), Color.FromArgb(0, 255, 255, 255), 90f)) g.FillRectangle(gb2, 0, 0, Width, Math.Max(2, Height / 2));
