@@ -535,3 +535,6 @@ v1.49.10 (TESTE)
 
 v1.49.11 (TESTE)
 - Novos icones em arte pixelada: Sensores, GPU, RAM, Saude do armazenamento (SMART), Internet, Ventoinhas, Overclock, Benchmark, Afinidade, Desinstalador e Otimizacoes (menu lateral e onde sao usados).
+
+v1.49.12 (TESTE)
+- Menu Ventoinhas: a parte vazia de baixo agora e transparente (mostra o fundo do tema em vez de um retangulo liso).

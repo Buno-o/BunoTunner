@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.11.0")]
-[assembly: AssemblyFileVersion("1.49.11.0")]
-[assembly: AssemblyInformationalVersion("1.49.11")]
+[assembly: AssemblyVersion("1.49.12.0")]
+[assembly: AssemblyFileVersion("1.49.12.0")]
+[assembly: AssemblyInformationalVersion("1.49.12")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1936,7 +1936,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.11";
+        public const string Version = "v1.49.12";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -11741,6 +11741,7 @@ namespace BunoTunner
         public FanPage()
         {
             Size = new Size(676, 586); Dock = DockStyle.Fill;   // tamanho inicial = o da area da pagina, para os ancoramentos (Anchor) funcionarem
+            SetStyle(ControlStyles.SupportsTransparentBackColor, true); BackColor = Color.Transparent;   // fundo transparente: aparece o fundo do tema (arte) na parte vazia de baixo
             FanHub.Build();
             tip.InitialDelay = 300; tip.AutoPopDelay = 9000;
             BuildList(); BuildMode(); BuildApply(); BuildMenu();
