@@ -541,3 +541,6 @@ v1.49.12 (TESTE)
 
 v1.49.13 (TESTE)
 - Tema Steampunk: mais contraste nos textos (texto normal, secundario, titulos, OK e erro mais escuros).
+
+v1.49.14 (TESTE)
+- Tema Steampunk: novos icones steampunk (menu lateral e Benchmark: CPU, FPU, GPU, RAM, SSD/SMART, Internet, Ventoinhas, OC, Benchmark, Afinidade, Desinstalador, Otimizacoes, Sensores). Os outros temas continuam com os icones anteriores.
