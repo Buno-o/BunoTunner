@@ -513,3 +513,7 @@ v1.49.3 (TESTE)
 
 v1.49.4 (TESTE)
 - Memoria RAM: layout refeito medindo cada posicao no modelo (blocos Timer e Latencia a direita, sem sobreposicao, textos da limpeza automatica em duas linhas como no modelo, Resumo com altura propria para nao esconder bordas).
+
+v1.49.5 (TESTE)
+- Memoria RAM: removido o botao "Limpar memoria agora" (o atalho e a limpeza automatica continuam). O grafico de latencia (ns x tamanho do bloco) voltou, abaixo do bloco Latencia.
+- Atalho de limpar memoria: o atalho salvo agora aparece no botao ao abrir o programa (antes mostrava "(nenhum)" ate ser refeito, embora estivesse registrado).

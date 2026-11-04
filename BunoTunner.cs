@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.4.0")]
-[assembly: AssemblyFileVersion("1.49.4.0")]
-[assembly: AssemblyInformationalVersion("1.49.4")]
+[assembly: AssemblyVersion("1.49.5.0")]
+[assembly: AssemblyFileVersion("1.49.5.0")]
+[assembly: AssemblyInformationalVersion("1.49.5")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1936,7 +1936,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.4";
+        public const string Version = "v1.49.5";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -12878,13 +12878,23 @@ namespace BunoTunner
             catch (Exception) { KeyOk = false; }
         }
         // chamado uma vez na inicializacao (thread da interface)
+        static bool keyLoaded;
+        public static void LoadKey()
+        {
+            if (keyLoaded) return; keyLoaded = true;
+            try
+            {
+                string[] a = Settings.Get("mc_hk", "0,0").Split(',');
+                int m, v; if (a.Length == 2 && int.TryParse(a[0], out m) && int.TryParse(a[1], out v)) { Mods = m; Vk = v; }
+            }
+            catch (Exception) { }
+        }
         public static void Init()
         {
             if (autoTm != null) return;
             try
             {
-                string[] a = Settings.Get("mc_hk", "0,0").Split(',');
-                int m, v; if (a.Length == 2 && int.TryParse(a[0], out m) && int.TryParse(a[1], out v)) { Mods = m; Vk = v; }
+                LoadKey();
                 Apply();
             }
             catch (Exception) { }
@@ -12989,7 +12999,7 @@ namespace BunoTunner
             "#", "Interface física (PHY)",
             "tPHYWRD", "tPHYWRD:", "tPHYWRL", "tPHYWRL:", "tPHYRDL", "tPHYRDL:", "RDDATAEN", "RdDataEn:", "CmdStgCnt", "CmdStgCnt:", "RcvrWait", "RcvrWait:" };
         string[] curSpec; string lastKind = "";
-        Label lblTrState; XpProgress pbMc; Label lblMcMem; ComboBox cbTr, cbMcPct; XpOption chkTrAuto; XpButton btnMc, btnHk; Timer mcTm; bool hkCap; LTip rtip = new LTip();
+        Label lblTrState; XpProgress pbMc; Label lblMcMem; ComboBox cbTr, cbMcPct; XpOption chkTrAuto; XpButton btnHk; Timer mcTm; bool hkCap; LTip rtip = new LTip();
 
         Label Head(Control g, string t, int x, int y, int w)
         {
@@ -13053,10 +13063,6 @@ namespace BunoTunner
                 o.CheckedChanged += delegate { Settings.Set(key, o.Checked ? "1" : "0"); };
                 rtip.SetToolTip(o, ops[i][3]);
             }
-            // botao de limpar agora: no espaco livre, a direita das opcoes
-            btnMc = UI.Btn(g, "Limpar memória agora", 330, 230, 196, delegate { RunClean(); });
-            btnMc.Height = 30;
-            rtip.SetToolTip(btnMc, "Limpa agora, conforme as opções de \"O que limpar\". A memória livre aparece atualizada na barra de cima.");
             Controls.Add(g);
             MemClean.Cleaned += delegate(string r)
             {
@@ -13064,9 +13070,7 @@ namespace BunoTunner
                 {
                     BeginInvoke(new Action(delegate
                     {
-                        UpdateMc(); rtip.SetToolTip(btnMc, Lang.T(r));
-                        string sh = r.StartsWith("Liberado") ? r.Substring(0, r.IndexOf(" MB") + 3) : "Memória limpa";
-                        Flash(btnMc, Lang.T(sh), 4000, delegate { btnMc.Text = Lang.T("Limpar memória agora"); });
+                        UpdateMc(); rtip.SetToolTip(lblMcMem, Lang.T(r));
                     }));
                 }
                 catch (Exception) { }
@@ -13098,10 +13102,11 @@ namespace BunoTunner
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
-        void ShowHk()
+        public void ShowHk()
         {
             if (btnHk == null) return;
             if (hkCap) { btnHk.Text = Lang.T("Pressione o atalho..."); return; }
+            MemClean.LoadKey();
             btnHk.Text = MemClean.Vk == 0 ? Lang.T("Limpar memória: ") + Lang.T("(nenhum)") : MemClean.KeyName() + (!MemClean.KeyOk ? " " + Lang.T("(em uso!)") : "");
         }
 
@@ -13110,16 +13115,6 @@ namespace BunoTunner
             long t, f; int load; MemClean.Memory(out t, out f, out load);
             lblMcMem.Text = Lang.T("Total") + ": " + t + " MB    " + Lang.T("Livre") + ": " + f + " MB    " + Lang.T("Em uso") + ": " + load + " %";
             pbMc.Value = Math.Max(0, Math.Min(100, load));
-        }
-
-        void RunClean()
-        {
-            btnMc.Enabled = false; btnMc.Text = Lang.T("Limpando...");
-            System.Threading.ThreadPool.QueueUserWorkItem(delegate
-            {
-                try { MemClean.CleanSaved(); } catch (Exception ex) { try { BeginInvoke(new Action(delegate { Flash(btnMc, "Erro: " + ex.Message, 4000, delegate { btnMc.Text = Lang.T("Limpar memória agora"); }); })); } catch (Exception) { } }
-                try { BeginInvoke(new Action(delegate { btnMc.Enabled = true; })); } catch (Exception) { }
-            });
         }
 
         void BuildTimerRes()
@@ -13225,6 +13220,7 @@ namespace BunoTunner
             // o grafico (ns x tamanho do bloco) saiu da tela (os dados medidos continuam sendo guardados)
             lblLatSteps = UI.Lbl(g, "", 222, 108, Xp.Ui, Xp.Dim); lblLatSteps.Visible = false;
             Controls.Add(g);
+            latGraph.SetBounds(298, 220, 352, 54); Controls.Add(latGraph); latGraph.BringToFront();
         }
 
         void ToggleLat()
@@ -16783,7 +16779,7 @@ namespace BunoTunner
                 Startup.Save();
                 RefreshAutoBtn();
                 Overlay.Init();
-                MemClean.Init();
+                MemClean.Init(); ramPage.ShowHk();
                 try { File.Delete(Application.ExecutablePath + ".old"); } catch (Exception) { }
                 bool trayStart = false;
                 foreach (string a in Environment.GetCommandLineArgs()) if (a == "--tray") trayStart = true;
