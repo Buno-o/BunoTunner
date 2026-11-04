@@ -507,3 +507,6 @@ v1.49.1 (TESTE)
 
 v1.49.2 (TESTE)
 - Memoria RAM: Resolucao do timer e Latencia da memoria agora lado a lado na mesma fileira, como no modelo (proporcoes, espacamentos e contornos); estado do timer ("Ativa") no cabecalho do bloco, opcao de aplicar ao abrir com texto em duas linhas, caixas e botoes redimensionados. A lista dos pentes ficou logo abaixo do Resumo.
+
+v1.49.3 (TESTE)
+- Memoria RAM: layout refeito exatamente como no modelo: Resolucao do timer e Latencia empilhados a direita do bloco Limpar memoria; opcoes de "O que limpar" em uma coluna; atalho e limpeza automatica reposicionados; lista de pentes e Resumo logo abaixo. O botao "Limpar memoria agora" ficou no espaco livre abaixo da Latencia, a direita das opcoes.
