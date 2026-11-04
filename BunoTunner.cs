@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.0.0")]
-[assembly: AssemblyFileVersion("1.49.0.0")]
-[assembly: AssemblyInformationalVersion("1.49.0")]
+[assembly: AssemblyVersion("1.49.1.0")]
+[assembly: AssemblyFileVersion("1.49.1.0")]
+[assembly: AssemblyInformationalVersion("1.49.1")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -395,7 +395,7 @@ namespace BunoTunner
             "Consultando os sites das fabricantes...", "Checking the manufacturers' websites...",
             "Atualizar drivers (todos os dispositivos, GPU e Chipset)", "Update drivers (all devices, GPU and Chipset)", "Windows Update (todos os dispositivos)", "Windows Update (all devices)", "Site da fabricante (GPU NVIDIA/AMD e chipset AMD)", "Manufacturer website (NVIDIA/AMD GPU and AMD chipset)",
             "Marque pelo menos uma das origens (Windows Update ou site da fabricante).", "Tick at least one source (Windows Update or manufacturer website).", "---- Windows Update ----", "---- Windows Update ----", "---- Site da fabricante ----", "---- Manufacturer website ----",
-            "Concluído.", "Done.", "Ignorado.", "Skipped.", "gravando", "writing", "conferindo", "verifying", "conferido sem erro", "verified, no error", "erro", "error", "Padrão", "Pattern", "Passagem", "Pass", "Blocos", "Blocks", "Reservando a memória do teste...", "Reserving the test memory...", "Escrita sequencial (1 MB)", "Sequential write (1 MB)", "Leitura sequencial + conferência", "Sequential read + verification", "Leitura aleatória 4K", "Random 4K read", "Histórico de testes", "Test history", "Data e hora", "Date and time", "Avaliação da conexão", "Connection rating", "Faça um teste para ver se a sua conexão serve para jogos, streaming e chamadas.", "Run a test to see whether your connection suits gaming, streaming and calls.", "Medindo...", "Measuring...", "Copiar linha selecionada", "Copy selected row", "Controle, segurança e resultado ao vivo", "Controls, safety and live results", "Taxa atual", "Current rate", "Copiar relatório", "Copy report", "Salvar relatório...", "Save report...", "Mostrar só alertas", "Show alerts only", "Filtrar:", "Filter:", "Situação", "Status", "Selecione um disco primeiro.", "Select a disk first.", "Relatório copiado para a área de transferência.", "Report copied to the clipboard.", "Relatório salvo.", "Report saved.", "Inverter seleção", "Invert selection", "Dica: Enter nos campos de % ou RPM também aplica.", "Tip: Enter in the % or RPM boxes also applies.", "Identificar = liga as selecionadas a 100% por 5 s para você descobrir qual é qual.  Botão direito na lista: selecionar por tipo ou renomear (inclua CPU, Bomba ou Gabinete no nome). Atalhos: Ctrl+A seleciona tudo, F2 ou duplo clique renomeia.", "Identify = runs the selected fans at 100% for 5 s so you can tell which is which.  Right-click the list: select by type or rename (include CPU, Pump or Case in the name). Shortcuts: Ctrl+A selects all, F2 or double-click renames.", "Limpeza e manutenção", "Cleanup and maintenance", "Libera espaço no disco.", "Frees disk space.", "Desempenho em jogos", "Gaming performance", "Ajustes que podem melhorar FPS, tremidas e resposta do mouse.", "Tweaks that can improve FPS, stutter and mouse response.", "Interface do Windows", "Windows interface", "Aparência e comportamento do sistema.", "System look and behavior.", "Segurança (avançado)", "Security (advanced)", "Estes ajustes REDUZEM a proteção do PC. Use só se souber o que está fazendo.", "These tweaks REDUCE the PC's protection. Use only if you know what you are doing.", "Mantenha a GPU, o chipset e os demais dispositivos atualizados.", "Keep the GPU, chipset and other devices up to date.",
+            "Concluído.", "Done.", "Ignorado.", "Skipped.", "gravando", "writing", "conferindo", "verifying", "conferido sem erro", "verified, no error", "erro", "error", "Padrão", "Pattern", "Passagem", "Pass", "Blocos", "Blocks", "Reservando a memória do teste...", "Reserving the test memory...", "Escrita sequencial (1 MB)", "Sequential write (1 MB)", "Leitura sequencial + conferência", "Sequential read + verification", "Leitura aleatória 4K", "Random 4K read", "Histórico de testes", "Test history", "Data e hora", "Date and time", "Avaliação da conexão", "Connection rating", "Faça um teste para ver se a sua conexão serve para jogos, streaming e chamadas.", "Run a test to see whether your connection suits gaming, streaming and calls.", "Medindo...", "Measuring...", "Feche outros programas para um resultado melhor.", "Close other programs for a better result.", "Copiar linha selecionada", "Copy selected row", "Controle, segurança e resultado ao vivo", "Controls, safety and live results", "Taxa atual", "Current rate", "Copiar relatório", "Copy report", "Salvar relatório...", "Save report...", "Mostrar só alertas", "Show alerts only", "Filtrar:", "Filter:", "Situação", "Status", "Selecione um disco primeiro.", "Select a disk first.", "Relatório copiado para a área de transferência.", "Report copied to the clipboard.", "Relatório salvo.", "Report saved.", "Inverter seleção", "Invert selection", "Dica: Enter nos campos de % ou RPM também aplica.", "Tip: Enter in the % or RPM boxes also applies.", "Identificar = liga as selecionadas a 100% por 5 s para você descobrir qual é qual.  Botão direito na lista: selecionar por tipo ou renomear (inclua CPU, Bomba ou Gabinete no nome). Atalhos: Ctrl+A seleciona tudo, F2 ou duplo clique renomeia.", "Identify = runs the selected fans at 100% for 5 s so you can tell which is which.  Right-click the list: select by type or rename (include CPU, Pump or Case in the name). Shortcuts: Ctrl+A selects all, F2 or double-click renames.", "Limpeza e manutenção", "Cleanup and maintenance", "Libera espaço no disco.", "Frees disk space.", "Desempenho em jogos", "Gaming performance", "Ajustes que podem melhorar FPS, tremidas e resposta do mouse.", "Tweaks that can improve FPS, stutter and mouse response.", "Interface do Windows", "Windows interface", "Aparência e comportamento do sistema.", "System look and behavior.", "Segurança (avançado)", "Security (advanced)", "Estes ajustes REDUZEM a proteção do PC. Use só se souber o que está fazendo.", "These tweaks REDUCE the PC's protection. Use only if you know what you are doing.", "Mantenha a GPU, o chipset e os demais dispositivos atualizados.", "Keep the GPU, chipset and other devices up to date.",
             "Instalador fechado.", "Installer closed.",
             "Abrindo o instalador. Conclua a instalação na janela da fabricante...", "Opening the installer. Finish the installation in the manufacturer's window...",
             "Instalador apagado por segurança. Nada foi executado.", "Installer deleted for safety. Nothing was run.",
@@ -1936,7 +1936,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.0";
+        public const string Version = "v1.49.1";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -13218,10 +13218,10 @@ namespace BunoTunner
             bLat = UI.Btn(g, "Medir latência", 14, 102, 130, delegate { ToggleLat(); });
             bLat.Height = 28;
             pbLat = new XpProgress(); pbLat.SetBounds(150, 108, 64, 14); g.Controls.Add(pbLat);
-            latGraph.SetBounds(222, 24, 424, 82); g.Controls.Add(latGraph);
-            lblLatSteps = UI.Lbl(g, "", 222, 108, Xp.Ui, Xp.Dim);
-            lblLatSteps.AutoSize = false; lblLatSteps.SetBounds(222, 108, 424, 30);
+            // o grafico (ns x tamanho do bloco) saiu da tela: a lista dos pentes de memoria ocupa o lugar dele (os dados medidos continuam sendo guardados)
+            lblLatSteps = UI.Lbl(g, "", 222, 108, Xp.Ui, Xp.Dim); lblLatSteps.Visible = false;
             Controls.Add(g);
+            lvMod.SetBounds(214, Top0 + 8, 438, 126); lvMod.BringToFront();
         }
 
         void ToggleLat()
@@ -13229,7 +13229,7 @@ namespace BunoTunner
             if (latBusy) { latStop = true; return; }
             latBusy = true; latStop = false;
             bLat.Text = "Parar"; latGraph.Kb.Clear(); latGraph.Ns.Clear(); latGraph.Invalidate();
-            lblLatBig.Text = "..."; lblLatSteps.Text = "Medindo (feche outros programas para um resultado melhor)..."; pbLat.Value = 0;
+            lblLatBig.Text = "..."; lblLatSteps.Text = "Medindo (feche outros programas para um resultado melhor)..."; lblLatSub.Text = Lang.T("Medindo..."); rtip.SetToolTip(lblLatBig, Lang.T("Feche outros programas para um resultado melhor.")); pbLat.Value = 0;
             System.Threading.ThreadPool.QueueUserWorkItem(delegate { LatRun(); });
         }
 
@@ -13268,14 +13268,14 @@ namespace BunoTunner
                 {
                     latBusy = false; bLat.Text = "Medir latência"; pbLat.Value = 0;
                     int n = latGraph.Ns.Count;
-                    if (n == 0) { lblLatBig.Text = "- ns"; lblLatSteps.Text = err != null ? "Falhou: " + err : "Cancelado."; return; }
+                    if (n == 0) { lblLatBig.Text = "- ns"; lblLatSteps.Text = err != null ? "Falhou: " + err : "Cancelado."; lblLatSub.Text = Lang.T("Latência da RAM (bloco de 256 MB)") + "  -  " + Lang.T(lblLatSteps.Text); return; }
                     lblLatBig.Text = latGraph.Ns[n - 1].ToString("0.0") + " ns";
                     lblLatSub.Text = "Latência da RAM (bloco de " + (latGraph.Kb[n - 1] >= 1024 ? (latGraph.Kb[n - 1] / 1024).ToString("0") + " MB" : latGraph.Kb[n - 1].ToString("0") + " KB") + ")";
                     StringBuilder sb = new StringBuilder();
                     double[] want = { 16, 256, 8192 };
                     string[] nm = { "16 KB", "256 KB", "8 MB" };
                     for (int i = 0; i < want.Length; i++) { int k = latGraph.Kb.IndexOf(want[i]); if (k >= 0) sb.Append(nm[i] + ": " + latGraph.Ns[k].ToString("0.0") + " ns    "); }
-                    lblLatSteps.Text = sb.ToString() + (latStop ? "(interrompido)" : "") + (err != null ? " " + err : "");
+                    lblLatSteps.Text = sb.ToString() + (latStop ? "(interrompido)" : "") + (err != null ? " " + err : ""); rtip.SetToolTip(lblLatBig, lblLatSteps.Text);
                 }));
             }
             catch (Exception) { }
@@ -13339,7 +13339,7 @@ namespace BunoTunner
 
         void BuildMods()
         {
-            ((XpList)lvMod).AutoFit = true; lvMod.SetBounds(0, 274 + Top0 + Sh, 656, 104); lvMod.View = View.Details; lvMod.FullRowSelect = true; lvMod.GridLines = true;
+            ((XpList)lvMod).AutoFit = true; lvMod.Visible = true; lvMod.View = View.Details; lvMod.FullRowSelect = true; lvMod.GridLines = true;
             lvMod.BackColor = Xp.EditBg; lvMod.Font = Xp.Ui;
             lvMod.Columns.Add("Slot", 140); lvMod.Columns.Add("Cap.", 55); lvMod.Columns.Add("Fabricante", 90); lvMod.Columns.Add("Part number", 150);
             lvMod.Columns.Add("MT/s", 50); lvMod.Columns.Add("Volt", 55); lvMod.Columns.Add("Tipo", 50); lvMod.Columns.Add("Ranks", 50);
@@ -13387,7 +13387,7 @@ namespace BunoTunner
                     try { BeginInvoke(new Action(delegate { try { Clipboard.SetText(d); } catch (Exception) { } Dlg.Show(this, d + "\n(copiado para a área de transferência)", "BunoTunner - diagnóstico dos timings"); })); } catch (Exception) { }
                 });
             });
-            g.SetBounds(0, 384 + Top0 + Sh, 656, by + 44);
+            g.SetBounds(0, 272 + Top0 + Sh, 656, by + 44);
             Controls.Add(g);
         }
 
