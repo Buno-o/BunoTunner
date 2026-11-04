@@ -517,3 +517,6 @@ v1.49.4 (TESTE)
 v1.49.5 (TESTE)
 - Memoria RAM: removido o botao "Limpar memoria agora" (o atalho e a limpeza automatica continuam). O grafico de latencia (ns x tamanho do bloco) voltou, abaixo do bloco Latencia.
 - Atalho de limpar memoria: o atalho salvo agora aparece no botao ao abrir o programa (antes mostrava "(nenhum)" ate ser refeito, embora estivesse registrado).
+
+v1.49.6 (TESTE)
+- Memoria RAM: removido de novo o grafico "ns x tamanho do bloco"; o bloco Latencia fica como no modelo (valor grande, "Medir latencia" e barra).

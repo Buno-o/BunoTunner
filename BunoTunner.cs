@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.5.0")]
-[assembly: AssemblyFileVersion("1.49.5.0")]
-[assembly: AssemblyInformationalVersion("1.49.5")]
+[assembly: AssemblyVersion("1.49.6.0")]
+[assembly: AssemblyFileVersion("1.49.6.0")]
+[assembly: AssemblyInformationalVersion("1.49.6")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1936,7 +1936,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.5";
+        public const string Version = "v1.49.6";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -13220,7 +13220,6 @@ namespace BunoTunner
             // o grafico (ns x tamanho do bloco) saiu da tela (os dados medidos continuam sendo guardados)
             lblLatSteps = UI.Lbl(g, "", 222, 108, Xp.Ui, Xp.Dim); lblLatSteps.Visible = false;
             Controls.Add(g);
-            latGraph.SetBounds(298, 220, 352, 54); Controls.Add(latGraph); latGraph.BringToFront();
         }
 
         void ToggleLat()
