@@ -492,3 +492,6 @@ v1.47.2 (TESTE)
 
 v1.48.0 (TESTE)
 - Render do teste de RAM redesenhado: em cima, a arte da placa-mae com os pentes e canos de vidro; esferas de energia andam por dentro dos canos (mais rapido quanto maior a velocidade da RAM) e raios correm pelos canos e sobem pelos pentes. Uma faixa fina no pe da arte mostra o estado real de cada bloco de 64 MB. Embaixo, tema verde com grade e legenda de pergaminhos; padrao, passagem, blocos e as palavras lidas da memoria continuam reais e iguais a antes. Janela do render da RAM maior (880x700).
+
+v1.48.1 (TESTE)
+- Render da RAM: arte refeita sem os borroes onde ficavam as esferas desenhadas (agora a textura dos tubos e preservada); caminhos das esferas remarcados sobre os tubos e removidos os trechos que subiam nos pentes de memoria; novos trechos de tubo ate o conector do pente e nas pontas esquerdas.
