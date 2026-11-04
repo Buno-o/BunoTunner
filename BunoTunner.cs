@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.18.0")]
-[assembly: AssemblyFileVersion("1.49.18.0")]
-[assembly: AssemblyInformationalVersion("1.49.18")]
+[assembly: AssemblyVersion("1.49.19.0")]
+[assembly: AssemblyFileVersion("1.49.19.0")]
+[assembly: AssemblyInformationalVersion("1.49.19")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -390,16 +390,16 @@ namespace BunoTunner
         static readonly string[] Pairs2 = {
             "Temp. GPU: ", "GPU Temp: ", "Mín: ", "Min: ", "Máx: ", "Max: ",
             "Drivers de GPU e Chipset direto da fabricante", "GPU and Chipset drivers straight from the manufacturer",
-            "Consulta o site da NVIDIA / AMD e compara com o driver instalado. Se houver versão mais nova, baixa o instalador oficial, confere a assinatura digital e abre a instalação normal para você concluir. Para Intel, abre o Assistente de Drivers da Intel.", "Checks the NVIDIA / AMD website and compares with the installed driver. If a newer version exists, it downloads the official installer, checks its digital signature and opens the normal installation for you to finish. For Intel, it opens Intel's Driver & Support Assistant.",
+            "Consulta o site da NVIDIA / AMD / Intel e compara com o driver instalado. Se houver versão mais nova, baixa o instalador oficial, confere a assinatura digital e abre a instalação normal para você concluir. Para Intel, abre o Assistente de Drivers da Intel.", "Checks the NVIDIA / AMD / Intel website and compares with the installed driver. If a newer version exists, it downloads the official installer, checks its digital signature and opens the normal installation for you to finish. For Intel, it opens Intel's Driver & Support Assistant.",
             "Verificar GPU e Chipset", "Check GPU and Chipset",
             "Consultando os sites das fabricantes...", "Checking the manufacturers' websites...",
-            "Atualizar drivers (todos os dispositivos, GPU e Chipset)", "Update drivers (all devices, GPU and Chipset)", "Windows Update (todos os dispositivos)", "Windows Update (all devices)", "Site da fabricante (GPU NVIDIA/AMD e chipset AMD)", "Manufacturer website (NVIDIA/AMD GPU and AMD chipset)",
+            "Atualizar drivers (todos os dispositivos, GPU e Chipset)", "Update drivers (all devices, GPU and Chipset)", "Windows Update (todos os dispositivos)", "Windows Update (all devices)", "Site da fabricante (GPU NVIDIA/AMD/Intel e chipset AMD/Intel)", "Manufacturer website (NVIDIA/AMD/Intel GPU and AMD/Intel chipset)",
             "Marque pelo menos uma das origens (Windows Update ou site da fabricante).", "Tick at least one source (Windows Update or manufacturer website).", "---- Windows Update ----", "---- Windows Update ----", "---- Site da fabricante ----", "---- Manufacturer website ----",
             "Concluído.", "Done.", "Ignorado.", "Skipped.", "gravando", "writing", "conferindo", "verifying", "conferido sem erro", "verified, no error", "erro", "error", "Padrão", "Pattern", "Passagem", "Pass", "Blocos", "Blocks", "Reservando a memória do teste...", "Reserving the test memory...", "Escrita sequencial (1 MB)", "Sequential write (1 MB)", "Leitura sequencial + conferência", "Sequential read + verification", "Leitura aleatória 4K", "Random 4K read", "Histórico de testes", "Test history", "Data e hora", "Date and time", "Avaliação da conexão", "Connection rating", "Faça um teste para ver se a sua conexão serve para jogos, streaming e chamadas.", "Run a test to see whether your connection suits gaming, streaming and calls.", "Medindo...", "Measuring...", "Feche outros programas para um resultado melhor.", "Close other programs for a better result.", "Copiar linha selecionada", "Copy selected row", "Controle, segurança e resultado ao vivo", "Controls, safety and live results", "Taxa atual", "Current rate", "Copiar relatório", "Copy report", "Salvar relatório...", "Save report...", "Mostrar só alertas", "Show alerts only", "Filtrar:", "Filter:", "Situação", "Status", "Selecione um disco primeiro.", "Select a disk first.", "Relatório copiado para a área de transferência.", "Report copied to the clipboard.", "Relatório salvo.", "Report saved.", "Inverter seleção", "Invert selection", "Dica: Enter nos campos de % ou RPM também aplica.", "Tip: Enter in the % or RPM boxes also applies.", "Identificar = liga as selecionadas a 100% por 5 s para você descobrir qual é qual.  Botão direito na lista: selecionar por tipo ou renomear (inclua CPU, Bomba ou Gabinete no nome). Atalhos: Ctrl+A seleciona tudo, F2 ou duplo clique renomeia.", "Identify = runs the selected fans at 100% for 5 s so you can tell which is which.  Right-click the list: select by type or rename (include CPU, Pump or Case in the name). Shortcuts: Ctrl+A selects all, F2 or double-click renames.", "Limpeza e manutenção", "Cleanup and maintenance", "Libera espaço no disco.", "Frees disk space.", "Desempenho em jogos", "Gaming performance", "Ajustes que podem melhorar FPS, tremidas e resposta do mouse.", "Tweaks that can improve FPS, stutter and mouse response.", "Interface do Windows", "Windows interface", "Aparência e comportamento do sistema.", "System look and behavior.", "Segurança (avançado)", "Security (advanced)", "Estes ajustes REDUZEM a proteção do PC. Use só se souber o que está fazendo.", "These tweaks REDUCE the PC's protection. Use only if you know what you are doing.", "Mantenha a GPU, o chipset e os demais dispositivos atualizados.", "Keep the GPU, chipset and other devices up to date.",
             "Instalador fechado.", "Installer closed.",
             "Abrindo o instalador. Conclua a instalação na janela da fabricante...", "Opening the installer. Finish the installation in the manufacturer's window...",
             "Instalador apagado por segurança. Nada foi executado.", "Installer deleted for safety. Nothing was run.",
-            "Nenhuma placa de video NVIDIA/AMD ou chipset AMD identificado.", "No NVIDIA/AMD graphics card or AMD chipset identified.",
+            "Nenhuma placa de video NVIDIA/AMD/Intel ou chipset AMD/Intel identificado.", "No NVIDIA/AMD/Intel graphics card or AMD/Intel chipset identified.",
             "Intel: a Intel não oferece consulta pública confiável de versões; o Assistente de Drivers e Suporte da Intel faz isso.", "Intel: Intel offers no reliable public version lookup; Intel's Driver & Support Assistant does that.",
             "Desfazer", "Undo", "Refazer", "Redo", "Limpar lista", "Clear list", "Restaurar padrão", "Restore defaults", "Exportar...", "Export...", "Importar...", "Import...",
             "Todos os grupos", "All groups", "Adicionar ao overlay", "Add to overlay", "Adicionar todos os resultados da busca", "Add all search results",
@@ -1938,7 +1938,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.18";
+        public const string Version = "v1.49.19";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -17529,7 +17529,7 @@ namespace BunoTunner
     //  Otimizacoes do Windows: limpeza de temporarios (CacheCleaner)
     // ------------------------------------------------------------------
     // ------------------------------------------------------------------
-    //  Drivers direto da fabricante: GPU (NVIDIA / AMD) e chipset (AMD). Intel abre o assistente oficial.
+    //  Drivers direto da fabricante: GPU (NVIDIA / AMD / Intel / Intel) e chipset (AMD / Intel).
     //  Consulta o site da fabricante, compara com a versao instalada, baixa, confere a assinatura e abre o instalador normal.
     // ------------------------------------------------------------------
     class VItem { public string Title, Inst, Latest, Url, Referer, Pub, Page; }
@@ -17777,6 +17777,52 @@ namespace BunoTunner
             return it;
         }
 
+        // ---------------- Intel (le a pagina oficial de downloads) ----------------
+        static void IntelRead(string id, VItem it, Action<string> log)
+        {
+            string url = "https://www.intel.com/content/www/us/en/download/" + id;
+            it.Page = url; it.Referer = "https://www.intel.com/"; it.Pub = "Intel";
+            string h = null;
+            try { h = Http(url, "https://www.intel.com/"); }
+            catch (Exception ex) { log("Intel: não consegui abrir a página de downloads (" + ex.Message + ")."); it.Page = IntelPage; return; }
+            Match v = Regex.Match(h, "DownloadVersion[^0-9]{0,40}([0-9]+(?:\\.[0-9]+){2,3})", RegexOptions.IgnoreCase);
+            if (!v.Success) v = Regex.Match(h, "([0-9]+(?:\\.[0-9]+){2,3})\\s*\\(Latest\\)", RegexOptions.IgnoreCase);
+            if (v.Success) it.Latest = v.Groups[1].Value;
+            foreach (Match m in Regex.Matches(h, "https?://downloadmirror\\.intel\\.com/[0-9]+(?:/[^\"'\\s<>]*)?\\.exe", RegexOptions.IgnoreCase))
+            {
+                it.Url = m.Value.Replace("&amp;", "&");
+                if (it.Url.StartsWith("http:", StringComparison.OrdinalIgnoreCase)) it.Url = "https:" + it.Url.Substring(5);
+                break;
+            }
+            if (it.Latest == null) { log("Intel: a página não trouxe a versão (o site da Intel pode ter mudado)."); it.Page = url; }
+        }
+
+        // pagina de downloads de video da Intel conforme o modelo: Arc / Iris Xe, UHD 7xx (11a-14a geracao) ou HD/UHD 6xx e anteriores
+        static string IntelId(string name)
+        {
+            string n = name ?? "";
+            if (Regex.IsMatch(n, "Arc|Iris.*Xe|Xe", RegexOptions.IgnoreCase)) return "785597";
+            if (Regex.IsMatch(n, "UHD Graphics\\s*7\\d\\d", RegexOptions.IgnoreCase)) return "864990";
+            if (Regex.IsMatch(n, "Core Ultra|Intel\\(R\\) Graphics\\s*$", RegexOptions.IgnoreCase)) return "785597";
+            return "776137";
+        }
+
+        static VItem IntelGpu(VGpu g, string id, Action<string> log)
+        {
+            VItem it = new VItem(); it.Title = "Driver de video Intel (" + g.Name + ")";
+            it.Inst = g.Drv;
+            IntelRead(id, it, log);
+            return it;
+        }
+
+        static VItem IntelChipset(Action<string> log)
+        {
+            VItem it = new VItem(); it.Title = "Driver de chipset Intel (Chipset Device Software)";
+            it.Inst = InstalledVer("Intel(R) Chipset Device Software");
+            IntelRead("19347", it, log);
+            return it;
+        }
+
         // ---------------- download, assinatura e instalacao ----------------
         static string Download(VItem it, Action<string> log)
         {
@@ -17829,7 +17875,7 @@ namespace BunoTunner
 
         static void Offer(VItem it, bool install, Action<string> log, Func<string, bool> confirm)
         {
-            if (it.Latest == null || it.Url == null)
+            if (it.Latest == null)
             {
                 log(it.Title + ": não foi possível consultar a versão automaticamente.");
                 if (install && it.Page != null && confirm("Não consegui consultar a versão mais recente de:\n" + it.Title + "\n\nAbrir a página oficial de downloads no navegador?")) OpenPage(it.Page);
@@ -17839,6 +17885,12 @@ namespace BunoTunner
             if (known && Cmp(it.Inst, it.Latest) >= 0) { log(it.Title + ": já está atualizado (" + it.Inst + ")."); return; }
             log(it.Title + ": instalada " + (known ? it.Inst : "(não identificada)") + " -> mais recente " + it.Latest + ".");
             if (!install) return;
+            if (it.Url == null)
+            {
+                if (it.Page != null && confirm(it.Title + "\n\nVersão instalada: " + (known ? it.Inst : "não identificada") + "\nVersão mais recente no site da fabricante: " + it.Latest +
+                    "\n\nNão encontrei o link direto do instalador. Abrir a página oficial de downloads no navegador?")) OpenPage(it.Page);
+                return;
+            }
             if (!confirm(it.Title + "\n\nVersão instalada: " + (known ? it.Inst : "não identificada") + "\nVersão mais recente no site da fabricante: " + it.Latest +
                 "\n\nBaixar o instalador oficial e abrir a instalação normal para você concluir?")) { log("Ignorado."); return; }
             string file = Download(it, log);
@@ -17859,14 +17911,14 @@ namespace BunoTunner
             {
                 log("Consultando os sites das fabricantes...");
                 List<VItem> items = new List<VItem>();
-                bool intel = false, nv = false, amdGpu = false;
+                bool nv = false, amdGpu = false; HashSet<string> intelIds = new HashSet<string>();
                 foreach (VGpu g in Gpus())
                 {
                     try
                     {
                         if (g.Ven == "10DE" && !nv) { nv = true; items.Add(Nvidia(g, log)); }
                         else if (g.Ven == "1002" && !amdGpu && Regex.IsMatch(g.Name ?? "", "RX", RegexOptions.IgnoreCase)) { amdGpu = true; items.Add(AmdGpu(g, log)); }
-                        else if (g.Ven == "8086") intel = true;
+                        else if (g.Ven == "8086") { string iid = IntelId(g.Name); if (intelIds.Add(iid)) items.Add(IntelGpu(g, iid, log)); }
                     }
                     catch (Exception ex) { log("Falha ao consultar " + g.Name + ": " + ex.Message); }
                 }
@@ -17875,17 +17927,15 @@ namespace BunoTunner
                 {
                     try { items.Add(AmdChipset(log)); } catch (Exception ex) { log("Falha ao consultar o chipset AMD: " + ex.Message); }
                 }
-                else if (cpu.IndexOf("Intel", StringComparison.OrdinalIgnoreCase) >= 0) intel = true;
-                if (items.Count == 0 && !intel) log("Nenhuma placa de video NVIDIA/AMD ou chipset AMD identificado.");
+                else if (cpu.IndexOf("Intel", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    try { items.Add(IntelChipset(log)); } catch (Exception ex) { log("Falha ao consultar o chipset Intel: " + ex.Message); }
+                }
+                if (items.Count == 0) log("Nenhuma placa de video NVIDIA/AMD/Intel ou chipset AMD/Intel identificado.");
                 foreach (VItem it in items)
                 {
                     try { Offer(it, install, log, confirm); }
                     catch (Exception ex) { log(it.Title + ": falhou (" + ex.Message + ")."); }
-                }
-                if (intel)
-                {
-                    log("Intel: a Intel não oferece consulta pública confiável de versões; o Assistente de Drivers e Suporte da Intel faz isso.");
-                    if (install && confirm("Foi detectado hardware Intel (video e/ou chipset).\n\nA Intel não permite consultar a versão mais recente automaticamente. Abrir a página oficial do Assistente de Drivers e Suporte da Intel, que detecta e instala os drivers?")) OpenPage(IntelPage);
                 }
                 log("Concluído.");
             }
@@ -18184,14 +18234,14 @@ namespace BunoTunner
         {
             Section("Drivers", "Mantenha a GPU, o chipset e os demais dispositivos atualizados.", false, true);
             XpGroup g = new XpGroup(); g.Title = "Atualizar drivers (todos os dispositivos, GPU e Chipset)"; g.SetBounds(12, top, 638, 148);
-            Label d = UI.Lbl(g, "Analisa o PC e procura drivers mais novos no Windows Update e, para a placa de video (NVIDIA / AMD) e o chipset AMD, direto no site da fabricante. Antes de instalar, cria um ponto de restauração e confere a assinatura digital (e o hash SHA-256 no Windows Update); se algo estiver alterado, nada é instalado. Os instaladores da fabricante são baixados e abertos para você concluir; para Intel, abre o Assistente de Drivers da Intel.", 12, 22, Xp.Ui, Xp.Dim);
+            Label d = UI.Lbl(g, "Analisa o PC e procura drivers mais novos no Windows Update e, para a placa de video (NVIDIA / AMD / Intel) e o chipset AMD, direto no site da fabricante. Antes de instalar, cria um ponto de restauração e confere a assinatura digital (e o hash SHA-256 no Windows Update); se algo estiver alterado, nada é instalado. Os instaladores da fabricante são baixados e abertos para você concluir; para Intel, abre o Assistente de Drivers da Intel.", 12, 22, Xp.Ui, Xp.Dim);
             d.AutoSize = false; d.SetBounds(12, 22, 624, 58);
             XpButton bGo = UI.Btn(g, "Atualizar drivers", 12, 86, 150, null);
             XpButton bScan = UI.Btn(g, "Só verificar", 170, 86, 120, null);
             bGo.Height = 24; bScan.Height = 24;
             XpProgress pb = new XpProgress(); pb.SetBounds(300, 91, 336, 14); g.Controls.Add(pb);
             XpOption chkWu = UI.Opt(g, "Windows Update (todos os dispositivos)", 12, 116, 300, false); chkWu.Checked = true;
-            XpOption chkVend = UI.Opt(g, "Site da fabricante (GPU NVIDIA/AMD e chipset AMD)", 316, 116, 320, false); chkVend.Checked = true;
+            XpOption chkVend = UI.Opt(g, "Site da fabricante (GPU NVIDIA/AMD/Intel e chipset AMD/Intel)", 316, 116, 320, false); chkVend.Checked = true;
             // o andamento aparece num popup (aberto ao clicar em "So verificar" ou "Atualizar drivers")
             TextBox log = null;   // um novo TextBox a cada popup (fechar o popup descarta o anterior)
             XpForm pop = null; bool busy = false;

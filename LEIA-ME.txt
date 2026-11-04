@@ -556,3 +556,6 @@ v1.49.17 (TESTE)
 
 v1.49.18 (TESTE)
 - Tema GTA VI (Vice City): novos icones tematicos (menu lateral, dicas e Benchmark).
+
+v1.49.19 (TESTE)
+- Atualizar drivers: agora verifica direto no site da Intel o driver de video (Arc, Iris Xe, UHD/HD) e o chipset (Chipset Device Software), compara com o instalado e baixa o instalador oficial (confere a assinatura digital da Intel). Se o site nao der o link direto, abre a pagina oficial de downloads.
