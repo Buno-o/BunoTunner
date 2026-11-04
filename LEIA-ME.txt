@@ -520,3 +520,6 @@ v1.49.5 (TESTE)
 
 v1.49.6 (TESTE)
 - Memoria RAM: removido de novo o grafico "ns x tamanho do bloco"; o bloco Latencia fica como no modelo (valor grande, "Medir latencia" e barra).
+
+v1.49.7 (TESTE)
+- Memoria RAM: blocos Resolucao do timer e Latencia refeitos com as medidas tiradas pixel a pixel da imagem do modelo (posicao, tamanho, titulos, botoes e barra).

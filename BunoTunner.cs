@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.6.0")]
-[assembly: AssemblyFileVersion("1.49.6.0")]
-[assembly: AssemblyInformationalVersion("1.49.6")]
+[assembly: AssemblyVersion("1.49.7.0")]
+[assembly: AssemblyFileVersion("1.49.7.0")]
+[assembly: AssemblyInformationalVersion("1.49.7")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1936,7 +1936,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.6";
+        public const string Version = "v1.49.7";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -13119,24 +13119,24 @@ namespace BunoTunner
 
         void BuildTimerRes()
         {
-            XpGroup g = new XpGroup(); g.Title = ""; g.SetBounds(336, 0, 281, 103);
-            Head(g, "Resolução do timer", 13, 12, 253);
-            lblTrState = UI.Lbl(g, "", 150, 11, Xp.UiBold, Xp.Dim); lblTrState.AutoSize = false; lblTrState.SetBounds(150, 10, 118, 16); lblTrState.TextAlign = ContentAlignment.MiddleRight;
-            UI.Lbl(g, "Pedir:", 13, 45);
-            cbTr = new ComboBox(); cbTr.DropDownStyle = ComboBoxStyle.DropDownList; cbTr.Font = Xp.Ui; cbTr.SetBounds(58, 40, 102, 22); cbTr.DropDownWidth = 210;
+            XpGroup g = new XpGroup(); g.Title = ""; g.SetBounds(334, 0, 312, 108);
+            Head(g, "Resolução do timer", 15, 0, 252);
+            lblTrState = UI.Lbl(g, "", 150, 11, Xp.UiBold, Xp.Dim); lblTrState.AutoSize = false; lblTrState.SetBounds(130, 1, 137, 16); lblTrState.TextAlign = ContentAlignment.MiddleRight;
+            UI.Lbl(g, "Pedir:", 15, 35);
+            cbTr = new ComboBox(); cbTr.DropDownStyle = ComboBoxStyle.DropDownList; cbTr.Font = Xp.Ui; cbTr.SetBounds(60, 30, 102, 22); cbTr.DropDownWidth = 210;
             foreach (string n in TimerRes.Names) cbTr.Items.Add(n);
             cbTr.SelectedIndex = TimerRes.Selected;
             cbTr.SelectedIndexChanged += delegate { Settings.Set("tr_idx", cbTr.SelectedIndex.ToString()); if (TimerRes.Active) TrStart(); UpdateTr(); };
             g.Controls.Add(cbTr);
-            XpButton bi = UI.Btn(g, "Iniciar", 171, 39, 94, delegate { TrStart(); });
-            XpButton bp = UI.Btn(g, "Parar", 171, 67, 94, delegate { TimerRes.Stop(); lblTrState.ForeColor = Xp.Dim; UpdateTr(); });
+            XpButton bi = UI.Btn(g, "Iniciar", 173, 29, 94, delegate { TrStart(); });
+            XpButton bp = UI.Btn(g, "Parar", 173, 57, 94, delegate { TimerRes.Stop(); lblTrState.ForeColor = Xp.Dim; UpdateTr(); });
             bi.Height = 23; bp.Height = 23;
             rtip.SetToolTip(bi, "Pede ao Windows essa resolução de timer. Vale enquanto o BunoTunner estiver aberto ou até clicar em Parar. Resoluções menores deixam o Windows mais responsivo (jogos, áudio), mas gastam um pouco mais de energia. No Windows 11 pode valer só para o próprio BunoTunner.");
             rtip.SetToolTip(bp, "Volta ao padrão do Windows (15,625 ms).");
-            chkTrAuto = UI.Opt(g, "", 12, 74, 18, false);
+            chkTrAuto = UI.Opt(g, "", 13, 62, 18, false);
             chkTrAuto.Checked = Settings.Get("tr_auto", "0") == "1";
             chkTrAuto.CheckedChanged += delegate { Settings.Set("tr_auto", chkTrAuto.Checked ? "1" : "0"); };
-            Label la = UI.Lbl(g, "Aplicar automaticamente ao abrir o BunoTunner", 32, 70, Xp.Ui, Xp.GroupText); la.AutoSize = false; la.SetBounds(32, 70, 134, 28);
+            Label la = UI.Lbl(g, "Aplicar automaticamente ao abrir o BunoTunner", 32, 70, Xp.Ui, Xp.GroupText); la.AutoSize = false; la.SetBounds(31, 58, 134, 28);
             la.Click += delegate { chkTrAuto.Checked = !chkTrAuto.Checked; };
             Controls.Add(g);
             UpdateTr();
@@ -13209,14 +13209,15 @@ namespace BunoTunner
 
         void BuildLatency()
         {
-            XpGroup g = new XpGroup(); g.Title = "Latência da memória (ns)"; g.SetBounds(291, 103, 366, 111);
-            lblLatBig = UI.Lbl(g, "- ns", 21, 44, Xp.Big, Xp.GroupText);
+            XpGroup g = new XpGroup(); g.Title = ""; g.SetBounds(334, 114, 312, 113);
+            Head(g, "Latência da memória (ns)", 15, 3, 252).ForeColor = Xp.GroupText;
+            lblLatBig = UI.Lbl(g, "- ns", 24, 34, Xp.Big, Xp.GroupText);
             lblLatBig.Font = new Font(Xp.Big.FontFamily, 22f, FontStyle.Bold);
-            lblLatSub = UI.Lbl(g, "Latência da RAM (bloco de 256 MB)", 18, 88, Xp.Ui, Xp.Dim);
-            lblLatSub.AutoSize = false; lblLatSub.SetBounds(18, 88, 222, 16);
-            bLat = UI.Btn(g, "Medir latência", 226, 43, 129, delegate { ToggleLat(); });
-            bLat.Height = 27;
-            pbLat = new XpProgress(); pbLat.SetBounds(239, 83, 102, 13); g.Controls.Add(pbLat);
+            lblLatSub = UI.Lbl(g, "Latência da RAM (bloco de 256 MB)", 19, 76, Xp.Ui, Xp.Dim);
+            lblLatSub.AutoSize = false; lblLatSub.SetBounds(19, 76, 178, 16);
+            bLat = UI.Btn(g, "Medir latência", 205, 32, 82, delegate { ToggleLat(); });
+            bLat.Height = 28;
+            pbLat = new XpProgress(); pbLat.SetBounds(196, 72, 102, 14); g.Controls.Add(pbLat);
             // o grafico (ns x tamanho do bloco) saiu da tela (os dados medidos continuam sendo guardados)
             lblLatSteps = UI.Lbl(g, "", 222, 108, Xp.Ui, Xp.Dim); lblLatSteps.Visible = false;
             Controls.Add(g);
