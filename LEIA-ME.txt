@@ -547,3 +547,6 @@ v1.49.14 (TESTE)
 
 v1.49.15 (TESTE)
 - Overlay, layout "Tema: Steampunk" repaginado: painel de couro escuro com moldura de latao, cabecalho com engrenagens, rebites nos cantos, valores em mostradores escuros com texto ambar e rotulos claros (bem mais legivel).
+
+v1.49.16 (TESTE)
+- Menu lateral: ao deixar o mouse sobre um icone, a dica mostra o icone em resolucao nativa (do tema selecionado) acima da descricao. Icones refeitos a partir das imagens originais (padrao e Steampunk).
