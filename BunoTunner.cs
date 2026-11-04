@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.48.1.0")]
-[assembly: AssemblyFileVersion("1.48.1.0")]
-[assembly: AssemblyInformationalVersion("1.48.1")]
+[assembly: AssemblyVersion("1.48.2.0")]
+[assembly: AssemblyFileVersion("1.48.2.0")]
+[assembly: AssemblyInformationalVersion("1.48.2")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -218,7 +218,7 @@ namespace BunoTunner
             "Desativar MPO", "Disable MPO",
             "Executando...", "Running...",
             "GPU  -  render 3D (estilo FurMark)", "GPU  -  3D render (FurMark style)",
-            "Janela OpenGL com bola de pelos e shader; mostra o FPS. Fechar a janela para o teste.", "Opens an OpenGL window with shaders and fur and shows FPS. Closing the window stops the test.",
+            "Janela OpenGL com bola de filamentos e shader; mostra o FPS. Fechar a janela para o teste.", "Opens an OpenGL window with shaders and filaments and shows FPS. Closing the window stops the test.",
             "CPU  -  ray tracing 3D (estilo Cinebench)", "CPU  -  3D ray tracing (Cinebench style)",
             "Renderiza uma cena em todos os núcleos, bloco a bloco. Pontos = Mrays/s x 100.", "Renders a scene on all cores, block by block. Points = Mrays/s x 100.",
             "FPU  -  campo de ondas em ponto flutuante", "FPU  -  floating-point wave field",
@@ -243,8 +243,8 @@ namespace BunoTunner
             "Resoluções menores deixam o Windows mais responsivo (jogos, áudio), mas gastam um pouco mais de energia. A mudança vale enquanto o BunoTunner estiver aberto. No Windows 11 ela pode valer só para o processo que a pediu.", "Lower resolutions make Windows more responsive (games, audio) but use a bit more power. The change lasts while BunoTunner is open. On Windows 11 it may apply only to the process that requested it.",
             "Tweaks e DeBloat", "Tweaks and DeBloat", "Aplique ou desfaça todos os ajustes desta página de uma vez.", "Apply or undo every tweak on this page at once.",
             "Unidade de medida", "Unit of measure", "Unidade de medida (todos deste tipo)", "Unit of measure (all of this type)", "Usar o padrão do tipo", "Use the type default",
-            "Pelos:", "Fur strands:", "50 mil", "50 thousand", "100 mil", "100 thousand", "250 mil", "250 thousand", "500 mil", "500 thousand", "1 milhão", "1 million",
-            "Quantidade de pelos do render. Mais pelos = teste mais pesado (FPS menor).", "Number of fur strands in the render. More strands = heavier test (lower FPS).",
+            "Filamentos:", "Filaments:", "50 mil", "50 thousand", "100 mil", "100 thousand", "250 mil", "250 thousand", "500 mil", "500 thousand", "1 milhão", "1 million",
+            "Quantidade de filamentos do render. Mais filamentos = teste mais pesado (FPS menor).", "Number of filaments in the render. More filaments = heavier test (lower FPS).",
             "Threads:", "Threads:",
             "Usar (% da livre):", "Use (% of free):",
             "Drive:", "Drive:",
@@ -552,8 +552,8 @@ namespace BunoTunner
             "  recurso ", "  feature ",
             "  tipo ", "  type ",
             "  |  Dica: em notebooks o fabricante (BIOS/vBIOS) pode bloquear o overclock; atualize o driver NVIDIA e tente valores menores. A seção \"Travar clock\" costuma funcionar mesmo assim.", "  |  Tip: on laptops the manufacturer (BIOS/vBIOS) may block overclocking; update the NVIDIA driver and try smaller values. The \"Lock clock\" section usually works anyway.",
-            "  |  pelos OpenGL", "  |  OpenGL fur",
-            "  |  shader + pelos OpenGL", "  |  shader + OpenGL fur",
+            "  |  filamentos OpenGL", "  |  OpenGL filaments",
+            "  |  shader + filamentos OpenGL", "  |  shader + OpenGL filaments",
             " (BIOS legado / CSM)", " (legacy BIOS / CSM)",
             " (BIOS legado ou sem suporte)", " (legacy BIOS or unsupported)",
             " (Esc fecha e para)", " (Esc closes and stops)",
@@ -849,7 +849,7 @@ namespace BunoTunner
             "Fuso horário: ", "Time zone: ",
             "GPU não encontrada", "GPU not found",
             "GPU - consumo", "GPU - power",
-            "GPU - render 3D de pelos (OpenGL)", "GPU - 3D fur render (OpenGL)",
+            "GPU - render 3D de filamentos (OpenGL)", "GPU - 3D filament render (OpenGL)",
             "GPU - temperatura", "GPU - temperature",
             "GPU - uso", "GPU - usage",
             "GPUs listadas", "GPUs listed",
@@ -1936,7 +1936,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.48.1";
+        public const string Version = "v1.48.2";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -2632,6 +2632,7 @@ namespace BunoTunner
                         g.DrawEllipse(Pens.Navy, gb);
                         break;
                     }
+                case "ssd":
                 case "health":
                     {
                         // HDD de cima com faixa "SMART" + check verde (saude ok)
@@ -2685,19 +2686,6 @@ namespace BunoTunner
                             using (LinearGradientBrush fb2 = new LinearGradientBrush(pb, ControlPaint.Light(fc[pi], 0.35f), ControlPaint.Dark(fc[pi], 0.12f), 70f)) g.FillPolygon(fb2, pa);
                             using (Pen fo = new Pen(Color.FromArgb(90, 20, 20, 20), 0.8f)) g.DrawPolygon(fo, pa);
                         }
-                        break;
-                    }
-                case "ssd":
-                    {
-                        RectangleF body = new RectangleF(ic.X, ic.Y + h * 0.14f, w, h * 0.72f);
-                        using (LinearGradientBrush bg = new LinearGradientBrush(body, Color.FromArgb(120, 128, 142), Color.FromArgb(52, 58, 70), 90f)) g.FillRectangle(bg, body);
-                        g.DrawRectangle(Pens.Black, body.X, body.Y, body.Width, body.Height);
-                        RectangleF lab = new RectangleF(body.X + w * 0.1f, body.Y + body.Height * 0.16f, w * 0.52f, body.Height * 0.5f);
-                        using (SolidBrush lb = new SolidBrush(Color.FromArgb(70, 140, 220))) g.FillRectangle(lb, lab);
-                        g.DrawRectangle(Pens.White, lab.X, lab.Y, lab.Width, lab.Height);
-                        using (SolidBrush led = new SolidBrush(Color.FromArgb(60, 230, 90))) g.FillEllipse(led, body.Right - w * 0.2f, body.Bottom - body.Height * 0.3f, w * 0.1f, w * 0.1f);
-                        using (SolidBrush gold = new SolidBrush(Color.FromArgb(235, 190, 60)))
-                            for (int i = 0; i < 6; i++) g.FillRectangle(gold, body.X + w * 0.08f + i * w * 0.07f, body.Bottom, w * 0.045f, h * 0.1f);
                         break;
                     }
                 case "fpu":
@@ -8641,7 +8629,7 @@ namespace BunoTunner
     class BenchCanvas : Control
     {
         public bool HudOnly; public int Kind; public double Rate, Temp = double.NaN, Elapsed, Total; public string Unit = "", Extra = ""; public long Errors;
-        static readonly string[] Names = { "GPU - render 3D de pelos (OpenGL)", "CPU - render 3D por blocos (ray tracing)", "FPU - malha de ondas em ponto flutuante", "RAM - mapa de memória", "SSD - mapa de blocos do disco" };
+        static readonly string[] Names = { "GPU - render 3D de filamentos (OpenGL)", "CPU - render 3D por blocos (ray tracing)", "FPU - malha de ondas em ponto flutuante", "RAM - mapa de memória", "SSD - mapa de blocos do disco" };
         Timer tm = new Timer();
         DateTime t0 = DateTime.UtcNow, fpsT = DateTime.UtcNow; int frames; double fps;
         // pelos
@@ -10374,9 +10362,9 @@ namespace BunoTunner
                 }
                 catch (Exception) { prog = 0; }
                 int NSTR = Math.Max(10000, Math.Min(1000000, Bench.FurCount)); const float SHIT = 1200f;
-                LoadTxt = NSTR.ToString("N0", CultureInfo.GetCultureInfo("pt-BR")) + " pelos" + (prog != 0 ? " + shader " + ((int)SHIT) + " it" : "");
+                LoadTxt = NSTR.ToString("N0", CultureInfo.GetCultureInfo("pt-BR")) + " filamentos" + (prog != 0 ? " + shader " + ((int)SHIT) + " it" : "");
 
-                // pelos: bola de pelos dourada (esfera)
+                // pelos: bola de filamentos dourada (esfera)
                 int N = NSTR;
                 float[] pos = new float[N * 6], col = new float[N * 8];
                 Random rnd = new Random(3);
@@ -10413,7 +10401,7 @@ namespace BunoTunner
                     }
                 hv = GCHandle.Alloc(pos, GCHandleType.Pinned); hc = GCHandle.Alloc(col, GCHandleType.Pinned);
                 Renderer = rend ?? "";
-                Bench.Extra = rend + "  |  bola de pelos OpenGL (" + LoadTxt + ")";
+                Bench.Extra = rend + "  |  bola de filamentos OpenGL (" + LoadTxt + ")";
                 State = 1;
                 DateTime t0 = DateTime.UtcNow;
                 hudBmp = new Bitmap(2048, 1024, PixelFormat.Format32bppArgb); hudPx = new byte[2048 * 1024 * 4]; hudPin = GCHandle.Alloc(hudPx, GCHandleType.Pinned);
@@ -16459,9 +16447,10 @@ namespace BunoTunner
         XpButton btnBSeq;
 
         // um cartao por teste (grade de 2 colunas): icone que inicia/para, descricao, duracao e opcoes do teste
+        static readonly int[] BenchPos = { 1, 0, 4, 2, 3 };   // posicao de cada teste (indice: 0 GPU, 1 CPU, 2 FPU, 3 RAM, 4 SSD) -> CPU, GPU, RAM, SSD, FPU
         XpGroup BenchBlock(int k, string title, string desc, string icon, string tipText)
         {
-            XpGroup g = new XpGroup(); g.Title = title; g.SetBounds(0, k * 74, 676, 70);
+            XpGroup g = new XpGroup(); g.Title = title; g.SetBounds(0, BenchPos[k] * 74, 676, 70);
             XpIconButton b = new XpIconButton(icon, 48); b.Location = new Point(12, 19); b.Badge = 1;
             int kk = k;
             b.Click += delegate { ToggleBench(kk); };
@@ -16478,10 +16467,10 @@ namespace BunoTunner
         {
             Panel p = new Panel(); p.Dock = DockStyle.Fill;
 
-            XpGroup gG = BenchBlock(0, "GPU  -  render 3D (estilo FurMark)", "Janela OpenGL com bola de pelos e shader; mostra o FPS. Fechar a janela para o teste.", "gpu", "Iniciar / parar o estresse de GPU");
-            UI.Lbl(gG, "Pelos:", 384, 48);
+            XpGroup gG = BenchBlock(0, "GPU  -  render 3D (estilo FurMark)", "Janela OpenGL com bola de filamentos e shader; mostra o FPS. Fechar a janela para o teste.", "gpu", "Iniciar / parar o estresse de GPU");
+            UI.Lbl(gG, "Filamentos:", 384, 48);
             cbBFur = Combo(gG, 448, 44, 110, "50 mil", "100 mil", "250 mil", "500 mil", "1 milhão"); cbBFur.SelectedIndex = 2;
-            tip.SetToolTip(cbBFur, "Quantidade de pelos do render. Mais pelos = teste mais pesado (FPS menor).");
+            tip.SetToolTip(cbBFur, "Quantidade de filamentos do render. Mais filamentos = teste mais pesado (FPS menor).");
             UI.Lbl(gG, "Placa:", 72, 54);
             lblBGpu = UI.Lbl(gG, cur != null ? cur.Name : "-", 112, 54, Xp.UiBold, Xp.GroupText);
             lblBGpu.AutoSize = false; lblBGpu.SetBounds(112, 54, 260, 14);
@@ -16526,9 +16515,9 @@ namespace BunoTunner
             chkBSafe = UI.Opt(gK, "Parar se passar de", 12, 28, 150, false); chkBSafe.Checked = true;
             txBTemp = UI.Txt(gK, 168, 25, 40, "95");
             UI.Lbl(gK, "\u00B0C", 212, 29);
-            pbBench = new XpProgress(); pbBench.SetBounds(12, 60, 316, 18);
+            pbBench = new XpProgress(); pbBench.SetBounds(300, 29, 364, 18);
             gK.Controls.Add(pbBench);
-            btnBSeq = UI.Btn(gK, "Rodar sequência (CPU, FPU, RAM, GPU)", 12, 88, 316, delegate { ToggleSeq(); });
+            btnBSeq = UI.Btn(gK, "Rodar sequência (CPU, FPU, RAM, GPU)", 12, 170, 316, delegate { ToggleSeq(); });
             btnBSeq.Height = 28;
             tip.SetToolTip(btnBSeq, "Roda CPU, FPU, RAM e GPU um após o outro, cada um com a duração do seu bloco (o SSD fica de fora para não gerar desgaste).");
             p.Controls.Add(gK);
@@ -16559,14 +16548,14 @@ namespace BunoTunner
             XpButton bClr = UI.Btn(g3, "Limpar", 420, 178, 64, delegate { lvBench.Items.Clear(); });
             bCopy.Height = bCsv.Height = bClr.Height = 22;
             // "Resultado ao vivo" fica fora da tela (os controles continuam existindo); so a linha de status aparece, no cartao de controle
-            lblBMsg.Parent = gK; lblBMsg.SetBounds(12, 124, 316, 72);
+            lblBMsg.Parent = gK; lblBMsg.SetBounds(340, 166, 324, 38);
             // taxa e estatisticas do teste em andamento ficam visiveis no cartao de controle
-            UI.Lbl(gK, "Taxa atual", 352, 26, Xp.UiBold);
-            lblBRate.Parent = gK; lblBRate.AutoSize = false; lblBRate.SetBounds(352, 42, 310, 30);
+            UI.Lbl(gK, "Taxa atual", 26, 66, Xp.UiBold);
+            lblBRate.Parent = gK; lblBRate.AutoSize = false; lblBRate.SetBounds(26, 84, 136, 30);
             for (int i = 0; i < 5; i++)
             {
-                capL[i].Parent = gK; capL[i].SetBounds(352, 84 + i * 21, 100, 18);
-                vals[i].Parent = gK; vals[i].AutoSize = false; vals[i].SetBounds(456, 84 + i * 21, 206, 18);
+                capL[i].Parent = gK; capL[i].SetBounds(168, 62 + i * 21, 100, 18);
+                vals[i].Parent = gK; vals[i].AutoSize = false; vals[i].SetBounds(272, 62 + i * 21, 230, 18);
             }
 
             tmBench.Interval = 1000;
