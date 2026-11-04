@@ -489,3 +489,6 @@ v1.47.1 (TESTE)
 
 v1.47.2 (TESTE)
 - Memoria RAM: novo layout como no modelo (Atalho e limpeza automatica acima de "O que limpar"), com divisorias entre os blocos (Timer / Latencia / Resumo) e mais espacamento. Removidos os textos de resultado e de estado: o resultado da limpeza aparece por alguns segundos no proprio botao e o estado do atalho no texto do botao; minima/maxima/atual do timer ficaram na dica da caixa de resolucao.
+
+v1.48.0 (TESTE)
+- Render do teste de RAM redesenhado: em cima, a arte da placa-mae com os pentes e canos de vidro; esferas de energia andam por dentro dos canos (mais rapido quanto maior a velocidade da RAM) e raios correm pelos canos e sobem pelos pentes. Uma faixa fina no pe da arte mostra o estado real de cada bloco de 64 MB. Embaixo, tema verde com grade e legenda de pergaminhos; padrao, passagem, blocos e as palavras lidas da memoria continuam reais e iguais a antes. Janela do render da RAM maior (880x700).
