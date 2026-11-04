@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.8.0")]
-[assembly: AssemblyFileVersion("1.49.8.0")]
-[assembly: AssemblyInformationalVersion("1.49.8")]
+[assembly: AssemblyVersion("1.49.9.0")]
+[assembly: AssemblyFileVersion("1.49.9.0")]
+[assembly: AssemblyInformationalVersion("1.49.9")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1936,7 +1936,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.8";
+        public const string Version = "v1.49.9";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -16899,8 +16899,6 @@ namespace BunoTunner
             lblClocks = UI.Lbl(c, "-", 14, 20);
             lblOcInfo = UI.Lbl(c, "", 14, 42, Xp.Ui, Xp.Dim);
             lblOcInfo.AutoSize = false; lblOcInfo.SetBounds(14, 42, 648, 62);
-            UI.Lbl(c, "Crossbar / Uncore / Fabric clock: nenhuma API pública (NVML, NvAPI, ADL, IGCL) expõe esses clocks, então nenhum programa de terceiros consegue alterá-los.", 14, 100, Xp.Ui, Xp.Dim)
-                .MaximumSize = new Size(648, 0);
             p.Controls.Add(c);
             return p;
         }

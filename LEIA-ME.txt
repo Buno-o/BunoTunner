@@ -526,3 +526,6 @@ v1.49.7 (TESTE)
 
 v1.49.8 (TESTE)
 - Memoria RAM: corrigido o bug que escondia os blocos Resolucao do timer e Latencia (ficavam atras do bloco Limpar memoria); agora aparecem na frente, no lugar do modelo.
+
+v1.49.9 (TESTE)
+- Menu OC: removida a mensagem sobre Crossbar / Uncore / Fabric clock.
