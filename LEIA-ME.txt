@@ -504,3 +504,6 @@ v1.49.0 (TESTE)
 
 v1.49.1 (TESTE)
 - Memoria RAM: removido o grafico da latencia (ns x tamanho do bloco); a lista dos pentes (slots) agora ocupa o lugar dele, ao lado do valor da latencia; os timings subiram, pois a lista nao ocupa mais uma faixa propria.
+
+v1.49.2 (TESTE)
+- Memoria RAM: Resolucao do timer e Latencia da memoria agora lado a lado na mesma fileira, como no modelo (proporcoes, espacamentos e contornos); estado do timer ("Ativa") no cabecalho do bloco, opcao de aplicar ao abrir com texto em duas linhas, caixas e botoes redimensionados. A lista dos pentes ficou logo abaixo do Resumo.
