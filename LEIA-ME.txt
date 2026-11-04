@@ -523,3 +523,6 @@ v1.49.6 (TESTE)
 
 v1.49.7 (TESTE)
 - Memoria RAM: blocos Resolucao do timer e Latencia refeitos com as medidas tiradas pixel a pixel da imagem do modelo (posicao, tamanho, titulos, botoes e barra).
+
+v1.49.8 (TESTE)
+- Memoria RAM: corrigido o bug que escondia os blocos Resolucao do timer e Latencia (ficavam atras do bloco Limpar memoria); agora aparecem na frente, no lugar do modelo.

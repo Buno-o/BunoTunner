@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.7.0")]
-[assembly: AssemblyFileVersion("1.49.7.0")]
-[assembly: AssemblyInformationalVersion("1.49.7")]
+[assembly: AssemblyVersion("1.49.8.0")]
+[assembly: AssemblyFileVersion("1.49.8.0")]
+[assembly: AssemblyInformationalVersion("1.49.8")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1936,7 +1936,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.7";
+        public const string Version = "v1.49.8";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -13138,7 +13138,7 @@ namespace BunoTunner
             chkTrAuto.CheckedChanged += delegate { Settings.Set("tr_auto", chkTrAuto.Checked ? "1" : "0"); };
             Label la = UI.Lbl(g, "Aplicar automaticamente ao abrir o BunoTunner", 32, 70, Xp.Ui, Xp.GroupText); la.AutoSize = false; la.SetBounds(31, 58, 134, 28);
             la.Click += delegate { chkTrAuto.Checked = !chkTrAuto.Checked; };
-            Controls.Add(g);
+            Controls.Add(g); g.BringToFront();
             UpdateTr();
         }
 
@@ -13220,7 +13220,7 @@ namespace BunoTunner
             pbLat = new XpProgress(); pbLat.SetBounds(196, 72, 102, 14); g.Controls.Add(pbLat);
             // o grafico (ns x tamanho do bloco) saiu da tela (os dados medidos continuam sendo guardados)
             lblLatSteps = UI.Lbl(g, "", 222, 108, Xp.Ui, Xp.Dim); lblLatSteps.Visible = false;
-            Controls.Add(g);
+            Controls.Add(g); g.BringToFront();
         }
 
         void ToggleLat()
