@@ -529,3 +529,6 @@ v1.49.8 (TESTE)
 
 v1.49.9 (TESTE)
 - Menu OC: removida a mensagem sobre Crossbar / Uncore / Fabric clock.
+
+v1.49.10 (TESTE)
+- Novos icones em arte pixelada: CPU (menu lateral e Benchmark) e FPU (Benchmark).
