@@ -553,3 +553,6 @@ v1.49.16 (TESTE)
 
 v1.49.17 (TESTE)
 - Temas Neon/Cyberpunk e Dark/AMOLED: novos icones ciberpunk (menu lateral, dicas e Benchmark).
+
+v1.49.18 (TESTE)
+- Tema GTA VI (Vice City): novos icones tematicos (menu lateral, dicas e Benchmark).
