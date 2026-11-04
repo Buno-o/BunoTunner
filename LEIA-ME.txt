@@ -532,3 +532,6 @@ v1.49.9 (TESTE)
 
 v1.49.10 (TESTE)
 - Novos icones em arte pixelada: CPU (menu lateral e Benchmark) e FPU (Benchmark).
+
+v1.49.11 (TESTE)
+- Novos icones em arte pixelada: Sensores, GPU, RAM, Saude do armazenamento (SMART), Internet, Ventoinhas, Overclock, Benchmark, Afinidade, Desinstalador e Otimizacoes (menu lateral e onde sao usados).
