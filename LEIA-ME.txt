@@ -498,3 +498,6 @@ v1.48.1 (TESTE)
 
 v1.48.2 (TESTE)
 - Benchmark: nova ordem dos testes (CPU, GPU, RAM, SSD, FPU); icone do SSD agora e o mesmo do S.M.A.R.T.; "Pelos" virou "Filamentos" no teste de GPU (textos, dicas e traducao); cartao de controle reorganizado: taxa atual e estatisticas a esquerda, barra de progresso ao lado da temperatura limite e a sequencia e a mensagem na linha de baixo.
+
+v1.49.0 (TESTE)
+- Benchmark: removido o botao "Rodar sequencia". Render do SSD redesenhado: barra de progresso brilhante da fase no topo, grafico de velocidade em barras com degrade (verde, amarelo, laranja, vermelho) e, a direita, um HD em pixel art com o disco girando e a agulha balancando de leve (mais agitada na fase 4K aleatoria). Janela do render do SSD maior (880x700).
