@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.23.0")]
-[assembly: AssemblyFileVersion("1.49.23.0")]
-[assembly: AssemblyInformationalVersion("1.49.23")]
+[assembly: AssemblyVersion("1.49.24.0")]
+[assembly: AssemblyFileVersion("1.49.24.0")]
+[assembly: AssemblyInformationalVersion("1.49.24")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1938,7 +1938,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.23";
+        public const string Version = "v1.49.24";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -17839,10 +17839,28 @@ namespace BunoTunner
             return it;
         }
 
+        // sem entrada em "Programas": le a versao dos drivers INF de chipset da Intel (classe Sistema, formato 10.x.x.x)
+        static string IntelChipsetInf()
+        {
+            string best = null;
+            try
+            {
+                using (ManagementObjectSearcher q = new ManagementObjectSearcher("SELECT DriverVersion, Manufacturer, DeviceClass FROM Win32_PnPSignedDriver WHERE Manufacturer LIKE '%Intel%' AND DeviceClass='SYSTEM'"))
+                    foreach (ManagementObject m in q.Get())
+                    {
+                        string v = Convert.ToString(m["DriverVersion"]);
+                        if (v == null || !Regex.IsMatch(v, "^10\\.\\d+\\.\\d+\\.\\d+$")) continue;
+                        if (best == null || Cmp(v, best) > 0) best = v;
+                    }
+            }
+            catch (Exception) { }
+            return best;
+        }
+
         static VItem IntelChipset(Action<string> log)
         {
             VItem it = new VItem(); it.Title = "Driver de chipset Intel (Chipset Device Software)";
-            it.Inst = InstalledVer("Intel(R) Chipset Device Software");
+            it.Inst = InstalledVer("Intel(R) Chipset Device Software") ?? InstalledVer("Intel Chipset Device Software") ?? IntelChipsetInf();
             IntelRead("19347", it, log);
             return it;
         }
