@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.31.0")]
-[assembly: AssemblyFileVersion("1.49.31.0")]
-[assembly: AssemblyInformationalVersion("1.49.31")]
+[assembly: AssemblyVersion("1.49.32.0")]
+[assembly: AssemblyFileVersion("1.49.32.0")]
+[assembly: AssemblyInformationalVersion("1.49.32")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1945,7 +1945,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.31";
+        public const string Version = "v1.49.32";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -12126,7 +12126,7 @@ namespace BunoTunner
 
         public static void Draw(Control c, Graphics g)
         {
-            if (!On || Xp.Theme == 4) return;
+            if (!On || Xp.Theme == 3 || Xp.Theme == 4 || Xp.Theme == 6) return; // sem imagem de fundo
             Form f = c.FindForm();
             if (f == null) return;
             Bitmap sc = Scene();
