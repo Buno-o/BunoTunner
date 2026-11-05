@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.22.0")]
-[assembly: AssemblyFileVersion("1.49.22.0")]
-[assembly: AssemblyInformationalVersion("1.49.22")]
+[assembly: AssemblyVersion("1.49.23.0")]
+[assembly: AssemblyFileVersion("1.49.23.0")]
+[assembly: AssemblyInformationalVersion("1.49.23")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1938,7 +1938,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.22";
+        public const string Version = "v1.49.23";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -17768,13 +17768,47 @@ namespace BunoTunner
         }
 
         // ---------------- Intel (le a pagina oficial de downloads) ----------------
+        // o site da Intel recusa (403) pedidos que nao parecem de navegador: tenta com cabecalhos completos e, se falhar, com o curl.exe do Windows e com o PowerShell
+        static string IntelHttp(string url, Action<string> log)
+        {
+            string err = "";
+            foreach (string u in new string[] { url, url.Replace("://www.intel.com", "://intel.com") })
+            {
+                try
+                {
+                    HttpWebRequest rq = Req(u, null);
+                    rq.CookieContainer = new CookieContainer();
+                    rq.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8";
+                    rq.Headers["Upgrade-Insecure-Requests"] = "1"; rq.Headers["Sec-Fetch-Dest"] = "document"; rq.Headers["Sec-Fetch-Mode"] = "navigate";
+                    rq.Headers["Sec-Fetch-Site"] = "none"; rq.Headers["Sec-Fetch-User"] = "?1"; rq.Headers["Cache-Control"] = "max-age=0";
+                    using (WebResponse rs = rq.GetResponse()) using (StreamReader sr = new StreamReader(rs.GetResponseStream(), Encoding.UTF8)) { string t = sr.ReadToEnd(); if (t.Length > 2000) return t; }
+                }
+                catch (Exception ex) { err = ex.Message; }
+            }
+            try
+            {
+                int c;
+                string o = Proc.Run("curl.exe", "-sL --compressed --max-time 40 -A \"" + UA + "\" -H \"Accept-Language: en-US,en;q=0.9\" -H \"Upgrade-Insecure-Requests: 1\" \"" + url + "\"", 60000, out c);
+                if (o != null && o.Length > 2000 && o.IndexOf("DownloadVersion", StringComparison.OrdinalIgnoreCase) >= 0) return o;
+            }
+            catch (Exception) { }
+            try
+            {
+                int c;
+                string o = Proc.Run("powershell.exe", "-NoProfile -NonInteractive -Command \"[Net.ServicePointManager]::SecurityProtocol='Tls12,Tls13'; (Invoke-WebRequest -UseBasicParsing -UserAgent '" + UA + "' -Uri '" + url + "' -TimeoutSec 40).Content\"", 60000, out c);
+                if (o != null && o.Length > 2000 && o.IndexOf("DownloadVersion", StringComparison.OrdinalIgnoreCase) >= 0) return o;
+            }
+            catch (Exception) { }
+            log("Intel: o site recusou a consulta automática (" + err + "). Abra a página oficial para baixar.");
+            return null;
+        }
+
         static void IntelRead(string id, VItem it, Action<string> log)
         {
             string url = "https://www.intel.com/content/www/us/en/download/" + id;
             it.Page = url; it.Referer = "https://www.intel.com/"; it.Pub = "Intel";
-            string h = null;
-            try { h = Http(url, "https://www.intel.com/"); }
-            catch (Exception ex) { log("Intel: não consegui abrir a página de downloads (" + ex.Message + ")."); it.Page = IntelPage; return; }
+            string h = IntelHttp(url, log);
+            if (h == null) { it.Page = url; return; }
             Match v = Regex.Match(h, "DownloadVersion[^0-9]{0,40}([0-9]+(?:\\.[0-9]+){2,3})", RegexOptions.IgnoreCase);
             if (!v.Success) v = Regex.Match(h, "([0-9]+(?:\\.[0-9]+){2,3})\\s*\\(Latest\\)", RegexOptions.IgnoreCase);
             if (v.Success) it.Latest = v.Groups[1].Value;

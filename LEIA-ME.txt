@@ -569,3 +569,6 @@ v1.49.21 (TESTE)
 
 v1.49.22 (TESTE)
 - Steampunk: icones substituidos pelas versoes editadas a mao (sem fundo, inteiros, sem cortes).
+
+v1.49.23 (TESTE)
+- Atualizar drivers Intel: o site da Intel recusava (403) a consulta. Agora tenta com cabecalhos de navegador completos, depois com o curl.exe do Windows e depois com o PowerShell; se tudo falhar, abre a pagina oficial.
