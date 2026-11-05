@@ -593,3 +593,6 @@ v1.49.29 (TESTE)
 
 v1.49.30 (TESTE)
 - Tema Steampunk: removidas a bola/placa vazia ao lado dos titulos (Resolucao do timer, Latencia da memoria), a linha de cobre sob eles e a bola sob o check de aplicar automaticamente.
+
+v1.49.31 (TESTE)
+- Memoria RAM: layout conforme o exemplo enviado: campo de porcentagem (95%) afastado e sem quina cortada; Resolucao do timer e Latencia da memoria mais para baixo; botoes Iniciar/Parar afastados; barra de latencia sem quina cortada; divisoria em cano (tema Steampunk) entre os dois blocos.
