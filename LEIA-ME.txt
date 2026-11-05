@@ -566,3 +566,6 @@ v1.49.20 (TESTE)
 
 v1.49.21 (TESTE)
 - Neon/Dark: icones de Sensores, Desinstalador e Otimizacoes trocados pelas versoes editadas a mao.
+
+v1.49.22 (TESTE)
+- Steampunk: icones substituidos pelas versoes editadas a mao (sem fundo, inteiros, sem cortes).
