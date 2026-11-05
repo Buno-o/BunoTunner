@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.28.0")]
-[assembly: AssemblyFileVersion("1.49.28.0")]
-[assembly: AssemblyInformationalVersion("1.49.28")]
+[assembly: AssemblyVersion("1.49.29.0")]
+[assembly: AssemblyFileVersion("1.49.29.0")]
+[assembly: AssemblyInformationalVersion("1.49.29")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1945,7 +1945,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.28";
+        public const string Version = "v1.49.29";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -2229,6 +2229,20 @@ namespace BunoTunner
         }
         public override string Text { get { return Box.Text; } set { Box.Text = value; } }
         public bool ReadOnly { get { return Box.ReadOnly; } set { Box.ReadOnly = value; } }
+    }
+
+    // linha divisoria 3D (some no tema Steampunk)
+    class RuleLine : Control
+    {
+        public RuleLine() { SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, true); TabStop = false; }
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            Graphics g = e.Graphics;
+            g.Clear(Parent != null ? Parent.BackColor : Xp.Face);
+            if (Xp.Theme == 4) return;
+            using (Pen d = new Pen(SystemColors.ControlDark)) g.DrawLine(d, 0, 0, Width, 0);
+            using (Pen l = new Pen(SystemColors.ControlLightLight)) g.DrawLine(l, 0, 1, Width, 1);
+        }
     }
 
     // Caixa de grupo estilo XP
@@ -12096,7 +12110,7 @@ namespace BunoTunner
 
         public static void Draw(Control c, Graphics g)
         {
-            if (!On) return;
+            if (!On || Xp.Theme == 4) return;
             Form f = c.FindForm();
             if (f == null) return;
             Bitmap sc = Scene();
@@ -15004,11 +15018,11 @@ namespace BunoTunner
         Label Head(Control g, string t, int x, int y, int w)
         {
             Label l = UI.Lbl(g, t, x, y, Xp.UiBold, Xp.Dim); l.AutoSize = false; l.SetBounds(x, y, w, 16);
-            Label ln = new Label(); ln.BorderStyle = BorderStyle.Fixed3D; ln.SetBounds(x, y + 17, w, 2); g.Controls.Add(ln);
+            RuleLine ln = new RuleLine(); ln.SetBounds(x, y + 17, w, 2); g.Controls.Add(ln);
             return l;
         }
         // divisoria entre blocos
-        void Divider(int y) { Label ln = new Label(); ln.BorderStyle = BorderStyle.Fixed3D; ln.SetBounds(0, y, 656, 2); Controls.Add(ln); }
+        void Divider(int y) { RuleLine ln = new RuleLine(); ln.SetBounds(0, y, 656, 2); Controls.Add(ln); }
 
         // troca o texto de um botao por alguns segundos (retorno de uma acao sem ocupar espaco na tela)
         void Flash(XpButton b, string txt, int ms, Action restore)
