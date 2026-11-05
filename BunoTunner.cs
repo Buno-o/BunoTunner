@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.26.0")]
-[assembly: AssemblyFileVersion("1.49.26.0")]
-[assembly: AssemblyInformationalVersion("1.49.26")]
+[assembly: AssemblyVersion("1.49.27.0")]
+[assembly: AssemblyFileVersion("1.49.27.0")]
+[assembly: AssemblyInformationalVersion("1.49.27")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1877,6 +1877,7 @@ namespace BunoTunner
                 if (n != c.ForeColor) c.ForeColor = n;
             }
             if (c is XpGroup || c is TaskPane || c.GetType() == typeof(Panel)) Fx.Hook(c);
+            if (c is ScrollableControl) Fx.HookScroll(c);
             foreach (Control k in c.Controls) Apply(k);
             XpText xt = c as XpText;
             if (xt != null) xt.Height = xt.Box.PreferredHeight + 4;
@@ -1938,7 +1939,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.26";
+        public const string Version = "v1.49.27";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -12024,6 +12025,23 @@ namespace BunoTunner
             int i = (int)f;
             if (i >= st.Length - 1) return st[st.Length - 1];
             return Lp(st[i], st[i + 1], f - i);
+        }
+
+        // paginas com rolagem: o Windows move os pixels ja desenhados, mas a arte de fundo e fixa; entao repinta tudo apos rolar
+        static readonly HashSet<Control> scrollHooked = new HashSet<Control>();
+        public static void HookScroll(Control c)
+        {
+            ScrollableControl sc = c as ScrollableControl;
+            if (sc == null || !sc.AutoScroll || !scrollHooked.Add(c)) return;
+            Control cc = c;
+            Action redraw = delegate
+            {
+                if (!On) return;
+                try { cc.BeginInvoke(new Action(delegate { if (!cc.IsDisposed) { cc.Invalidate(true); cc.Update(); } })); } catch (Exception) { }
+            };
+            sc.Scroll += delegate { redraw(); };
+            sc.MouseWheel += delegate { redraw(); };
+            sc.Disposed += delegate { scrollHooked.Remove(cc); };
         }
 
         public static void Hook(Control c)
