@@ -590,3 +590,6 @@ v1.49.28 (TESTE)
 
 v1.49.29 (TESTE)
 - Tema Steampunk: removida a arte de fundo (fica so a cor lisa) e as linhas/pontos sob os titulos dos blocos.
+
+v1.49.30 (TESTE)
+- Tema Steampunk: removidas a bola/placa vazia ao lado dos titulos (Resolucao do timer, Latencia da memoria), a linha de cobre sob eles e a bola sob o check de aplicar automaticamente.

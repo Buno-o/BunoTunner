@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.29.0")]
-[assembly: AssemblyFileVersion("1.49.29.0")]
-[assembly: AssemblyInformationalVersion("1.49.29")]
+[assembly: AssemblyVersion("1.49.30.0")]
+[assembly: AssemblyFileVersion("1.49.30.0")]
+[assembly: AssemblyInformationalVersion("1.49.30")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1945,7 +1945,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.29";
+        public const string Version = "v1.49.30";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -2106,7 +2106,7 @@ namespace BunoTunner
             g.Clear(Parent != null ? Parent.BackColor : Xp.Face);
             int y = (Height - 13) / 2;
             int ox = 1;
-            if (Xp.Theme == 4) { Fx.BrassPlate(g, new Rectangle(0, 0, Width, Height), false, hot, Enabled, false); ox = 6; }
+            if (Xp.Theme == 4 && !string.IsNullOrEmpty(Text)) { Fx.BrassPlate(g, new Rectangle(0, 0, Width, Height), false, hot, Enabled, false); ox = 6; }
             Rectangle b = new Rectangle(ox, y, 12, 12);
             using (LinearGradientBrush br = new LinearGradientBrush(b, (Xp.Aero && hot) ? Color.FromArgb(190, 230, 253) : Xp.OptA, (Xp.Aero && hot) ? Color.FromArgb(234, 246, 253) : Xp.OptB, 45f))
             {
@@ -2259,6 +2259,7 @@ namespace BunoTunner
             g.SmoothingMode = SmoothingMode.AntiAlias;
             if (Xp.Theme == 4)
             {
+                if (string.IsNullOrEmpty(title)) return;
                 Size ts = TextRenderer.MeasureText(title, Xp.UiBold);
                 Rectangle plate = new Rectangle(2, 0, ts.Width + 18, 21);
                 Fx.GroupBrass(g, Width, Height, plate);
