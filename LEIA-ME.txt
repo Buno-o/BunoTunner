@@ -575,3 +575,6 @@ v1.49.23 (TESTE)
 
 v1.49.24 (TESTE)
 - Atualizar drivers Intel: o chipset agora tem a versao instalada identificada tambem pelos drivers INF da Intel (quando nao ha o programa "Chipset Device Software" instalado).
+
+v1.49.25 (TESTE)
+- Popup de verificar/atualizar drivers: agora fica sempre por cima de todas as janelas (incluindo o proprio app); as perguntas de confirmacao tambem aparecem por cima dele.

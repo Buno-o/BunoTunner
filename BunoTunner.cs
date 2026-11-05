@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.24.0")]
-[assembly: AssemblyFileVersion("1.49.24.0")]
-[assembly: AssemblyInformationalVersion("1.49.24")]
+[assembly: AssemblyVersion("1.49.25.0")]
+[assembly: AssemblyFileVersion("1.49.25.0")]
+[assembly: AssemblyInformationalVersion("1.49.25")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1938,7 +1938,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.24";
+        public const string Version = "v1.49.25";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -18293,7 +18293,7 @@ namespace BunoTunner
                 {
                     log = new TextBox(); log.Multiline = true; log.ReadOnly = true; log.ScrollBars = ScrollBars.Vertical; log.WordWrap = true;
                     log.Font = Xp.Ui; log.BackColor = Xp.EditBg; log.ForeColor = Xp.Text; log.Dock = DockStyle.Fill;
-                    pop = new XpForm(); pop.Text = Lang.T("Atualizar drivers - andamento");
+                    pop = new XpForm(); pop.Text = Lang.T("Atualizar drivers - andamento"); pop.TopMost = true; pop.ShowInTaskbar = false;
                     pop.FormClosing += delegate(object so, FormClosingEventArgs fe)
                     {
                         if (busy && fe.CloseReason == CloseReason.UserClosing &&
@@ -18305,7 +18305,7 @@ namespace BunoTunner
                     pop.Controls.Add(log); pop.Controls.Add(bot); log.BringToFront();
                 }
                 if (!pop.Visible) pop.Show(FindForm());
-                pop.Activate();
+                pop.TopMost = true; pop.BringToFront(); pop.Activate();
             };
             Timer anim = new Timer(); anim.Interval = 60; anim.Tick += delegate { pb.Step(); };
             Action<bool> start = delegate(bool install)
@@ -18321,7 +18321,7 @@ namespace BunoTunner
                 Func<string, bool> askVendor = delegate(string msg)
                 {
                     bool yes = false;
-                    try { Invoke(new Action(delegate { yes = Dlg.Show(this, msg, "BunoTunner - Drivers", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes; })); }
+                    try { Invoke(new Action(delegate { yes = Dlg.Show(pop != null && !pop.IsDisposed ? (IWin32Window)pop : this, msg, "BunoTunner - Drivers", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes; })); }
                     catch (Exception) { }
                     return yes;
                 };
