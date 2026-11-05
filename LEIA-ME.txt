@@ -578,3 +578,6 @@ v1.49.24 (TESTE)
 
 v1.49.25 (TESTE)
 - Popup de verificar/atualizar drivers: agora fica sempre por cima de todas as janelas (incluindo o proprio app); as perguntas de confirmacao tambem aparecem por cima dele.
+
+v1.49.26 (TESTE)
+- Drivers Intel: a versao instalada do chipset agora tambem le o programa "SetupChipset" (Intel Chipset Device Software), inclusive instalado so para o usuario, e usa a maior versao encontrada.

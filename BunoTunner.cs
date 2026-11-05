@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.25.0")]
-[assembly: AssemblyFileVersion("1.49.25.0")]
-[assembly: AssemblyInformationalVersion("1.49.25")]
+[assembly: AssemblyVersion("1.49.26.0")]
+[assembly: AssemblyFileVersion("1.49.26.0")]
+[assembly: AssemblyInformationalVersion("1.49.26")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1938,7 +1938,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.25";
+        public const string Version = "v1.49.26";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -17839,6 +17839,40 @@ namespace BunoTunner
             return it;
         }
 
+        // maior versao encontrada: programa "Chipset Device Software" (nome pode ser "SetupChipset"), em todos os usuarios ou so no usuario atual, e drivers INF
+        static string IntelChipsetVer()
+        {
+            string best = null;
+            string[] names = { "Chipset Device Software", "SetupChipset", "Intel(R) Chipset", "Intel Chipset" };
+            string[] paths = { @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall", @"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall" };
+            foreach (RegistryKey root in new RegistryKey[] { Registry.LocalMachine, Registry.CurrentUser })
+                foreach (string p in paths)
+                {
+                    try
+                    {
+                        using (RegistryKey k = root.OpenSubKey(p))
+                        {
+                            if (k == null) continue;
+                            foreach (string sn in k.GetSubKeyNames())
+                                using (RegistryKey r = k.OpenSubKey(sn))
+                                {
+                                    if (r == null) continue;
+                                    string dn = r.GetValue("DisplayName") as string, v = r.GetValue("DisplayVersion") as string, pub = r.GetValue("Publisher") as string;
+                                    if (dn == null || string.IsNullOrEmpty(v) || !Regex.IsMatch(v, "^\\d+(\\.\\d+){2,3}$")) continue;
+                                    bool hit = false;
+                                    foreach (string n in names) if (dn.IndexOf(n, StringComparison.OrdinalIgnoreCase) >= 0) hit = true;
+                                    if (!hit || (pub != null && pub.IndexOf("Intel", StringComparison.OrdinalIgnoreCase) < 0)) continue;
+                                    if (best == null || Cmp(v, best) > 0) best = v;
+                                }
+                        }
+                    }
+                    catch (Exception) { }
+                }
+            string inf = IntelChipsetInf();
+            if (inf != null && (best == null || Cmp(inf, best) > 0)) best = inf;
+            return best;
+        }
+
         // sem entrada em "Programas": le a versao dos drivers INF de chipset da Intel (classe Sistema, formato 10.x.x.x)
         static string IntelChipsetInf()
         {
@@ -17860,7 +17894,7 @@ namespace BunoTunner
         static VItem IntelChipset(Action<string> log)
         {
             VItem it = new VItem(); it.Title = "Driver de chipset Intel (Chipset Device Software)";
-            it.Inst = InstalledVer("Intel(R) Chipset Device Software") ?? InstalledVer("Intel Chipset Device Software") ?? IntelChipsetInf();
+            it.Inst = IntelChipsetVer();
             IntelRead("19347", it, log);
             return it;
         }
