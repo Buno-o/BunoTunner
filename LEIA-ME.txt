@@ -559,3 +559,7 @@ v1.49.18 (TESTE)
 
 v1.49.19 (TESTE)
 - Atualizar drivers: agora verifica direto no site da Intel o driver de video (Arc, Iris Xe, UHD/HD) e o chipset (Chipset Device Software), compara com o instalado e baixa o instalador oficial (confere a assinatura digital da Intel). Se o site nao der o link direto, abre a pagina oficial de downloads.
+
+v1.49.20 (TESTE)
+- Dica dos icones laterais: agora nunca sai da tela (reposiciona para caber, dentro da area util do monitor).
+- Icones: removidos o contorno branco (sensores Neon/Dark) e as barras/linhas sobrando nas bordas (icones padrao e outros temas). No Neon/Dark o icone de FPU voltou a ter o botao verde original.
