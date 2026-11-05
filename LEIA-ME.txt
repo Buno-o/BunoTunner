@@ -584,3 +584,6 @@ v1.49.26 (TESTE)
 
 v1.49.27 (TESTE)
 - Temas com imagem de fundo (Neon, Steampunk, GTA VI): corrigido o fundo que ficava bugado ao rolar as paginas para cima e para baixo (agora repinta tudo apos rolar).
+
+v1.49.28 (TESTE)
+- Tema Steampunk: visual refeito conforme o exemplo enviado (placas de latao nos titulos dos grupos com tubo de cobre duplo, botoes e barras de opcao de latao com rebites, barra de titulo e menu lateral em latao, parede de pedra no fundo). Textos e outros temas nao foram alterados.

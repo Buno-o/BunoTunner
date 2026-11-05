@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.27.0")]
-[assembly: AssemblyFileVersion("1.49.27.0")]
-[assembly: AssemblyInformationalVersion("1.49.27")]
+[assembly: AssemblyVersion("1.49.28.0")]
+[assembly: AssemblyFileVersion("1.49.28.0")]
+[assembly: AssemblyInformationalVersion("1.49.28")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1734,6 +1734,12 @@ namespace BunoTunner
                     p.Hi = C(255, 232, 186); p.Dim = C(104, 66, 34);
                     // mais contraste nos textos
                     p.Text = C(18, 8, 0); p.Dim = C(66, 34, 10); p.GroupText = C(62, 20, 0); p.Good = C(8, 66, 16); p.Bad = C(120, 8, 4);
+                    // visual latao (copia do mock)
+                    p.BtnA = C(228, 204, 146); p.BtnB = C(172, 140, 80); p.BtnDownA = C(168, 136, 78); p.BtnDownB = C(214, 188, 130); p.Hot = C(255, 232, 150);
+                    p.CapA = C(216, 190, 128); p.CapB = C(160, 130, 72); p.CapFrame = C(128, 98, 48); p.CapText = C(52, 30, 8); p.CapShadow = C(246, 232, 192);
+                    p.CapBtn1 = C(238, 216, 152); p.CapBtn2 = C(172, 136, 72);
+                    p.PaneTop = C(208, 180, 120); p.PaneMid = C(180, 150, 92); p.PaneBot = C(150, 120, 66); p.PaneText = C(44, 24, 4);
+                    p.Face = C(196, 170, 120); p.GroupText = C(40, 22, 4); p.EditBg = C(236, 222, 186);
                     p.Rad = 3;
                     break;
                 case 5: // Retro / Vintage (Windows 95/98)
@@ -1939,7 +1945,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.27";
+        public const string Version = "v1.49.28";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -2036,6 +2042,13 @@ namespace BunoTunner
                 TextRenderer.DrawText(g, Text, Font, tr, Enabled ? Xp.Text : Xp.Dis, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
                 return;
             }
+            if (Xp.Theme == 4)
+            {
+                Fx.BrassPlate(g, r, down, hot && Enabled, Enabled, true);
+                TextRenderer.DrawText(g, Text, Font, down ? new Rectangle(1, 1, Width, Height) : r, Enabled ? Xp.Text : Xp.Dis,
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+                return;
+            }
             Color c1 = down ? Xp.BtnDownA : Xp.BtnA;
             Color c2 = down ? Xp.BtnDownB : Xp.BtnB;
             using (GraphicsPath p = Xp.Round(r, Xp.Rad))
@@ -2092,7 +2105,9 @@ namespace BunoTunner
             g.SmoothingMode = SmoothingMode.AntiAlias;
             g.Clear(Parent != null ? Parent.BackColor : Xp.Face);
             int y = (Height - 13) / 2;
-            Rectangle b = new Rectangle(1, y, 12, 12);
+            int ox = 1;
+            if (Xp.Theme == 4) { Fx.BrassPlate(g, new Rectangle(0, 0, Width, Height), false, hot, Enabled, false); ox = 6; }
+            Rectangle b = new Rectangle(ox, y, 12, 12);
             using (LinearGradientBrush br = new LinearGradientBrush(b, (Xp.Aero && hot) ? Color.FromArgb(190, 230, 253) : Xp.OptA, (Xp.Aero && hot) ? Color.FromArgb(234, 246, 253) : Xp.OptB, 45f))
             {
                 if (Radio) g.FillEllipse(br, b); else g.FillRectangle(br, b);
@@ -2114,7 +2129,7 @@ namespace BunoTunner
                         g.DrawLines(cp, new Point[] { new Point(b.X + 2, b.Y + 6), new Point(b.X + 5, b.Y + 9), new Point(b.X + 10, b.Y + 3) });
                 }
             }
-            TextRenderer.DrawText(g, Text, Font, new Point(19, (Height - Font.Height) / 2), Enabled ? Xp.Text : Xp.Dis);
+            TextRenderer.DrawText(g, Text, Font, new Point(ox + 18, (Height - Font.Height) / 2), Enabled ? Xp.Text : Xp.Dis);
         }
     }
 
@@ -2228,7 +2243,14 @@ namespace BunoTunner
             Graphics g = e.Graphics;
             Fx.Draw(this, g);
             g.SmoothingMode = SmoothingMode.AntiAlias;
-            if (Xp.Theme == 4) Fx.GroupPipe(g, Width, Height);
+            if (Xp.Theme == 4)
+            {
+                Size ts = TextRenderer.MeasureText(title, Xp.UiBold);
+                Rectangle plate = new Rectangle(2, 0, ts.Width + 18, 21);
+                Fx.GroupBrass(g, Width, Height, plate);
+                TextRenderer.DrawText(g, title, Xp.UiBold, new Point(plate.X + 9, 2), Xp.GroupText);
+                return;
+            }
             else using (GraphicsPath p = Xp.Round(new Rectangle(0, 8, Width, Height - 8), Xp.Aero ? 6 : 4))
             using (Pen pen = new Pen(Xp.GroupLine))
                 g.DrawPath(pen, p);
@@ -12584,6 +12606,42 @@ namespace BunoTunner
             PipeLine(g, x, y1, x, y2, th);
             for (float y = y1 + 40; y < y2 - 10; y += 150) Collar(g, x, y, 7, th, true);
         }
+        public static void BrassPlate(Graphics g, Rectangle r, bool down, bool hot, bool en, bool rivets)
+        {
+            SmoothingMode old = g.SmoothingMode; g.SmoothingMode = SmoothingMode.AntiAlias;
+            Rectangle q = new Rectangle(r.X, r.Y, r.Width - 1, r.Height - 1);
+            Color a = down ? Hex(0xa88a52) : hot ? Hex(0xf2e0a6) : Hex(0xe4cf96);
+            Color b = down ? Hex(0xd2b87e) : hot ? Hex(0xc6a25e) : Hex(0xab8647);
+            if (!en) { a = Hex(0xd2c7aa); b = Hex(0xb8aa84); }
+            using (GraphicsPath p = Xp.Round(q, 5))
+            {
+                using (LinearGradientBrush br = new LinearGradientBrush(q, a, b, 90f)) g.FillPath(br, p);
+                using (Pen d = new Pen(A(255, 66, 40, 14), 1.4f)) g.DrawPath(d, p);
+            }
+            using (Pen l = new Pen(A(150, 255, 244, 200), 1f)) g.DrawLine(l, q.X + 4, q.Y + 2, q.Right - 4, q.Y + 2);
+            if (rivets && q.Width >= 60 && q.Height >= 20)
+            {
+                Bolt(g, q.X + 6, q.Y + 6, 2f); Bolt(g, q.Right - 6, q.Y + 6, 2f);
+                Bolt(g, q.X + 6, q.Bottom - 6, 2f); Bolt(g, q.Right - 6, q.Bottom - 6, 2f);
+            }
+            g.SmoothingMode = old;
+        }
+        // grupo no estilo do mock: placa de latao no titulo + tubo de cobre duplo correndo ate a borda direita
+        public static void GroupBrass(Graphics g, int w, int h, Rectangle plate)
+        {
+            float y = plate.Y + plate.Height / 2f;
+            float x0 = plate.Right - 2;
+            using (Pen d = new Pen(A(255, 60, 30, 8), 5f)) g.DrawLine(d, x0, y, w, y);
+            using (Pen m = new Pen(Hex(0xc0703a), 3.2f)) g.DrawLine(m, x0, y, w, y);
+            using (Pen l = new Pen(A(220, 250, 205, 160), 1f)) g.DrawLine(l, x0, y - 1, w, y - 1);
+            using (Pen s = new Pen(A(150, 150, 90, 40), 1f))
+            {
+                g.DrawLine(s, 1, plate.Bottom, 1, h - 2);
+                g.DrawLine(s, w - 2, y, w - 2, h - 2);
+                g.DrawLine(s, 1, h - 2, w - 2, h - 2);
+            }
+            BrassPlate(g, plate, false, false, true, false);
+        }
         public static void GroupPipe(Graphics g, int w, int h)
         {
             using (GraphicsPath p = Xp.Round(new Rectangle(2, 10, w - 5, h - 13), 5))
@@ -12608,17 +12666,23 @@ namespace BunoTunner
                 g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
                 g.InterpolationMode = InterpolationMode.HighQualityBicubic;
                 // parede de madeira escura com rebites
-                using (LinearGradientBrush wall = new LinearGradientBrush(new Rectangle(0, 0, W, H), Hex(0x3b2515), Hex(0x1e1209), 90f)) g.FillRectangle(wall, 0, 0, W, H);
-                for (int i = 0; i < 700; i++)
+                // parede de pedra (blocos com juntas e manchas)
+                using (LinearGradientBrush wall = new LinearGradientBrush(new Rectangle(0, 0, W, H), Hex(0x6f685b), Hex(0x4a453b), 90f)) g.FillRectangle(wall, 0, 0, W, H);
+                for (int row = 0, yy = 0; yy < H; row++, yy += 110)
                 {
-                    int x = r.Next(W), y = r.Next(H), l = r.Next(20, 120);
-                    using (Pen p = new Pen(A(r.Next(8, 22), r.Next(2) == 0 ? 0 : 255, r.Next(2) == 0 ? 0 : 200, 120), 1f)) g.DrawLine(p, x, y, x + l, y);
+                    int off = (row % 2) * 120;
+                    for (int xx = -off; xx < W; xx += 240)
+                    {
+                        int sh = r.Next(-14, 15);
+                        using (SolidBrush sb = new SolidBrush(A(70, sh > 0 ? 255 : 0, sh > 0 ? 250 : 0, sh > 0 ? 235 : 0))) g.FillRectangle(sb, xx + 2, yy + 2, 236, 106);
+                        using (Pen jp = new Pen(A(150, 24, 20, 14), 3f)) { g.DrawLine(jp, xx, yy, xx + 240, yy); g.DrawLine(jp, xx, yy, xx, yy + 110); }
+                        using (Pen hp = new Pen(A(50, 255, 245, 220), 1f)) g.DrawLine(hp, xx + 2, yy + 3, xx + 238, yy + 3);
+                    }
                 }
-                for (int x = 0; x < W; x += 96)
+                for (int i = 0; i < 1400; i++)
                 {
-                    using (Pen p = new Pen(A(120, 0, 0, 0), 3f)) g.DrawLine(p, x, 0, x, H);
-                    using (Pen p = new Pen(A(40, 255, 210, 150), 1f)) g.DrawLine(p, x + 2, 0, x + 2, H);
-                    for (int y = 40; y < H; y += 120) Bolt(g, x + 48, y, 3.2f);
+                    int x = r.Next(W), y = r.Next(H), l = r.Next(2, 9);
+                    using (SolidBrush sp = new SolidBrush(A(r.Next(14, 40), r.Next(2) == 0 ? 0 : 255, r.Next(2) == 0 ? 0 : 240, r.Next(2) == 0 ? 0 : 220))) g.FillEllipse(sp, x, y, l, l);
                 }
                 Color gl = Hex(0xd7a75a), gd = Hex(0x4a2c0c);
                 // engrenagens de fundo
