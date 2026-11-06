@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.32.0")]
-[assembly: AssemblyFileVersion("1.49.32.0")]
-[assembly: AssemblyInformationalVersion("1.49.32")]
+[assembly: AssemblyVersion("1.49.33.0")]
+[assembly: AssemblyFileVersion("1.49.33.0")]
+[assembly: AssemblyInformationalVersion("1.49.33")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1945,7 +1945,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.32";
+        public const string Version = "v1.49.33";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -18156,6 +18156,10 @@ namespace BunoTunner
                 "Ativar", delegate { return Pc("on", "Hibernação ATIVADA."); },
                 delegate { object v = Get(true, @"SYSTEM\CurrentControlSet\Control\Power", "HibernateEnabled"); return v != null && Convert.ToInt32(v) == 0 ? "Estado: DESATIVADA" : "Estado: ativada"; }, null);
             Section("Desempenho em jogos", "Ajustes que podem melhorar FPS, tremidas e resposta do mouse.", false);
+            Add("Plano de energia Desempenho Máximo", "Cria o plano \"Desempenho Máximo\" (powercfg -duplicatescheme) e já o ativa (powercfg -setactive). Mantém CPU/GPU sem economia de energia; em notebook gasta mais bateria. Desfazer volta ao plano Equilibrado e remove o criado.",
+                "Criar e ativar", delegate { return UltPlan(true); },
+                "Desfazer", delegate { return UltPlan(false); },
+                delegate { int c; string o = Proc.Run("powercfg.exe", "/getactivescheme", 20000, out c); return IsUlt(o) ? "Estado: Desempenho Máximo ATIVO" : "Estado: outro plano ativo"; }, null);
             Add("Aceleração do mouse (Aprimorar precisão do ponteiro)", "Desligada, o ponteiro anda sempre a mesma distância para o mesmo movimento da mão (recomendado para jogos). Aplica na hora, sem reiniciar.",
                 "Desativar", delegate { return Mouse(false); },
                 "Ativar", delegate { return Mouse(true); },
@@ -18566,6 +18570,46 @@ namespace BunoTunner
                 catch (Exception) { }
             }
             return "Concluído: " + files + " arquivo(s) apagado(s), " + (freed / 1048576.0).ToString("0.0") + " MB liberados.";
+        }
+
+        // plano de energia "Desempenho Maximo": cria (powercfg -duplicatescheme) e ja ATIVA (powercfg -setactive)
+        const string UltSrc = "e9a42b02-d5df-448d-aa00-03f14749eb61", BalGuid = "381b4222-f694-41f0-9685-ff5bb260df2e";
+        static bool IsUlt(string line)
+        {
+            return line.IndexOf("Ultimate", StringComparison.OrdinalIgnoreCase) >= 0 || (line.IndexOf("Desempenho", StringComparison.OrdinalIgnoreCase) >= 0 && line.IndexOf("ximo", StringComparison.OrdinalIgnoreCase) >= 0);
+        }
+        static string FirstGuid(string t)
+        {
+            System.Text.RegularExpressions.Match m = System.Text.RegularExpressions.Regex.Match(t, "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
+            return m.Success ? m.Value : null;
+        }
+        static string UltFind()
+        {
+            int c; string o = Proc.Run("powercfg.exe", "/list", 20000, out c);
+            foreach (string ln in o.Split('\n')) if (IsUlt(ln)) { string g = FirstGuid(ln); if (g != null) return g; }
+            return null;
+        }
+        static string UltPlan(bool apply)
+        {
+            int c;
+            if (apply)
+            {
+                string guid = UltFind();
+                if (guid == null)
+                {
+                    string o = Proc.Run("powercfg.exe", "-duplicatescheme " + UltSrc, 20000, out c);
+                    if (c != 0) return "Falhou: " + o.Trim();
+                    guid = FirstGuid(o) ?? UltFind();
+                    if (guid == null) return "Falhou: o plano foi criado mas não foi encontrado na lista.";
+                }
+                string o2 = Proc.Run("powercfg.exe", "-setactive " + guid, 20000, out c);
+                return c == 0 ? "Plano Desempenho Máximo criado e ATIVADO." : "Falhou: " + o2.Trim();
+            }
+            string g2 = UltFind();
+            string o3 = Proc.Run("powercfg.exe", "-setactive " + BalGuid, 20000, out c);
+            if (c != 0) return "Falhou: " + o3.Trim();
+            if (g2 != null) Proc.Run("powercfg.exe", "-delete " + g2, 20000, out c);
+            return "Plano Equilibrado ativado e o plano Desempenho Máximo removido.";
         }
 
         Label Add(string title, string desc, string runText, Func<string> run, string undoText, Func<string> undo, Func<string> state, string confirm)

@@ -599,3 +599,6 @@ v1.49.31 (TESTE)
 
 v1.49.32 (TESTE)
 - Temas GTA VI e Neon/Cyberpunk: removida a imagem de fundo (fica so a cor lisa) para facilitar a leitura.
+
+v1.49.33 (TESTE)
+- Otimizacao: novo ajuste "Plano de energia Desempenho Maximo" (powercfg -duplicatescheme + -setactive: cria e ja ativa; desfazer volta ao Equilibrado e remove o criado). Entra no "Aplicar todos" e no "Desfazer todos".
