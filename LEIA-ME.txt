@@ -602,3 +602,6 @@ v1.49.32 (TESTE)
 
 v1.49.33 (TESTE)
 - Otimizacao: novo ajuste "Plano de energia Desempenho Maximo" (powercfg -duplicatescheme + -setactive: cria e ja ativa; desfazer volta ao Equilibrado e remove o criado). Entra no "Aplicar todos" e no "Desfazer todos".
+
+v1.49.34 (TESTE)
+- Benchmark de CPU: cena refeita para ficar parecida com a foto enviada (esfera dourada espelhada sobre gramado, sol baixo do lado direito, floresta com troncos e luzes de jardim ao fundo, mesma paleta de cores) e teste mais pesado (384 amostras por pixel, 5 reflexos por raio, 4 raios de oclusao no gramado).

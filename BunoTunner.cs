@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.33.0")]
-[assembly: AssemblyFileVersion("1.49.33.0")]
-[assembly: AssemblyInformationalVersion("1.49.33")]
+[assembly: AssemblyVersion("1.49.34.0")]
+[assembly: AssemblyFileVersion("1.49.34.0")]
+[assembly: AssemblyInformationalVersion("1.49.34")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1945,7 +1945,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.33";
+        public const string Version = "v1.49.34";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -11309,18 +11309,17 @@ namespace BunoTunner
 
         // ---------- CPU: ray tracing 3D por blocos (como o Cinebench / Blender), todas as threads renderizando ----------
         // Cena: esfera de ouro espelhada sobre grama, floresta ao fundo (tudo procedural; os reflexos sao calculados por ray tracing na CPU)
-        double camE0, camE1, camE2, camF0, camF1, camF2, camR0, camR2, camU0, camU1, camU2; int[] order; const int SPP = 256;
-        const double LX = -0.6061, LY = 0.3435, LZ = 0.7274;   // direcao do sol (normalizada)
+        double camE0, camE1, camE2, camF0, camF1, camF2, camR0, camR2, camU0, camU1, camU2; int[] order; const int SPP = 384;
+        const double LX = 0.92844, LY = 0.18968, LZ = 0.31946;   // direcao do sol (normalizada): baixo, do lado direito, um pouco ao fundo
 
         void SetupPass()
         {
-            camE0 = 0; camE1 = 1.3; camE2 = -5.2;
-            double tx = 0, ty = 0.25, tz = 0;
-            double fx = tx - camE0, fy = ty - camE1, fz = tz - camE2, fl = Math.Sqrt(fx * fx + fy * fy + fz * fz);
-            camF0 = fx / fl; camF1 = fy / fl; camF2 = fz / fl;
-            double rl = Math.Sqrt(camF0 * camF0 + camF2 * camF2);
-            camR0 = -camF2 / rl; camR2 = camF0 / rl;
-            camU0 = -camR2 * camF1; camU1 = camR2 * camF0 - camR0 * camF2; camU2 = camR0 * camF1;
+            // camera baixa e ligeiramente inclinada para baixo (horizonte a ~25% da altura), esfera ao centro
+            double pitch = 14.0 * Math.PI / 180.0, sp = Math.Sin(pitch), cp = Math.Cos(pitch);
+            camE0 = 0; camE1 = 1.78; camE2 = -5.8;
+            camF0 = 0; camF1 = -sp; camF2 = cp;
+            camR0 = 1; camR2 = 0;
+            camU0 = 0; camU1 = cp; camU2 = sp;
         }
 
         static double H2(int x, int y)
@@ -11347,44 +11346,51 @@ namespace BunoTunner
         }
         static double Sm(double a, double b, double x) { double t = (x - a) / (b - a); if (t < 0) t = 0; else if (t > 1) t = 1; return t * t * (3 - 2 * t); }
 
-        // ambiente: ceu quente + floresta densa (copas, duas camadas de troncos) ao redor, com o sol baixo
+        static readonly double[] Gard = { 0.9, 1.9, -0.5, -2.3 };
+        // ambiente: ceu quente + floresta densa (copas e troncos) ao redor, sol baixo a direita e luzes de jardim no horizonte
         static void Env(double dx, double dy, double dz, out double R, out double G, out double Bl)
         {
             double e = Math.Abs(dy);
             double sd = dx * LX + dy * LY + dz * LZ; if (sd < 0) sd = 0;
-            double k = Sm(0, 0.9, e);
-            double sr = 0.95 - 0.38 * k, sg = 0.9 - 0.2 * k, sb = 0.78 + 0.17 * k;
-            double glow = Math.Pow(sd, 10) * 0.9; sr += glow; sg += glow * 0.75; sb += glow * 0.4;
-            if (sd > 0.9992) { sr += 9; sg += 7.5; sb += 5; }
             double phi = Math.Atan2(dz, dx);
-            double dens = Fbm(phi * 11, e * 9, 5) + (0.5 - e) * 0.9;
-            double thr = 0.45 + e * 0.55;
-            double fol = Sm(thr - 0.04, thr + 0.04, dens);
-            double n1 = Fbm(phi * 26 + 3, e * 24, 4), n2 = Fbm(phi * 7 + 9, e * 6, 3);
-            double lit = Sm(0.56, 0.92, n1 * 0.75 + 0.3 * n2 + 0.45 * sd * sd + 0.05 + e * 0.3);
-            double dk = 0.45 + 0.55 * Sm(0.02, 0.3, e);
-            double fr = (0.012 + 0.25 * lit) * dk, fg = (0.035 + 0.34 * lit) * dk, fb = (0.008 + 0.05 * lit) * dk;
+            double kk = Sm(0, 0.9, e);
+            double sr = 0.95 - 0.30 * kk, sg = 0.90 - 0.12 * kk, sb = 0.76 + 0.22 * kk;
+            double glow = Math.Pow(sd, 8) * 0.8; sr += glow; sg += glow * 0.8; sb += glow * 0.45;
+            double bigs = sd > 0.9987 ? 1.0 : 0.0;
+            double top = 0.2 + 0.3 * Fbm(phi * 3 + 2, 0.5, 3) + 0.6 * Sm(-0.1, 0.5, dz);
+            double ft = Fbm(phi * 16, e * 12, 5);
+            double sky = Sm(top, top + 0.10, e + 0.42 * (ft - 0.5));
+            double n1 = Fbm(phi * 40 + 3, e * 34, 4), n2 = Fbm(phi * 9 + 9, e * 7, 3);
+            double lit = Sm(0.50, 0.88, n1 * 0.7 + 0.3 * n2 + 0.55 * sd * sd + 0.05 + 0.1 * e);
+            double dk = 0.35 + 0.65 * Sm(0, 0.25, e);
+            double fr = (0.004 + 0.13 * lit) * dk, fg = (0.016 + 0.20 * lit) * dk, fb = (0.003 + 0.02 * lit) * dk;
             double tr = 0, tg = 0, tb = 0, tw = 0;
-            for (int ly = 0; ly < 2; ly++)
+            for (int ly = 0; ly < 3; ly++)
             {
-                double cell = ly == 0 ? 0.3 : 0.1, kk = phi / cell, ci = Math.Floor(kk), hh = H2((int)ci, 7 + ly * 31);
-                if (hh > (ly == 0 ? 0.5 : 0.45) && e < 0.5)
+                double cell = ly == 0 ? 0.5 : ly == 1 ? 0.16 : 0.08, k2 = phi / cell, ci = Math.Floor(k2); int cii = (int)ci;
+                double hh = H2(cii, 7 + ly * 31), ctr = ci + 0.2 + 0.6 * H2(cii, 9 + ly * 31);
+                double wd = ly == 0 ? 0.035 + 0.04 * H2(cii, 11) : ly == 1 ? 0.025 + 0.03 * H2(cii, 11) : 0.035 + 0.035 * H2(cii, 11);
+                double dd = Math.Abs(k2 - ctr);
+                if (hh > (ly == 0 ? 0.62 : ly == 1 ? 0.4 : 0.5) && e < top + 0.05 && dd < wd)
                 {
-                    double ctr = ci + 0.2 + 0.6 * H2((int)ci, 9 + ly * 31);
-                    double wd = (ly == 0 ? 0.06 + 0.14 * H2((int)ci, 11) : 0.08 + 0.1 * H2((int)ci, 11)) - e * (ly == 0 ? 0.06 : 0.05);
-                    double dd = Math.Abs(kk - ctr);
-                    if (dd < wd)
+                    double w = (1 - Sm(wd * 0.8, wd, dd)) * (1 - Sm(top - 0.1, top + 0.05, e));
+                    double bark = Fbm(phi * 220 + ly * 7, e * 9, 3), rel = (k2 - ctr) / wd;
+                    double side = Sm(-1, 1, rel * 0.9 + 0.6 * sd + 0.1), dark = ly == 0 ? 1.0 : ly == 1 ? 0.7 : 0.5;
+                    if (tw < 0.5 || ly == 0)
                     {
-                        double w = (1 - Sm(wd * 0.85, wd, dd)) * (1 - Sm(0.38, 0.5, e));
-                        double bark = Fbm(phi * 150 + ly * 7, e * 7, 3), rel = (kk - ctr) / wd;
-                        double side = Sm(-1, 1, -rel * 0.9 + 0.5 * sd + 0.2), dark = ly == 0 ? 1.0 : 0.5;
-                        double lr = (0.06 + 0.34 * side) * (0.6 + 0.7 * bark) * dark, lg = (0.045 + 0.22 * side) * (0.6 + 0.7 * bark) * dark, lb = (0.03 + 0.12 * side) * (0.6 + 0.7 * bark) * dark;
-                        if (ly == 0 || tw < 0.5) { tr = lr; tg = lg; tb = lb; tw = w; if (ly == 0 && w > 0.5) ly = 2; }
+                        tr = (0.012 + 0.10 * side) * (0.5 + 0.8 * bark) * dark; tg = (0.008 + 0.06 * side) * (0.5 + 0.8 * bark) * dark; tb = (0.004 + 0.025 * side) * (0.5 + 0.8 * bark) * dark; tw = w;
                     }
                 }
             }
-            double r = sr * (1 - fol) + fr * fol, g = sg * (1 - fol) + fg * fol, b = sb * (1 - fol) + fb * fol;
-            if (tw > 0) { r = r * (1 - tw) + tr * tw; g = g * (1 - tw) + tg * tw; b = b * (1 - tw) + tb * tw; }
+            double r = sr * sky + fr * (1 - sky), g = sg * sky + fg * (1 - sky), b = sb * sky + fb * (1 - sky);
+            r = r * (1 - tw) + tr * tw; g = g * (1 - tw) + tg * tw; b = b * (1 - tw) + tb * tw;
+            r += 9 * bigs; g += 7.5 * bigs; b += 4.5 * bigs;
+            if (e < 0.08)
+                for (int q = 0; q < Gard.Length; q++)
+                {
+                    double pu = (phi - Gard[q]) / 0.006, pv = (e - 0.03) / 0.008, spot = Math.Exp(-(pu * pu + pv * pv));
+                    r += 3.0 * spot; g += 1.5 * spot; b += 0.3 * spot;
+                }
             R = r; G = g; Bl = b;
         }
 
@@ -11401,7 +11407,7 @@ namespace BunoTunner
         static void Trace(double ox, double oy, double oz, double dx, double dy, double dz, Random rnd, ref long rays, out double R, out double G, out double Bl)
         {
             double ar = 0, ag = 0, ab = 0, tr = 1, tg = 1, tb = 1;
-            for (int depth = 0; depth < 4; depth++)
+            for (int depth = 0; depth < 5; depth++)
             {
                 rays++;
                 double ts, tgd = 1e30; bool hs = HitSphere(ox, oy, oz, dx, dy, dz, out ts);
@@ -11416,9 +11422,9 @@ namespace BunoTunner
                 {
                     double px = ox + dx * ts, py = oy + dy * ts, pz = oz + dz * ts, nx = px, ny = py - 1.0, nz = pz;
                     double dn = dx * nx + dy * ny + dz * nz;
-                    double cs = -dn; if (cs < 0) cs = 0; double fw = Math.Pow(1 - cs, 5) * 0.5;
-                    tr *= (1.0 + (1 - 1.0) * fw) * 0.97; tg *= (0.78 + (1 - 0.78) * fw) * 0.97; tb *= (0.34 + (1 - 0.34) * fw) * 0.97;
-                    double rx = dx - 2 * dn * nx + (rnd.NextDouble() - 0.5) * 0.006, ry = dy - 2 * dn * ny + (rnd.NextDouble() - 0.5) * 0.006, rz = dz - 2 * dn * nz + (rnd.NextDouble() - 0.5) * 0.006;
+                    double cs = -dn; if (cs < 0) cs = 0; double fw = Math.Pow(1 - cs, 5) * 0.4;
+                    tr *= 0.96; tg *= (0.70 + 0.30 * fw) * 0.96; tb *= (0.20 + 0.80 * fw) * 0.96;
+                    double rx = dx - 2 * dn * nx + (rnd.NextDouble() - 0.5) * 0.004, ry = dy - 2 * dn * ny + (rnd.NextDouble() - 0.5) * 0.004, rz = dz - 2 * dn * nz + (rnd.NextDouble() - 0.5) * 0.004;
                     double rl = Math.Sqrt(rx * rx + ry * ry + rz * rz);
                     ox = px + nx * 1e-3; oy = py + ny * 1e-3; oz = pz + nz * 1e-3; dx = rx / rl; dy = ry / rl; dz = rz / rl;
                     continue;
@@ -11426,31 +11432,33 @@ namespace BunoTunner
                 {
                     double px = ox + dx * tgd, pz = oz + dz * tgd;
                     // grama procedural (varias oitavas de ruido = lamina fina + manchas grandes)
-                    double big = Fbm(px * 1.1, pz * 1.1, 3), bl = Fbm(px * 60, pz * 40, 4), bl2 = Fbm(px * 140 + 3, pz * 90, 2);
-                    double gl = 0.3 + 0.4 * bl + 0.3 * big + 0.12 * bl2; if (gl > 1) gl = 1;
-                    double cr = 0.06 + 0.34 * gl, cg = 0.2 + 0.42 * gl, cb = 0.03 + 0.09 * gl;
-                    double ex = Fbm(px * 60 + 0.7, pz * 40, 3) - bl, ez = Fbm(px * 60, pz * 40 + 0.7, 3) - bl;
-                    double nx = -ex * 4, nz = -ez * 4, ny = 1, nl = Math.Sqrt(nx * nx + ny * ny + nz * nz); nx /= nl; ny /= nl; nz /= nl;
+                    double big = Fbm(px * 0.9, pz * 0.9, 3), bl = Fbm(px * 110, pz * 70, 4), bl2 = Fbm(px * 160 + 3, pz * 100, 3);
+                    double gl = 0.25 + 0.45 * bl + 0.3 * big + 0.12 * bl2; if (gl > 1) gl = 1; else if (gl < 0) gl = 0;
+                    double cr = 0.085 + 0.09 * gl, cg = 0.22 + 0.17 * gl, cb = 0.03 + 0.035 * gl;
+                    double ex = Fbm(px * 110 + 0.7, pz * 70, 3) - bl, ez = Fbm(px * 110, pz * 70 + 0.7, 3) - bl;
+                    double nx = -ex * 3.2, nz = -ez * 3.2, ny = 1, nl = Math.Sqrt(nx * nx + ny * ny + nz * nz); nx /= nl; ny /= nl; nz /= nl;
                     double diff = nx * LX + ny * LY + nz * LZ; if (diff < 0) diff = 0;
-                    // sombra da esfera (sol com tamanho: raio de sombra sorteado) e sombra das arvores (faixas alongadas)
+                    // sombra da esfera (sol com tamanho: raio de sombra sorteado) e sombras das arvores (faixas longas no sentido da luz)
                     double vis = 1, st;
                     rays++;
-                    double jx = LX + (rnd.NextDouble() - 0.5) * 0.07, jy = LY + (rnd.NextDouble() - 0.5) * 0.07, jz = LZ + (rnd.NextDouble() - 0.5) * 0.07, jl = Math.Sqrt(jx * jx + jy * jy + jz * jz);
-                    if (HitSphere(px, 1e-3, pz, jx / jl, jy / jl, jz / jl, out st)) vis = 0.05;
-                    double aa = px * 0.7673 + pz * 0.6413, bb = -px * 0.6413 + pz * 0.7673;
-                    double mask = 0.2 + 0.8 * Sm(0.38, 0.55, Fbm(aa * 0.55 + 4, bb * 0.14, 3)); mask *= 1 - 0.7 * Sm(7, 11, pz);
-                    // oclusao ambiente por 3 raios + luz dourada refletida pela esfera
-                    double occ = 0, gold = 0;
-                    for (int q = 0; q < 3; q++)
+                    double jx = LX + (rnd.NextDouble() - 0.5) * 0.06, jy = LY + (rnd.NextDouble() - 0.5) * 0.06, jz = LZ + (rnd.NextDouble() - 0.5) * 0.06, jl = Math.Sqrt(jx * jx + jy * jy + jz * jz);
+                    if (HitSphere(px, 1e-3, pz, jx / jl, jy / jl, jz / jl, out st)) vis = 0.04;
+                    double aa = -px * 0.945 - pz * 0.325, bb = px * 0.325 - pz * 0.945;
+                    double mask = 0.14 + 0.86 * Sm(0.40, 0.60, Fbm(aa * 0.10 + 4, bb * 0.38, 4));
+                    mask *= 0.25 + 0.75 * Sm(-4.2, -0.6, px + 0.25 * pz + 1.0);
+                    mask *= 1 - 0.65 * Sm(9, 18, pz);
+                    // oclusao ambiente por 4 raios + luz dourada refletida pela esfera
+                    double occ = 0;
+                    for (int q = 0; q < 4; q++)
                     {
                         rays++;
                         double u1 = rnd.NextDouble(), u2 = rnd.NextDouble(), rr = Math.Sqrt(u1), ang = 6.2831853 * u2;
                         double hx = rr * Math.Cos(ang), hz = rr * Math.Sin(ang), hy = Math.Sqrt(1 - u1);
                         double qt;
-                        if (HitSphere(px, 1e-3, pz, hx, hy, hz, out qt)) { occ += 1; gold += 1; }
+                        if (HitSphere(px, 1e-3, pz, hx, hy, hz, out qt)) occ += 1;
                     }
-                    double ao = 1 - 0.55 * occ / 3.0, gb = gold / 3.0;
-                    double wr = diff * vis * mask * 1.55 + ao * 0.34 + gb * 0.55, wg = diff * vis * mask * 1.3 + ao * 0.4 + gb * 0.4, wb = diff * vis * mask * 0.85 + ao * 0.46 + gb * 0.12;
+                    double ao = 1 - 0.6 * occ / 4.0, gb = occ / 4.0, bao = 0.55 + 0.45 * gl, sh = diff * vis * mask;
+                    double wr = (sh * 6.2 + ao * 0.07 + gb * 0.6) * bao, wg = (sh * 5.0 + ao * 0.18 + gb * 0.4) * bao, wb = (sh * 2.6 + ao * 0.24 + gb * 0.1) * bao;
                     ar += tr * cr * wr; ag += tg * cg * wg; ab += tb * cb * wb;
                     break;
                 }
@@ -11504,7 +11512,7 @@ namespace BunoTunner
                 if (b < 0) { Th.Thread.Sleep(30); continue; }
                 int x0 = (b % NBX) * B, y0 = (b / NBX) * B; long rays = 0;
                 double ex = camE0, ey = camE1, ez = camE2, fx = camF0, fy = camF1, fz = camF2, rx = camR0, rz = camR2, ux = camU0, uy = camU1, uz = camU2;
-                double th = 0.56, asp = W / (double)H;
+                double th = 0.5, asp = W / (double)H;
                 for (int y = y0; y < y0 + B && !quit && !Bench.Stop; y++)
                     for (int x = x0; x < x0 + B; x++)
                     {
