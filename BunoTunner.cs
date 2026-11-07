@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.34.0")]
-[assembly: AssemblyFileVersion("1.49.34.0")]
-[assembly: AssemblyInformationalVersion("1.49.34")]
+[assembly: AssemblyVersion("1.49.35.0")]
+[assembly: AssemblyFileVersion("1.49.35.0")]
+[assembly: AssemblyInformationalVersion("1.49.35")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -377,6 +377,10 @@ namespace BunoTunner
             "Origem", "Source",
             "Redefinir tudo", "Reset all",
             "Restaurar padrão", "Restore default",
+            "HWBot Mínimo", "HWBot Minimal",
+            "HWBot Mínimo concluído.", "HWBot Minimal finished.",
+            "Fecha todos os serviços e programas que não são essenciais (mantém o núcleo do Windows, a rede e o Explorer) para benchmarks. Nada é desativado de forma permanente: ao reiniciar o PC, tudo volta ao normal.", "Closes every non-essential service and program (keeps the Windows core, the network and Explorer) for benchmarks. Nothing is disabled permanently: after a restart everything goes back to normal.",
+            "ATENÇÃO: SALVE SEU TRABALHO. O HWBot Mínimo vai fechar o navegador, Discord, Steam, painel da NVIDIA, bandeja, menu Iniciar/pesquisa e todos os serviços e programas que não são essenciais (ficam só o núcleo do Windows, a rede, o Explorer e os programas de benchmark/monitoramento). Fica sem som. Os serviços são só parados, nada é desativado: para voltar ao normal, reinicie o PC.\n\nContinuar?", "WARNING: SAVE YOUR WORK. HWBot Minimal will close the browser, Discord, Steam, the NVIDIA panel, the tray, the Start menu/search and every non-essential service and program (only the Windows core, the network, Explorer and benchmark/monitoring programs stay). There will be no sound. Services are only stopped, nothing is disabled: to go back to normal, restart the PC.\n\nContinue?",
             "Destravar tudo", "Unlock all",
             "Travar", "Lock",
             "Overclock / limites", "Overclock / limits",
@@ -1945,7 +1949,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.34";
+        public const string Version = "v1.49.35";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -2004,6 +2008,7 @@ namespace BunoTunner
     class XpButton : Control
     {
         bool hot, down;
+        public bool Red;   // botao vermelho (acao agressiva)
         public XpButton()
         {
             SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer |
@@ -2022,6 +2027,18 @@ namespace BunoTunner
             g.SmoothingMode = SmoothingMode.AntiAlias;
             g.Clear(Parent != null ? Parent.BackColor : Xp.Face);
             Rectangle r = new Rectangle(0, 0, Width, Height);
+            if (Red)
+            {
+                Color ra = !Enabled ? Color.FromArgb(200, 170, 170) : down ? Color.FromArgb(150, 12, 12) : hot ? Color.FromArgb(255, 96, 80) : Color.FromArgb(236, 56, 44);
+                Color rb = !Enabled ? Color.FromArgb(170, 130, 130) : down ? Color.FromArgb(200, 40, 30) : hot ? Color.FromArgb(200, 24, 18) : Color.FromArgb(160, 10, 10);
+                using (GraphicsPath rp = Xp.Round(new Rectangle(0, 0, Width - 1, Height - 1), 4))
+                {
+                    using (LinearGradientBrush rbr = new LinearGradientBrush(r, ra, rb, 90f)) g.FillPath(rbr, rp);
+                    using (Pen rpen = new Pen(Color.FromArgb(90, 0, 0))) g.DrawPath(rpen, rp);
+                }
+                TextRenderer.DrawText(g, Text, Font, down ? new Rectangle(1, 1, Width, Height) : r, Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+                return;
+            }
             if (Xp.Aero)
             {
                 Color t1, t2, b1, b2, bd;
@@ -14779,6 +14796,135 @@ namespace BunoTunner
     //  Limpeza de memoria (working set / standby / cache / modificadas) com atalho global e limpeza automatica
     //  + Timer Resolution (NtSetTimerResolution). Implementado direto sobre as APIs do Windows.
     // ------------------------------------------------------------------
+    // "HWBot Minimo": deixa o Windows so com o nucleo + rede + Explorer ate o proximo reinicio (servicos so sao PARADOS, nada e desativado)
+    static class HwMin
+    {
+        static readonly string[] Protegidos = { "cpuz*", "GPU-Z*", "HWiNFO*", "MSIAfterburner*", "PrecisionX*", "EVGA*", "3DMark*", "SystemInfo*", "Cinebench*", "y-cruncher*", "GPUPI*", "geekbench*",
+            "super_pi*", "superpi*", "wPrime*", "hwbot*", "BenchMate*", "OCCT*", "aida64*", "Taskmgr", "BunoTunner*" };
+        static readonly string[] Criticos = { "Idle", "System", "Secure System", "Registry", "Memory Compression", "smss", "csrss", "wininit", "winlogon", "services", "lsass", "LsaIso", "LogonUI",
+            "fontdrvhost", "dwm", "WUDFHost", "conhost", "consent", "WindowsTerminal", "OpenConsole", "powershell", "pwsh",
+            "MsMpEng", "NisSrv", "MpDefenderCoreService", "SecurityHealthService", "SgrmBroker", "vmmem", "vmmemWSL", "explorer", "sihost" };
+        static readonly string[] Essenciais = { "RpcSs", "RpcEptMapper", "DcomLaunch", "LSM", "SamSs", "Power", "PlugPlay", "BrokerInfrastructure", "SystemEventsBroker", "CoreMessagingRegistrar",
+            "Schedule", "EventLog", "gpsvc", "Winmgmt", "Appinfo", "DispBrokerDesktopSvc",
+            "WinDefend", "WdNisSvc", "SecurityHealthService", "Sense", "MDCoreSvc", "WaaSMedicSvc", "SgrmBroker", "webthreatdefsvc", "webthreatdefusersvc",
+            "Dhcp", "Dnscache", "nsi", "NlaSvc", "netprofm", "Wcmsvc", "WlanSvc", "BFE", "mpssvc", "CryptSvc", "KeyIso",
+            "ProfSvc", "UserManager", "StateRepository", "TimeBrokerSvc" };
+        static readonly string[] PrioBaixa = { "explorer", "sihost", "taskhostw", "ctfmon" };
+        static List<int> prot = new List<int>();
+
+        static bool Ess(string nome)
+        {
+            string b = Regex.Replace(nome ?? "", "_[0-9a-fA-F]{4,}$", "");
+            foreach (string e in Essenciais) if (string.Equals(e, b, StringComparison.OrdinalIgnoreCase)) return true;
+            return false;
+        }
+        static bool Cri(string nome) { foreach (string c in Criticos) if (string.Equals(c, nome, StringComparison.OrdinalIgnoreCase)) return true; return false; }
+        static bool Prog(string nome)
+        {
+            foreach (string p in Protegidos)
+                if (Regex.IsMatch(nome, "^" + Regex.Escape(p).Replace("\\*", ".*") + "$", RegexOptions.IgnoreCase)) return true;
+            return false;
+        }
+        static void Ancestrais()
+        {
+            prot = new List<int>();
+            Dictionary<int, int> pai = new Dictionary<int, int>();
+            using (ManagementObjectSearcher q = new ManagementObjectSearcher("SELECT ProcessId, ParentProcessId FROM Win32_Process"))
+                foreach (ManagementObject o in q.Get()) { pai[Convert.ToInt32(o["ProcessId"])] = Convert.ToInt32(o["ParentProcessId"]); o.Dispose(); }
+            int cur = Process.GetCurrentProcess().Id, guard = 0;
+            while (pai.ContainsKey(cur) && guard++ < 25) { prot.Add(cur); cur = pai[cur]; }
+        }
+        class Svc { public string Name; public int Pid; public bool CanStop; public string State; }
+        static List<Svc> Servicos()
+        {
+            List<Svc> l = new List<Svc>();
+            using (ManagementObjectSearcher q = new ManagementObjectSearcher("SELECT Name, State, AcceptStop, ProcessId FROM Win32_Service"))
+                foreach (ManagementObject o in q.Get())
+                {
+                    Svc s = new Svc(); s.Name = Convert.ToString(o["Name"]); s.State = Convert.ToString(o["State"]);
+                    s.CanStop = o["AcceptStop"] != null && Convert.ToBoolean(o["AcceptStop"]); s.Pid = o["ProcessId"] == null ? 0 : Convert.ToInt32(o["ProcessId"]);
+                    l.Add(s); o.Dispose();
+                }
+            return l;
+        }
+        static void Contar(out int procs, out int svcs)
+        {
+            procs = Process.GetProcesses().Length; svcs = 0;
+            foreach (Svc s in Servicos()) if (s.State == "Running") svcs++;
+        }
+        static void Matar(int pid) { try { using (Process p = Process.GetProcessById(pid)) p.Kill(); } catch (Exception) { } }
+
+        public static string Run(Action<string> st)
+        {
+            Ancestrais();
+            int p0, s0, p1, s1; Contar(out p0, out s0);
+            for (int pass = 1; pass <= 3; pass++)
+            {
+                string pre = "HWBot Mínimo, passada " + pass + " de 3: ";
+                st(pre + "parando serviços...");
+                foreach (Svc s in Servicos())
+                {
+                    if (s.State == "Stopped" || Ess(s.Name) || !s.CanStop) continue;
+                    int c; Proc.Run("sc.exe", "stop " + s.Name, 20000, out c);
+                }
+                DateTime fim = DateTime.UtcNow.AddSeconds(15);
+                do
+                {
+                    Th.Thread.Sleep(500);
+                    bool pend = false; foreach (Svc s in Servicos()) if (s.State == "Stop Pending") { pend = true; break; }
+                    if (!pend) break;
+                } while (DateTime.UtcNow < fim);
+                st(pre + "forçando serviços que não pararam...");
+                Dictionary<int, List<string>> host = new Dictionary<int, List<string>>();
+                foreach (Svc s in Servicos())
+                {
+                    if (s.State == "Stopped" || s.Pid <= 0) continue;
+                    if (!host.ContainsKey(s.Pid)) host[s.Pid] = new List<string>();
+                    host[s.Pid].Add(s.Name);
+                }
+                foreach (KeyValuePair<int, List<string>> kv in host)
+                {
+                    if (prot.Contains(kv.Key)) continue;
+                    bool ess = false; foreach (string n in kv.Value) if (Ess(n)) { ess = true; break; }
+                    if (ess) continue;
+                    string pn; try { using (Process p = Process.GetProcessById(kv.Key)) pn = p.ProcessName; } catch (Exception) { continue; }
+                    if (Cri(pn) || Prog(pn)) continue;
+                    Matar(kv.Key);
+                }
+                st(pre + "fechando programas e processos...");
+                host.Clear();
+                foreach (Svc s in Servicos())
+                {
+                    if (s.State == "Stopped" || s.Pid <= 0) continue;
+                    if (!host.ContainsKey(s.Pid)) host[s.Pid] = new List<string>();
+                    host[s.Pid].Add(s.Name);
+                }
+                List<int[]> alvo = new List<int[]>();
+                using (ManagementObjectSearcher q = new ManagementObjectSearcher("SELECT ProcessId, Name FROM Win32_Process"))
+                    foreach (ManagementObject o in q.Get())
+                    {
+                        int id = Convert.ToInt32(o["ProcessId"]); string nome = Path.GetFileNameWithoutExtension(Convert.ToString(o["Name"])); o.Dispose();
+                        if (id <= 4 || prot.Contains(id) || Cri(nome) || Prog(nome)) continue;
+                        if (host.ContainsKey(id))
+                        {
+                            bool ess = false; foreach (string n in host[id]) if (Ess(n)) { ess = true; break; }
+                            if (ess) continue;
+                        }
+                        else if (string.Equals(nome, "svchost", StringComparison.OrdinalIgnoreCase)) continue;
+                        alvo.Add(new int[] { id });
+                    }
+                foreach (int[] a in alvo) Matar(a[0]);
+                if (pass < 3) Th.Thread.Sleep(4000);   // pega servicos que religam sozinhos
+            }
+            st("HWBot Mínimo: baixando a prioridade do que sobrou e limpando a memória...");
+            foreach (string n in PrioBaixa)
+                foreach (Process p in Process.GetProcessesByName(n)) { try { p.PriorityClass = ProcessPriorityClass.Idle; } catch (Exception) { } p.Dispose(); }
+            try { MemClean.Clean(true, false, true, true); } catch (Exception) { }
+            Contar(out p1, out s1);
+            return "HWBot Mínimo concluído.\n\nProcessos: " + p0 + " -> " + p1 + "\nServiços rodando: " + s0 + " -> " + s1 + "\n\nReinicie o PC para voltar tudo ao normal.";
+        }
+    }
+
     static class MemClean
     {
         [StructLayout(LayoutKind.Sequential)]
@@ -15545,7 +15691,28 @@ namespace BunoTunner
         int N;
         ListView lvP = new XpList(), lvRules = new XpList();
         XpText txFilter; XpOption chkPause, chkSame, chkRules; XpOption[] cpuBox;
-        ComboBox cbPrio, cbPre; Label lblCount, lblMsg;
+        ComboBox cbPrio, cbPre; Label lblCount, lblMsg; XpButton bHw; bool hwBusy;
+        void HwStart()
+        {
+            if (hwBusy) return;
+            if (Dlg.Show(this, "ATENÇÃO: SALVE SEU TRABALHO. O HWBot Mínimo vai fechar o navegador, Discord, Steam, painel da NVIDIA, bandeja, menu Iniciar/pesquisa e todos os serviços e programas que não são essenciais (ficam só o núcleo do Windows, a rede, o Explorer e os programas de benchmark/monitoramento). Fica sem som. Os serviços são só parados, nada é desativado: para voltar ao normal, reinicie o PC.\n\nContinuar?", "BunoTunner - HWBot Mínimo", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) != DialogResult.OK) return;
+            hwBusy = true; bHw.Enabled = false;
+            System.Threading.ThreadPool.QueueUserWorkItem(delegate
+            {
+                string r;
+                try { r = HwMin.Run(delegate(string t) { try { BeginInvoke(new Action(delegate { lblMsg.ForeColor = Xp.Good; lblMsg.Text = Lang.T(t); })); } catch (Exception) { } }); }
+                catch (Exception ex) { r = "Erro: " + ex.Message; }
+                try
+                {
+                    BeginInvoke(new Action(delegate
+                    {
+                        hwBusy = false; bHw.Enabled = true; lblMsg.ForeColor = Xp.Good; lblMsg.Text = Lang.T("HWBot Mínimo concluído.");
+                        Dlg.Show(this, r, "BunoTunner - HWBot Mínimo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }));
+                }
+                catch (Exception) { }
+            });
+        }
         Dictionary<int, ListViewItem> pidItem = new Dictionary<int, ListViewItem>();
         List<ProcRow> lastRows = new List<ProcRow>();
         Dictionary<int, TimeSpan> prevCpu = new Dictionary<int, TimeSpan>(); DateTime prevT = DateTime.UtcNow;
@@ -15622,7 +15789,10 @@ namespace BunoTunner
             UI.Btn(g, "Aplicar aos marcados", 10, 250, 150, delegate { ApplyNow(false); }).Height = 26;
             UI.Btn(g, "Restaurar padrão", 168, 250, 130, delegate { ApplyNow(true); }).Height = 26;
             lblMsg = UI.Lbl(g, "", 10, 284, Xp.UiBold, Xp.Good);
-            lblMsg.AutoSize = false; lblMsg.SetBounds(10, 282, 400, 36);
+            lblMsg.AutoSize = false; lblMsg.SetBounds(10, 282, 152, 38);
+            bHw = UI.Btn(g, "HWBot Mínimo", 168, 292, 130, delegate { HwStart(); });
+            bHw.Red = true; bHw.Height = 26; bHw.Font = Xp.UiBold;
+            tip.SetToolTip(bHw, "Fecha todos os serviços e programas que não são essenciais (mantém o núcleo do Windows, a rede e o Explorer) para benchmarks. Nada é desativado de forma permanente: ao reiniciar o PC, tudo volta ao normal.");
             tip.SetToolTip(chkSame, "Navegadores e jogos criam vários processos com o mesmo nome; isto altera todos de uma vez.");
             Controls.Add(g);
             UpdateCount();

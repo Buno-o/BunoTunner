@@ -605,3 +605,6 @@ v1.49.33 (TESTE)
 
 v1.49.34 (TESTE)
 - Benchmark de CPU: cena refeita para ficar parecida com a foto enviada (esfera dourada espelhada sobre gramado, sol baixo do lado direito, floresta com troncos e luzes de jardim ao fundo, mesma paleta de cores) e teste mais pesado (384 amostras por pixel, 5 reflexos por raio, 4 raios de oclusao no gramado).
+
+v1.49.35 (TESTE)
+- Afinidade/Prioridade: novo botao vermelho "HWBot Minimo" (do script HWBot-Minimo): fecha todos os servicos e programas nao essenciais (mantem nucleo do Windows, rede, Explorer e programas de benchmark), em 3 passadas, baixa a prioridade do Explorer e limpa a memoria. So para (nada e desativado): reiniciou o PC, volta tudo ao normal. Pede confirmacao antes.
