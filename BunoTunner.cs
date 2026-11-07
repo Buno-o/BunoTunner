@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.35.0")]
-[assembly: AssemblyFileVersion("1.49.35.0")]
-[assembly: AssemblyInformationalVersion("1.49.35")]
+[assembly: AssemblyVersion("1.49.36.0")]
+[assembly: AssemblyFileVersion("1.49.36.0")]
+[assembly: AssemblyInformationalVersion("1.49.36")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -377,10 +377,10 @@ namespace BunoTunner
             "Origem", "Source",
             "Redefinir tudo", "Reset all",
             "Restaurar padrão", "Restore default",
-            "HWBot Mínimo", "HWBot Minimal",
-            "HWBot Mínimo concluído.", "HWBot Minimal finished.",
+            "Bloat Cleaner", "Bloat Cleaner",
+            "Bloat Cleaner concluído.", "Bloat Cleaner finished.",
             "Fecha todos os serviços e programas que não são essenciais (mantém o núcleo do Windows, a rede e o Explorer) para benchmarks. Nada é desativado de forma permanente: ao reiniciar o PC, tudo volta ao normal.", "Closes every non-essential service and program (keeps the Windows core, the network and Explorer) for benchmarks. Nothing is disabled permanently: after a restart everything goes back to normal.",
-            "ATENÇÃO: SALVE SEU TRABALHO. O HWBot Mínimo vai fechar o navegador, Discord, Steam, painel da NVIDIA, bandeja, menu Iniciar/pesquisa e todos os serviços e programas que não são essenciais (ficam só o núcleo do Windows, a rede, o Explorer e os programas de benchmark/monitoramento). Fica sem som. Os serviços são só parados, nada é desativado: para voltar ao normal, reinicie o PC.\n\nContinuar?", "WARNING: SAVE YOUR WORK. HWBot Minimal will close the browser, Discord, Steam, the NVIDIA panel, the tray, the Start menu/search and every non-essential service and program (only the Windows core, the network, Explorer and benchmark/monitoring programs stay). There will be no sound. Services are only stopped, nothing is disabled: to go back to normal, restart the PC.\n\nContinue?",
+            "ATENÇÃO: SALVE SEU TRABALHO. O Bloat Cleaner vai fechar o navegador, Discord, Steam, painel da NVIDIA, bandeja, menu Iniciar/pesquisa e todos os serviços e programas que não são essenciais (ficam só o núcleo do Windows, a rede, o Explorer e os programas de benchmark/monitoramento). Fica sem som. Os serviços são só parados, nada é desativado: para voltar ao normal, reinicie o PC.\n\nContinuar?", "WARNING: SAVE YOUR WORK. Bloat Cleaner will close the browser, Discord, Steam, the NVIDIA panel, the tray, the Start menu/search and every non-essential service and program (only the Windows core, the network, Explorer and benchmark/monitoring programs stay). There will be no sound. Services are only stopped, nothing is disabled: to go back to normal, restart the PC.\n\nContinue?",
             "Destravar tudo", "Unlock all",
             "Travar", "Lock",
             "Overclock / limites", "Overclock / limits",
@@ -1949,7 +1949,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.35";
+        public const string Version = "v1.49.36";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -14860,7 +14860,7 @@ namespace BunoTunner
             int p0, s0, p1, s1; Contar(out p0, out s0);
             for (int pass = 1; pass <= 3; pass++)
             {
-                string pre = "HWBot Mínimo, passada " + pass + " de 3: ";
+                string pre = "Bloat Cleaner, passada " + pass + " de 3: ";
                 st(pre + "parando serviços...");
                 foreach (Svc s in Servicos())
                 {
@@ -14916,12 +14916,12 @@ namespace BunoTunner
                 foreach (int[] a in alvo) Matar(a[0]);
                 if (pass < 3) Th.Thread.Sleep(4000);   // pega servicos que religam sozinhos
             }
-            st("HWBot Mínimo: baixando a prioridade do que sobrou e limpando a memória...");
+            st("Bloat Cleaner: baixando a prioridade do que sobrou e limpando a memória...");
             foreach (string n in PrioBaixa)
                 foreach (Process p in Process.GetProcessesByName(n)) { try { p.PriorityClass = ProcessPriorityClass.Idle; } catch (Exception) { } p.Dispose(); }
             try { MemClean.Clean(true, false, true, true); } catch (Exception) { }
             Contar(out p1, out s1);
-            return "HWBot Mínimo concluído.\n\nProcessos: " + p0 + " -> " + p1 + "\nServiços rodando: " + s0 + " -> " + s1 + "\n\nReinicie o PC para voltar tudo ao normal.";
+            return "Bloat Cleaner concluído.\n\nProcessos: " + p0 + " -> " + p1 + "\nServiços rodando: " + s0 + " -> " + s1 + "\n\nReinicie o PC para voltar tudo ao normal.";
         }
     }
 
@@ -15695,7 +15695,7 @@ namespace BunoTunner
         void HwStart()
         {
             if (hwBusy) return;
-            if (Dlg.Show(this, "ATENÇÃO: SALVE SEU TRABALHO. O HWBot Mínimo vai fechar o navegador, Discord, Steam, painel da NVIDIA, bandeja, menu Iniciar/pesquisa e todos os serviços e programas que não são essenciais (ficam só o núcleo do Windows, a rede, o Explorer e os programas de benchmark/monitoramento). Fica sem som. Os serviços são só parados, nada é desativado: para voltar ao normal, reinicie o PC.\n\nContinuar?", "BunoTunner - HWBot Mínimo", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) != DialogResult.OK) return;
+            if (Dlg.Show(this, "ATENÇÃO: SALVE SEU TRABALHO. O Bloat Cleaner vai fechar o navegador, Discord, Steam, painel da NVIDIA, bandeja, menu Iniciar/pesquisa e todos os serviços e programas que não são essenciais (ficam só o núcleo do Windows, a rede, o Explorer e os programas de benchmark/monitoramento). Fica sem som. Os serviços são só parados, nada é desativado: para voltar ao normal, reinicie o PC.\n\nContinuar?", "BunoTunner - Bloat Cleaner", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) != DialogResult.OK) return;
             hwBusy = true; bHw.Enabled = false;
             System.Threading.ThreadPool.QueueUserWorkItem(delegate
             {
@@ -15706,8 +15706,8 @@ namespace BunoTunner
                 {
                     BeginInvoke(new Action(delegate
                     {
-                        hwBusy = false; bHw.Enabled = true; lblMsg.ForeColor = Xp.Good; lblMsg.Text = Lang.T("HWBot Mínimo concluído.");
-                        Dlg.Show(this, r, "BunoTunner - HWBot Mínimo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        hwBusy = false; bHw.Enabled = true; lblMsg.ForeColor = Xp.Good; lblMsg.Text = Lang.T("Bloat Cleaner concluído.");
+                        Dlg.Show(this, r, "BunoTunner - Bloat Cleaner", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }));
                 }
                 catch (Exception) { }
@@ -15790,7 +15790,7 @@ namespace BunoTunner
             UI.Btn(g, "Restaurar padrão", 168, 250, 130, delegate { ApplyNow(true); }).Height = 26;
             lblMsg = UI.Lbl(g, "", 10, 284, Xp.UiBold, Xp.Good);
             lblMsg.AutoSize = false; lblMsg.SetBounds(10, 282, 152, 38);
-            bHw = UI.Btn(g, "HWBot Mínimo", 168, 292, 130, delegate { HwStart(); });
+            bHw = UI.Btn(g, "Bloat Cleaner", 168, 292, 130, delegate { HwStart(); });
             bHw.Red = true; bHw.Height = 26; bHw.Font = Xp.UiBold;
             tip.SetToolTip(bHw, "Fecha todos os serviços e programas que não são essenciais (mantém o núcleo do Windows, a rede e o Explorer) para benchmarks. Nada é desativado de forma permanente: ao reiniciar o PC, tudo volta ao normal.");
             tip.SetToolTip(chkSame, "Navegadores e jogos criam vários processos com o mesmo nome; isto altera todos de uma vez.");

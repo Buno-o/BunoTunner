@@ -608,3 +608,6 @@ v1.49.34 (TESTE)
 
 v1.49.35 (TESTE)
 - Afinidade/Prioridade: novo botao vermelho "HWBot Minimo" (do script HWBot-Minimo): fecha todos os servicos e programas nao essenciais (mantem nucleo do Windows, rede, Explorer e programas de benchmark), em 3 passadas, baixa a prioridade do Explorer e limpa a memoria. So para (nada e desativado): reiniciou o PC, volta tudo ao normal. Pede confirmacao antes.
+
+v1.49.36 (TESTE)
+- O botao "HWBot Minimo" (aba Afinidade/Prioridade) foi renomeado para "Bloat Cleaner".
