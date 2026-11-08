@@ -649,3 +649,6 @@ v1.49.44 (TESTE)
 v1.49.45 (TESTE)
 - Overlay Luna (XP): removidas as faixas de cor alternadas; o fundo fica liso, na cor original do XP.
 - Overlay: o "Titulo do topo" de todos os layouts com barra agora vem preenchido com "GitHub.com/Buno-o" por padrao; o usuario pode trocar quando quiser (apagar o campo volta ao padrao).
+
+v1.49.46 (TESTE)
+- Overlay Frutiger Aero: minimizar e fechar bem pequenos no canto superior direito da barra (vidro azul e vermelho, estilo Windows 7; decorativos).

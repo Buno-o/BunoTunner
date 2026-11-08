@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.45.0")]
-[assembly: AssemblyFileVersion("1.49.45.0")]
-[assembly: AssemblyInformationalVersion("1.49.45")]
+[assembly: AssemblyVersion("1.49.46.0")]
+[assembly: AssemblyFileVersion("1.49.46.0")]
+[assembly: AssemblyInformationalVersion("1.49.46")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1952,7 +1952,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.45";
+        public const string Version = "v1.49.46";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -8297,13 +8297,14 @@ namespace BunoTunner
             for (int k = 0; k < 2; k++)
             {
                 Rectangle b = k == 0 ? mr : cr; bool close = k == 1;
-                if (style == 1)
+                if (style == 1 || style == 3)
                 {
-                    Color c1 = close ? K(227, 120, 92) : K(88, 150, 255), c2 = close ? K(196, 58, 30) : K(30, 90, 226);
+                    bool w7 = style == 3;
+                    Color c1 = close ? (w7 ? K(240, 150, 130) : K(227, 120, 92)) : (w7 ? K(226, 238, 252) : K(88, 150, 255)), c2 = close ? (w7 ? K(198, 48, 28) : K(196, 58, 30)) : (w7 ? K(128, 168, 224) : K(30, 90, 226));
                     using (GraphicsPath bp = Round(b, Math.Max(2, bs / 4)))
                     {
                         using (LinearGradientBrush lb = new LinearGradientBrush(b, c1, c2, 45f)) g.FillPath(lb, bp);
-                        using (Pen wp = new Pen(Color.White, Math.Max(1f, 1.2f * s))) g.DrawPath(wp, bp);
+                        using (Pen wp = new Pen(w7 ? K(48, 70, 110) : Color.White, Math.Max(1f, 1.2f * s))) g.DrawPath(wp, bp);
                     }
                     using (Pen xp = new Pen(Color.White, Math.Max(1.2f, 1.6f * s)))
                     {
@@ -8391,7 +8392,7 @@ namespace BunoTunner
             d = N(l, "Terminal (verde)"); d.Top = d.Bot = K(0, 6, 0); d.Rad = 0; d.Bd = K(0, 200, 70); d.Hdr = "C:\\> monitor_"; d.HdrA = K(0, 90, 30); d.HdrB = K(0, 50, 16); d.HdrTx = K(110, 255, 140); d.Scan = true; d.Line = KA(70, 0, 200, 70); d.Corner = K(0, 255, 90); d.CornerStyle = 1; d.Lab = K(50, 170, 80); d.Val = K(110, 255, 140);
             // temas do programa (cores vindas da paleta de cada tema, nao do tema ativo)
             p = Pal.Make(0); d = N(l, "Tema: Luna (XP)"); d.Top = d.Bot = p.Face; d.Bd = K(0, 60, 220); d.BW = 2f; d.Hdr = "BunoTunner"; d.HdrA = K(9, 151, 255); d.HdrB = K(0, 60, 210); d.HdrXp = true; d.HdrTx = Color.White; d.Ctl = 1; d.Line = p.GroupLine; d.Lab = K(70, 70, 70); d.Val = p.Text; d.Dot = p.OptMark; d.Rad = 6;
-            p = Pal.Make(1); d = N(l, "Tema: Frutiger Aero (Win 7)"); d.Top = KA(215, 226, 240, 253); d.Bot = KA(190, 150, 190, 236); d.Bd = KA(230, 60, 85, 125); d.Rad = 16; d.Hdr = "Sensores"; d.HdrA = KA(150, 255, 255, 255); d.HdrB = KA(70, 190, 220, 250); d.HdrTx = K(8, 24, 52); d.HdrGlow = true; d.Gloss = true; d.Inner = KA(170, 255, 255, 255); d.Pill = KA(170, 255, 255, 255); d.PillBd = KA(110, 110, 140, 180); d.Lab = K(60, 80, 110); d.Val = p.GroupText;
+            p = Pal.Make(1); d = N(l, "Tema: Frutiger Aero (Win 7)"); d.Top = KA(215, 226, 240, 253); d.Bot = KA(190, 150, 190, 236); d.Bd = KA(230, 60, 85, 125); d.Rad = 16; d.Hdr = "Sensores"; d.HdrA = KA(150, 255, 255, 255); d.HdrB = KA(70, 190, 220, 250); d.HdrTx = K(8, 24, 52); d.HdrGlow = true; d.Ctl = 3; d.Gloss = true; d.Inner = KA(170, 255, 255, 255); d.Pill = KA(170, 255, 255, 255); d.PillBd = KA(110, 110, 140, 180); d.Lab = K(60, 80, 110); d.Val = p.GroupText;
             p = Pal.Make(2); d = N(l, "Tema: Dark / AMOLED"); d.Top = d.Bot = p.Face; d.Bd = p.Border; d.Rad = 10; d.Hdr = "SENSORES"; d.HdrA = p.CapA; d.HdrB = p.CapB; d.HdrTx = p.CapText; d.Bar = p.GroupText; d.BarPos = 1; d.Dot = p.GroupText; d.Line = KA(40, 255, 255, 255); d.Pill = K(30, 30, 38); d.Lab = p.Dim; d.Val = p.Text;
             p = Pal.Make(3); d = N(l, "Tema: Neon / Cyberpunk"); d.Top = d.Bot = p.Face; d.Bd = p.Border; d.Glow = p.GroupText; d.Rad = 3; d.Hdr = "CYBER//SYS"; d.HdrA = p.CapA; d.HdrB = p.CapB; d.HdrTx = Color.White; d.Corner = p.Border; d.CornerStyle = 1; d.Scan = true; d.Dot = p.GroupText; d.Zebra = KA(46, 180, 0, 200); d.Bar = p.CapA; d.Bar2 = p.Border; d.BarPos = 3; d.Lab = p.Dim; d.Val = p.Text;
             p = Pal.Make(4); d = N(l, "Tema: Steampunk"); d.Steam = true; d.Top = K(78, 46, 22); d.Bot = K(34, 18, 8); d.Bd = K(214, 160, 70); d.BW = 2.5f; d.Rad = 10; d.Hdr = "VAPOR"; d.HdrA = K(122, 68, 28); d.HdrB = K(58, 30, 10); d.HdrTx = K(255, 228, 150); d.Inner = KA(170, 150, 100, 40); d.Corner = K(236, 190, 110); d.CornerStyle = 2; d.Pill = KA(235, 18, 10, 4); d.PillBd = K(176, 120, 50); d.Line = KA(70, 214, 160, 70); d.Zebra = KA(16, 255, 200, 120); d.Lab = K(240, 212, 166); d.Val = K(255, 216, 120); d.Dot = K(214, 160, 70);
