@@ -630,3 +630,11 @@ v1.49.40 (TESTE)
 v1.49.41 (TESTE)
 - Overlay: novo campo "Titulo do topo" (segunda linha da janela do overlay) para trocar o texto escrito na barra superior de qualquer layout/tema que tenha barra (READY_, NEON, VAPOR, VICE CITY, BunoTunner...). Cada layout guarda o seu proprio titulo (max. 24 letras); apagar o campo volta ao texto original. Entra em exportar/importar, desfazer/refazer e "Restaurar padrao".
 - Overlay Ambar: a barra do topo era amarela com letras pretas (com contorno preto, dificil de ler); agora e ambar escuro com letras ambar claras.
+
+v1.49.42 (TESTE)
+- Tema Frutiger Aero (programa todo): as janelas ficam translucidas (area de trabalho visivel por tras, 88% de opacidade) e pedem ao Windows o desfoque tipo vidro. Para ajustar, no arquivo de configuracao: aero.opacity (50 a 100) e aero.glass (0 desliga).
+- Overlay: novo "Contorno do valor" (ao lado de "Titulo do topo"): quando ligado, cada valor fica dentro de uma caixa arredondada clara com borda escura; desligado, so o valor com contorno de letra.
+- Overlay Luna (XP): azul da barra e da borda igual ao do Windows XP + minimo e fechar bem pequenos no canto (decorativos).
+- Overlay Vintage (Win 95): azul marinho do Win95 (0,0,128) + minimo e fechar pequenos no canto (decorativos).
+- Overlay Frutiger Aero: fundo de vidro translucido, barra clara com titulo escuro e brilho (legivel).
+- Overlay Claro minimalista: titulo da barra mais escuro, com brilho claro, sem o contorno preto.
