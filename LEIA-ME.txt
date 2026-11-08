@@ -623,3 +623,6 @@ v1.49.38 (TESTE)
 
 v1.49.39 (TESTE)
 - Menu Overlay: layout refeito conforme o modelo enviado. "Ativar overlay" ficou curto, com o campo "Mostrar" (Somente em jogos / DirectX / Sempre) ao lado, sem o rotulo; o atalho foi para a segunda linha (rotulo "Atalho:" + botao mais estreito); "Restaurar padrao", "Editar na tela", "Exportar..." e "Importar..." reposicionados abaixo da lista da esquerda; "Temperatura em vermelho" e "Fonte" sob a lista da direita, com "Valores em negrito", "Contorno preto" e "Compacto" empilhados ao lado. Removidos da janela: Desfazer, Refazer, Limpar lista, Fechar e "Aplicar a cor tambem ao nome" (Ctrl+Z/Ctrl+Y e Esc continuam funcionando).
+
+v1.49.40 (TESTE)
+- Menu Overlay: o rotulo "Layout:" foi movido para a esquerda para nao ficar sobre o campo.

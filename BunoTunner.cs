@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.39.0")]
-[assembly: AssemblyFileVersion("1.49.39.0")]
-[assembly: AssemblyInformationalVersion("1.49.39")]
+[assembly: AssemblyVersion("1.49.40.0")]
+[assembly: AssemblyFileVersion("1.49.40.0")]
+[assembly: AssemblyInformationalVersion("1.49.40")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1952,7 +1952,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.39";
+        public const string Version = "v1.49.40";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -8541,7 +8541,7 @@ namespace BunoTunner
             foreach (int v in Sizes) cbSize.Items.Add(v + "%");
             UI.Lbl(body, "Opacidade:", 450, 9); cbOp = Combo(body, 520, 5, 70);
             foreach (int v in Ops) cbOp.Items.Add(v + "%");
-            UI.Lbl(body, "Layout:", 625, 9); cbLay = Combo(body, 650, 5, 126); cbLay.DropDownWidth = 230;
+            UI.Lbl(body, "Layout:", 608, 9); cbLay = Combo(body, 650, 5, 126); cbLay.DropDownWidth = 230;
             foreach (OverlayForm.LD x in OverlayForm.Layouts) cbLay.Items.Add(x.Name);
             cbLay.MaxDropDownItems = 25;
                         cbMode.Items.Add("Somente em jogos (tela cheia ou janela sem borda)");
