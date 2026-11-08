@@ -615,3 +615,8 @@ v1.49.36 (TESTE)
 v1.49.37 (TESTE)
 - Overlay: novos itens de frametime calculados pelo ETW (o mesmo captador do FPS): "Frametime atual (ms)", "Frametime medio (ms)", "1% low (FPS)" e "0,1% low (FPS)" (janela de 10 s; precisa de administrador, 64 bits). Adicione na lista de itens do overlay.
 - Overlay: mais controle visual - fonte (familia) das letras, valores em negrito (liga/desliga), contorno preto (liga/desliga) e cor global dos nomes e dos valores (ha botao "Cores padrao"). Tudo entra em exportar/importar, desfazer/refazer e "Restaurar padrao".
+
+v1.49.38 (TESTE)
+- Menu Overlay: removidas a dica de rodape e as fileiras de botoes (Cor, Renomear, Subir, Descer, Resetar, Cor dos nomes, Cor dos valores, Cores padrao). Tudo fica no clique direito de um item da lista.
+- Clique direito > "Cor...": o programa pergunta "Cor do nome", "Cor do valor" ou "Tudo" e abre o seletor de cor. Cada item agora tem cor do nome e cor do valor independentes. "Renomear...", "Resetar cor e nome" e "Remover" continuam no menu; a ordem se muda arrastando.
+- Clique direito > "Gráfico" (liga/desliga): o item ganha, no proprio overlay, um grafico de linha com o historico recente dos valores (funciona em sensores, FPS e frametime).
