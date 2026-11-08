@@ -8341,7 +8341,7 @@ namespace BunoTunner
         public class LD
         {
             public string Name, Hdr; public int Rad = -1, BarPos, CornerStyle, Ctl;   // Ctl: botoes decorativos na barra (1 = XP, 2 = Win95)
-            public bool HdrGlow, HdrXp;   // HdrXp: mesmo degrade de 5 cores da barra de titulo do tema Luna public float BW = 1f;
+            public bool HdrGlow, HdrXp; /* HdrXp: mesmo degrade de 5 cores da barra de titulo do tema Luna */ public float BW = 1f;
             public Color Top, Bot, Bd, Bar, Bar2, Lab, Val, Glow, HdrA, HdrB, HdrTx, Line, Zebra, Inner, Corner, Pill, PillBd, Dot;
             public bool Bevel, Soft, Gloss, Scan, Steam;
         }
