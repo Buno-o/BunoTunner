@@ -645,3 +645,7 @@ v1.49.43 (TESTE)
 
 v1.49.44 (TESTE)
 - Overlay Luna (XP): a barra do topo agora usa exatamente o mesmo degrade de azul (5 tons) da barra de titulo das janelas do tema XP do programa, e a borda usa o mesmo azul (0,60,220).
+
+v1.49.45 (TESTE)
+- Overlay Luna (XP): removidas as faixas de cor alternadas; o fundo fica liso, na cor original do XP.
+- Overlay: o "Titulo do topo" de todos os layouts com barra agora vem preenchido com "GitHub.com/Buno-o" por padrao; o usuario pode trocar quando quiser (apagar o campo volta ao padrao).
