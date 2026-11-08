@@ -642,3 +642,6 @@ v1.49.42 (TESTE)
 v1.49.43 (TESTE)
 - Tema Frutiger Aero (programa): transparencia bem mais leve (95% em vez de 88%) e o desfoque do Windows ficou desligado por padrao (aero.blur=1 liga; aero.opacity de 50 a 100 ajusta).
 - Overlay "Contorno do valor": agora, quando ligado, REMOVE a caixa clara atras dos valores (a dos layouts Frutiger Aero e Win95) e deixa so um contorno escuro grosso rente as letras. Desligado, o layout fica como antes.
+
+v1.49.44 (TESTE)
+- Overlay Luna (XP): a barra do topo agora usa exatamente o mesmo degrade de azul (5 tons) da barra de titulo das janelas do tema XP do programa, e a borda usa o mesmo azul (0,60,220).

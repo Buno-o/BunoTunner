@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.43.0")]
-[assembly: AssemblyFileVersion("1.49.43.0")]
-[assembly: AssemblyInformationalVersion("1.49.43")]
+[assembly: AssemblyVersion("1.49.44.0")]
+[assembly: AssemblyFileVersion("1.49.44.0")]
+[assembly: AssemblyInformationalVersion("1.49.44")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1952,7 +1952,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.43";
+        public const string Version = "v1.49.44";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -8341,7 +8341,7 @@ namespace BunoTunner
         public class LD
         {
             public string Name, Hdr; public int Rad = -1, BarPos, CornerStyle, Ctl;   // Ctl: botoes decorativos na barra (1 = XP, 2 = Win95)
-            public bool HdrGlow; public float BW = 1f;
+            public bool HdrGlow, HdrXp;   // HdrXp: mesmo degrade de 5 cores da barra de titulo do tema Luna public float BW = 1f;
             public Color Top, Bot, Bd, Bar, Bar2, Lab, Val, Glow, HdrA, HdrB, HdrTx, Line, Zebra, Inner, Corner, Pill, PillBd, Dot;
             public bool Bevel, Soft, Gloss, Scan, Steam;
         }
@@ -8390,7 +8390,7 @@ namespace BunoTunner
             d = N(l, "Neon"); d.Top = K(10, 6, 24); d.Bot = K(24, 6, 46); d.Bd = K(0, 229, 255); d.Glow = K(0, 229, 255); d.Hdr = "NEON"; d.HdrA = K(0, 120, 150); d.HdrB = K(10, 6, 24); d.HdrTx = K(0, 245, 255); d.Inner = KA(90, 255, 0, 200); d.Dot = K(255, 0, 200); d.Rad = 8; d.Val = K(230, 250, 255); d.Lab = K(130, 170, 200);
             d = N(l, "Terminal (verde)"); d.Top = d.Bot = K(0, 6, 0); d.Rad = 0; d.Bd = K(0, 200, 70); d.Hdr = "C:\\> monitor_"; d.HdrA = K(0, 90, 30); d.HdrB = K(0, 50, 16); d.HdrTx = K(110, 255, 140); d.Scan = true; d.Line = KA(70, 0, 200, 70); d.Corner = K(0, 255, 90); d.CornerStyle = 1; d.Lab = K(50, 170, 80); d.Val = K(110, 255, 140);
             // temas do programa (cores vindas da paleta de cada tema, nao do tema ativo)
-            p = Pal.Make(0); d = N(l, "Tema: Luna (XP)"); d.Top = d.Bot = p.Face; d.Bd = K(8, 49, 217); d.BW = 2f; d.Hdr = "BunoTunner"; d.HdrA = K(53, 147, 255); d.HdrB = K(0, 84, 227); d.HdrTx = Color.White; d.Ctl = 1; d.Zebra = KA(120, 255, 255, 255); d.Line = p.GroupLine; d.Lab = K(70, 70, 70); d.Val = p.Text; d.Dot = p.OptMark; d.Rad = 6;
+            p = Pal.Make(0); d = N(l, "Tema: Luna (XP)"); d.Top = d.Bot = p.Face; d.Bd = K(0, 60, 220); d.BW = 2f; d.Hdr = "BunoTunner"; d.HdrA = K(9, 151, 255); d.HdrB = K(0, 60, 210); d.HdrXp = true; d.HdrTx = Color.White; d.Ctl = 1; d.Zebra = KA(120, 255, 255, 255); d.Line = p.GroupLine; d.Lab = K(70, 70, 70); d.Val = p.Text; d.Dot = p.OptMark; d.Rad = 6;
             p = Pal.Make(1); d = N(l, "Tema: Frutiger Aero (Win 7)"); d.Top = KA(215, 226, 240, 253); d.Bot = KA(190, 150, 190, 236); d.Bd = KA(230, 60, 85, 125); d.Rad = 16; d.Hdr = "Sensores"; d.HdrA = KA(150, 255, 255, 255); d.HdrB = KA(70, 190, 220, 250); d.HdrTx = K(8, 24, 52); d.HdrGlow = true; d.Gloss = true; d.Inner = KA(170, 255, 255, 255); d.Pill = KA(170, 255, 255, 255); d.PillBd = KA(110, 110, 140, 180); d.Lab = K(60, 80, 110); d.Val = p.GroupText;
             p = Pal.Make(2); d = N(l, "Tema: Dark / AMOLED"); d.Top = d.Bot = p.Face; d.Bd = p.Border; d.Rad = 10; d.Hdr = "SENSORES"; d.HdrA = p.CapA; d.HdrB = p.CapB; d.HdrTx = p.CapText; d.Bar = p.GroupText; d.BarPos = 1; d.Dot = p.GroupText; d.Line = KA(40, 255, 255, 255); d.Pill = K(30, 30, 38); d.Lab = p.Dim; d.Val = p.Text;
             p = Pal.Make(3); d = N(l, "Tema: Neon / Cyberpunk"); d.Top = d.Bot = p.Face; d.Bd = p.Border; d.Glow = p.GroupText; d.Rad = 3; d.Hdr = "CYBER//SYS"; d.HdrA = p.CapA; d.HdrB = p.CapB; d.HdrTx = Color.White; d.Corner = p.Border; d.CornerStyle = 1; d.Scan = true; d.Dot = p.GroupText; d.Zebra = KA(46, 180, 0, 200); d.Bar = p.CapA; d.Bar2 = p.Border; d.BarPos = 3; d.Lab = p.Dim; d.Val = p.Text;
@@ -8441,7 +8441,16 @@ namespace BunoTunner
                     if (hdrH > 0 && d.Hdr != null)
                     {
                         Rectangle hr = d.Bevel ? new Rectangle(3, 3, Width - 7, hdrH - 3) : d.Steam ? new Rectangle(5, 5, Width - 11, hdrH - 1) : new Rectangle(0, 0, Width, hdrH);
-                        using (LinearGradientBrush hb = new LinearGradientBrush(hr, Sc(d.HdrA, bgAlpha), Sc(d.HdrB, bgAlpha), 90f)) g.FillRectangle(hb, hr);
+                        using (LinearGradientBrush hb = new LinearGradientBrush(hr, Sc(d.HdrA, bgAlpha), Sc(d.HdrB, bgAlpha), 90f))
+                        {
+                            if (d.HdrXp)
+                            {
+                                ColorBlend xb = new ColorBlend(5); xb.Positions = new float[] { 0f, 0.1f, 0.5f, 0.9f, 1f };
+                                xb.Colors = new Color[] { Sc(K(9, 151, 255), bgAlpha), Sc(K(0, 83, 238), bgAlpha), Sc(K(0, 80, 238), bgAlpha), Sc(K(0, 96, 250), bgAlpha), Sc(K(0, 60, 210), bgAlpha) };
+                                hb.InterpolationColors = xb;
+                            }
+                            g.FillRectangle(hb, hr);
+                        }
                         if (!d.Bd.IsEmpty && !d.Bevel) using (Pen hp = new Pen(Color.FromArgb(120, d.Bd))) g.DrawLine(hp, 0, hdrH - 1, Width, hdrH - 1);
                         if (d.Steam)
                         {
