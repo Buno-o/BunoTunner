@@ -620,3 +620,6 @@ v1.49.38 (TESTE)
 - Menu Overlay: removidas a dica de rodape e as fileiras de botoes (Cor, Renomear, Subir, Descer, Resetar, Cor dos nomes, Cor dos valores, Cores padrao). Tudo fica no clique direito de um item da lista.
 - Clique direito > "Cor...": o programa pergunta "Cor do nome", "Cor do valor" ou "Tudo" e abre o seletor de cor. Cada item agora tem cor do nome e cor do valor independentes. "Renomear...", "Resetar cor e nome" e "Remover" continuam no menu; a ordem se muda arrastando.
 - Clique direito > "Gráfico" (liga/desliga): o item ganha, no proprio overlay, um grafico de linha com o historico recente dos valores (funciona em sensores, FPS e frametime).
+
+v1.49.39 (TESTE)
+- Menu Overlay: layout refeito conforme o modelo enviado. "Ativar overlay" ficou curto, com o campo "Mostrar" (Somente em jogos / DirectX / Sempre) ao lado, sem o rotulo; o atalho foi para a segunda linha (rotulo "Atalho:" + botao mais estreito); "Restaurar padrao", "Editar na tela", "Exportar..." e "Importar..." reposicionados abaixo da lista da esquerda; "Temperatura em vermelho" e "Fonte" sob a lista da direita, com "Valores em negrito", "Contorno preto" e "Compacto" empilhados ao lado. Removidos da janela: Desfazer, Refazer, Limpar lista, Fechar e "Aplicar a cor tambem ao nome" (Ctrl+Z/Ctrl+Y e Esc continuam funcionando).

@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.38.0")]
-[assembly: AssemblyFileVersion("1.49.38.0")]
-[assembly: AssemblyInformationalVersion("1.49.38")]
+[assembly: AssemblyVersion("1.49.39.0")]
+[assembly: AssemblyFileVersion("1.49.39.0")]
+[assembly: AssemblyInformationalVersion("1.49.39")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -438,7 +438,7 @@ namespace BunoTunner
             "IOL canal B / DIMM0:", "IOL channel B / DIMM0:", "IOL canal B / DIMM1:", "IOL channel B / DIMM1:",
             "Overlay em jogos...", "In-game overlay...",
             "Overlay em jogos", "In-game overlay",
-            "Ativar overlay em jogos", "Enable in-game overlay",
+            "Ativar overlay em jogos", "Enable in-game overlay", "Ativar overlay", "Enable overlay", "Compacto", "Compact",
             "Tamanho:", "Size:",
             "Opacidade:", "Opacity:", "Layout:", "Layout:", "Padrão (fundo + contorno)", "Default (background + border)", "Sem fundo nem contorno", "No background or border",
             "So contorno (sem fundo)", "Border only (no background)", "Barra lateral", "Side bar", "Neon", "Neon", "Terminal (verde)", "Terminal (green)", "Tema: Luna (XP)", "Theme: Luna (XP)", "Tema: Frutiger Aero (Win 7)", "Theme: Frutiger Aero (Win 7)", "Tema: Dark / AMOLED", "Theme: Dark / AMOLED", "Tema: Neon / Cyberpunk", "Theme: Neon / Cyberpunk", "Tema: Steampunk", "Theme: Steampunk", "Tema: Vintage (Win 95)", "Theme: Vintage (Win 95)", "Tema: GTA VI (Vice City)", "Theme: GTA VI (Vice City)", "Vidro (translúcido)", "Glass (translucent)", "Pílula", "Pill", "Claro minimalista", "Light minimal", "Barra superior", "Top bar", "Barra inferior", "Bottom bar", "Âmbar (monitor antigo)", "Amber (old monitor)", "HUD ciano", "Cyan HUD", "Oceano", "Ocean", "Floresta", "Forest", "Rosa", "Pink", "Papel", "Paper", "Faixa escura (sem borda)", "Dark strip (no border)", 
@@ -1952,7 +1952,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.38";
+        public const string Version = "v1.49.39";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -8532,23 +8532,23 @@ namespace BunoTunner
         public OverlayConfigForm()
         {
             Text = "Overlay em jogos";
-            Size = new Size(796, 640); KeyPreview = true;
+            Size = new Size(796, 616); KeyPreview = true;
             Panel body = new Panel(); body.Dock = DockStyle.Fill; Controls.Add(body);
 
-            chkOn = UI.Opt(body, "Ativar overlay em jogos", 8, 8, 260, false);
+            chkOn = UI.Opt(body, "Ativar overlay", 8, 8, 91, false);
+            cbMode = Combo(body, 100, 5, 128); cbMode.DropDownWidth = 340;
             UI.Lbl(body, "Tamanho:", 300, 9); cbSize = Combo(body, 362, 5, 70);
             foreach (int v in Sizes) cbSize.Items.Add(v + "%");
             UI.Lbl(body, "Opacidade:", 450, 9); cbOp = Combo(body, 520, 5, 70);
             foreach (int v in Ops) cbOp.Items.Add(v + "%");
-            UI.Lbl(body, "Layout:", 600, 9); cbLay = Combo(body, 650, 5, 126); cbLay.DropDownWidth = 230;
+            UI.Lbl(body, "Layout:", 625, 9); cbLay = Combo(body, 650, 5, 126); cbLay.DropDownWidth = 230;
             foreach (OverlayForm.LD x in OverlayForm.Layouts) cbLay.Items.Add(x.Name);
             cbLay.MaxDropDownItems = 25;
-            UI.Lbl(body, "Mostrar:", 8, 40); cbMode = Combo(body, 66, 36, 420);
-            cbMode.Items.Add("Somente em jogos (tela cheia ou janela sem borda)");
+                        cbMode.Items.Add("Somente em jogos (tela cheia ou janela sem borda)");
             cbMode.Items.Add("Em qualquer programa que desenhe com DirectX");
             cbMode.Items.Add("Sempre (para testar)");
-            UI.Lbl(body, "Atalho:", 500, 40);
-            btnKey = UI.Btn(body, "", 556, 36, 220, delegate { capturing = true; Overlay.PauseKey(true); btnKey.Text = "Pressione o atalho...  (Esc cancela, Del limpa)"; });
+            UI.Lbl(body, "Atalho:", 8, 41);
+            btnKey = UI.Btn(body, "", 48, 36, 209, delegate { capturing = true; Overlay.PauseKey(true); btnKey.Text = "Pressione o atalho..."; });
             btnKey.Text = "Mostrar/ocultar: " + Overlay.KeyName() + (Overlay.KeyOk ? "" : " (em uso!)");
 
             UI.Lbl(body, "Sensores disponíveis  (duplo clique ou arraste para a direita)", 8, 72, Xp.UiBold);
@@ -8569,27 +8569,23 @@ namespace BunoTunner
 
             // ferramentas do item selecionado (lista da direita)
 
-            UI.Btn(body, "Desfazer", 8, 497, 76, delegate { Overlay.Undo(); });
-            UI.Btn(body, "Refazer", 88, 497, 70, delegate { Overlay.Redo(); });
-            UI.Btn(body, "Limpar lista", 162, 497, 96, delegate { if (Overlay.Items.Count == 0) return; Overlay.Items.Clear(); Overlay.Commit(); });
-            UI.Btn(body, "Restaurar padrão", 262, 497, 118, delegate
+            UI.Btn(body, "Restaurar padrão", 257, 470, 117, delegate
             {
                 if (Dlg.Show(this, "Restaurar todas as opções do overlay (itens, cores, nomes, tamanho, opacidade...) para o padrão?\nVocê pode desfazer com Ctrl+Z.", "Overlay em jogos", MessageBoxButtons.YesNo) == DialogResult.Yes) Overlay.ResetAll();
             });
-            btnEdit = UI.Btn(body, "Editar na tela", 430, 497, 124, delegate { Overlay.SetEditing(!Overlay.Editing, Screen.FromControl(this)); });
-            UI.Btn(body, "Exportar...", 558, 497, 104, delegate { DoExport(); });
-            UI.Btn(body, "Importar...", 666, 497, 110, delegate { DoImport(); });
+            btnEdit = UI.Btn(body, "Editar na tela", 27, 498, 125, delegate { Overlay.SetEditing(!Overlay.Editing, Screen.FromControl(this)); });
+            UI.Btn(body, "Exportar...", 156, 498, 104, delegate { DoExport(); });
+            UI.Btn(body, "Importar...", 264, 498, 110, delegate { DoImport(); });
 
-            chkCompact = UI.Opt(body, "Compacto (só os valores, sem nomes)", 8, 535, 270, false);
-            chkColName = UI.Opt(body, "Aplicar a cor também ao nome", 290, 535, 230, false);
-            UI.Btn(body, "Fechar", 686, 531, 90, delegate { Close(); });
-            UI.Lbl(body, "Temperatura em vermelho a partir de:", 8, 568);
-            cbHot = Combo(body, 238, 564, 90);
+            UI.Lbl(body, "Temperatura em vermelho a partir de:", 430, 472);
+            cbHot = Combo(body, 628, 467, 90);
             cbHot.Items.Add("Desligado"); for (int t = 70; t <= 95; t += 5) cbHot.Items.Add(t + " °C");
 
-            UI.Lbl(body, "Fonte:", 345, 568); cbFont = Combo(body, 390, 564, 150); cbFont.DropDownWidth = 260; cbFont.MaxDropDownItems = 20;
+            UI.Lbl(body, "Fonte:", 430, 499); cbFont = Combo(body, 477, 494, 150); cbFont.DropDownWidth = 260; cbFont.MaxDropDownItems = 20;
             { List<string> fn = new List<string>(); foreach (FontFamily ff in FontFamily.Families) fn.Add(ff.Name); fn.Sort(StringComparer.CurrentCultureIgnoreCase); foreach (string f in fn) cbFont.Items.Add(f); }
-            chkBold = UI.Opt(body, "Valores em negrito", 550, 566, 140, false); chkOut = UI.Opt(body, "Contorno preto", 690, 566, 100, false);
+            chkBold = UI.Opt(body, "Valores em negrito", 640, 496, 150, false); chkOut = UI.Opt(body, "Contorno preto", 640, 518, 150, false);
+            chkCompact = UI.Opt(body, "Compacto", 640, 541, 150, false);
+            chkColName = UI.Opt(body, "Aplicar a cor também ao nome", 8, 535, 230, false); chkColName.Visible = false;   // substituido pela cor do nome por item (clique direito > Cor)
 
             building = true;
             chkOn.Checked = Overlay.On;
