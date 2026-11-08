@@ -611,3 +611,7 @@ v1.49.35 (TESTE)
 
 v1.49.36 (TESTE)
 - O botao "HWBot Minimo" (aba Afinidade/Prioridade) foi renomeado para "Bloat Cleaner".
+
+v1.49.37 (TESTE)
+- Overlay: novos itens de frametime calculados pelo ETW (o mesmo captador do FPS): "Frametime atual (ms)", "Frametime medio (ms)", "1% low (FPS)" e "0,1% low (FPS)" (janela de 10 s; precisa de administrador, 64 bits). Adicione na lista de itens do overlay.
+- Overlay: mais controle visual - fonte (familia) das letras, valores em negrito (liga/desliga), contorno preto (liga/desliga) e cor global dos nomes e dos valores (ha botao "Cores padrao"). Tudo entra em exportar/importar, desfazer/refazer e "Restaurar padrao".

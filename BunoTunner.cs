@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.36.0")]
-[assembly: AssemblyFileVersion("1.49.36.0")]
-[assembly: AssemblyInformationalVersion("1.49.36")]
+[assembly: AssemblyVersion("1.49.37.0")]
+[assembly: AssemblyFileVersion("1.49.37.0")]
+[assembly: AssemblyInformationalVersion("1.49.37")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -377,6 +377,8 @@ namespace BunoTunner
             "Origem", "Source",
             "Redefinir tudo", "Reset all",
             "Restaurar padrão", "Restore default",
+            "Fonte:", "Font:", "Valores em negrito", "Bold values", "Contorno preto", "Black outline", "Cor dos nomes...", "Names color...", "Cor dos valores...", "Values color...", "Cores padrão", "Default colors",
+            "Frametime atual (ms)", "Current frametime (ms)", "Frametime médio (ms)", "Average frametime (ms)", "1% low (FPS)", "1% low (FPS)", "0,1% low (FPS)", "0.1% low (FPS)", "Frametime médio", "Average frametime",
             "Bloat Cleaner", "Bloat Cleaner",
             "Bloat Cleaner concluído.", "Bloat Cleaner finished.",
             "Fecha todos os serviços e programas que não são essenciais (mantém o núcleo do Windows, a rede e o Explorer) para benchmarks. Nada é desativado de forma permanente: ao reiniciar o PC, tudo volta ao normal.", "Closes every non-essential service and program (keeps the Windows core, the network and Explorer) for benchmarks. Nothing is disabled permanently: after a restart everything goes back to normal.",
@@ -1949,7 +1951,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.36";
+        public const string Version = "v1.49.37";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -7621,7 +7623,7 @@ namespace BunoTunner
                         PidInfo pk; if (!pids.TryGetValue(pid, out pk)) { pk = new PidInfo(); pids[pid] = pk; }
                         Kq kq; if (!pk.K.TryGetValue(id, out kq)) { kq = new Kq(); pk.K[id] = kq; }
                         kq.Q.Enqueue(ts); kq.Newest = ts; kq.Last = arrive;
-                        long kc = ts - Stopwatch.Frequency * 2;
+                        long kc = ts - Stopwatch.Frequency * 12;
                         while (kq.Q.Count > 0 && kq.Q.Peek() < kc) kq.Q.Dequeue();
                     }
                     return;
@@ -7630,7 +7632,7 @@ namespace BunoTunner
                 {
                     PidInfo pi; if (!pids.TryGetValue(pid, out pi)) { pi = new PidInfo(); pids[pid] = pi; }
                     pi.Q.Enqueue(ts); pi.Newest = ts; pi.Last = arrive; if (d9) pi.D9 = true;
-                    long cut = ts - Stopwatch.Frequency * 2;
+                    long cut = ts - Stopwatch.Frequency * 12;
                     while (pi.Q.Count > 0 && pi.Q.Peek() < cut) pi.Q.Dequeue();
                 }
             }
@@ -7664,6 +7666,33 @@ namespace BunoTunner
             if (pi.Api == null || pi.ApiMode != mode || now - pi.ApiAt > hz * 10) { pi.Api = DetectApi(pid, pi.D9, dk); pi.ApiMode = mode; pi.ApiAt = now; }
             api = pi.Api;
             return fps > 0;
+        }
+
+        // frametime (ms) do processo, calculado pelos intervalos entre os eventos de Present do ETW (ultimos ~10 s):
+        // atual, medio e 1% / 0,1% low (media dos piores 1% / 0,1% dos quadros, convertida em FPS)
+        public static bool GetFt(uint pid, out double cur, out double avg, out double low1, out double low01)
+        {
+            cur = avg = low1 = low01 = 0; long now = Stopwatch.GetTimestamp(), hz = Stopwatch.Frequency; long[] ts;
+            lock (lk)
+            {
+                PidInfo pi; if (!pids.TryGetValue(pid, out pi)) return false;
+                Queue<long> q = null; long newest = 0;
+                if (pi.Last != 0 && now - pi.Last <= hz * 3) { q = pi.Q; newest = pi.Newest; }
+                else foreach (int id in KIds) { Kq kq; if (pi.K.TryGetValue(id, out kq) && now - kq.Last <= hz * 3) { q = kq.Q; newest = kq.Newest; break; } }
+                if (q == null) return false;
+                long cut = newest - hz * 10; List<long> l = new List<long>();
+                foreach (long t in q) if (t > cut) l.Add(t);
+                ts = l.ToArray();
+            }
+            if (ts.Length < 12) return false;
+            int n = ts.Length - 1; double[] d = new double[n];
+            for (int i = 0; i < n; i++) d[i] = (ts[i + 1] - ts[i]) * 1000.0 / hz;
+            cur = d[n - 1]; avg = (ts[n] - ts[0]) * 1000.0 / hz / n;
+            Array.Sort(d); Array.Reverse(d);   // do pior para o melhor
+            int k1 = Math.Max(1, (int)Math.Ceiling(n * 0.01)), k2 = Math.Max(1, (int)Math.Ceiling(n * 0.001)); double a1 = 0, a2 = 0;
+            for (int i = 0; i < k1; i++) a1 += d[i]; for (int i = 0; i < k2; i++) a2 += d[i];
+            low1 = 1000.0 / (a1 / k1); low01 = 1000.0 / (a2 / k2);
+            return true;
         }
 
         static string DetectApi(uint pid, bool d9prov, bool dkOnly)
@@ -7709,7 +7738,12 @@ namespace BunoTunner
     {
         public class Row { public string Key, Label, Value; public bool Hot, HasCol; public Color Col; }
         public static readonly string[][] Specials = {
-            new string[] { "@FPS", "FPS (API + quadros/s)" } };
+            new string[] { "@FPS", "FPS (API + quadros/s)" }, new string[] { "@FT", "Frametime atual (ms)" }, new string[] { "@FTA", "Frametime médio (ms)" },
+            new string[] { "@L1", "1% low (FPS)" }, new string[] { "@L01", "0,1% low (FPS)" } };
+        public static string FontName = "Segoe UI"; public static bool BoldVal = true, Outline = true; public static Color LabCol = Color.Empty, ValCol = Color.Empty;
+        static double ftCur, ftAvg, ftL1, ftL01; static bool ftOk;
+        static string Hx(Color c) { return c.IsEmpty ? "" : (c.R << 16 | c.G << 8 | c.B).ToString("X6"); }
+        static Color Cx(string t) { int v; return t.Length == 6 && int.TryParse(t, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out v) ? Color.FromArgb(255, (v >> 16) & 255, (v >> 8) & 255, v & 255) : Color.Empty; }
         public static Dictionary<string, Color> Colors = new Dictionary<string, Color>();
         public static Dictionary<string, string> Names = new Dictionary<string, string>();
         public static bool Compact, ColName; public static int HotTemp = 80;
@@ -7740,8 +7774,10 @@ namespace BunoTunner
             Scale = Math.Max(50, Math.Min(200, (int)Math.Round(I("ov.size", 100) / 5.0) * 5)); Mode = Math.Max(0, Math.Min(2, I("ov.mode", 0))); Opac = Math.Max(50, Math.Min(100, (int)Math.Round(I("ov.op", 85) / 5.0) * 5)); Layout = Math.Max(0, Math.Min(24, I("ov.lay", 0)));
             Fx = Math.Max(0, Math.Min(1, Dd("ov.fx", 0))); Fy = Math.Max(0, Math.Min(1, Dd("ov.fy", 0)));
             Items = new List<string>(Settings.Get("ov.items", "@FPS").Split(new string[] { "~|~" }, StringSplitOptions.RemoveEmptyEntries));
-            Items.RemoveAll(delegate(string it) { return it.StartsWith("@") && it != "@FPS"; });   // itens removidos em versoes anteriores (frametime etc.)
+            Items.RemoveAll(delegate(string it) { return it.StartsWith("@") && Array.FindIndex(Specials, delegate(string[] sp) { return sp[0] == it; }) < 0; });
             KeyMods = I("ov.keymods", 3); KeyVk = I("ov.keyvk", (int)Keys.O);   // padrao: Ctrl+Shift+O
+            FontName = Settings.Get("ov.font", "Segoe UI"); if (FontName.Length == 0) FontName = "Segoe UI";
+            BoldVal = Settings.Get("ov.bold", "1") == "1"; Outline = Settings.Get("ov.outline", "1") == "1"; LabCol = Cx(Settings.Get("ov.clab", "")); ValCol = Cx(Settings.Get("ov.cval", ""));
             Compact = Settings.Get("ov.compact", "0") == "1"; ColName = Settings.Get("ov.colname", "0") == "1"; HotTemp = I("ov.hot", 80);
             Colors.Clear(); Names.Clear();
             foreach (string e in Settings.Get("ov.cols", "").Split(Sep, StringSplitOptions.RemoveEmptyEntries))
@@ -7757,7 +7793,7 @@ namespace BunoTunner
         public static void SetColor(string key, Color? c) { if (c.HasValue) Colors[key] = c.Value; else Colors.Remove(key); Commit(); }
         public static void SetName(string key, string n) { if (string.IsNullOrEmpty(n)) Names.Remove(key); else Names[key] = n.Replace("~", "").Replace("\r", " ").Replace("\n", " "); Commit(); }
         // todas as chaves da configuracao (usadas para salvar, desfazer/refazer e exportar/importar)
-        static readonly string[] CfgKeys = { "ov.size", "ov.mode", "ov.op", "ov.lay", "ov.fx", "ov.fy", "ov.items", "ov.compact", "ov.colname", "ov.hot", "ov.cols", "ov.names", "ov.keymods", "ov.keyvk" };
+        static readonly string[] CfgKeys = { "ov.size", "ov.mode", "ov.op", "ov.lay", "ov.fx", "ov.fy", "ov.items", "ov.compact", "ov.colname", "ov.hot", "ov.cols", "ov.names", "ov.keymods", "ov.keyvk", "ov.font", "ov.bold", "ov.outline", "ov.clab", "ov.cval" };
         static List<KeyValuePair<string, string>> Dump()
         {
             List<KeyValuePair<string, string>> d = new List<KeyValuePair<string, string>>();
@@ -7770,6 +7806,8 @@ namespace BunoTunner
             d.Add(new KeyValuePair<string, string>("ov.compact", Compact ? "1" : "0")); d.Add(new KeyValuePair<string, string>("ov.colname", ColName ? "1" : "0"));
             d.Add(new KeyValuePair<string, string>("ov.hot", HotTemp.ToString()));
             d.Add(new KeyValuePair<string, string>("ov.cols", string.Join("~|~", cl.ToArray()))); d.Add(new KeyValuePair<string, string>("ov.names", string.Join("~|~", nl.ToArray())));
+            d.Add(new KeyValuePair<string, string>("ov.font", FontName)); d.Add(new KeyValuePair<string, string>("ov.bold", BoldVal ? "1" : "0")); d.Add(new KeyValuePair<string, string>("ov.outline", Outline ? "1" : "0"));
+            d.Add(new KeyValuePair<string, string>("ov.clab", Hx(LabCol))); d.Add(new KeyValuePair<string, string>("ov.cval", Hx(ValCol)));
             d.Add(new KeyValuePair<string, string>("ov.keymods", KeyMods.ToString())); d.Add(new KeyValuePair<string, string>("ov.keyvk", KeyVk.ToString()));
             return d;
         }
@@ -7824,7 +7862,7 @@ namespace BunoTunner
         public static void ResetAll()
         {
             Scale = 100; Opac = 85; Layout = 0; Mode = 0; Fx = 0; Fy = 0; Items = new List<string>(new string[] { "@FPS" }); Colors.Clear(); Names.Clear();
-            Compact = false; ColName = false; HotTemp = 80; Commit();
+            Compact = false; ColName = false; HotTemp = 80; FontName = "Segoe UI"; BoldVal = true; Outline = true; LabCol = Color.Empty; ValCol = Color.Empty; Commit();
         }
         public static string KeyName()
         {
@@ -7959,6 +7997,7 @@ namespace BunoTunner
                 fpsPid = pid; fpsAt = DateTime.UtcNow; fpsApi = null; fpsVal = 0;
                 bool ownRender = pid == myPid && Control.FromHandle(fg) is RenderForm;   // janela de render do Benchmark (OpenGL) tambem e medida
                 fpsGame = (pid != myPid || ownRender) && pid != 0 && FpsMon.Get(pid, out fpsVal, out fpsApi);
+                ftOk = fpsGame && FpsMon.GetFt(pid, out ftCur, out ftAvg, out ftL1, out ftL01);
                 if (ownRender && fpsGame && ((RenderForm)Control.FromHandle(fg)).Gl != null) fpsApi = "OpenGL";   // o proprio render sabe qual API usa (o processo tambem carrega D3D11 por causa da interface)
             }
             int fps = fpsVal; string api = fpsApi; bool game = fpsGame;
@@ -7971,6 +8010,10 @@ namespace BunoTunner
             {
                 Row r = new Row(); r.Key = k;
                 if (k == "@FPS") { r.Label = api ?? "FPS"; r.Value = game ? fps + " FPS" : "-- FPS"; }
+                else if (k == "@FT") { r.Label = Lang.T("Frametime"); r.Value = ftOk ? ftCur.ToString("0.0", CultureInfo.InvariantCulture) + " ms" : "-- ms"; }
+                else if (k == "@FTA") { r.Label = Lang.T("Frametime médio"); r.Value = ftOk ? ftAvg.ToString("0.0", CultureInfo.InvariantCulture) + " ms" : "-- ms"; }
+                else if (k == "@L1") { r.Label = "1% low"; r.Value = ftOk ? Math.Round(ftL1) + " FPS" : "-- FPS"; }
+                else if (k == "@L01") { r.Label = "0.1% low"; r.Value = ftOk ? Math.Round(ftL01) + " FPS" : "-- FPS"; }
                 else
                 {
                     Sn s = Find(k); r.Label = LabelOf(k); r.Value = s != null ? ValueOf(s) : "-";
@@ -8010,7 +8053,7 @@ namespace BunoTunner
             if (measG == null) { measG = Graphics.FromImage(measBmp); measG.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit; }
             using (StringFormat sf = new StringFormat(StringFormat.GenericTypographic)) { sf.FormatFlags |= StringFormatFlags.NoWrap | StringFormatFlags.MeasureTrailingSpaces; return measG.MeasureString(t ?? "", f, 4000, sf).Width + 2; }
         }
-        static int shdOff = 1;
+        static int shdOff = 1; static bool outOn = true;
         static void DT(Graphics g, string t, Font f, Rectangle r, Color c, StringAlignment al)
         {
             using (StringFormat sf = new StringFormat(StringFormat.GenericTypographic))
@@ -8018,7 +8061,7 @@ namespace BunoTunner
             {
                 sf.Alignment = al; sf.LineAlignment = StringAlignment.Center; sf.FormatFlags |= StringFormatFlags.NoWrap; sf.Trimming = StringTrimming.None;
                 // contorno preto em volta de todos os textos do overlay (legivel sobre qualquer fundo)
-                using (SolidBrush sb = new SolidBrush(Color.Black))
+                if (outOn) using (SolidBrush sb = new SolidBrush(Color.Black))
                     for (int dx = -shdOff; dx <= shdOff; dx++) for (int dy = -shdOff; dy <= shdOff; dy++)
                         if ((dx != 0 || dy != 0) && (Math.Abs(dx) == shdOff || Math.Abs(dy) == shdOff)) g.DrawString(t ?? "", f, sb, new Rectangle(r.X + dx, r.Y + dy, r.Width, r.Height), sf);
                 g.DrawString(t ?? "", f, b, r, sf);
@@ -8097,11 +8140,15 @@ namespace BunoTunner
 
         void Fonts()
         {
-            string k = "Segoe UI|" + scale;
+            string fam = Overlay.FontName; bool okf = false;
+            try { foreach (FontFamily ff in FontFamily.Families) if (ff.Name == fam) { okf = true; break; } } catch (Exception) { }
+            if (!okf) fam = "Segoe UI";
+            string k = fam + "|" + scale + "|" + (Overlay.BoldVal ? 1 : 0);
             if (k == fkey && fl != null) return;
             fkey = k; if (fl != null) { fl.Dispose(); fv.Dispose(); }
             float sz = 9.5f * scale / 100f;
-            fl = new Font("Segoe UI", sz, FontStyle.Regular); fv = new Font("Segoe UI", sz, FontStyle.Bold);
+            try { fl = new Font(fam, sz, FontStyle.Regular); fv = new Font(fam, sz, Overlay.BoldVal ? FontStyle.Bold : FontStyle.Regular); }
+            catch (Exception) { fl = new Font("Segoe UI", sz, FontStyle.Regular); fv = new Font("Segoe UI", sz, FontStyle.Bold); }
         }
 
         public void SetState(List<Overlay.Row> r, int sc, int op, Rectangle screen, bool ed)
@@ -8237,7 +8284,7 @@ namespace BunoTunner
             g.Clear(Color.Transparent);
             Rectangle r = new Rectangle(0, 0, Width - 1, Height - 1);
             LD d = CurLay(edit);   // na edicao sempre mostra a caixa padrao para dar para arrastar
-            shdOff = Math.Max(1, (int)Math.Round(s));
+            shdOff = Math.Max(1, (int)Math.Round(s)); outOn = Overlay.Outline;
             int rad = d.Rad < 0 ? (Xp.Rad + 2) * 2 : Math.Min(d.Rad, Math.Min(Width, Height) - 1);
             using (GraphicsPath gp = Round(r, rad))
             {
@@ -8343,8 +8390,8 @@ namespace BunoTunner
                         if (!d.PillBd.IsEmpty) using (Pen pbp = new Pen(d.PillBd)) g.DrawPath(pbp, pg);
                     }
                 }
-                Color vc = x.Hot ? cHot : (x.HasCol ? x.Col : (d.Val.IsEmpty ? cValue : d.Val));
-                Color lc = (Overlay.ColName && x.HasCol && !x.Hot) ? x.Col : (d.Lab.IsEmpty ? cLabel : d.Lab);
+                Color vc = x.Hot ? cHot : (x.HasCol ? x.Col : (!Overlay.ValCol.IsEmpty ? Overlay.ValCol : (d.Val.IsEmpty ? cValue : d.Val)));
+                Color lc = (Overlay.ColName && x.HasCol && !x.Hot) ? x.Col : (!Overlay.LabCol.IsEmpty ? Overlay.LabCol : (d.Lab.IsEmpty ? cLabel : d.Lab));
                 if (!Overlay.Compact) DT(g, x.Label, fl, lr, lc, StringAlignment.Near);
                 DT(g, x.Value, fv, vr, vc, Overlay.Compact ? StringAlignment.Near : StringAlignment.Far);
             }
@@ -8421,7 +8468,7 @@ namespace BunoTunner
             inst = new OverlayConfigForm(); inst.Show(owner);
         }
 
-        XpOption chkOn, chkCompact, chkColName; ComboBox cbMode, cbSize, cbOp, cbLay, cbHot, cbGrp; XpText txSearch; ListView lvAv; ListBox lbSel; XpButton btnEdit, btnKey; Label hint; Timer tm = new Timer(); bool capturing;
+        XpOption chkOn, chkCompact, chkColName, chkBold, chkOut; ComboBox cbFont; ComboBox cbMode, cbSize, cbOp, cbLay, cbHot, cbGrp; XpText txSearch; ListView lvAv; ListBox lbSel; XpButton btnEdit, btnKey; Label hint; Timer tm = new Timer(); bool capturing;
         int dropIdx = -1, downIdx = -1; Point downPt; bool building;
         static int[] Seq(int a, int b) { List<int> l = new List<int>(); for (int v = a; v <= b; v += 5) l.Add(v); return l.ToArray(); }
         static readonly int[] Sizes = Seq(50, 200), Ops = Seq(50, 100);
@@ -8429,7 +8476,7 @@ namespace BunoTunner
         public OverlayConfigForm()
         {
             Text = "Overlay em jogos";
-            Size = new Size(796, 690); KeyPreview = true;
+            Size = new Size(796, 724); KeyPreview = true;
             Panel body = new Panel(); body.Dock = DockStyle.Fill; Controls.Add(body);
 
             chkOn = UI.Opt(body, "Ativar overlay em jogos", 8, 8, 260, false);
@@ -8489,7 +8536,13 @@ namespace BunoTunner
             cbHot = Combo(body, 238, 564, 90);
             cbHot.Items.Add("Desligado"); for (int t = 70; t <= 95; t += 5) cbHot.Items.Add(t + " °C");
 
-            hint = UI.Lbl(body, "", 8, 600, Xp.Ui, Xp.Dim); hint.AutoSize = false; hint.SetBounds(8, 598, 768, 46);
+            UI.Lbl(body, "Fonte:", 345, 568); cbFont = Combo(body, 390, 564, 150); cbFont.DropDownWidth = 260; cbFont.MaxDropDownItems = 20;
+            { List<string> fn = new List<string>(); foreach (FontFamily ff in FontFamily.Families) fn.Add(ff.Name); fn.Sort(StringComparer.CurrentCultureIgnoreCase); foreach (string f in fn) cbFont.Items.Add(f); }
+            chkBold = UI.Opt(body, "Valores em negrito", 550, 566, 140, false); chkOut = UI.Opt(body, "Contorno preto", 690, 566, 100, false);
+            UI.Btn(body, "Cor dos nomes...", 8, 598, 140, delegate { PickGlobal(false); });
+            UI.Btn(body, "Cor dos valores...", 152, 598, 150, delegate { PickGlobal(true); });
+            UI.Btn(body, "Cores padrão", 306, 598, 120, delegate { Overlay.LabCol = Color.Empty; Overlay.ValCol = Color.Empty; Overlay.Commit(); });
+            hint = UI.Lbl(body, "", 8, 634, Xp.Ui, Xp.Dim); hint.AutoSize = false; hint.SetBounds(8, 632, 768, 46);
             hint.Text = "Dica: Esc fecha esta janela; Ctrl+Z desfaz e Ctrl+Y refaz. Clique com o botão direito num item da lista para mudar cor, nome, ordem ou remover; duplo clique abre a cor. Em \"Editar na tela\" arraste o overlay pelo topo e as linhas para reordenar. Jogos em tela cheia exclusiva (não a sem borda) podem esconder o overlay. O atalho Mostrar/ocultar e global: a combinação escolhida fica reservada para o BunoTunner e não chega aos outros programas (se aparecer \"em uso!\", outro programa já a usa - escolha outra).";
 
             building = true;
@@ -8497,7 +8550,7 @@ namespace BunoTunner
             cbSize.SelectedIndex = Math.Max(0, Array.IndexOf(Sizes, Overlay.Scale));
             cbOp.SelectedIndex = Math.Max(0, Array.IndexOf(Ops, Overlay.Opac));
             cbMode.SelectedIndex = Overlay.Mode; cbLay.SelectedIndex = Overlay.Layout;
-            chkCompact.Checked = Overlay.Compact; chkColName.Checked = Overlay.ColName;
+            chkCompact.Checked = Overlay.Compact; chkColName.Checked = Overlay.ColName; SyncLook();
             cbGrp.Items.Add("Todos os grupos"); cbGrp.SelectedIndex = 0;
             cbHot.SelectedIndex = Overlay.HotTemp <= 0 ? 0 : Math.Max(1, Math.Min(cbHot.Items.Count - 1, (Overlay.HotTemp - 70) / 5 + 1));
             building = false;
@@ -8523,6 +8576,9 @@ namespace BunoTunner
             lvAv.ContextMenuStrip = cma;
             lvAv.KeyDown += delegate(object o, KeyEventArgs e) { if (e.KeyCode == Keys.A && e.Control) { foreach (ListViewItem it in lvAv.Items) it.Selected = true; e.Handled = true; } };
             chkCompact.CheckedChanged += delegate { if (building) return; Overlay.Compact = chkCompact.Checked; Overlay.Commit(); };
+            cbFont.SelectedIndexChanged += delegate { if (building || cbFont.SelectedIndex < 0) return; Overlay.FontName = (string)cbFont.SelectedItem; Overlay.Commit(); };
+            chkBold.CheckedChanged += delegate { if (building) return; Overlay.BoldVal = chkBold.Checked; Overlay.Commit(); };
+            chkOut.CheckedChanged += delegate { if (building) return; Overlay.Outline = chkOut.Checked; Overlay.Commit(); };
             chkColName.CheckedChanged += delegate { if (building) return; Overlay.ColName = chkColName.Checked; Overlay.Commit(); };
             cbHot.SelectedIndexChanged += delegate { if (building || cbHot.SelectedIndex < 0) return; Overlay.HotTemp = cbHot.SelectedIndex == 0 ? 0 : 70 + (cbHot.SelectedIndex - 1) * 5; Overlay.Commit(); };
             txSearch.Box.TextChanged += delegate { FillAvail(); };
@@ -8666,7 +8722,7 @@ namespace BunoTunner
                     {
                         building = true;
                         cbSize.SelectedIndex = Math.Max(0, Array.IndexOf(Sizes, Overlay.Scale)); cbOp.SelectedIndex = Math.Max(0, Array.IndexOf(Ops, Overlay.Opac)); cbMode.SelectedIndex = Overlay.Mode; cbLay.SelectedIndex = Overlay.Layout;
-                        chkCompact.Checked = Overlay.Compact; chkColName.Checked = Overlay.ColName;
+                        chkCompact.Checked = Overlay.Compact; chkColName.Checked = Overlay.ColName; SyncLook();
                         cbHot.SelectedIndex = Overlay.HotTemp <= 0 ? 0 : Math.Max(1, Math.Min(cbHot.Items.Count - 1, (Overlay.HotTemp - 70) / 5 + 1));
                         building = false;
                         btnKey.Text = "Mostrar/ocultar: " + Overlay.KeyName();
@@ -8680,6 +8736,21 @@ namespace BunoTunner
         // ---- ferramentas do item selecionado ----
         int SelIdx() { int i = lbSel.SelectedIndex; return i >= 0 && i < Overlay.Items.Count ? i : -1; }
         bool NeedSel() { if (SelIdx() >= 0) return true; Dlg.Show(this, "Selecione antes um item na lista da direita (Ordem no overlay).", "Overlay em jogos"); return false; }
+        void SyncLook()
+        {
+            int i = cbFont.Items.IndexOf(Overlay.FontName); cbFont.SelectedIndex = i >= 0 ? i : cbFont.Items.IndexOf("Segoe UI");
+            chkBold.Checked = Overlay.BoldVal; chkOut.Checked = Overlay.Outline;
+        }
+        void PickGlobal(bool val)
+        {
+            using (ColorDialog cd = new ColorDialog())
+            {
+                cd.FullOpen = true; cd.AnyColor = true; cd.Color = val ? (Overlay.ValCol.IsEmpty ? Color.FromArgb(240, 242, 246) : Overlay.ValCol) : (Overlay.LabCol.IsEmpty ? Color.FromArgb(165, 171, 184) : Overlay.LabCol);
+                if (cd.ShowDialog(this) != DialogResult.OK) return;
+                if (val) Overlay.ValCol = cd.Color; else Overlay.LabCol = cd.Color;
+                Overlay.Commit();
+            }
+        }
         void PickColor()
         {
             if (!NeedSel()) return;
@@ -8733,7 +8804,7 @@ namespace BunoTunner
             building = true;
             int si = Array.IndexOf(Sizes, Overlay.Scale), oi = Array.IndexOf(Ops, Overlay.Opac);
             if (si >= 0) cbSize.SelectedIndex = si; if (oi >= 0) cbOp.SelectedIndex = oi;
-            cbMode.SelectedIndex = Overlay.Mode; cbLay.SelectedIndex = Overlay.Layout; chkCompact.Checked = Overlay.Compact; chkColName.Checked = Overlay.ColName;
+            cbMode.SelectedIndex = Overlay.Mode; cbLay.SelectedIndex = Overlay.Layout; chkCompact.Checked = Overlay.Compact; chkColName.Checked = Overlay.ColName; SyncLook();
             cbHot.SelectedIndex = Overlay.HotTemp <= 0 ? 0 : Math.Max(1, Math.Min(cbHot.Items.Count - 1, (Overlay.HotTemp - 70) / 5 + 1));
             building = false;
             FillSel(); FillAvailMarks();
