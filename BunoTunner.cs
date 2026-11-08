@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.42.0")]
-[assembly: AssemblyFileVersion("1.49.42.0")]
-[assembly: AssemblyInformationalVersion("1.49.42")]
+[assembly: AssemblyVersion("1.49.43.0")]
+[assembly: AssemblyFileVersion("1.49.43.0")]
+[assembly: AssemblyInformationalVersion("1.49.43")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -1952,7 +1952,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.42";
+        public const string Version = "v1.49.43";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -4833,10 +4833,10 @@ namespace BunoTunner
         {
             try
             {
-                bool on = Xp.Aero && Settings.Get("aero.glass", "1") == "1"; int pc; if (!int.TryParse(Settings.Get("aero.opacity", "88"), out pc)) pc = 88;
+                bool on = Xp.Aero && Settings.Get("aero.glass", "1") == "1"; int pc; if (!int.TryParse(Settings.Get("aero.opacity", "95"), out pc)) pc = 95;
                 double op = on ? Math.Max(50, Math.Min(100, pc)) / 100.0 : 1.0;
                 if (Math.Abs(Opacity - op) > 0.001) Opacity = op;
-                if (IsHandleCreated) { DwmBB b = new DwmBB(); b.Flags = 1; b.Enable = on ? 1 : 0; DwmEnableBlurBehindWindow(Handle, ref b); }
+                if (IsHandleCreated) { DwmBB b = new DwmBB(); b.Flags = 1; b.Enable = on && Settings.Get("aero.blur", "0") == "1" ? 1 : 0; DwmEnableBlurBehindWindow(Handle, ref b); }
             }
             catch (Exception) { }
         }
@@ -8118,12 +8118,27 @@ namespace BunoTunner
             using (StringFormat sf = new StringFormat(StringFormat.GenericTypographic)) { sf.FormatFlags |= StringFormatFlags.NoWrap | StringFormatFlags.MeasureTrailingSpaces; return measG.MeasureString(t ?? "", f, 4000, sf).Width + 2; }
         }
         static int shdOff = 1; static bool outOn = true;
-        static void DT(Graphics g, string t, Font f, Rectangle r, Color c, StringAlignment al, bool outline = true)
+        static void DT(Graphics g, string t, Font f, Rectangle r, Color c, StringAlignment al, bool outline = true, bool thick = false)
         {
             using (StringFormat sf = new StringFormat(StringFormat.GenericTypographic))
             using (SolidBrush b = new SolidBrush(c))
             {
                 sf.Alignment = al; sf.LineAlignment = StringAlignment.Center; sf.FormatFlags |= StringFormatFlags.NoWrap; sf.Trimming = StringTrimming.None;
+                if (thick)
+                {
+                    // "contorno do valor": contorno escuro grosso e arredondado rente as letras
+                    try
+                    {
+                        using (GraphicsPath tp = new GraphicsPath())
+                        {
+                            tp.AddString(t ?? "", f.FontFamily, (int)f.Style, f.SizeInPoints * g.DpiY / 72f, r, sf);
+                            using (Pen pn = new Pen(Color.Black, Math.Max(2.5f, 3f * f.SizeInPoints / 9.5f))) { pn.LineJoin = LineJoin.Round; g.DrawPath(pn, tp); }
+                            g.FillPath(b, tp);
+                        }
+                        return;
+                    }
+                    catch (Exception) { }
+                }
                 // contorno preto em volta de todos os textos do overlay (legivel sobre qualquer fundo)
                 if (outOn && outline) using (SolidBrush sb = new SolidBrush(Color.Black))
                     for (int dx = -shdOff; dx <= shdOff; dx++) for (int dy = -shdOff; dy <= shdOff; dy++)
@@ -8228,7 +8243,7 @@ namespace BunoTunner
                 vw = Math.Max(vw, (int)Math.Ceiling(TW(x.Value, fv)));
             }
             if (!Overlay.Compact && !d.Dot.IsEmpty) lw += (int)(9 * s);
-            if (!d.Pill.IsEmpty || Overlay.ValBox) vw += (int)(10 * s);
+            if (!d.Pill.IsEmpty && !Overlay.ValBox) vw += (int)(10 * s);
             int grip = ed ? (int)(14 * s) : 0;
             int w = Math.Max((int)(110 * s), pad * 2 + grip + lw + gap + vw);
             if (ed) w = Math.Max(w, (int)(250 * s));
@@ -8512,31 +8527,22 @@ namespace BunoTunner
                     using (SolidBrush db = new SolidBrush(x.Hot ? cHot : d.Dot)) g.FillEllipse(db, rr.Left + grip + 1, rr.Top + (rr.Height - ds) / 2, ds, ds);
                     g.DrawEllipse(Pens.Black, rr.Left + grip + 1, rr.Top + (rr.Height - ds) / 2, ds, ds);
                 }
-                bool vbx = Overlay.ValBox; int pp = (d.Pill.IsEmpty && !vbx) ? 0 : (int)(5 * s);
+                bool vbx = Overlay.ValBox; int pp = (d.Pill.IsEmpty || vbx) ? 0 : (int)(5 * s);   // "contorno do valor" ligado: sem a caixa clara atras do valor
                 Rectangle vr = new Rectangle(lr.Left + (Overlay.Compact ? pp : 0), lr.Top, lr.Width - pp - (Overlay.Compact ? pp : 0), lr.Height);
                 if (pp > 0)
                 {
                     int tw = (int)Math.Ceiling(TW(x.Value, fv));
                     Rectangle pr = new Rectangle(Overlay.Compact ? lr.Left : lr.Right - pp * 2 - tw, rr.Top + 1, tw + pp * 2, Math.Max(4, rr.Height - 2));
-                    using (GraphicsPath pg = Round(pr, vbx ? pr.Height : Math.Min(pr.Height, 12)))
+                    using (GraphicsPath pg = Round(pr, Math.Min(pr.Height, 12)))
                     {
-                        if (vbx)
-                        {
-                            // "contorno do valor": caixa arredondada clara com borda escura em volta do valor
-                            using (LinearGradientBrush vg = new LinearGradientBrush(pr, K(250, 251, 253), K(204, 210, 220), 90f)) g.FillPath(vg, pg);
-                            using (Pen vp = new Pen(K(18, 20, 26), Math.Max(1.5f, 1.8f * s))) g.DrawPath(vp, pg);
-                        }
-                        else
-                        {
-                            using (SolidBrush pb = new SolidBrush(Sc(d.Pill, bgAlpha))) g.FillPath(pb, pg);
-                            if (!d.PillBd.IsEmpty) using (Pen pbp = new Pen(d.PillBd)) g.DrawPath(pbp, pg);
-                        }
+                        using (SolidBrush pb = new SolidBrush(Sc(d.Pill, bgAlpha))) g.FillPath(pb, pg);
+                        if (!d.PillBd.IsEmpty) using (Pen pbp = new Pen(d.PillBd)) g.DrawPath(pbp, pg);
                     }
                 }
                 Color vc = x.Hot ? cHot : (x.HasCol ? x.Col : (!Overlay.ValCol.IsEmpty ? Overlay.ValCol : (d.Val.IsEmpty ? cValue : d.Val)));
                 Color lc = x.HasNCol ? x.NCol : (Overlay.ColName && x.HasCol && !x.Hot) ? x.Col : (!Overlay.LabCol.IsEmpty ? Overlay.LabCol : (d.Lab.IsEmpty ? cLabel : d.Lab));
                 if (!Overlay.Compact) DT(g, x.Label, fl, lr, lc, StringAlignment.Near);
-                DT(g, x.Value, fv, vr, vc, Overlay.Compact ? StringAlignment.Near : StringAlignment.Far);
+                DT(g, x.Value, fv, vr, vc, Overlay.Compact ? StringAlignment.Near : StringAlignment.Far, true, vbx);
                 if (x.Hist != null) DrawGraph(g, new Rectangle(full.Left + grip, rr.Bottom + 1, full.Width - grip, full.Bottom - rr.Bottom - (int)(4 * s)), x.Hist, vc, s);
             }
             if (edit)

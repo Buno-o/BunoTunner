@@ -638,3 +638,7 @@ v1.49.42 (TESTE)
 - Overlay Vintage (Win 95): azul marinho do Win95 (0,0,128) + minimo e fechar pequenos no canto (decorativos).
 - Overlay Frutiger Aero: fundo de vidro translucido, barra clara com titulo escuro e brilho (legivel).
 - Overlay Claro minimalista: titulo da barra mais escuro, com brilho claro, sem o contorno preto.
+
+v1.49.43 (TESTE)
+- Tema Frutiger Aero (programa): transparencia bem mais leve (95% em vez de 88%) e o desfoque do Windows ficou desligado por padrao (aero.blur=1 liga; aero.opacity de 50 a 100 ajusta).
+- Overlay "Contorno do valor": agora, quando ligado, REMOVE a caixa clara atras dos valores (a dos layouts Frutiger Aero e Win95) e deixa so um contorno escuro grosso rente as letras. Desligado, o layout fica como antes.
