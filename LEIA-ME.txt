@@ -626,3 +626,7 @@ v1.49.39 (TESTE)
 
 v1.49.40 (TESTE)
 - Menu Overlay: o rotulo "Layout:" foi movido para a esquerda para nao ficar sobre o campo.
+
+v1.49.41 (TESTE)
+- Overlay: novo campo "Titulo do topo" (segunda linha da janela do overlay) para trocar o texto escrito na barra superior de qualquer layout/tema que tenha barra (READY_, NEON, VAPOR, VICE CITY, BunoTunner...). Cada layout guarda o seu proprio titulo (max. 24 letras); apagar o campo volta ao texto original. Entra em exportar/importar, desfazer/refazer e "Restaurar padrao".
+- Overlay Ambar: a barra do topo era amarela com letras pretas (com contorno preto, dificil de ler); agora e ambar escuro com letras ambar claras.
