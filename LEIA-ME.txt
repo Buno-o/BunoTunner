@@ -656,3 +656,6 @@ v1.49.46 (TESTE)
 v1.49.47 (TESTE)
 - Novo tema "Realistic (Win 10)": visual plano e claro (cinza claro, destaque azul 0,120,215, cantos retos, fonte Segoe UI) com icones realistas novos no menu lateral, nas dicas e na aba Benchmark (GPU, CPU, fogo para a FPU, RAM, HD, ventoinha, frequencimetro, internet, grade de nucleos, lixeira, logo do Windows, monitor de sensores e tela de benchmark). Tambem ganhou um layout de overlay "Tema: Realistic (Win 10)" no fim da lista.
 - Temas renomeados e reordenados no seletor: Vintage (Win 95), Luna (Win XP), Frutiger Aero (Win 7), Realistic (Win 10), Dark, SteamPunk, CyberPunk, GTA VI. O tema escolhido anteriormente continua valendo.
+
+v1.49.48 (TESTE)
+- Tema Realistic (Win 10): icones do Benchmark e da FPU trocados (fogo agora e o Benchmark/Estresse; a tela com pi e play e a FPU) e mais contraste (fundo, bordas, texto, botoes, menu lateral e barras mais escuros).
