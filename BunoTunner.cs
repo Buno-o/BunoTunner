@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.55.0")]
-[assembly: AssemblyFileVersion("1.49.55.0")]
-[assembly: AssemblyInformationalVersion("1.49.55")]
+[assembly: AssemblyVersion("1.49.56.0")]
+[assembly: AssemblyFileVersion("1.49.56.0")]
+[assembly: AssemblyInformationalVersion("1.49.56")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -2012,7 +2012,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.55";
+        public const string Version = "v1.49.56";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -17256,6 +17256,27 @@ namespace BunoTunner
             }
             catch (Exception ex) { return "Erro ao executar " + exe + ": " + ex.Message; }
         }
+        // RAM Disks ativos: { letra, tamanho em bytes, unidade }
+        public static List<string[]> RamDisks()
+        {
+            List<string[]> r = new List<string[]>(); List<string> seen = new List<string>();
+            string im = ImDisk();
+            if (im != null)
+            {
+                int c; string o = Run2(im, "-l -n", 10000, out c);
+                foreach (string ln in o.Replace("\r", "").Split('\n'))
+                {
+                    int n; if (!int.TryParse(ln.Trim(), out n)) continue;
+                    string d = Run2(im, "-l -u " + n, 10000, out c); Match m = Regex.Match(d, @"(?<![A-Za-z])([A-Za-z]):"); string letter = m.Success ? m.Groups[1].Value.ToUpperInvariant() : "";
+                    long sz = 0; try { if (letter.Length == 1) sz = new DriveInfo(letter).TotalSize; } catch (Exception) { }
+                    if (letter.Length > 0) seen.Add(letter);
+                    r.Add(new string[] { letter, sz.ToString(), n.ToString() });
+                }
+            }
+            string own = DiskLetter();
+            if (own.Length == 1 && DiskReady() && !seen.Contains(own.ToUpperInvariant())) { long sz = 0; try { sz = new DriveInfo(own).TotalSize; } catch (Exception) { } r.Add(new string[] { own.ToUpperInvariant(), sz.ToString(), "" }); }
+            return r;
+        }
         public static string DiskLetter() { return Settings.Get("xf.disk", ""); }
         public static bool DiskReady() { string l = DiskLetter(); try { return l.Length == 1 && new DriveInfo(l).IsReady; } catch (Exception) { return false; } }
         public static long DiskMb() { try { return new DriveInfo(DiskLetter()).TotalSize / 1048576L; } catch (Exception) { return 0; } }
@@ -19901,6 +19922,17 @@ namespace BunoTunner
                         }
                     }
                     catch (Exception) { }
+                    // RAM Disks (ImDisk / XFast RAM): nao aparecem no Get-PhysicalDisk, entram na lista como discos virtuais
+                    try
+                    {
+                        foreach (string[] rd in XFastRam.RamDisks())
+                        {
+                            DiskInfo d = new DiskInfo(); long rsz; long.TryParse(rd[1], out rsz);
+                            d.Id = "RAM:" + rd[0] + rd[2]; d.Name = "RAM Disk (ImDisk)" + (rd[0].Length > 0 ? " - " + rd[0] + ":" : ""); d.Media = "RAM"; d.Bus = "Virtual"; d.Health = "Healthy"; d.Size = rsz; d.Fw = "-";
+                            l.Add(d); err = null;
+                        }
+                    }
+                    catch (Exception) { }
                 }
                 catch (Exception ex) { err = ex.Message; }
                 try
@@ -19961,13 +19993,13 @@ namespace BunoTunner
             if (cur == null) { lblHealth.Text = "-"; lblLife.Text = "-"; lblTemp.Text = "-"; pbLife.Value = 0; pbTemp.Value = 0; allRows.Clear(); return; }
             DiskInfo d = cur; string h = HealthText(d);
             lblHealth.Text = h; lblHealth.ForeColor = HealthColor(h);
-            if (double.IsNaN(d.Life)) { pbLife.Value = 0; lblLife.Text = d.IsSsd ? "indisponível" : "n/a (HDD)"; } else { pbLife.Value = (int)d.Life; lblLife.Text = d.Life.ToString("0") + "% restante"; }
+            if (double.IsNaN(d.Life)) { pbLife.Value = 0; lblLife.Text = d.IsSsd ? "indisponível" : (d.Media == "RAM" ? "n/a (RAM Disk)" : "n/a (HDD)"); } else { pbLife.Value = (int)d.Life; lblLife.Text = d.Life.ToString("0") + "% restante"; }
             LiveTemp();
             List<string[]> rows = new List<string[]>();
             rows.Add(new string[] { "Modelo", d.Name }); rows.Add(new string[] { "Tipo / interface", d.Kind });
             rows.Add(new string[] { "Capacidade", (d.Size / 1000000000L) + " GB (" + (d.Size / 1073741824L) + " GiB)" });
             rows.Add(new string[] { "Firmware", d.Fw }); rows.Add(new string[] { "Estado informado pelo Windows", d.Health });
-            if (d.Smart.Count == 0) rows.Add(new string[] { "S.M.A.R.T. detalhado", "não disponível (disco USB/RAID ou NVMe sem tabela ATA)" });
+            if (d.Smart.Count == 0) rows.Add(new string[] { "S.M.A.R.T. detalhado", d.Media == "RAM" ? "não se aplica (disco virtual na memória RAM; some ao reiniciar)" : "não disponível (disco USB/RAID ou NVMe sem tabela ATA)" });
             if (!double.IsNaN(d.Wear)) rows.Add(new string[] { "Desgaste (uso da vida útil)", d.Wear.ToString("0") + "%" });
             if (!double.IsNaN(d.Hours)) rows.Add(new string[] { "Horas ligado", d.Hours.ToString("0") + " h (~" + (d.Hours / 24).ToString("0") + " dias)" });
             if (!double.IsNaN(d.Cycles)) rows.Add(new string[] { "Ciclos liga/desliga", d.Cycles.ToString("0") });

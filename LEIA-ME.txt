@@ -690,3 +690,6 @@ v1.49.54 (TESTE)
 
 v1.49.55 (TESTE)
 - Benchmark SSD: medicao mais fiel (aproxima do CrystalDiskMark em discos muito rapidos, como RAM Disk). O cronometro agora so liga depois do preparo dos buffers; cada teste sequencial repete a passagem ate somar pelo menos 3 s (os aleatorios rodam 5 s); e o tratamento de cada pedido de E/S ficou bem mais leve (recolhe varios pedidos concluidos de uma vez, sem chamadas ao sistema).
+
+v1.49.56 (TESTE)
+- Saude do armazenamento: o RAM Disk (ImDisk / XFast RAM) agora aparece em "Seus discos" como disco virtual (tipo "Virtual RAM", saude Boa, sem S.M.A.R.T.). Ele nao aparecia porque o Windows nao o lista como disco fisico.
