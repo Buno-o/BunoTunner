@@ -666,3 +666,8 @@ v1.49.49 (TESTE)
 - Opcao de mandar para o RAM Disk o cache do Chrome, Edge, Firefox, INetCache e a pasta TEMP do usuario (via juncao NTFS). "Remover" desfaz tudo.
 - Ao reiniciar o Windows o disco some e os redirecionamentos voltam ao normal (RunOnce + limpeza ao abrir o programa).
 - Funciona com qualquer DDR (2/3/4/5) e CPU AMD ou Intel. Usa o driver gratuito ImDisk Toolkit (nao incluso); sem ele o botao Criar fica desativado.
+
+v1.49.50 (TESTE)
+- XFast RAM: o driver do RAM Disk (ImDisk x64 + AWEAlloc, assinados, extraidos do ImDisk Toolkit) agora vem EMBUTIDO no programa; nao precisa baixar nada. Instala ao criar o disco (ou pelo botao "Instalar driver"), com confirmacao.
+- XFast RAM: corrigida a criacao com "Memoria fisica (AWE)". O modo AWE exige o privilegio "Bloquear paginas na memoria", que a conta de administrador nao tem; agora o disco e criado como SYSTEM (tarefa agendada temporaria) e o servico AWEAlloc e iniciado antes.
+- Driver embutido: ImDisk (c) Olof Lagerkvist / LTR Data, licenca permissiva (aviso de copyright mantido). Apenas Windows 64 bits (x64).
