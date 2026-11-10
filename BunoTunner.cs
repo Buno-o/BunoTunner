@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.51.0")]
-[assembly: AssemblyFileVersion("1.49.51.0")]
-[assembly: AssemblyInformationalVersion("1.49.51")]
+[assembly: AssemblyVersion("1.49.52.0")]
+[assembly: AssemblyFileVersion("1.49.52.0")]
+[assembly: AssemblyInformationalVersion("1.49.52")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -320,6 +320,7 @@ namespace BunoTunner
             "Lendo os timings...", "Reading timings...",
             "Ler novamente", "Read again",
             "Diagnóstico", "Diagnostics",
+            "Criando o RAM Disk... aguarde (pode levar alguns segundos).", "Creating the RAM Disk... please wait (may take a few seconds).",
             "Instalar driver", "Install driver",
             "Embutido no programa (instala ao criar)", "Built into the program (installs on create)",
             "O driver do RAM Disk (ImDisk, assinado) já vem dentro do programa e é instalado automaticamente na primeira vez que você criar o disco.", "The RAM Disk driver (ImDisk, signed) is built into the program and is installed automatically the first time you create the disk.",
@@ -2007,7 +2008,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.51";
+        public const string Version = "v1.49.52";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -17069,10 +17070,10 @@ namespace BunoTunner
         }
         static bool StartSvc(string n)
         {
-            int c; Proc.Run("sc.exe", "start " + n, 20000, out c);
+            int c; Run2("sc.exe", "start " + n, 20000, out c);
             for (int i = 0; i < 10; i++)
             {
-                string q = Proc.Run("sc.exe", "query " + n, 10000, out c);
+                string q = Run2("sc.exe", "query " + n, 10000, out c);
                 if (q.IndexOf("RUNNING", StringComparison.OrdinalIgnoreCase) >= 0) return true;
                 System.Threading.Thread.Sleep(300);
             }
@@ -17109,14 +17110,14 @@ namespace BunoTunner
                     File.WriteAllBytes(Path.Combine(sd, "imdisk.cpl"), f["imdisk.cpl"]); File.WriteAllBytes(Path.Combine(sd, "imdisk.exe"), f["imdisk.exe"]);
                     if (!ServiceExists("ImDisk"))
                     {
-                        int c; string o = Proc.Run("sc.exe", "create ImDisk type= kernel start= demand error= normal binPath= \"\\SystemRoot\\System32\\drivers\\imdisk.sys\" DisplayName= \"ImDisk Virtual Disk Driver\"", 20000, out c);
+                        int c; string o = Run2("sc.exe", "create ImDisk type= kernel start= demand error= normal binPath= \"\\SystemRoot\\System32\\drivers\\imdisk.sys\" DisplayName= \"ImDisk Virtual Disk Driver\"", 20000, out c);
                         if (c != 0) { msg = "Falha ao registrar o driver ImDisk (código " + c + ").\n" + o; return false; }
                     }
                 }
                 if (!ServiceExists("AWEAlloc"))
                 {
                     File.WriteAllBytes(Path.Combine(drv, "awealloc.sys"), f["awealloc.sys"]);
-                    int c; string o = Proc.Run("sc.exe", "create AWEAlloc type= kernel start= demand error= normal binPath= \"\\SystemRoot\\System32\\drivers\\awealloc.sys\" DisplayName= \"AWE Memory Allocation Driver\"", 20000, out c);
+                    int c; string o = Run2("sc.exe", "create AWEAlloc type= kernel start= demand error= normal binPath= \"\\SystemRoot\\System32\\drivers\\awealloc.sys\" DisplayName= \"AWE Memory Allocation Driver\"", 20000, out c);
                     if (c != 0) { msg = "Falha ao registrar o driver AWEAlloc (código " + c + ").\n" + o; return false; }
                 }
                 bool a = StartSvc("AWEAlloc"), b = StartSvc("ImDisk");
@@ -17133,10 +17134,10 @@ namespace BunoTunner
             string dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "BunoTunner"); Directory.CreateDirectory(dir);
             string cmd = Path.Combine(dir, "xf-sys.cmd"), log = Path.Combine(dir, "xf-sys.log"); int c;
             try { if (File.Exists(log)) File.Delete(log); } catch (Exception) { }
-            File.WriteAllText(cmd, "@echo off\r\n\"" + exe + "\" " + args + " > \"" + log + "\" 2>&1\r\necho EXITCODE=%errorlevel%>> \"" + log + "\"\r\n", Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage));
-            Proc.Run("schtasks.exe", "/create /tn BunoTunnerXF /tr \"" + cmd + "\" /sc once /st 00:00 /ru SYSTEM /rl HIGHEST /f", 20000, out c);
+            File.WriteAllText(cmd, "@echo off\r\n\"" + exe + "\" " + args + " < nul > \"" + log + "\" 2>&1\r\necho EXITCODE=%errorlevel%>> \"" + log + "\"\r\n", Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage));
+            Run2("schtasks.exe", "/create /tn BunoTunnerXF /tr \"" + cmd + "\" /sc once /st 00:00 /ru SYSTEM /rl HIGHEST /f", 20000, out c);
             if (c != 0) return "Não foi possível criar a tarefa do sistema (schtasks código " + c + ").";
-            Proc.Run("schtasks.exe", "/run /tn BunoTunnerXF", 20000, out c);
+            Run2("schtasks.exe", "/run /tn BunoTunnerXF", 20000, out c);
             string txt = ""; DateTime end = DateTime.Now.AddMilliseconds(timeoutMs);
             while (DateTime.Now < end)
             {
@@ -17144,10 +17145,33 @@ namespace BunoTunner
                 try { using (FileStream fs = new FileStream(log, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) using (StreamReader sr = new StreamReader(fs, Encoding.Default)) txt = sr.ReadToEnd(); } catch (Exception) { continue; }
                 if (txt.Contains("EXITCODE=")) break;
             }
-            Proc.Run("schtasks.exe", "/delete /tn BunoTunnerXF /f", 20000, out c);
+            Run2("schtasks.exe", "/delete /tn BunoTunnerXF /f", 20000, out c);
             try { File.Delete(cmd); } catch (Exception) { }
             Match m = Regex.Match(txt, @"EXITCODE=(-?\d+)"); if (m.Success) code = int.Parse(m.Groups[1].Value);
             return Regex.Replace(txt, @"EXITCODE=-?\d+\s*", "").Trim();
+        }
+        // executa um programa sem prender a janela: entrada fechada (nada fica esperando tecla) e tempo limite de verdade
+        static string Run2(string exe, string args, int timeoutMs, out int code)
+        {
+            code = -1;
+            try
+            {
+                ProcessStartInfo psi = new ProcessStartInfo(exe, args);
+                psi.UseShellExecute = false; psi.CreateNoWindow = true;
+                psi.RedirectStandardOutput = true; psi.RedirectStandardError = true; psi.RedirectStandardInput = true;
+                StringBuilder sb = new StringBuilder();
+                using (Process p = Process.Start(psi))
+                {
+                    p.OutputDataReceived += delegate(object o, DataReceivedEventArgs e) { if (e.Data != null) lock (sb) sb.AppendLine(e.Data); };
+                    p.ErrorDataReceived += delegate(object o, DataReceivedEventArgs e) { if (e.Data != null) lock (sb) sb.AppendLine(e.Data); };
+                    p.BeginOutputReadLine(); p.BeginErrorReadLine();
+                    try { p.StandardInput.Close(); } catch (Exception) { }
+                    if (!p.WaitForExit(timeoutMs)) { try { p.Kill(); } catch (Exception) { } lock (sb) return sb.ToString().Trim() + "\n(tempo esgotado)"; }
+                    p.WaitForExit();
+                    code = p.ExitCode; lock (sb) return sb.ToString().Trim();
+                }
+            }
+            catch (Exception ex) { return "Erro ao executar " + exe + ": " + ex.Message; }
         }
         public static string DiskLetter() { return Settings.Get("xf.disk", ""); }
         public static bool DiskReady() { string l = DiskLetter(); try { return l.Length == 1 && new DriveInfo(l).IsReady; } catch (Exception) { return false; } }
@@ -17283,10 +17307,13 @@ namespace BunoTunner
             StartSvc("ImDisk");
             if (DiskReady()) { msg = "Já existe um RAM Disk ativo (" + DiskLetter() + ":). Remova-o antes de criar outro."; return false; }
             label = (label ?? "").Replace("\"", "").Replace("/", "").Trim(); if (label.Length == 0) label = "RAMDisk";
-            string args = "-a -t " + (awe ? "file" : "vm") + " -s " + mb + "M -m " + letter + ": " + (awe ? "-o awe " : "") + "-p \"/fs:" + fs.ToLowerInvariant() + " /q /y /v:" + label + "\"";
-            int code; string o = awe ? RunSys(im, args, 120000, out code) : Proc.Run(im, args, 120000, out code);
-            if (code != 0 || !Directory.Exists(letter + @":\")) { msg = "O ImDisk não conseguiu criar o disco (código " + code + ").\n" + o; try { Proc.Run(im, "-D -m " + letter + ":", 20000, out code); } catch (Exception) { } return false; }
+            string args = "-a -t " + (awe ? "file" : "vm") + " -s " + mb + "M -m " + letter + ":" + (awe ? " -o awe" : "");
+            int code; string o = awe ? RunSys(im, args, 120000, out code) : Run2(im, args, 120000, out code);
+            if (code != 0) { msg = "O ImDisk não conseguiu criar o disco (código " + code + ").\n" + o; try { Run2(im, "-D -m " + letter + ":", 20000, out code); } catch (Exception) { } return false; }
             Settings.Set("xf.disk", letter);
+            System.Threading.Thread.Sleep(800);
+            int fc; string fo = Run2("format.com", letter + ": /fs:" + fs.ToLowerInvariant() + " /q /y /v:" + label, 180000, out fc);
+            if (fc != 0 || !Directory.Exists(letter + @":\")) { msg = "O disco foi criado mas a formatação falhou (código " + fc + ").\n" + fo; try { Run2(im, "-D -m " + letter + ":", 30000, out code); } catch (Exception) { } Settings.Set("xf.disk", ""); return false; }
             string root = letter + @":\XFastRAM";
             try { Directory.CreateDirectory(root); } catch (Exception) { }
             List<string[]> links = new List<string[]>(); List<string> bad = new List<string>();
@@ -17312,7 +17339,7 @@ namespace BunoTunner
                         if (IsLink(dir) || Directory.Exists(bak)) continue;
                         Directory.Move(dir, bak);
                         Directory.CreateDirectory(target);
-                        int c2; string o2 = Proc.Run("cmd.exe", "/c mklink /J \"" + dir + "\" \"" + target + "\"", 15000, out c2);
+                        int c2; string o2 = Run2("cmd.exe", "/c mklink /J \"" + dir + "\" \"" + target + "\"", 15000, out c2);
                         if (c2 != 0) { Directory.Move(bak, dir); bad.Add(dir + ": " + o2); continue; }
                         links.Add(new string[] { dir, bak });
                     }
@@ -17335,7 +17362,7 @@ namespace BunoTunner
             RevertAll();
             if (l.Length == 0) { msg = "Redirecionamentos desfeitos."; return true; }
             string im = ImDisk(); int code = 0; string o = "";
-            if (im != null && DiskReady()) o = Proc.Run(im, "-D -m " + l + ":", 30000, out code);
+            if (im != null && DiskReady()) o = Run2(im, "-D -m " + l + ":", 30000, out code);
             Settings.Set("xf.disk", "");
             if (code != 0) { msg = "Redirecionamentos desfeitos, mas o ImDisk não removeu o disco " + l + ": (código " + code + ").\n" + o; return false; }
             msg = "RAM Disk " + l + ": removido e memória devolvida ao Windows.";
@@ -17412,10 +17439,16 @@ namespace BunoTunner
             string fs = (string)cbFs.SelectedItem; if (fs == "FAT32" && mb > 32768) fs = "NTFS";
             List<string> keys = new List<string>();
             for (int i = 0; i < chk.Length; i++) { Settings.Set("xf.opt." + XFastRam.Targets[i].Key, chk[i].Checked ? "1" : "0"); if (chk[i].Checked) keys.Add(XFastRam.Targets[i].Key); }
-            Cursor = Cursors.WaitCursor; string msg; bool done;
-            try { done = XFastRam.Apply(((string)cbLetter.SelectedItem).Substring(0, 1), mb, fs, txLabel.Text, awe, keys, out msg); } finally { Cursor = Cursors.Default; }
-            lblStatus.ForeColor = done ? Xp.Good : Xp.Bad; lblStatus.Text = Lang.T(msg);
-            RefreshState(false); lblStatus.Text = Lang.T(msg);
+            string letter = ((string)cbLetter.SelectedItem).Substring(0, 1), lab = txLabel.Text;
+            Cursor = Cursors.WaitCursor; btnApply.Enabled = false; btnRemove.Enabled = false; btnInst.Enabled = false;
+            lblStatus.ForeColor = Xp.Dim; lblStatus.Text = Lang.T("Criando o RAM Disk... aguarde (pode levar alguns segundos).");
+            System.Threading.Thread th = new System.Threading.Thread(delegate()
+            {
+                string m2; bool ok2;
+                try { ok2 = XFastRam.Apply(letter, mb, fs, lab, awe, keys, out m2); } catch (Exception ex) { ok2 = false; m2 = "Erro: " + ex.Message; }
+                try { BeginInvoke(new Action(delegate { Cursor = Cursors.Default; RefreshState(false); lblStatus.ForeColor = ok2 ? Xp.Good : Xp.Bad; lblStatus.Text = Lang.T(m2); })); } catch (Exception) { }
+            });
+            th.IsBackground = true; th.Start();
         }
         void DoInstall()
         {

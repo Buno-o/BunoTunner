@@ -674,3 +674,7 @@ v1.49.50 (TESTE)
 
 v1.49.51 (TESTE)
 - XFast RAM: corrigido o erro "O ImDisk nao conseguiu criar o disco (codigo -1)" no modo Memoria fisica (AWE). Segundo a ajuda do proprio imdisk.exe, a opcao awe so vale para disco do tipo "file" (sem arquivo, so com -s); o programa usava o tipo "vm". Agora o modo fisico usa "-t file -o awe".
+
+v1.49.52 (TESTE)
+- XFast RAM: a janela nao trava mais ao criar o disco (a criacao roda em segundo plano, com aviso "Criando o RAM Disk... aguarde").
+- XFast RAM: os programas externos (imdisk, format, sc, schtasks) agora rodam com a entrada fechada e tempo limite real, para nada ficar esperando uma tecla. O disco e criado e depois formatado em uma etapa separada, com mensagem de erro propria.
