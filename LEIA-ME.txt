@@ -678,3 +678,9 @@ v1.49.51 (TESTE)
 v1.49.52 (TESTE)
 - XFast RAM: a janela nao trava mais ao criar o disco (a criacao roda em segundo plano, com aviso "Criando o RAM Disk... aguarde").
 - XFast RAM: os programas externos (imdisk, format, sc, schtasks) agora rodam com a entrada fechada e tempo limite real, para nada ficar esperando uma tecla. O disco e criado e depois formatado em uma etapa separada, com mensagem de erro propria.
+
+v1.49.53 (TESTE)
+- Benchmark: removido o seletor "Duracao" de todos os testes. CPU, FPU, RAM e GPU rodam 1 minuto e terminam sozinhos; o SSD termina quando acaba a passagem.
+- Benchmark SSD refeito no estilo CrystalDiskMark: SEQ1M Q8T1, SEQ1M Q1T1, RND4K Q32T1 e RND4K Q1T1, com 1 passagem de escrita e 1 de leitura em cada (fila de pedidos real, E/S sem cache). Ao final abre uma janela com os resultados de todos os testes (MB/s e IOPS nos 4K), com botao Copiar.
+- Benchmark SSD: se o drive tiver pouco espaco livre (ex.: RAM Disk de 1,5 GB com teste de 1 GB), o tamanho do teste e reduzido automaticamente em vez de falhar; se o drive recusar E/S sem cache, tenta com cache e avisa.
+- A animacao do teste nao foi alterada.
