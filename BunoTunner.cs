@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.53.0")]
-[assembly: AssemblyFileVersion("1.49.53.0")]
-[assembly: AssemblyInformationalVersion("1.49.53")]
+[assembly: AssemblyVersion("1.49.54.0")]
+[assembly: AssemblyFileVersion("1.49.54.0")]
+[assembly: AssemblyInformationalVersion("1.49.54")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -320,6 +320,7 @@ namespace BunoTunner
             "Lendo os timings...", "Reading timings...",
             "Ler novamente", "Read again",
             "Diagnóstico", "Diagnostics",
+            "Resultado da CPU", "CPU result",
             "Resultado do SSD", "SSD result",
             "Leitura (MB/s)", "Read (MB/s)",
             "Escrita (MB/s)", "Write (MB/s)",
@@ -2011,7 +2012,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.53";
+        public const string Version = "v1.49.54";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -11869,6 +11870,9 @@ namespace BunoTunner
         double lastPass, bestPass; DateTime passStart = DateTime.UtcNow;
         int nextB, doneB, pass; DateTime finishedAt = DateTime.MinValue; volatile bool quit; object lk = new object();
         Bitmap bmp = new Bitmap(W, H, PixelFormat.Format32bppRgb);
+
+        public double LastPassSec { get { return lastPass; } }   // segundos do primeiro render completo (0 = ainda nao terminou)
+        public int Progress { get { return doneB >= NB ? 100 : 100 * doneB / NB; } }
 
         public BenchCanvas(int kind, int threads)
         {
@@ -21907,7 +21911,7 @@ namespace BunoTunner
         XpIconButton[] bBtn = new XpIconButton[5];
         ComboBox[] cbDurK = new ComboBox[5]; ComboBox cbBFur; static readonly int[] FurSteps = { 50000, 100000, 250000, 500000, 1000000 };
         ComboBox cbBThrF;
-        XpButton btnBSeq;
+        XpButton btnBSeq; double bCpuTime;
 
         // um cartao por teste (grade de 2 colunas): icone que inicia/para, descricao, duracao e opcoes do teste
         static readonly int[] BenchPos = { 1, 0, 4, 2, 3 };   // posicao de cada teste (indice: 0 GPU, 1 CPU, 2 FPU, 3 RAM, 4 SSD) -> CPU, GPU, RAM, SSD, FPU
@@ -22107,7 +22111,7 @@ namespace BunoTunner
             else bSeqRun = false;
             if (Bench.Alive) { lblBMsg.Text = "Finalizando o teste anterior... tente de novo em um instante."; return; }
             int kind = pick;
-            bDurSec = kind == 4 ? 0 : 60;
+            bDurSec = 0; bCpuTime = 0;   // sem duracao: CPU e SSD terminam quando o teste acaba; GPU, FPU e RAM rodam ate o usuario parar
             Bench.FurCount = FurSteps[Math.Max(0, Math.Min(FurSteps.Length - 1, cbBFur.SelectedIndex))];
             Settings.Set("benchFur", cbBFur.SelectedIndex.ToString());
             int cores = Environment.ProcessorCount;
@@ -22150,7 +22154,7 @@ namespace BunoTunner
             }
             catch { rf = null; }
             bBtn[kind].Badge = 2; bBtn[kind].Invalidate(); btnBSeq.Text = "Parar tudo";
-            pbBench.Marquee = false; pbBench.Value = 0;
+            pbBench.Marquee = kind == 0 || kind == 2 || kind == 3; pbBench.Value = 0;
             lblBMsg.Text = "Rodando...";
             tmBench.Start();
         }
@@ -22234,8 +22238,9 @@ namespace BunoTunner
             lblBTime.Text = (es / 60).ToString("00") + ":" + (es % 60).ToString("00") + (bDurSec > 0 ? " / " + (bDurSec / 60).ToString("00") + ":" + (bDurSec % 60).ToString("00") + "   (restam " + Math.Max(0, bDurSec - es) + " s)" : "");
             string ex = Bench.Extra;
             if (!string.IsNullOrEmpty(ex)) lblBMsg.Text = ex;
-            if (bKind == 4) pbBench.Value = Math.Max(0, Math.Min(100, Bench.SsdProg)); else if (bDurSec > 0) pbBench.Value = (int)(100 * elapsed / bDurSec); else pbBench.Step();
+            if (bKind == 4) pbBench.Value = Math.Max(0, Math.Min(100, Bench.SsdProg)); else if (bKind == 1) pbBench.Value = rf != null && rf.Cv != null ? Math.Max(0, Math.Min(100, rf.Cv.Progress)) : 0; else if (bDurSec > 0) pbBench.Value = (int)(100 * elapsed / bDurSec); else pbBench.Step();
 
+            if (bKind == 1 && rf != null && rf.Cv != null && rf.Cv.LastPassSec > 0) { bCpuTime = rf.Cv.LastPassSec; StopBench("Concluído."); return; }
             if (Bench.Fail != null) { StopBench("Falhou: " + Bench.Fail); return; }
             if (chkBSafe.Checked && t.HasValue && t.Value >= UI.Int(txBTemp, 95)) { StopBench("Parado por segurança: temperatura de " + t.Value.ToString("0") + " \u00B0C."); return; }
             if (bDurSec > 0 && elapsed >= bDurSec) { StopBench("Concluído."); return; }
@@ -22299,6 +22304,11 @@ namespace BunoTunner
                 else { bSeqRun = false; msg += "  Sequência concluída."; }
             }
             lblBMsg.Text = msg + (errs > 0 ? "  ATENÇÃO: " + errs + " erro(s) de cálculo/verificação - sistema instável!" : "");
+            if (wasRun && okEnd && bKind == 1 && bCpuTime > 0)
+            {
+                string ct = "Render concluído em " + bCpuTime.ToString("0.0") + " s" + (bN > 0 ? "\nPontuação: " + (bSum / bN * 100).ToString("0") + " pts (" + (cbBThr.SelectedIndex == 2 ? "1 thread" : "multi") + ")\nMédia: " + (bSum / bN).ToString("0.0") + " " + u + "   Pico: " + bPeak.ToString("0.0") + " " + u : "") + (errs > 0 ? "\n" + errs + " erro(s) de verificação!" : "");
+                BeginInvoke(new Action(delegate { Dlg.Show(FindForm(), ct, "Resultado da CPU"); }));
+            }
             if (wasRun && okEnd && bKind == 4 && Bench.SsdDone) { string drv = cbBDrive.SelectedItem as string; BeginInvoke(new Action(delegate { SsdResultForm.ShowIt(FindForm(), drv, Bench.SsdMb, errs); })); }
         }
 

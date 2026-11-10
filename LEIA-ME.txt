@@ -684,3 +684,6 @@ v1.49.53 (TESTE)
 - Benchmark SSD refeito no estilo CrystalDiskMark: SEQ1M Q8T1, SEQ1M Q1T1, RND4K Q32T1 e RND4K Q1T1, com 1 passagem de escrita e 1 de leitura em cada (fila de pedidos real, E/S sem cache). Ao final abre uma janela com os resultados de todos os testes (MB/s e IOPS nos 4K), com botao Copiar.
 - Benchmark SSD: se o drive tiver pouco espaco livre (ex.: RAM Disk de 1,5 GB com teste de 1 GB), o tamanho do teste e reduzido automaticamente em vez de falhar; se o drive recusar E/S sem cache, tenta com cache e avisa.
 - A animacao do teste nao foi alterada.
+
+v1.49.54 (TESTE)
+- Benchmark: GPU, FPU e RAM agora rodam sem limite de tempo ate o usuario parar/fechar. CPU roda ate terminar o render (1 passagem completa) e mostra o resultado (tempo, pontuacao, media e pico); o SSD continua rodando ate terminar os 4 testes e mostra os resultados.
