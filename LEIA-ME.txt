@@ -693,3 +693,7 @@ v1.49.55 (TESTE)
 
 v1.49.56 (TESTE)
 - Saude do armazenamento: o RAM Disk (ImDisk / XFast RAM) agora aparece em "Seus discos" como disco virtual (tipo "Virtual RAM", saude Boa, sem S.M.A.R.T.). Ele nao aparecia porque o Windows nao o lista como disco fisico.
+
+v1.49.57 (TESTE)
+- Benchmark SSD: novo seletor "Passadas" (1, 2, 3, 5 ou 9; padrao 3, como o CrystalDiskMark). O conjunto dos 4 testes repete esse numero de vezes e o resultado de cada teste e o melhor valor entre as passadas. Tamanho do arquivo de teste: agora de 512 MB ate 8 GB.
+- Benchmark SSD: cada teste mede pelo menos 5 s e todos os pedidos de E/S usam um unico buffer (cabe no cache do processador), o que aproxima os numeros do CrystalDiskMark em discos muito rapidos como o RAM Disk. A conferencia de leitura passou a usar um cabecalho fixo.

@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.56.0")]
-[assembly: AssemblyFileVersion("1.49.56.0")]
-[assembly: AssemblyInformationalVersion("1.49.56")]
+[assembly: AssemblyVersion("1.49.57.0")]
+[assembly: AssemblyFileVersion("1.49.57.0")]
+[assembly: AssemblyInformationalVersion("1.49.57")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -320,6 +320,8 @@ namespace BunoTunner
             "Lendo os timings...", "Reading timings...",
             "Ler novamente", "Read again",
             "Diagnóstico", "Diagnostics",
+            "Passadas:", "Passes:",
+            "Quantas vezes o conjunto dos 4 testes se repete. O resultado de cada teste é o melhor valor entre as passadas (como no CrystalDiskMark).", "How many times the set of 4 tests repeats. Each test's result is the best value among the passes (like CrystalDiskMark).",
             "Resultado da CPU", "CPU result",
             "Resultado do SSD", "SSD result",
             "Leitura (MB/s)", "Read (MB/s)",
@@ -2012,7 +2014,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.56";
+        public const string Version = "v1.49.57";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -14052,7 +14054,7 @@ namespace BunoTunner
         public static double[] SsdMbs = new double[8], SsdIops = new double[8];   // [teste*2 + 0 leitura / 1 escrita]
         public static readonly string[] SsdNames = { "SEQ1M Q8T1", "SEQ1M Q1T1", "RND4K Q32T1", "RND4K Q1T1" };
         public static volatile bool SsdDone; public static volatile int SsdProg;   // SsdProg: 0..100
-        public static volatile string SsdInfo = "";
+        public static volatile string SsdInfo = ""; public static int SsdPasses = 3; const int SsdMagic = 0x4F4E5542;
         [DllImport("kernel32.dll", SetLastError = true)] static extern IntPtr CreateEvent(IntPtr sec, bool manual, bool initial, IntPtr name);
         [DllImport("kernel32.dll", SetLastError = true)] static extern uint WaitForMultipleObjects(uint n, IntPtr[] h, bool all, uint ms);
 
@@ -14067,10 +14069,13 @@ namespace BunoTunner
             Stopwatch sw = new Stopwatch();
             try
             {
+                // um unico buffer para todos os pedidos (1 MB cabe no cache do processador; 8 buffers diferentes diminuiriam a velocidade em discos muito rapidos)
+                raw[0] = Marshal.AllocHGlobal(blk + 4096); IntPtr b0 = new IntPtr((raw[0].ToInt64() + 4095) & ~4095L);
+                byte[] rb = new byte[blk]; new Random(777).NextBytes(rb); Marshal.Copy(rb, 0, b0, blk);
+                Marshal.WriteInt32(b0, 0, SsdMagic); Marshal.WriteInt32(b0, 4, ~SsdMagic);
                 for (int i = 0; i < q; i++)
                 {
-                    raw[i] = Marshal.AllocHGlobal(blk + 4096); buf[i] = new IntPtr((raw[i].ToInt64() + 4095) & ~4095L);
-                    byte[] rb = new byte[blk]; new Random(777 + i).NextBytes(rb); Marshal.Copy(rb, 0, buf[i], blk);
+                    buf[i] = b0;
                     ov[i] = Marshal.AllocHGlobal(ovSize); ev[i] = CreateEvent(IntPtr.Zero, false, false, IntPtr.Zero);
                 }
                 SsdPhase = phaseShow; SsdPos = 0;
@@ -14091,7 +14096,6 @@ namespace BunoTunner
                         long off = idx[i] * blk;
                         Marshal.WriteIntPtr(ov[i], 0, IntPtr.Zero); Marshal.WriteIntPtr(ov[i], IntPtr.Size, IntPtr.Zero);
                         Marshal.WriteInt32(ov[i], ovOff, (int)(off & 0xFFFFFFFF)); Marshal.WriteInt32(ov[i], ovOff + 4, (int)(off >> 32)); Marshal.WriteIntPtr(ov[i], ovOff + 8, ev[i]);
-                        if (write && !rnd) { Marshal.WriteInt32(buf[i], 0, (int)idx[i]); Marshal.WriteInt32(buf[i], 4, ~(int)idx[i]); }
                         uint dummy; bool r = write ? WriteFile(h, buf[i], (uint)blk, out dummy, ov[i]) : ReadFile(h, buf[i], (uint)blk, out dummy, ov[i]);
                         if (!r && Marshal.GetLastWin32Error() != 997) { Fail = (write ? "Erro de escrita (" : "Erro de leitura (") + Marshal.GetLastWin32Error() + ")"; ok = false; break; }
                         act[i] = true; active++;
@@ -14112,7 +14116,7 @@ namespace BunoTunner
                             if (write) SsdMap[mc] = 1;
                             else
                             {
-                                bool bad = Marshal.ReadInt32(buf[s], 0) != (int)idx[s] || Marshal.ReadInt32(buf[s], 4) != ~(int)idx[s];
+                                bool bad = Marshal.ReadInt32(buf[s], 0) != SsdMagic || Marshal.ReadInt32(buf[s], 4) != ~SsdMagic;
                                 if (bad) { Th.Interlocked.Increment(ref Errors); SsdMap[mc] = 3; } else if (SsdMap[mc] != 3) SsdMap[mc] = 2;
                             }
                         }
@@ -14135,10 +14139,11 @@ namespace BunoTunner
             }
             finally
             {
+                bool pending = false; for (int i = 0; i < q; i++) if (act[i]) pending = true;
+                if (!pending && raw[0] != IntPtr.Zero) Marshal.FreeHGlobal(raw[0]);
                 for (int i = 0; i < q; i++)
                 {
                     if (act[i]) continue;   // pedido ainda pendente: nao libera a memoria (o disco ainda pode escrever nela)
-                    if (raw[i] != IntPtr.Zero) Marshal.FreeHGlobal(raw[i]);
                     if (ov[i] != IntPtr.Zero) Marshal.FreeHGlobal(ov[i]);
                     if (ev[i] != IntPtr.Zero) CloseHandle(ev[i]);
                 }
@@ -14179,19 +14184,21 @@ namespace BunoTunner
             {
                 SsdMap = new byte[128]; Array.Clear(SsdHit, 0, SsdHit.Length); SsdMb = mb; SsdPos = 0; SsdPhase = 0;
                 int[] blkS = { 1 << 20, 1 << 20, 4096, 4096 }, qS = { 8, 1, 32, 1 }; bool[] rndS = { false, false, true, true };
-                for (int t = 0; t < 4 && !Stop; t++)
-                {
-                    for (int rw = 1; rw >= 0 && !Stop; rw--)   // escrita primeiro (cria o conteudo), depois leitura
+                int passes = Math.Max(1, SsdPasses);
+                for (int pass = 0; pass < passes && !Stop; pass++)
+                    for (int t = 0; t < 4 && !Stop; t++)
                     {
-                        bool write = rw == 1; double mbps, iops;
-                        if (!SsdPass(h, write, rndS[t], blkS[t], qS[t], mb, 5.0, 3.0, write ? 0 : (rndS[t] ? 2 : 1), out mbps, out iops)) { if (Fail != null) return; break; }
-                        SsdMbs[t * 2 + rw] = mbps; SsdIops[t * 2 + rw] = iops;
-                        SsdProg = (t * 2 + (write ? 1 : 2)) * 100 / 8;
-                        StringBuilder sb = new StringBuilder();
-                        for (int k = 0; k <= t; k++) { if (k > 0) sb.Append(" | "); sb.Append(SsdNames[k]).Append(": ").Append(SsdMbs[k * 2].ToString("0")).Append(" / ").Append(SsdMbs[k * 2 + 1].ToString("0")).Append(" MB/s"); }
-                        Extra = sb.ToString() + "  (leitura / escrita)";
+                        for (int rw = 1; rw >= 0 && !Stop; rw--)   // escrita primeiro (cria o conteudo), depois leitura
+                        {
+                            bool write = rw == 1; double mbps, iops;
+                            if (!SsdPass(h, write, rndS[t], blkS[t], qS[t], mb, 5.0, 5.0, write ? 0 : (rndS[t] ? 2 : 1), out mbps, out iops)) { if (Fail != null) return; break; }
+                            if (mbps > SsdMbs[t * 2 + rw]) { SsdMbs[t * 2 + rw] = mbps; SsdIops[t * 2 + rw] = iops; }   // vale o melhor valor entre as passadas
+                            SsdProg = (pass * 8 + t * 2 + (write ? 1 : 2)) * 100 / (passes * 8);
+                            StringBuilder sb = new StringBuilder("Passada " + (pass + 1) + "/" + passes + ":  ");
+                            for (int k = 0; k <= t; k++) { if (k > 0) sb.Append(" | "); sb.Append(SsdNames[k]).Append(": ").Append(SsdMbs[k * 2].ToString("0")).Append(" / ").Append(SsdMbs[k * 2 + 1].ToString("0")).Append(" MB/s"); }
+                            Extra = sb.ToString() + "  (leitura / escrita)";
+                        }
                     }
-                }
                 if (!Stop && Fail == null) { SsdProg = 100; SsdDone = true; }
             }
             finally { CloseHandle(h); }
@@ -17483,7 +17490,7 @@ namespace BunoTunner
         {
             Text = "Resultado do SSD"; Size = new Size(520, 340); StartPosition = FormStartPosition.CenterParent; ShowInTaskbar = false;
             Panel body = new Panel(); body.Dock = DockStyle.Fill; Controls.Add(body);
-            UI.Lbl(body, "Drive " + drive + "   -   arquivo de teste de " + mb + " MB   -   mín. 3 s por teste", 10, 6, Xp.Ui, Xp.Dim);
+            UI.Lbl(body, "Drive " + drive + "   -   arquivo de teste de " + mb + " MB   -   " + Bench.SsdPasses + " passada(s), melhor valor", 10, 6, Xp.Ui, Xp.Dim);
             UI.Lbl(body, "Teste", 14, 34, Xp.UiBold, Xp.GroupText); UI.Lbl(body, "Leitura (MB/s)", 150, 34, Xp.UiBold, Xp.GroupText); UI.Lbl(body, "Escrita (MB/s)", 330, 34, Xp.UiBold, Xp.GroupText);
             StringBuilder sb = new StringBuilder("BunoTunner - SSD " + drive + " (" + mb + " MB)\r\nTeste\tLeitura MB/s\tEscrita MB/s\r\n");
             for (int t = 0; t < 4; t++)
@@ -21521,7 +21528,7 @@ namespace BunoTunner
         XpIconButton btnFan, btnOc, btnSpec, btnCpu, btnBench;
         LTip tip = new LTip();
         // benchmark
-        ComboBox cbBThr, cbBRam, cbBDrive, cbBSize, cbTheme;
+        ComboBox cbBThr, cbBRam, cbBDrive, cbBSize, cbBPass, cbTheme;
         Label lblTheme, lblBRate, lblBAvg, lblBPeak, lblBTemp, lblBErr, lblBTime, lblBMsg;
         XpOption chkBSafe; XpText txBTemp; XpProgress pbBench;
         XpGraph grBench = new XpGraph(); ListView lvBench = new XpList(); Timer tmBench = new Timer();
@@ -22017,7 +22024,10 @@ namespace BunoTunner
                 cbBDrive.SelectedIndex = si >= 0 ? si : 0;
             }
             UI.Lbl(gS, "Tamanho:", 496, 48);
-            cbBSize = Combo(gS, 556, 44, 90, "512 MB", "1 GB", "2 GB", "4 GB"); cbBSize.SelectedIndex = 1;
+            cbBSize = Combo(gS, 556, 44, 90, "512 MB", "1 GB", "2 GB", "4 GB", "8 GB"); cbBSize.SelectedIndex = 1;
+            UI.Lbl(gS, "Passadas:", 384, 24);
+            cbBPass = Combo(gS, 448, 20, 110, "1", "2", "3", "5", "9"); { int pi; if (!int.TryParse(Settings.Get("benchPass", "2"), out pi) || pi < 0 || pi > 4) pi = 2; cbBPass.SelectedIndex = pi; }
+            tip.SetToolTip(cbBPass, "Quantas vezes o conjunto dos 4 testes se repete. O resultado de cada teste é o melhor valor entre as passadas (como no CrystalDiskMark).");
             p.Controls.Add(gS);
 
             // cartao de controle: seguranca, progresso, sequencia e mensagens
@@ -22141,7 +22151,7 @@ namespace BunoTunner
         void BenchLock(bool run)
         {
             for (int i = 0; i < 5; i++) { bBtn[i].Enabled = !run || i == bKind; cbDurK[i].Enabled = !run; }
-            cbBThrF.Enabled = !run; cbBThr.Enabled = !run; cbBFur.Enabled = !run; cbBRam.Enabled = !run; cbBDrive.Enabled = !run; cbBSize.Enabled = !run;
+            cbBThrF.Enabled = !run; cbBThr.Enabled = !run; cbBFur.Enabled = !run; cbBRam.Enabled = !run; cbBDrive.Enabled = !run; cbBSize.Enabled = !run; cbBPass.Enabled = !run;
         }
 
         void ToggleBench(int pick)
@@ -22161,7 +22171,8 @@ namespace BunoTunner
             int cores = Environment.ProcessorCount;
             int thr = cbBThr.SelectedIndex == 0 ? cores : (cbBThr.SelectedIndex == 1 ? Math.Max(1, cores / 2) : 1);   // CPU e FPU compartilham
             int ramPct = new int[] { 25, 50, 70 }[cbBRam.SelectedIndex];
-            int mb = new int[] { 512, 1024, 2048, 4096 }[cbBSize.SelectedIndex];
+            int mb = new int[] { 512, 1024, 2048, 4096, 8192 }[cbBSize.SelectedIndex];
+            Bench.SsdPasses = new int[] { 1, 2, 3, 5, 9 }[cbBPass.SelectedIndex]; Settings.Set("benchPass", cbBPass.SelectedIndex.ToString());
             string drive = cbBDrive.SelectedItem as string;
             if (kind == 4)
             {
