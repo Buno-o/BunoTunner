@@ -671,3 +671,6 @@ v1.49.50 (TESTE)
 - XFast RAM: o driver do RAM Disk (ImDisk x64 + AWEAlloc, assinados, extraidos do ImDisk Toolkit) agora vem EMBUTIDO no programa; nao precisa baixar nada. Instala ao criar o disco (ou pelo botao "Instalar driver"), com confirmacao.
 - XFast RAM: corrigida a criacao com "Memoria fisica (AWE)". O modo AWE exige o privilegio "Bloquear paginas na memoria", que a conta de administrador nao tem; agora o disco e criado como SYSTEM (tarefa agendada temporaria) e o servico AWEAlloc e iniciado antes.
 - Driver embutido: ImDisk (c) Olof Lagerkvist / LTR Data, licenca permissiva (aviso de copyright mantido). Apenas Windows 64 bits (x64).
+
+v1.49.51 (TESTE)
+- XFast RAM: corrigido o erro "O ImDisk nao conseguiu criar o disco (codigo -1)" no modo Memoria fisica (AWE). Segundo a ajuda do proprio imdisk.exe, a opcao awe so vale para disco do tipo "file" (sem arquivo, so com -s); o programa usava o tipo "vm". Agora o modo fisico usa "-t file -o awe".

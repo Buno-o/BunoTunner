@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.50.0")]
-[assembly: AssemblyFileVersion("1.49.50.0")]
-[assembly: AssemblyInformationalVersion("1.49.50")]
+[assembly: AssemblyVersion("1.49.51.0")]
+[assembly: AssemblyFileVersion("1.49.51.0")]
+[assembly: AssemblyInformationalVersion("1.49.51")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -2007,7 +2007,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.50";
+        public const string Version = "v1.49.51";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -17283,7 +17283,7 @@ namespace BunoTunner
             StartSvc("ImDisk");
             if (DiskReady()) { msg = "Já existe um RAM Disk ativo (" + DiskLetter() + ":). Remova-o antes de criar outro."; return false; }
             label = (label ?? "").Replace("\"", "").Replace("/", "").Trim(); if (label.Length == 0) label = "RAMDisk";
-            string args = "-a -t vm -s " + mb + "M -m " + letter + ": " + (awe ? "-o awe " : "") + "-p \"/fs:" + fs.ToLowerInvariant() + " /q /y /v:" + label + "\"";
+            string args = "-a -t " + (awe ? "file" : "vm") + " -s " + mb + "M -m " + letter + ": " + (awe ? "-o awe " : "") + "-p \"/fs:" + fs.ToLowerInvariant() + " /q /y /v:" + label + "\"";
             int code; string o = awe ? RunSys(im, args, 120000, out code) : Proc.Run(im, args, 120000, out code);
             if (code != 0 || !Directory.Exists(letter + @":\")) { msg = "O ImDisk não conseguiu criar o disco (código " + code + ").\n" + o; try { Proc.Run(im, "-D -m " + letter + ":", 20000, out code); } catch (Exception) { } return false; }
             Settings.Set("xf.disk", letter);
