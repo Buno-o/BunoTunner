@@ -659,3 +659,10 @@ v1.49.47 (TESTE)
 
 v1.49.48 (TESTE)
 - Tema Realistic (Win 10): icones do Benchmark e da FPU trocados (fogo agora e o Benchmark/Estresse; a tela com pi e play e a FPU) e mais contraste (fundo, bordas, texto, botoes, menu lateral e barras mais escuros).
+
+v1.49.49 (TESTE)
+- Pagina RAM: novo botao "XFast RAM..." ao lado de "Diagnostico" (abaixo dos timings). Abre um menu para criar um RAM Disk (disco na memoria RAM), estilo ASRock XFast RAM:
+  tamanho, unidade, sistema de arquivos (NTFS/exFAT/FAT32), nome, tipo de alocacao (virtual ou fisica/AWE).
+- Opcao de mandar para o RAM Disk o cache do Chrome, Edge, Firefox, INetCache e a pasta TEMP do usuario (via juncao NTFS). "Remover" desfaz tudo.
+- Ao reiniciar o Windows o disco some e os redirecionamentos voltam ao normal (RunOnce + limpeza ao abrir o programa).
+- Funciona com qualquer DDR (2/3/4/5) e CPU AMD ou Intel. Usa o driver gratuito ImDisk Toolkit (nao incluso); sem ele o botao Criar fica desativado.

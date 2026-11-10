@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.48.0")]
-[assembly: AssemblyFileVersion("1.49.48.0")]
-[assembly: AssemblyInformationalVersion("1.49.48")]
+[assembly: AssemblyVersion("1.49.49.0")]
+[assembly: AssemblyFileVersion("1.49.49.0")]
+[assembly: AssemblyInformationalVersion("1.49.49")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -320,6 +320,33 @@ namespace BunoTunner
             "Lendo os timings...", "Reading timings...",
             "Ler novamente", "Read again",
             "Diagnóstico", "Diagnostics",
+            "XFast RAM - RAM Disk", "XFast RAM - RAM Disk",
+            "Reserva parte da memória RAM como um disco muito rápido (estilo ASRock XFast RAM). Funciona com qualquer geração de DDR e com processadores AMD e Intel. Ao reiniciar o Windows o disco e tudo o que está nele desaparecem e o sistema volta ao normal.", "Reserves part of your RAM as a very fast disk (ASRock XFast RAM style). Works with any DDR generation and with AMD and Intel processors. When Windows restarts the disk and everything on it disappear and the system goes back to normal.",
+            "Memória (total / livre):", "Memory (total / free):",
+            "Driver do RAM Disk (ImDisk):", "RAM Disk driver (ImDisk):",
+            "Tamanho do disco:", "Disk size:",
+            "Unidade:", "Drive:",
+            "Sistema de arquivos:", "File system:",
+            "Nome do disco:", "Disk name:",
+            "Tipo de alocação:", "Allocation type:",
+            "Memória virtual (padrão; o Windows pode paginar)", "Virtual memory (default; Windows may page it)",
+            "Memória física (AWE; fica fixa na RAM)", "Physical memory (AWE; stays fixed in RAM)",
+            "Mandar para o RAM Disk (desfeito ao remover ou reiniciar):", "Send to the RAM Disk (undone on remove or reboot):",
+            "Cache do Google Chrome", "Google Chrome cache",
+            "Cache do Microsoft Edge", "Microsoft Edge cache",
+            "Cache do Mozilla Firefox", "Mozilla Firefox cache",
+            "Cache do Internet Explorer / Windows (INetCache)", "Internet Explorer / Windows cache (INetCache)",
+            "Pasta temporária do usuário (TEMP/TMP)", "User temporary folder (TEMP/TMP)",
+            "Feche os navegadores antes de aplicar. A pasta TEMP vale para programas abertos depois (WinRAR, 7-Zip, instaladores...); alguns só pegam após sair e entrar no Windows.", "Close the browsers before applying. The TEMP folder applies to programs opened afterwards (WinRAR, 7-Zip, installers...); some only pick it up after signing out and in.",
+            "Criar / aplicar", "Create / apply",
+            "Remover (desfazer tudo)", "Remove (undo everything)",
+            "Baixar ImDisk", "Download ImDisk",
+            "NÃO instalado (use \"Baixar ImDisk\")", "NOT installed (use \"Download ImDisk\")",
+            "RAM Disk ativo em", "RAM Disk active at",
+            "Para criar o disco é preciso o driver gratuito ImDisk Toolkit (assinado, funciona do Windows XP ao 11). Instale e abra esta janela de novo.", "To create the disk you need the free ImDisk Toolkit driver (signed, works from Windows XP to 11). Install it and reopen this window.",
+            "Informe um tamanho válido (ex.: 2 GB ou 2048) e escolha a unidade.", "Enter a valid size (e.g. 2 GB or 2048) and choose the drive.",
+            "O driver ImDisk não está instalado.", "The ImDisk driver is not installed.",
+            "Redirecionamentos desfeitos.", "Redirections undone.",
             "Indicar CPU-Z...", "Set CPU-Z...",
             "Baixar CPU-Z", "Download CPU-Z",
             "Latência da memória (ns)", "Memory latency (ns)",
@@ -1611,6 +1638,7 @@ namespace BunoTunner
                 Application.SetCompatibleTextRenderingDefault(false);
                 Lang.Init();
                 Xp.SetTheme(Xp.IdOf(Settings.Get("theme", "luna")));
+                try { XFastRam.Housekeeping(); } catch (Exception) { }
                 Application.EnableVisualStyles();
                 try { PawnIo.CheckAtStartup(null); } catch (Exception) { }
                 Startup.Mark("tema e PawnIO verificados");
@@ -1974,7 +2002,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.48";
+        public const string Version = "v1.49.49";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -15717,6 +15745,309 @@ namespace BunoTunner
         }
     }
 
+    // ------------------------------------------------------------------
+    //  XFast RAM (RAM Disk): disco na memoria RAM, igual ao ASRock XFast RAM (driver AsrRamDisk: miniport SCSI/Storport que reserva
+    //  paginas fisicas com MmAllocatePagesForMdl). Aqui o disco e criado pelo driver ImDisk (assinado, XP ate o Windows 11, x86/x64/ARM64);
+    //  o conteudo e a reserva somem ao reiniciar. Nao depende da geracao da DDR nem do fabricante da CPU (AMD/Intel): e tudo do Windows.
+    //  Redirecionamentos (cache de navegadores, pasta TEMP) sao desfeitos ao remover o disco; se o PC reiniciar sem remover, um RunOnce e a
+    //  limpeza na abertura do BunoTunner desfazem tudo.
+    // ------------------------------------------------------------------
+    static class XFastRam
+    {
+        [StructLayout(LayoutKind.Sequential)] struct XfMemSt { public uint Len, Load; public ulong TotPhys, AvPhys, TotPage, AvPage, TotVirt, AvVirt, AvExt; }
+        [DllImport("kernel32.dll")] static extern bool GlobalMemoryStatusEx(ref XfMemSt m);
+        [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)] static extern IntPtr SendMessageTimeout(IntPtr h, uint msg, IntPtr w, string l, uint flags, uint timeout, out IntPtr res);
+
+        public static void Mem(out long totalMb, out long freeMb)
+        {
+            XfMemSt m = new XfMemSt(); m.Len = (uint)Marshal.SizeOf(typeof(XfMemSt)); totalMb = 0; freeMb = 0;
+            if (GlobalMemoryStatusEx(ref m)) { totalMb = (long)(m.TotPhys / 1048576UL); freeMb = (long)(m.AvPhys / 1048576UL); }
+        }
+        public static string ImDisk()
+        {
+            try
+            {
+                string[] c = { Path.Combine(Environment.SystemDirectory, "imdisk.exe"), @"C:\Program Files\ImDisk\imdisk.exe", @"C:\Program Files (x86)\ImDisk\imdisk.exe" };
+                foreach (string p in c) if (File.Exists(p)) return p;
+                string path = Environment.GetEnvironmentVariable("PATH") ?? "";
+                foreach (string d in path.Split(';')) { try { if (d.Length > 0 && File.Exists(Path.Combine(d.Trim('"'), "imdisk.exe"))) return Path.Combine(d.Trim('"'), "imdisk.exe"); } catch (Exception) { } }
+            }
+            catch (Exception) { }
+            return null;
+        }
+        public static string DiskLetter() { return Settings.Get("xf.disk", ""); }
+        public static bool DiskReady() { string l = DiskLetter(); try { return l.Length == 1 && new DriveInfo(l).IsReady; } catch (Exception) { return false; } }
+        public static long DiskMb() { try { return new DriveInfo(DiskLetter()).TotalSize / 1048576L; } catch (Exception) { return 0; } }
+        public static List<string> FreeLetters()
+        {
+            List<string> l = new List<string>(); List<string> used = new List<string>();
+            foreach (DriveInfo d in DriveInfo.GetDrives()) used.Add(d.Name.Substring(0, 1).ToUpperInvariant());
+            for (char c = 'Z'; c >= 'D'; c--) if (!used.Contains(c.ToString())) l.Add(c.ToString());
+            return l;
+        }
+
+        // ---- pastas que podem ir para o RAM Disk ----
+        public class Target { public string Key, Name; public Target(string k, string n) { Key = k; Name = n; } }
+        public static readonly Target[] Targets = {
+            new Target("chrome", "Cache do Google Chrome"), new Target("edge", "Cache do Microsoft Edge"), new Target("firefox", "Cache do Mozilla Firefox"),
+            new Target("ie", "Cache do Internet Explorer / Windows (INetCache)"), new Target("temp", "Pasta temporária do usuário (TEMP/TMP)") };
+        static string LocalApp { get { return Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData); } }
+        static List<string> Dirs(string key)
+        {
+            List<string> r = new List<string>();
+            try
+            {
+                if (key == "chrome" || key == "edge")
+                {
+                    string ud = key == "chrome" ? Path.Combine(LocalApp, @"Google\Chrome\User Data") : Path.Combine(LocalApp, @"Microsoft\Edge\User Data");
+                    if (!Directory.Exists(ud)) return r;
+                    foreach (string prof in Directory.GetDirectories(ud))
+                    {
+                        string n = Path.GetFileName(prof);
+                        if (n != "Default" && !n.StartsWith("Profile ")) continue;
+                        foreach (string sub in new string[] { "Cache", "Code Cache" }) { string p = Path.Combine(prof, sub); if (Directory.Exists(p)) r.Add(p); }
+                    }
+                }
+                else if (key == "firefox")
+                {
+                    string pr = Path.Combine(LocalApp, @"Mozilla\Firefox\Profiles");
+                    if (Directory.Exists(pr)) foreach (string prof in Directory.GetDirectories(pr)) { string p = Path.Combine(prof, "cache2"); if (Directory.Exists(p)) r.Add(p); }
+                }
+                else if (key == "ie")
+                {
+                    string p = Path.Combine(LocalApp, @"Microsoft\Windows\INetCache"); if (Directory.Exists(p)) r.Add(p);
+                }
+            }
+            catch (Exception) { }
+            return r;
+        }
+        static bool IsLink(string p) { try { return (File.GetAttributes(p) & FileAttributes.ReparsePoint) != 0; } catch (Exception) { return false; } }
+
+        // ---- estado salvo (para desfazer mesmo depois de um reinicio) ----
+        const string Sep = "~|~";
+        static List<string[]> Links()
+        {
+            List<string[]> l = new List<string[]>();
+            foreach (string e in Settings.Get("xf.links", "").Split(new string[] { Sep }, StringSplitOptions.RemoveEmptyEntries))
+            { string[] p = e.Split('>'); if (p.Length == 2) l.Add(p); }
+            return l;
+        }
+        static void SaveLinks(List<string[]> l)
+        {
+            List<string> s = new List<string>(); foreach (string[] p in l) s.Add(p[0] + ">" + p[1]);
+            Settings.Set("xf.links", string.Join(Sep, s.ToArray()));
+        }
+        static string RevertScript { get { return Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "BunoTunner"), "xf-revert.cmd"); } }
+        const string RunOnceKey = @"Software\Microsoft\Windows\CurrentVersion\RunOnce", RunOnceName = "BunoTunnerXFastRevert";
+        static void WriteRunOnce(List<string[]> links)
+        {
+            try
+            {
+                string sc = RevertScript; Directory.CreateDirectory(Path.GetDirectoryName(sc));
+                StringBuilder sb = new StringBuilder("@echo off\r\nchcp 65001 >nul\r\n");
+                foreach (string[] p in links)
+                    sb.Append("rmdir \"").Append(p[0]).Append("\"\r\nif not exist \"").Append(p[0]).Append("\" if exist \"").Append(p[1]).Append("\" move \"").Append(p[1]).Append("\" \"").Append(p[0]).Append("\" >nul\r\n");
+                sb.Append("del \"%~f0\"\r\n");
+                File.WriteAllText(sc, sb.ToString(), new UTF8Encoding(false));
+                using (RegistryKey k = Registry.CurrentUser.CreateSubKey(RunOnceKey)) k.SetValue(RunOnceName, "cmd.exe /c \"\"" + sc + "\"\"");
+            }
+            catch (Exception) { }
+        }
+        static void ClearRunOnce()
+        {
+            try { using (RegistryKey k = Registry.CurrentUser.OpenSubKey(RunOnceKey, true)) if (k != null) k.DeleteValue(RunOnceName, false); } catch (Exception) { }
+            try { if (File.Exists(RevertScript)) File.Delete(RevertScript); } catch (Exception) { }
+        }
+        static void Broadcast() { try { IntPtr r; SendMessageTimeout((IntPtr)0xFFFF, 0x1A, IntPtr.Zero, "Environment", 2, 2000, out r); } catch (Exception) { } }
+
+        // desfaz os redirecionamentos (junctions e TEMP); nao mexe no disco
+        public static void RevertAll()
+        {
+            foreach (string[] p in Links())
+            {
+                try
+                {
+                    if (Directory.Exists(p[0]) && IsLink(p[0])) Directory.Delete(p[0]);
+                    if (!Directory.Exists(p[0]) && Directory.Exists(p[1])) Directory.Move(p[1], p[0]);
+                }
+                catch (Exception) { }
+            }
+            Settings.Set("xf.links", "");
+            try
+            {
+                using (RegistryKey k = Registry.CurrentUser.OpenSubKey(@"Volatile Environment", true))
+                    if (k != null) foreach (string n in new string[] { "TEMP", "TMP" }) { object v = k.GetValue(n); if (v != null && Settings.Get("xf.env", "") != "" && v.ToString().StartsWith(Settings.Get("xf.env", ""), StringComparison.OrdinalIgnoreCase)) k.DeleteValue(n, false); }
+            }
+            catch (Exception) { }
+            if (Settings.Get("xf.env", "") != "") { Settings.Set("xf.env", ""); Broadcast(); }
+            ClearRunOnce();
+        }
+        // chamado ao abrir o BunoTunner: se o PC reiniciou, o disco sumiu e os redirecionamentos precisam voltar ao normal
+        public static void Housekeeping()
+        {
+            if (Settings.Get("xf.links", "") == "" && Settings.Get("xf.env", "") == "" && DiskLetter() == "") return;
+            if (!DiskReady()) { RevertAll(); Settings.Set("xf.disk", ""); }
+        }
+
+        static long ParseMb(string t, out bool ok)
+        {
+            ok = false; t = (t ?? "").Trim().ToUpperInvariant().Replace(" ", "").Replace(",", ".");
+            double mult = 1; if (t.EndsWith("GB")) { mult = 1024; t = t.Substring(0, t.Length - 2); } else if (t.EndsWith("G")) { mult = 1024; t = t.Substring(0, t.Length - 1); }
+            else if (t.EndsWith("MB")) t = t.Substring(0, t.Length - 2); else if (t.EndsWith("M")) t = t.Substring(0, t.Length - 1);
+            double v; if (!double.TryParse(t, NumberStyles.Float, CultureInfo.InvariantCulture, out v) || v <= 0) return 0;
+            ok = true; return (long)Math.Round(v * mult);
+        }
+        public static long ParseSizeMb(string t) { bool ok; long v = ParseMb(t, out ok); return ok ? v : 0; }
+
+        // cria o disco e aplica os redirecionamentos escolhidos; devolve o texto do resultado
+        public static bool Apply(string letter, long mb, string fs, string label, bool awe, List<string> keys, out string msg)
+        {
+            msg = "";
+            string im = ImDisk();
+            if (im == null) { msg = "O driver ImDisk não está instalado."; return false; }
+            if (DiskReady()) { msg = "Já existe um RAM Disk ativo (" + DiskLetter() + ":). Remova-o antes de criar outro."; return false; }
+            label = (label ?? "").Replace("\"", "").Replace("/", "").Trim(); if (label.Length == 0) label = "RAMDisk";
+            string args = "-a -t vm -s " + mb + "M -m " + letter + ": " + (awe ? "-o awe " : "") + "-p \"/fs:" + fs.ToLowerInvariant() + " /q /y /v:" + label + "\"";
+            int code; string o = Proc.Run(im, args, 120000, out code);
+            if (code != 0 || !Directory.Exists(letter + @":\")) { msg = "O ImDisk não conseguiu criar o disco (código " + code + ").\n" + o; try { Proc.Run(im, "-D -m " + letter + ":", 20000, out code); } catch (Exception) { } return false; }
+            Settings.Set("xf.disk", letter);
+            string root = letter + @":\XFastRAM";
+            try { Directory.CreateDirectory(root); } catch (Exception) { }
+            List<string[]> links = new List<string[]>(); List<string> bad = new List<string>();
+            foreach (string key in keys)
+            {
+                if (key == "temp")
+                {
+                    try
+                    {
+                        string t = Path.Combine(root, "Temp"); Directory.CreateDirectory(t);
+                        using (RegistryKey k = Registry.CurrentUser.CreateSubKey(@"Volatile Environment")) { k.SetValue("TEMP", t); k.SetValue("TMP", t); }
+                        Settings.Set("xf.env", t); Broadcast();
+                    }
+                    catch (Exception ex) { bad.Add("TEMP: " + ex.Message); }
+                    continue;
+                }
+                int n = 0;
+                foreach (string dir in Dirs(key))
+                {
+                    string bak = dir + ".buno-xfast", target = Path.Combine(Path.Combine(root, key), (n++).ToString());
+                    try
+                    {
+                        if (IsLink(dir) || Directory.Exists(bak)) continue;
+                        Directory.Move(dir, bak);
+                        Directory.CreateDirectory(target);
+                        int c2; string o2 = Proc.Run("cmd.exe", "/c mklink /J \"" + dir + "\" \"" + target + "\"", 15000, out c2);
+                        if (c2 != 0) { Directory.Move(bak, dir); bad.Add(dir + ": " + o2); continue; }
+                        links.Add(new string[] { dir, bak });
+                    }
+                    catch (Exception ex)
+                    {
+                        try { if (!Directory.Exists(dir) && Directory.Exists(bak)) Directory.Move(bak, dir); } catch (Exception) { }
+                        bad.Add(Path.GetFileName(dir) + ": " + ex.Message + " (feche o programa que usa essa pasta)");
+                    }
+                }
+            }
+            SaveLinks(links); WriteRunOnce(links);
+            msg = "RAM Disk " + letter + ": criado com " + FmtMb(mb) + " (" + fs.ToUpperInvariant() + ", " + (awe ? "memória física" : "memória virtual") + ").";
+            if (links.Count > 0) msg += "\n" + links.Count + " pasta(s) de cache redirecionada(s).";
+            if (bad.Count > 0) msg += "\nNão foi possível redirecionar:\n- " + string.Join("\n- ", bad.ToArray());
+            return true;
+        }
+        public static bool Remove(out string msg)
+        {
+            msg = ""; string l = DiskLetter();
+            RevertAll();
+            if (l.Length == 0) { msg = "Redirecionamentos desfeitos."; return true; }
+            string im = ImDisk(); int code = 0; string o = "";
+            if (im != null && DiskReady()) o = Proc.Run(im, "-D -m " + l + ":", 30000, out code);
+            Settings.Set("xf.disk", "");
+            if (code != 0) { msg = "Redirecionamentos desfeitos, mas o ImDisk não removeu o disco " + l + ": (código " + code + ").\n" + o; return false; }
+            msg = "RAM Disk " + l + ": removido e memória devolvida ao Windows.";
+            return true;
+        }
+        public static string FmtMb(long mb) { return mb >= 1024 ? (mb / 1024.0).ToString("0.##", CultureInfo.InvariantCulture) + " GB" : mb + " MB"; }
+    }
+
+    class XFastRamForm : XpForm
+    {
+        ComboBox cbSize, cbLetter, cbFs, cbTech; XpText txLabel; XpOption[] chk; Label lblMem, lblDrv, lblStatus; XpButton btnApply, btnRemove;
+        long totMb, freeMb;
+        static ComboBox Cmb(Control p, int x, int y, int w, bool edit)
+        {
+            ComboBox c = new ComboBox(); c.DropDownStyle = edit ? ComboBoxStyle.DropDown : ComboBoxStyle.DropDownList; c.SetBounds(x, y, w, 24); c.Font = Xp.Ui; p.Controls.Add(c); return c;
+        }
+        public XFastRamForm()
+        {
+            Text = "XFast RAM - RAM Disk"; Size = new Size(580, 586); StartPosition = FormStartPosition.CenterParent; ShowInTaskbar = false;
+            Panel body = new Panel(); body.Dock = DockStyle.Fill; Controls.Add(body);
+            Label info = UI.Lbl(body, "Reserva parte da memória RAM como um disco muito rápido (estilo ASRock XFast RAM). Funciona com qualquer geração de DDR e com processadores AMD e Intel. Ao reiniciar o Windows o disco e tudo o que está nele desaparecem e o sistema volta ao normal.", 8, 6, Xp.Ui, Xp.Dim);
+            info.AutoSize = false; info.SetBounds(8, 6, 548, 50);
+            UI.Lbl(body, "Memória (total / livre):", 8, 64); lblMem = UI.Lbl(body, "-", 190, 64, Xp.UiBold, Xp.GroupText);
+            UI.Lbl(body, "Driver do RAM Disk (ImDisk):", 8, 86); lblDrv = UI.Lbl(body, "-", 190, 86, Xp.UiBold, Xp.GroupText);
+            UI.Lbl(body, "Tamanho do disco:", 8, 118); cbSize = Cmb(body, 190, 114, 120, true);
+            UI.Lbl(body, "Unidade:", 340, 118); cbLetter = Cmb(body, 400, 114, 70, false);
+            UI.Lbl(body, "Sistema de arquivos:", 8, 150); cbFs = Cmb(body, 190, 146, 120, false); cbFs.Items.AddRange(new object[] { "NTFS", "exFAT", "FAT32" }); cbFs.SelectedIndex = 0;
+            UI.Lbl(body, "Nome do disco:", 340, 150); txLabel = UI.Txt(body, 430, 146, 126, "RAMDisk");
+            UI.Lbl(body, "Tipo de alocação:", 8, 182); cbTech = Cmb(body, 190, 178, 366, false);
+            cbTech.Items.Add("Memória virtual (padrão; o Windows pode paginar)"); cbTech.Items.Add("Memória física (AWE; fica fixa na RAM)"); cbTech.SelectedIndex = 0;
+            UI.Lbl(body, "Mandar para o RAM Disk (desfeito ao remover ou reiniciar):", 8, 220, Xp.UiBold);
+            chk = new XpOption[XFastRam.Targets.Length]; int y = 244;
+            for (int i = 0; i < chk.Length; i++) { chk[i] = UI.Opt(body, XFastRam.Targets[i].Name, 20, y, 520, false); y += 24; }
+            Label hint = UI.Lbl(body, "Feche os navegadores antes de aplicar. A pasta TEMP vale para programas abertos depois (WinRAR, 7-Zip, instaladores...); alguns só pegam após sair e entrar no Windows.", 8, y + 4, Xp.Ui, Xp.Dim);
+            hint.AutoSize = false; hint.SetBounds(8, y + 4, 548, 36);
+            y += 48;
+            btnApply = UI.Btn(body, "Criar / aplicar", 8, y, 150, delegate { DoApply(); });
+            btnRemove = UI.Btn(body, "Remover (desfazer tudo)", 164, y, 170, delegate { DoRemove(); });
+            UI.Btn(body, "Baixar ImDisk", 340, y, 110, delegate { try { Process.Start("https://sourceforge.net/projects/imdisk-toolkit/"); } catch (Exception) { } });
+            UI.Btn(body, "Fechar", 456, y, 100, delegate { Close(); });
+            lblStatus = UI.Lbl(body, "", 8, y + 34, Xp.Ui, Xp.Dim); lblStatus.AutoSize = false; lblStatus.SetBounds(8, y + 34, 548, 76);
+            KeyPreview = true; KeyDown += delegate(object o, KeyEventArgs e) { if (e.KeyCode == Keys.Escape) Close(); };
+            RefreshState(true);
+        }
+        void RefreshState(bool first)
+        {
+            XFastRam.Mem(out totMb, out freeMb);
+            lblMem.Text = XFastRam.FmtMb(totMb) + " / " + XFastRam.FmtMb(freeMb);
+            bool im = XFastRam.ImDisk() != null, on = XFastRam.DiskReady();
+            lblDrv.Text = im ? Lang.T("Instalado") : Lang.T("NÃO instalado (use \"Baixar ImDisk\")"); lblDrv.ForeColor = im ? Xp.Good : Xp.Bad;
+            if (first)
+            {
+                long max = Math.Max(64, freeMb - 512); cbSize.Items.Clear();
+                foreach (long m in new long[] { 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536 }) if (m <= max) cbSize.Items.Add(XFastRam.FmtMb(m));
+                long def = Math.Max(64, Math.Min(max, totMb / 4)); cbSize.Text = XFastRam.FmtMb(def >= 1024 ? def / 512 * 512 : def);
+                cbLetter.Items.Clear(); foreach (string l in XFastRam.FreeLetters()) cbLetter.Items.Add(l + ":");
+                int r = cbLetter.Items.IndexOf("R:"); cbLetter.SelectedIndex = r >= 0 ? r : (cbLetter.Items.Count > 0 ? 0 : -1);
+                for (int i = 0; i < chk.Length; i++) chk[i].Checked = Settings.Get("xf.opt." + XFastRam.Targets[i].Key, i == 4 ? "0" : "1") == "1";
+            }
+            btnApply.Enabled = im && !on; btnRemove.Enabled = on || Settings.Get("xf.links", "") != "";
+            if (on) { lblStatus.ForeColor = Xp.Good; lblStatus.Text = Lang.T("RAM Disk ativo em") + " " + XFastRam.DiskLetter() + ": (" + XFastRam.FmtMb(XFastRam.DiskMb()) + ")"; }
+            else if (!im) { lblStatus.ForeColor = Xp.Dim; lblStatus.Text = Lang.T("Para criar o disco é preciso o driver gratuito ImDisk Toolkit (assinado, funciona do Windows XP ao 11). Instale e abra esta janela de novo."); }
+        }
+        void DoApply()
+        {
+            bool ok; long mb = XFastRam.ParseSizeMb(cbSize.Text); ok = mb > 0;
+            if (!ok || cbLetter.SelectedIndex < 0) { Dlg.Show(this, "Informe um tamanho válido (ex.: 2 GB ou 2048) e escolha a unidade.", "XFast RAM"); return; }
+            XFastRam.Mem(out totMb, out freeMb);
+            bool awe = cbTech.SelectedIndex == 1; long limit = awe ? freeMb - 512 : totMb * 85 / 100;
+            if (mb < 16 || mb > limit) { Dlg.Show(this, "O tamanho precisa ficar entre 16 MB e " + XFastRam.FmtMb(Math.Max(16, limit)) + " (livre agora: " + XFastRam.FmtMb(freeMb) + ").", "XFast RAM"); return; }
+            if (mb > totMb / 2 && Dlg.Show(this, "O disco vai ocupar mais da metade da sua memória (" + XFastRam.FmtMb(mb) + " de " + XFastRam.FmtMb(totMb) + "). O Windows e os programas podem ficar lentos. Continuar?", "XFast RAM", MessageBoxButtons.YesNo) != DialogResult.Yes) return;
+            string fs = (string)cbFs.SelectedItem; if (fs == "FAT32" && mb > 32768) fs = "NTFS";
+            List<string> keys = new List<string>();
+            for (int i = 0; i < chk.Length; i++) { Settings.Set("xf.opt." + XFastRam.Targets[i].Key, chk[i].Checked ? "1" : "0"); if (chk[i].Checked) keys.Add(XFastRam.Targets[i].Key); }
+            Cursor = Cursors.WaitCursor; string msg; bool done;
+            try { done = XFastRam.Apply(((string)cbLetter.SelectedItem).Substring(0, 1), mb, fs, txLabel.Text, awe, keys, out msg); } finally { Cursor = Cursors.Default; }
+            lblStatus.ForeColor = done ? Xp.Good : Xp.Bad; lblStatus.Text = Lang.T(msg);
+            RefreshState(false); lblStatus.Text = Lang.T(msg);
+        }
+        void DoRemove()
+        {
+            Cursor = Cursors.WaitCursor; string msg; bool done;
+            try { done = XFastRam.Remove(out msg); } finally { Cursor = Cursors.Default; }
+            RefreshState(false); lblStatus.ForeColor = done ? Xp.Good : Xp.Bad; lblStatus.Text = Lang.T(msg);
+            cbLetter.Items.Clear(); foreach (string l in XFastRam.FreeLetters()) cbLetter.Items.Add(l + ":"); int r = cbLetter.Items.IndexOf("R:"); cbLetter.SelectedIndex = r >= 0 ? r : (cbLetter.Items.Count > 0 ? 0 : -1);
+        }
+    }
+
     class RamPage : Panel
     {
         Label lblType, lblCap, lblSpeed, lblChan, lblVolt, lblRank, lblBw, lblSrc, lblLat;
@@ -16157,6 +16488,7 @@ namespace BunoTunner
                     try { BeginInvoke(new Action(delegate { try { Clipboard.SetText(d); } catch (Exception) { } Dlg.Show(this, d + "\n(copiado para a área de transferência)", "BunoTunner - diagnóstico dos timings"); })); } catch (Exception) { }
                 });
             });
+            UI.Btn(g, "XFast RAM...", 236, by, 130, delegate { new XFastRamForm().ShowDialog(FindForm()); });
             g.SetBounds(0, 472, 656, by + 44);
             Controls.Add(g);
         }
