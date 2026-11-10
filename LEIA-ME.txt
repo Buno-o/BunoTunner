@@ -687,3 +687,6 @@ v1.49.53 (TESTE)
 
 v1.49.54 (TESTE)
 - Benchmark: GPU, FPU e RAM agora rodam sem limite de tempo ate o usuario parar/fechar. CPU roda ate terminar o render (1 passagem completa) e mostra o resultado (tempo, pontuacao, media e pico); o SSD continua rodando ate terminar os 4 testes e mostra os resultados.
+
+v1.49.55 (TESTE)
+- Benchmark SSD: medicao mais fiel (aproxima do CrystalDiskMark em discos muito rapidos, como RAM Disk). O cronometro agora so liga depois do preparo dos buffers; cada teste sequencial repete a passagem ate somar pelo menos 3 s (os aleatorios rodam 5 s); e o tratamento de cada pedido de E/S ficou bem mais leve (recolhe varios pedidos concluidos de uma vez, sem chamadas ao sistema).

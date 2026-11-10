@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.54.0")]
-[assembly: AssemblyFileVersion("1.49.54.0")]
-[assembly: AssemblyInformationalVersion("1.49.54")]
+[assembly: AssemblyVersion("1.49.55.0")]
+[assembly: AssemblyFileVersion("1.49.55.0")]
+[assembly: AssemblyInformationalVersion("1.49.55")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -226,7 +226,7 @@ namespace BunoTunner
             "RAM  -  escrita e leitura com verificação", "RAM  -  write and read with verification",
             "Grava e le padrões na memória e confere cada valor; qualquer diferença conta como erro.", "Writes and reads patterns in memory and checks every value; any difference counts as an error.",
             "SSD  -  estilo CrystalDiskMark", "SSD  -  CrystalDiskMark style",
-            "Estilo CrystalDiskMark: SEQ1M Q8T1, SEQ1M Q1T1, RND4K Q32T1 e RND4K Q1T1 (1 passagem de leitura e escrita cada). Arquivo temporário no drive escolhido, apagado ao fim.", "CrystalDiskMark style: SEQ1M Q8T1, SEQ1M Q1T1, RND4K Q32T1 and RND4K Q1T1 (1 read and 1 write pass each). Temporary file on the chosen drive, deleted at the end.",
+            "Estilo CrystalDiskMark: SEQ1M Q8T1, SEQ1M Q1T1, RND4K Q32T1 e RND4K Q1T1 (leitura e escrita, cerca de 3 a 5 s cada). Arquivo temporário no drive escolhido, apagado ao fim.", "CrystalDiskMark style: SEQ1M Q8T1, SEQ1M Q1T1, RND4K Q32T1 and RND4K Q1T1 (read and write, about 3 to 5 s each). Temporary file on the chosen drive, deleted at the end.",
             "Duração:", "Duration:",
             "O que limpar", "What to clean", "Atalho e limpeza automática", "Hotkey and automatic cleaning", "Atalho:", "Hotkey:", "Limpar memória: ", "Clean memory: ",
             "Sem atalho. Clique no botão ao lado e aperte a combinação.", "No hotkey. Click the button and press the combination.", "Pedir:", "Request:", "Ativa", "Active", "Parada", "Stopped",
@@ -2012,7 +2012,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.54";
+        public const string Version = "v1.49.55";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -14054,18 +14054,17 @@ namespace BunoTunner
         public static volatile bool SsdDone; public static volatile int SsdProg;   // SsdProg: 0..100
         public static volatile string SsdInfo = "";
         [DllImport("kernel32.dll", SetLastError = true)] static extern IntPtr CreateEvent(IntPtr sec, bool manual, bool initial, IntPtr name);
-        [DllImport("kernel32.dll", SetLastError = true)] static extern bool ResetEvent(IntPtr h);
         [DllImport("kernel32.dll", SetLastError = true)] static extern uint WaitForMultipleObjects(uint n, IntPtr[] h, bool all, uint ms);
-        [DllImport("kernel32.dll", SetLastError = true)] static extern bool GetOverlappedResult(IntPtr h, IntPtr ov, out uint n, bool wait);
 
-        // uma fase: le ou escreve (sequencial: o arquivo todo uma vez; aleatorio: durante "sec" segundos) com q pedidos ao mesmo tempo
-        static bool SsdPass(IntPtr h, bool write, bool rnd, int blk, int q, int mb, double sec, int phaseShow, out double mbps, out double iops)
+        // uma fase: le ou escreve com q pedidos ao mesmo tempo. Sequencial: percorre o arquivo e repete ate somar "minSec" segundos de medicao;
+        // aleatorio: roda "sec" segundos. O relogio so liga depois que os buffers estao prontos.
+        static bool SsdPass(IntPtr h, bool write, bool rnd, int blk, int q, int mb, double sec, double minSec, int phaseShow, out double mbps, out double iops)
         {
             mbps = 0; iops = 0;
-            long blocks = (long)mb * 1048576L / blk; int ovSize = IntPtr.Size * 3 + 8;
+            long blocks = (long)mb * 1048576L / blk; int ovSize = IntPtr.Size * 3 + 8, ovOff = IntPtr.Size * 2;
             IntPtr[] raw = new IntPtr[q], buf = new IntPtr[q], ov = new IntPtr[q], ev = new IntPtr[q]; long[] idx = new long[q]; bool[] act = new bool[q];
             Random rand = new Random(); long next = 0, done = 0; int active = 0; bool ok = true;
-            Stopwatch sw = Stopwatch.StartNew();
+            Stopwatch sw = new Stopwatch();
             try
             {
                 for (int i = 0; i < q; i++)
@@ -14076,6 +14075,7 @@ namespace BunoTunner
                 }
                 SsdPhase = phaseShow; SsdPos = 0;
                 if (!rnd && write) Array.Clear(SsdMap, 0, SsdMap.Length);
+                sw.Start();
                 while (!Stop && ok)
                 {
                     // abastece as vagas livres
@@ -14083,42 +14083,54 @@ namespace BunoTunner
                     {
                         if (act[i]) continue;
                         if (rnd) { if (sw.Elapsed.TotalSeconds >= sec) break; idx[i] = (long)(rand.NextDouble() * blocks); }
-                        else { if (next >= blocks) break; idx[i] = next++; }
+                        else
+                        {
+                            if (next >= blocks) { if (sw.Elapsed.TotalSeconds >= minSec) break; next = 0; }
+                            idx[i] = next++;
+                        }
                         long off = idx[i] * blk;
-                        for (int z = 0; z < ovSize; z++) Marshal.WriteByte(ov[i], z, 0);
-                        Marshal.WriteInt32(ov[i], IntPtr.Size * 2, (int)(off & 0xFFFFFFFF)); Marshal.WriteInt32(ov[i], IntPtr.Size * 2 + 4, (int)(off >> 32)); Marshal.WriteIntPtr(ov[i], IntPtr.Size * 2 + 8, ev[i]);
-                        ResetEvent(ev[i]);
-                        if (write) { Marshal.WriteInt32(buf[i], 0, (int)idx[i]); Marshal.WriteInt32(buf[i], 4, ~(int)idx[i]); }
+                        Marshal.WriteIntPtr(ov[i], 0, IntPtr.Zero); Marshal.WriteIntPtr(ov[i], IntPtr.Size, IntPtr.Zero);
+                        Marshal.WriteInt32(ov[i], ovOff, (int)(off & 0xFFFFFFFF)); Marshal.WriteInt32(ov[i], ovOff + 4, (int)(off >> 32)); Marshal.WriteIntPtr(ov[i], ovOff + 8, ev[i]);
+                        if (write && !rnd) { Marshal.WriteInt32(buf[i], 0, (int)idx[i]); Marshal.WriteInt32(buf[i], 4, ~(int)idx[i]); }
                         uint dummy; bool r = write ? WriteFile(h, buf[i], (uint)blk, out dummy, ov[i]) : ReadFile(h, buf[i], (uint)blk, out dummy, ov[i]);
                         if (!r && Marshal.GetLastWin32Error() != 997) { Fail = (write ? "Erro de escrita (" : "Erro de leitura (") + Marshal.GetLastWin32Error() + ")"; ok = false; break; }
                         act[i] = true; active++;
                     }
                     if (active == 0) break;
-                    uint w = WaitForMultipleObjects((uint)q, ev, false, 60000);
-                    if (w >= (uint)q) { Fail = "Tempo esgotado esperando o disco."; ok = false; break; }
-                    int s = (int)w; uint n;
-                    if (!GetOverlappedResult(h, ov[s], out n, false) || n != (uint)blk) { Fail = (write ? "Erro de escrita (" : "Erro de leitura (") + Marshal.GetLastWin32Error() + ")"; ok = false; break; }
-                    act[s] = false; active--; done++;
-                    Th.Interlocked.Add(ref Counter, blk);
-                    int mc = (int)Math.Min(127L, idx[s] * 128 / blocks);
-                    if (!rnd)
+                    // recolhe tudo o que ja terminou olhando o estado do proprio pedido (sem chamar o sistema); so espera se nada terminou
+                    bool any = false;
+                    for (int s = 0; s < q && ok; s++)
                     {
-                        SsdPos = (int)Math.Min((long)mb - 1, idx[s] * blk / 1048576L);
-                        if (write) SsdMap[mc] = 1;
-                        else
+                        if (!act[s] || Marshal.ReadInt32(ov[s], 0) == 0x103) continue;
+                        any = true; act[s] = false; active--; done++;
+                        if (Marshal.ReadInt32(ov[s], 0) != 0 || Marshal.ReadIntPtr(ov[s], IntPtr.Size).ToInt64() != blk) { Fail = (write ? "Erro de escrita (" : "Erro de leitura (") + "status " + Marshal.ReadInt32(ov[s], 0).ToString("X") + ")"; ok = false; break; }
+                        Th.Interlocked.Add(ref Counter, blk);
+                        if (!rnd)
                         {
-                            bool bad = Marshal.ReadInt32(buf[s], 0) != (int)idx[s] || Marshal.ReadInt32(buf[s], 4) != ~(int)idx[s];
-                            if (bad) { Th.Interlocked.Increment(ref Errors); SsdMap[mc] = 3; } else if (SsdMap[mc] != 3) SsdMap[mc] = 2;
+                            int mc = (int)Math.Min(127L, idx[s] * 128 / blocks);
+                            SsdPos = (int)Math.Min((long)mb - 1, idx[s] * blk / 1048576L);
+                            if (write) SsdMap[mc] = 1;
+                            else
+                            {
+                                bool bad = Marshal.ReadInt32(buf[s], 0) != (int)idx[s] || Marshal.ReadInt32(buf[s], 4) != ~(int)idx[s];
+                                if (bad) { Th.Interlocked.Increment(ref Errors); SsdMap[mc] = 3; } else if (SsdMap[mc] != 3) SsdMap[mc] = 2;
+                            }
                         }
+                        else if (!write && (done & 15) == 0) SsdHit[(int)Math.Min(511L, idx[s] * 512 / blocks)] = Environment.TickCount | 1;
                     }
-                    else if (!write) SsdHit[(int)Math.Min(511L, idx[s] * 512 / blocks)] = Environment.TickCount | 1;
+                    if (!any && ok)
+                    {
+                        uint w = WaitForMultipleObjects((uint)q, ev, false, 60000);
+                        if (w == 0x102 || w == 0xFFFFFFFFu) { Fail = "Tempo esgotado esperando o disco."; ok = false; }
+                    }
                 }
+                sw.Stop();
                 // espera o que ainda esta em andamento antes de liberar os buffers
                 DateTime lim = DateTime.Now.AddSeconds(15);
                 while (active > 0 && DateTime.Now < lim)
                 {
-                    uint w = WaitForMultipleObjects((uint)q, ev, false, 2000); if (w >= (uint)q) break;
-                    act[(int)w] = false; active--;
+                    for (int s = 0; s < q; s++) if (act[s] && Marshal.ReadInt32(ov[s], 0) != 0x103) { act[s] = false; active--; }
+                    if (active > 0) System.Threading.Thread.Sleep(5);
                 }
             }
             finally
@@ -14172,7 +14184,7 @@ namespace BunoTunner
                     for (int rw = 1; rw >= 0 && !Stop; rw--)   // escrita primeiro (cria o conteudo), depois leitura
                     {
                         bool write = rw == 1; double mbps, iops;
-                        if (!SsdPass(h, write, rndS[t], blkS[t], qS[t], mb, 5.0, write ? 0 : (rndS[t] ? 2 : 1), out mbps, out iops)) { if (Fail != null) return; break; }
+                        if (!SsdPass(h, write, rndS[t], blkS[t], qS[t], mb, 5.0, 3.0, write ? 0 : (rndS[t] ? 2 : 1), out mbps, out iops)) { if (Fail != null) return; break; }
                         SsdMbs[t * 2 + rw] = mbps; SsdIops[t * 2 + rw] = iops;
                         SsdProg = (t * 2 + (write ? 1 : 2)) * 100 / 8;
                         StringBuilder sb = new StringBuilder();
@@ -17450,7 +17462,7 @@ namespace BunoTunner
         {
             Text = "Resultado do SSD"; Size = new Size(520, 340); StartPosition = FormStartPosition.CenterParent; ShowInTaskbar = false;
             Panel body = new Panel(); body.Dock = DockStyle.Fill; Controls.Add(body);
-            UI.Lbl(body, "Drive " + drive + "   -   arquivo de teste de " + mb + " MB   -   1 passagem", 10, 6, Xp.Ui, Xp.Dim);
+            UI.Lbl(body, "Drive " + drive + "   -   arquivo de teste de " + mb + " MB   -   mín. 3 s por teste", 10, 6, Xp.Ui, Xp.Dim);
             UI.Lbl(body, "Teste", 14, 34, Xp.UiBold, Xp.GroupText); UI.Lbl(body, "Leitura (MB/s)", 150, 34, Xp.UiBold, Xp.GroupText); UI.Lbl(body, "Escrita (MB/s)", 330, 34, Xp.UiBold, Xp.GroupText);
             StringBuilder sb = new StringBuilder("BunoTunner - SSD " + drive + " (" + mb + " MB)\r\nTeste\tLeitura MB/s\tEscrita MB/s\r\n");
             for (int t = 0; t < 4; t++)
@@ -21960,7 +21972,7 @@ namespace BunoTunner
             cbBRam = Combo(gR, 490, 44, 70, "25%", "50%", "70%"); cbBRam.SelectedIndex = 1;
             p.Controls.Add(gR);
 
-            XpGroup gS = BenchBlock(4, "SSD  -  estilo CrystalDiskMark", "Estilo CrystalDiskMark: SEQ1M Q8T1, SEQ1M Q1T1, RND4K Q32T1 e RND4K Q1T1 (1 passagem de leitura e escrita cada). Arquivo temporário no drive escolhido, apagado ao fim.", "ssd", "Iniciar / parar o estresse de SSD");
+            XpGroup gS = BenchBlock(4, "SSD  -  estilo CrystalDiskMark", "Estilo CrystalDiskMark: SEQ1M Q8T1, SEQ1M Q1T1, RND4K Q32T1 e RND4K Q1T1 (leitura e escrita, cerca de 3 a 5 s cada). Arquivo temporário no drive escolhido, apagado ao fim.", "ssd", "Iniciar / parar o estresse de SSD");
             UI.Lbl(gS, "Drive:", 384, 48);
             cbBDrive = Combo(gS, 426, 44, 62);
             foreach (DriveInfo d in DriveInfo.GetDrives())
