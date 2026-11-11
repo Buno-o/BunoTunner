@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.59.0")]
-[assembly: AssemblyFileVersion("1.49.59.0")]
-[assembly: AssemblyInformationalVersion("1.49.59")]
+[assembly: AssemblyVersion("1.49.60.0")]
+[assembly: AssemblyFileVersion("1.49.60.0")]
+[assembly: AssemblyInformationalVersion("1.49.60")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -2016,7 +2016,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.59";
+        public const string Version = "v1.49.60";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -17350,7 +17350,7 @@ namespace BunoTunner
             string dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "BunoTunner"); Directory.CreateDirectory(dir);
             string cmd = Path.Combine(dir, "xf-sys.cmd"), log = Path.Combine(dir, "xf-sys.log"); int c;
             try { if (File.Exists(log)) File.Delete(log); } catch (Exception) { }
-            File.WriteAllText(cmd, "@echo off\r\n\"" + exe + "\" " + args + " < nul > \"" + log + "\" 2>&1\r\necho EXITCODE=%errorlevel%>> \"" + log + "\"\r\n", Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage));
+            File.WriteAllText(cmd, "@echo off\r\n\"" + exe + "\" " + args + " < nul > \"" + log + "\" 2>&1\r\n>> \"" + log + "\" echo EXITCODE=%errorlevel%\r\n", Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage));
             Run2("schtasks.exe", "/create /tn BunoTunnerXF /tr \"" + cmd + "\" /sc once /st 00:00 /ru SYSTEM /rl HIGHEST /f", 20000, out c);
             if (c != 0) return "Não foi possível criar a tarefa do sistema (schtasks código " + c + ").";
             Run2("schtasks.exe", "/run /tn BunoTunnerXF", 20000, out c);
