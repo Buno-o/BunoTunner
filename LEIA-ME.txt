@@ -700,3 +700,7 @@ v1.49.57 (TESTE)
 
 v1.49.58 (TESTE)
 - Novo botao "Atualizar tudo" (duas setas circulares) na barra do topo, entre o PawnIO e o botao de verificar atualizacao. Le de novo GPU (specs e overclock), CPU, memoria RAM (timings e modulos), discos (saude) e forca a releitura dos sensores, para mostrar mudancas feitas em outros programas (clock, power limit etc.).
+
+v1.49.59 (TESTE)
+- Benchmark FPU muito mais pesado: alem do calculo da animacao, cada thread agora roda um kernel nativo de ponto flutuante com FMA vetorial em 12 acumuladores independentes (estilo Prime95/OCCT AVX): AVX-512 (512 bits) se a CPU tiver, senao AVX2+FMA (256 bits), senao um laco escalar com 8 cadeias. Cada bloco e conferido bit a bit contra o primeiro resultado (diferenca conta como erro). O GFLOPS mostrado passa a refletir essa carga. A animacao nao foi alterada.
+- Atencao: o teste de FPU agora esquenta bem mais a CPU; deixe o limite de temperatura ligado.

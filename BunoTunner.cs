@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.58.0")]
-[assembly: AssemblyFileVersion("1.49.58.0")]
-[assembly: AssemblyInformationalVersion("1.49.58")]
+[assembly: AssemblyVersion("1.49.59.0")]
+[assembly: AssemblyFileVersion("1.49.59.0")]
+[assembly: AssemblyInformationalVersion("1.49.59")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -2016,7 +2016,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.58";
+        public const string Version = "v1.49.59";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -11878,6 +11878,104 @@ namespace BunoTunner
         }
     }
 
+    // ------------------------------------------------------------------
+    //  FPU pesada: kernels nativos em codigo de maquina (x64) com FMA em varios acumuladores independentes (como Prime95/OCCT AVX).
+    //  AVX-512 (zmm, 8 doubles) se a CPU tiver, senao AVX2+FMA (ymm, 4 doubles), senao um laco escalar com 8 cadeias independentes.
+    //  Cada chamada roda 1.000.000 de iteracoes e o resultado e comparado bit a bit com o da primeira chamada (diferenca = erro de hardware).
+    // ------------------------------------------------------------------
+    static class FpuNative
+    {
+        [DllImport("kernel32.dll")] static extern IntPtr VirtualAlloc(IntPtr a, UIntPtr size, uint type, uint prot);
+        [DllImport("kernel32.dll")] static extern bool VirtualProtect(IntPtr a, UIntPtr size, uint prot, out uint old);
+        [DllImport("kernel32.dll")] static extern bool IsProcessorFeaturePresent(uint f);
+        [UnmanagedFunctionPointer(CallingConvention.Winapi)] delegate void Kern(long n, IntPtr data);
+        static Kern kern; static int lanes; static string mode = "FPU: laço escalar (sem AVX)"; static bool inited;
+        static readonly object lk = new object();
+        const long Iter = 1000000;
+        const string Avx2Hex =
+            "4881eca8000000c5f811b42400000000c5f811bc2410000000c57811842420000000c578118c2430000000c57811942440000000c578119c24500000" +
+            "00c57811a42460000000c57811ac2470000000c57811b42480000000c57811bc2490000000c5fd108200000000c5fd108a20000000c5fd1092400000" +
+            "00c5fd109a60000000c5fd10a280000000c5fd10aaa0000000c5fd10b2c0000000c5fd10bae0000000c57d108200010000c57d108a20010000c57d10" +
+            "9240010000c57d109a60010000c57d10a280010000c57d10aaa0010000c57d10b2c0010000c57d10bae0010000c4c29db8c5c4c295b8cec4c28db8d7" +
+            "c4c285b8dcc4c29db8e5c4c295b8eec4c28db8f7c4c285b8fcc4429db8c5c44295b8cec4428db8d7c44285b8dc48ffc975bfc5fd118200000000c5fd" +
+            "118a20000000c5fd119240000000c5fd119a60000000c5fd11a280000000c5fd11aaa0000000c5fd11b2c0000000c5fd11bae0000000c57d11820001" +
+            "0000c57d118a20010000c57d119240010000c57d119a60010000c5f877c5f810b42400000000c5f810bc2410000000c57810842420000000c578108c" +
+            "2430000000c57810942440000000c578109c2450000000c57810a42460000000c57810ac2470000000c57810b42480000000c57810bc249000000048" +
+            "81c4a8000000c3";
+        const string Avx512Hex =
+            "62e1fd4810820000000062e1fd48108a4000000062e1fd4810928000000062e1fd48109ac000000062e1fd4810a20001000062e1fd4810aa40010000" +
+            "62e1fd4810b28001000062e1fd4810bac00100006261fd481082000200006261fd48108a400200006261fd481092800200006261fd48109ac0020000" +
+            "6261fd4810a2000300006261fd4810aa400300006261fd4810b2800300006261fd4810bac003000062829d40b8c562829540b8ce62828d40b8d76282" +
+            "8540b8dc62829d40b8e562829540b8ee62828d40b8f762828540b8fc62029d40b8c562029540b8ce62028d40b8d762028540b8dc48ffc975b362e1fd" +
+            "4811820000000062e1fd48118a4000000062e1fd4811928000000062e1fd48119ac000000062e1fd4811a20001000062e1fd4811aa4001000062e1fd" +
+            "4811b28001000062e1fd4811bac00100006261fd481182000200006261fd48118a400200006261fd481192800200006261fd48119ac0020000c5f877" +
+            "c3";
+        public static string Mode { get { Init(); return mode; } }
+        static byte[] Hex(string h) { byte[] b = new byte[h.Length / 2]; for (int i = 0; i < b.Length; i++) b[i] = Convert.ToByte(h.Substring(i * 2, 2), 16); return b; }
+        static void Init()
+        {
+            lock (lk)
+            {
+                if (inited) return; inited = true;
+                try
+                {
+                    if (IntPtr.Size != 8) return;
+                    bool a512 = IsProcessorFeaturePresent(41), a2 = IsProcessorFeaturePresent(40);
+                    if (!a512 && !a2) return;
+                    byte[] code = Hex(a512 ? Avx512Hex : Avx2Hex);
+                    IntPtr m = VirtualAlloc(IntPtr.Zero, (UIntPtr)4096, 0x3000, 0x04);
+                    if (m == IntPtr.Zero) return;
+                    Marshal.Copy(code, 0, m, code.Length);
+                    uint old; VirtualProtect(m, (UIntPtr)4096, 0x20, out old);
+                    kern = (Kern)Marshal.GetDelegateForFunctionPointer(m, typeof(Kern));
+                    lanes = a512 ? 8 : 4; mode = a512 ? "FPU pesada: AVX-512 FMA (512 bits)" : "FPU pesada: AVX2 FMA (256 bits)";
+                }
+                catch (Exception) { kern = null; }
+            }
+        }
+        static bool Same(double[] a, double[] b, int n) { for (int i = 0; i < n; i++) if (BitConverter.DoubleToInt64Bits(a[i]) != BitConverter.DoubleToInt64Bits(b[i])) return false; return true; }
+
+        // roda ate quit() devolver true; soma os FLOPs em Bench.Counter e os erros em Bench.Errors
+        public static void Run(Func<bool> quit)
+        {
+            Init();
+            if (kern == null) { RunScalar(quit); return; }
+            int n = 16 * lanes, nres = 12 * lanes; long flops = 12L * lanes * 2 * Iter;
+            double[] seed = new double[n], res = new double[nres], refv = new double[nres];
+            Random r = new Random(Th.Thread.CurrentThread.ManagedThreadId * 31 + 7);
+            for (int i = 0; i < n; i++) seed[i] = 1.0 + r.NextDouble() * 0.5;
+            IntPtr work = Marshal.AllocHGlobal(n * 8 + 64);
+            try
+            {
+                Marshal.Copy(seed, 0, work, n); kern(Iter, work); Marshal.Copy(work, refv, 0, nres);
+                while (!quit())
+                {
+                    Marshal.Copy(seed, 0, work, n); kern(Iter, work); Marshal.Copy(work, res, 0, nres);
+                    if (!Same(res, refv, nres)) Th.Interlocked.Increment(ref Bench.Errors);
+                    Th.Interlocked.Add(ref Bench.Counter, flops);
+                }
+            }
+            finally { Marshal.FreeHGlobal(work); }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        static double Scalar(int n)
+        {
+            double x = 1.0000001, y = 0.9999999, z = 1.0000003, a0 = 1.1, a1 = 1.2, a2 = 1.3, a3 = 1.4, a4 = 1.5, a5 = 1.6, a6 = 1.7, a7 = 1.8;
+            for (int i = 0; i < n; i++) { a0 += x * y; a1 += y * z; a2 += z * x; a3 += x * z; a4 += y * x; a5 += z * y; a6 += x * x; a7 += y * y; }
+            return a0 + a1 + a2 + a3 + a4 + a5 + a6 + a7;
+        }
+        static void RunScalar(Func<bool> quit)
+        {
+            const int N = 4000000; double refv = Scalar(N);
+            while (!quit())
+            {
+                if (Scalar(N) != refv) Th.Interlocked.Increment(ref Bench.Errors);
+                Th.Interlocked.Add(ref Bench.Counter, 16L * N);
+            }
+        }
+    }
+
     class BenchCanvas : Control
     {
         public bool HudOnly; public int Kind; public double Rate, Temp = double.NaN, Elapsed, Total; public string Unit = "", Extra = ""; public long Errors;
@@ -11914,6 +12012,12 @@ namespace BunoTunner
                 for (int i = 0; i < fpuN; i++)
                 {
                     Th.Thread ft = new Th.Thread(FpuLoop); ft.IsBackground = true; ft.Start(i);
+                }
+                // carga pesada de verdade (FMA vetorial nativo) em paralelo com o calculo da animacao
+                Bench.Extra = FpuNative.Mode + " - " + fpuN + " thread(s) extremas";
+                for (int i = 0; i < fpuN; i++)
+                {
+                    Th.Thread ht = new Th.Thread(delegate() { FpuNative.Run(delegate { return quit || Bench.Stop; }); }); ht.IsBackground = true; ht.Start();
                 }
             }
             if (kind == 1)
