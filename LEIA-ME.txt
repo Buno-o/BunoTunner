@@ -697,3 +697,6 @@ v1.49.56 (TESTE)
 v1.49.57 (TESTE)
 - Benchmark SSD: novo seletor "Passadas" (1, 2, 3, 5 ou 9; padrao 3, como o CrystalDiskMark). O conjunto dos 4 testes repete esse numero de vezes e o resultado de cada teste e o melhor valor entre as passadas. Tamanho do arquivo de teste: agora de 512 MB ate 8 GB.
 - Benchmark SSD: cada teste mede pelo menos 5 s e todos os pedidos de E/S usam um unico buffer (cabe no cache do processador), o que aproxima os numeros do CrystalDiskMark em discos muito rapidos como o RAM Disk. A conferencia de leitura passou a usar um cabecalho fixo.
+
+v1.49.58 (TESTE)
+- Novo botao "Atualizar tudo" (duas setas circulares) na barra do topo, entre o PawnIO e o botao de verificar atualizacao. Le de novo GPU (specs e overclock), CPU, memoria RAM (timings e modulos), discos (saude) e forca a releitura dos sensores, para mostrar mudancas feitas em outros programas (clock, power limit etc.).

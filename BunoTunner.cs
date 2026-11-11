@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.57.0")]
-[assembly: AssemblyFileVersion("1.49.57.0")]
-[assembly: AssemblyInformationalVersion("1.49.57")]
+[assembly: AssemblyVersion("1.49.58.0")]
+[assembly: AssemblyFileVersion("1.49.58.0")]
+[assembly: AssemblyInformationalVersion("1.49.58")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -320,6 +320,8 @@ namespace BunoTunner
             "Lendo os timings...", "Reading timings...",
             "Ler novamente", "Read again",
             "Diagnóstico", "Diagnostics",
+            "Atualizar tudo\nLê de novo GPU, CPU, memória RAM, discos, overclock e sensores. Use depois de mudar clock ou outra configuração em outro programa.", "Refresh everything\nReads GPU, CPU, RAM, disks, overclock and sensors again. Use it after changing clocks or another setting in another program.",
+            "Atualizando tudo...", "Refreshing everything...",
             "Passadas:", "Passes:",
             "Quantas vezes o conjunto dos 4 testes se repete. O resultado de cada teste é o melhor valor entre as passadas (como no CrystalDiskMark).", "How many times the set of 4 tests repeats. Each test's result is the best value among the passes (like CrystalDiskMark).",
             "Resultado da CPU", "CPU result",
@@ -2014,7 +2016,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.57";
+        public const string Version = "v1.49.58";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -4750,6 +4752,24 @@ namespace BunoTunner
                         using (Pen tr = new Pen(Color.FromArgb(0, 100, 200), Math.Max(2f, w * 0.14f))) { tr.StartCap = LineCap.Round; tr.EndCap = LineCap.Round; g.DrawLine(tr, ic.X + w * 0.04f, ic.Bottom - h * 0.04f, ic.Right - w * 0.04f, ic.Bottom - h * 0.04f); }
                         break;
                     }
+                case "refresh":
+                    {
+                        // duas setas circulares: atualizar tudo
+                        float pw = Math.Max(2.2f, w * 0.15f);
+                        RectangleF rc = new RectangleF(ic.X + w * 0.14f, ic.Y + h * 0.14f, w * 0.72f, h * 0.72f);
+                        Color rcol = Color.FromArgb(0, 140, 70);
+                        for (int half = 0; half < 2; half++)
+                        {
+                            float start = half * 180f + 25f, sweep = 125f;
+                            using (Pen pn = new Pen(rcol, pw)) { pn.StartCap = LineCap.Round; g.DrawArc(pn, rc, start, sweep); }
+                            double a = (start + sweep) * Math.PI / 180.0;
+                            float ex = cx + rc.Width / 2f * (float)Math.Cos(a), ey = cy + rc.Height / 2f * (float)Math.Sin(a);
+                            float tx = -(float)Math.Sin(a), ty = (float)Math.Cos(a), nx = (float)Math.Cos(a), ny = (float)Math.Sin(a), hs = pw * 1.15f;
+                            using (SolidBrush hb = new SolidBrush(rcol))
+                                g.FillPolygon(hb, new PointF[] { new PointF(ex + tx * hs * 1.5f, ey + ty * hs * 1.5f), new PointF(ex + nx * hs * 1.35f, ey + ny * hs * 1.35f), new PointF(ex - nx * hs * 1.35f, ey - ny * hs * 1.35f) });
+                        }
+                        break;
+                    }
                 case "win10":
                 case "win10on":
                     {
@@ -7397,6 +7417,8 @@ namespace BunoTunner
         public static volatile string AlertText;
         public static volatile int IntervalMs = 500;
         static DateTime lastSlow = DateTime.MinValue;
+        // forca a proxima passada a reler tambem discos, rede e zonas termicas (que normalmente so atualizam a cada 5 s)
+        public static void RefreshNow() { lastSlow = DateTime.MinValue; }
         public static void SetInterval(int ms)
         {
             IntervalMs = Math.Max(100, Math.Min(10000, ms));
@@ -19876,6 +19898,7 @@ namespace BunoTunner
 
         static double D(string s) { double v; return double.TryParse((s ?? "").Trim().Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out v) ? v : double.NaN; }
 
+        public void Reload() { Load(); }
         void Load()
         {
             if (loading) return;
@@ -21603,7 +21626,7 @@ namespace BunoTunner
             right.Controls.Add(cmb);
             // PawnIO (ao lado da escolha da GPU)
             XpButton bPawn = new XpButton(); bPawn.Text = PawnIo.Installed() ? "PawnIO instalado" : "Instalar PawnIO";
-            bPawn.SetBounds(440, 2, 150, 22); bPawn.Enabled = !PawnIo.Installed();
+            bPawn.SetBounds(440, 2, 140, 22); bPawn.Enabled = !PawnIo.Installed();
             bPawn.Click += delegate { PawnIo.InstallNow(this); };
             right.Controls.Add(bPawn);
             tip.SetToolTip(bPawn, "PawnIO: driver usado pelo LibreHardwareMonitor para ler sensores da CPU/placa-mae e controlar as ventoinhas da placa-mae. Clique para baixar e instalar.");
@@ -21621,6 +21644,13 @@ namespace BunoTunner
             bUpd.Left = 676 - 54;
             tip.SetToolTip(bUpd, "Verificar atualizações\nProcura uma versão mais nova do BunoTunner e, se você quiser, baixa e instala.");
             bUpd.Click += delegate { CheckUpdate(); };
+            // botao de atualizar tudo (entre o PawnIO e o de atualizacao)
+            bRef = new XpIconButton("refresh", 24); bRef.Top = 2;
+            right.Controls.Add(bRef); bRef.BringToFront();
+            right.Resize += delegate { bRef.Left = right.ClientSize.Width - 92; };
+            bRef.Left = 676 - 84;
+            tip.SetToolTip(bRef, "Atualizar tudo\nLê de novo GPU, CPU, memória RAM, discos, overclock e sensores. Use depois de mudar clock ou outra configuração em outro programa.");
+            bRef.Click += delegate { RefreshAll(); };
             lblTheme = UI.Lbl(bar, "Tema:", 264, 8, Xp.UiBold);
             cbTheme = new ComboBox(); cbTheme.DropDownStyle = ComboBoxStyle.DropDownList; cbTheme.Font = Xp.Ui; cbTheme.SetBounds(306, 4, 176, 22); cbTheme.DropDownWidth = 230;
             foreach (int ti in Xp.MenuOrder) cbTheme.Items.Add(Xp.ThemeNames[ti]);
@@ -22485,8 +22515,29 @@ namespace BunoTunner
             }
         }
 
+        // ---------------- atualizar tudo ----------------
+        void RefreshAll()
+        {
+            if (refBusy) return;
+            refBusy = true; bRef.Enabled = false;
+            status.Text = Lang.T("Atualizando tudo...");
+            try { SensorHub.RefreshNow(); } catch (Exception) { }
+            try { LoadGpu(); } catch (Exception) { }
+            try { ramPage.ReadAsync(); ramPage.LoadAsync(); } catch (Exception) { }
+            try { ((StoragePage)pgSto).Reload(); } catch (Exception) { }
+            System.Threading.ThreadPool.QueueUserWorkItem(delegate
+            {
+                List<string[]> rows = null;
+                try { rows = CpuInfo.Collect(); } catch (Exception) { }
+                try { BeginInvoke(new Action(delegate { if (rows != null) FillCpu(rows); })); } catch (Exception) { }
+            });
+            Timer done = new Timer(); done.Interval = 2000;
+            done.Tick += delegate { done.Stop(); done.Dispose(); refBusy = false; bRef.Enabled = true; status.Text = statusText; };
+            done.Start();
+        }
+
         // ---------------- iniciar com o Windows ----------------
-        XpIconButton bWin, bUpd;
+        XpIconButton bWin, bUpd, bRef; bool refBusy;
         void RefreshAutoBtn()
         {
             System.Threading.ThreadPool.QueueUserWorkItem(delegate
