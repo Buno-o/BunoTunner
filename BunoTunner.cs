@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.60.0")]
-[assembly: AssemblyFileVersion("1.49.60.0")]
-[assembly: AssemblyInformationalVersion("1.49.60")]
+[assembly: AssemblyVersion("1.49.61.0")]
+[assembly: AssemblyFileVersion("1.49.61.0")]
+[assembly: AssemblyInformationalVersion("1.49.61")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -320,6 +320,7 @@ namespace BunoTunner
             "Lendo os timings...", "Reading timings...",
             "Ler novamente", "Read again",
             "Diagnóstico", "Diagnostics",
+            "Texto", "Text", "Linha de texto", "Text line", "Texto que aparece no overlay:", "Text shown in the overlay:", "Adicionar linha de texto...", "Add text line...",
             "Atualizar tudo\nLê de novo GPU, CPU, memória RAM, discos, overclock e sensores. Use depois de mudar clock ou outra configuração em outro programa.", "Refresh everything\nReads GPU, CPU, RAM, disks, overclock and sensors again. Use it after changing clocks or another setting in another program.",
             "Atualizando tudo...", "Refreshing everything...",
             "Passadas:", "Passes:",
@@ -2016,7 +2017,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.60";
+        public const string Version = "v1.49.61";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -8213,7 +8214,7 @@ namespace BunoTunner
             Scale = Math.Max(50, Math.Min(200, (int)Math.Round(I("ov.size", 100) / 5.0) * 5)); Mode = Math.Max(0, Math.Min(2, I("ov.mode", 0))); Opac = Math.Max(50, Math.Min(100, (int)Math.Round(I("ov.op", 85) / 5.0) * 5)); Layout = Math.Max(0, Math.Min(24, I("ov.lay", 0)));
             Fx = Math.Max(0, Math.Min(1, Dd("ov.fx", 0))); Fy = Math.Max(0, Math.Min(1, Dd("ov.fy", 0)));
             Items = new List<string>(Settings.Get("ov.items", "@FPS").Split(new string[] { "~|~" }, StringSplitOptions.RemoveEmptyEntries));
-            Items.RemoveAll(delegate(string it) { return it.StartsWith("@") && Array.FindIndex(Specials, delegate(string[] sp) { return sp[0] == it; }) < 0; });
+            Items.RemoveAll(delegate(string it) { return it.StartsWith("@") && !it.StartsWith("@TXT") && Array.FindIndex(Specials, delegate(string[] sp) { return sp[0] == it; }) < 0; });
             KeyMods = I("ov.keymods", 3); KeyVk = I("ov.keyvk", (int)Keys.O);   // padrao: Ctrl+Shift+O
             FontName = Settings.Get("ov.font", "Segoe UI"); if (FontName.Length == 0) FontName = "Segoe UI";
             BoldVal = Settings.Get("ov.bold", "1") == "1"; Outline = Settings.Get("ov.outline", "1") == "1"; ValBox = Settings.Get("ov.valbox", "0") == "1"; LabCol = Cx(Settings.Get("ov.clab", "")); ValCol = Cx(Settings.Get("ov.cval", ""));
@@ -8420,6 +8421,7 @@ namespace BunoTunner
         }
         public static string LabelOf(string key)
         {
+            if (key.StartsWith("@TXT")) return Lang.T("Texto");
             foreach (string[] sp in Specials) if (sp[0] == key) return sp[1];
             Sn s = Find(key);
             if (s != null) return LabelOf(s);
@@ -8477,9 +8479,10 @@ namespace BunoTunner
                     r.Hot = HotTemp > 0 && s != null && s.Type == "Temperature" && s.Last.HasValue && s.Last.Value >= HotTemp;
                 }
                 string nm; if (Names.TryGetValue(k, out nm)) r.Label = nm;
+                if (k.StartsWith("@TXT")) { string tx = r.Label; if (Compact) { r.Label = ""; r.Value = tx; } else r.Value = ""; }
                 Color cc; if (Colors.TryGetValue(k, out cc)) { r.HasCol = true; r.Col = cc; }
                 if (NameColors.TryGetValue(k, out cc)) { r.HasNCol = true; r.NCol = cc; }
-                if (Graphs.Contains(k))
+                if (Graphs.Contains(k) && !k.StartsWith("@TXT"))
                 {
                     float? nv = null;
                     if (k == "@FPS") { if (game) nv = fps; } else if (k == "@FT") { if (ftOk) nv = (float)ftCur; } else if (k == "@FTA") { if (ftOk) nv = (float)ftAvg; }
@@ -8943,7 +8946,7 @@ namespace BunoTunner
                     using (SolidBrush db = new SolidBrush(x.Hot ? cHot : d.Dot)) g.FillEllipse(db, rr.Left + grip + 1, rr.Top + (rr.Height - ds) / 2, ds, ds);
                     g.DrawEllipse(Pens.Black, rr.Left + grip + 1, rr.Top + (rr.Height - ds) / 2, ds, ds);
                 }
-                bool vbx = Overlay.ValBox; int pp = (d.Pill.IsEmpty || vbx) ? 0 : (int)(5 * s);   // "contorno do valor" ligado: sem a caixa clara atras do valor
+                bool vbx = Overlay.ValBox; int pp = (d.Pill.IsEmpty || vbx || string.IsNullOrEmpty(x.Value)) ? 0 : (int)(5 * s);   // "contorno do valor" ligado: sem a caixa clara atras do valor
                 Rectangle vr = new Rectangle(lr.Left + (Overlay.Compact ? pp : 0), lr.Top, lr.Width - pp - (Overlay.Compact ? pp : 0), lr.Height);
                 if (pp > 0)
                 {
@@ -9074,6 +9077,7 @@ namespace BunoTunner
 
             UI.Btn(body, "+", 388, 250, 34, delegate { AddSel(); });
             UI.Btn(body, "-", 388, 280, 34, delegate { RemSel(); });
+            UI.Btn(body, "+T", 388, 320, 34, delegate { AddText(); });
 
             UI.Lbl(body, "Ordem no overlay  (arraste para reordenar)", 430, 72, Xp.UiBold);
             lbSel = new ListBox(); lbSel.SetBounds(430, 94, 346, 362); lbSel.DrawMode = DrawMode.OwnerDrawFixed; lbSel.ItemHeight = 24; lbSel.IntegralHeight = false;
@@ -9119,6 +9123,7 @@ namespace BunoTunner
             cbGrp.SelectedIndexChanged += delegate { if (!building) FillAvail(); };
             ContextMenuStrip cma = new ContextMenuStrip();
             cma.Items.Add(Lang.T("Adicionar ao overlay"), null, delegate { AddSel(); });
+            cma.Items.Add(Lang.T("Adicionar linha de texto..."), null, delegate { AddText(); });
             cma.Items.Add(Lang.T("Adicionar todos os resultados da busca"), null, delegate { foreach (ListViewItem it in lvAv.Items) { string k = (string)it.Tag; if (!Overlay.Items.Contains(k)) Overlay.Items.Add(k); } Overlay.Commit(); });
             ToolStripMenuItem miUa = new ToolStripMenuItem(Lang.T("Unidade de medida")), miUaAll = new ToolStripMenuItem(Lang.T("Unidade de medida (todos deste tipo)"));
             cma.Items.Add(new ToolStripSeparator()); cma.Items.Add(miUa); cma.Items.Add(miUaAll);
@@ -9468,6 +9473,13 @@ namespace BunoTunner
                 string k = (string)it.Tag; if (k.StartsWith("@")) continue;
                 Sn s = Overlay.Find(k); if (s != null && it.SubItems.Count > 2) it.SubItems[2].Text = Overlay.ValueOf(s);
             }
+        }
+        void AddText()
+        {
+            string t = PromptForm.Ask(this, Lang.T("Linha de texto"), Lang.T("Texto que aparece no overlay:"), "");
+            if (t == null || t.Trim().Length == 0) return;
+            int n = 1; string key; do { key = "@TXT" + n++; } while (Overlay.Items.Contains(key));
+            Overlay.Names[key] = t.Trim(); Overlay.Items.Add(key); Overlay.Commit();
         }
         void AddSel()
         {

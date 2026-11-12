@@ -707,3 +707,6 @@ v1.49.59 (TESTE)
 
 v1.49.60 (TESTE)
 - XFast RAM (Memoria fisica/AWE): corrigido o falso erro "O ImDisk nao conseguiu criar o disco (codigo -1)" mesmo com o disco criado. O script que roda como SYSTEM escrevia o codigo de saida com "0>>" colado, que o cmd le como redirecionamento de entrada, entao o codigo nunca chegava ao programa. Agora a linha e escrita com o redirecionamento na frente.
+
+v1.49.61 (TESTE)
+- Overlay: nova funcao "linha de texto". Na tela de configuracao do overlay, o botao "+T" (ou clique direito na lista da esquerda > "Adicionar linha de texto...") pede um texto livre e adiciona uma linha com ele ao overlay. Voce pode reordenar, trocar a cor, editar o texto (clique direito > Renomear...) e remover como qualquer outro item; pode ter varias linhas. No modo Compacto o texto aparece normalmente.
