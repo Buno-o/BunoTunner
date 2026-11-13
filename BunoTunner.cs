@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.61.0")]
-[assembly: AssemblyFileVersion("1.49.61.0")]
-[assembly: AssemblyInformationalVersion("1.49.61")]
+[assembly: AssemblyVersion("1.49.62.0")]
+[assembly: AssemblyFileVersion("1.49.62.0")]
+[assembly: AssemblyInformationalVersion("1.49.62")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -224,7 +224,7 @@ namespace BunoTunner
             "FPU  -  campo de ondas em ponto flutuante", "FPU  -  floating-point wave field",
             "Cálculo de ondas com seno/cosseno em todos os núcleos; mostra GFLOPS estimado.", "Wave calculation with sine/cosine on all cores; shows estimated GFLOPS.",
             "RAM  -  escrita e leitura com verificação", "RAM  -  write and read with verification",
-            "Grava e le padrões na memória e confere cada valor; qualquer diferença conta como erro.", "Writes and reads patterns in memory and checks every value; any difference counts as an error.",
+            "Usa o máximo de memória livre possível e roda uma bateria de testes (endereço XOR padrão, bits caminhando, pseudoaleatório, inversão móvel, espelho AB-BA, movimento de bloco, módulo 20 e retenção); qualquer diferença conta como erro.", "Uses as much free memory as possible and runs a battery of tests (address XOR pattern, walking bits, pseudo-random, moving inversions, AB-BA mirror, block move, modulo 20 and retention); any difference counts as an error.",
             "SSD  -  estilo CrystalDiskMark", "SSD  -  CrystalDiskMark style",
             "Estilo CrystalDiskMark: SEQ1M Q8T1, SEQ1M Q1T1, RND4K Q32T1 e RND4K Q1T1 (leitura e escrita, cerca de 3 a 5 s cada). Arquivo temporário no drive escolhido, apagado ao fim.", "CrystalDiskMark style: SEQ1M Q8T1, SEQ1M Q1T1, RND4K Q32T1 and RND4K Q1T1 (read and write, about 3 to 5 s each). Temporary file on the chosen drive, deleted at the end.",
             "Duração:", "Duration:",
@@ -246,7 +246,10 @@ namespace BunoTunner
             "Filamentos:", "Filaments:", "50 mil", "50 thousand", "100 mil", "100 thousand", "250 mil", "250 thousand", "500 mil", "500 thousand", "1 milhão", "1 million",
             "Quantidade de filamentos do render. Mais filamentos = teste mais pesado (FPS menor).", "Number of filaments in the render. More filaments = heavier test (lower FPS).",
             "Threads:", "Threads:",
-            "Usar (% da livre):", "Use (% of free):",
+            "Ciclo", "Cycle", "Verificado", "Verified", "Erros neste teste", "Errors in this test", "Erros no total", "Total errors",
+            "Bits com falha", "Failing bits", "nenhum", "none", "Último erro", "Last error", "esperado", "expected", "lido", "read", "bloco", "block", "Aguardando (retenção)...", "Waiting (retention)...",
+            "Endereço XOR padrão", "Address XOR pattern", "Bits caminhando (1)", "Walking ones", "Bits caminhando (0)", "Walking zeros", "Pseudoaleatório", "Pseudo-random",
+            "Inversão móvel", "Moving inversions", "Espelho AB-BA", "AB-BA mirror", "Movimento de bloco", "Block move", "Módulo 20", "Modulo 20", "Retenção (refresh)", "Retention (refresh)",
             "Drive:", "Drive:",
             "Tamanho:", "Size:",
             "Parar se passar de", "Stop if above",
@@ -2017,7 +2020,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.61";
+        public const string Version = "v1.49.62";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -12577,6 +12580,38 @@ namespace BunoTunner
                         TextRenderer.DrawText(g, ln, hf, new Point(low.X + 10, top + row * 17), Color.FromArgb((int)(100 * f), (int)(235 * f), (int)(120 * f)));
                     }
                 }
+                // painel da direita: informacoes do teste em tempo real
+                if (nb > 0)
+                {
+                    int px = low.X + 478, pw = low.Right - px - 8, top2 = ly + 54, rowsI = Math.Max(0, (low.Bottom - top2 - 4) / 17);
+                    if (pw > 120 && rowsI > 0)
+                    {
+                        int tn = Bench.RamTestNames.Length, ti = Math.Max(0, Math.Min(tn - 1, Bench.RamTest));
+                        long tot = Errors, te = ti < Bench.RamTestErr.Length ? Bench.RamTestErr[ti] : 0, bm = Bench.RamBitMask;
+                        double gb = Th.Interlocked.Read(ref Bench.RamChecked) / 1073741824.0;
+                        Color cInf = Color.FromArgb(120, 225, 140), cBadT = Color.FromArgb(245, 90, 80), cHd = Color.FromArgb(245, 205, 90);
+                        List<string[]> ln2 = new List<string[]>();   // {texto, cor: 0 normal, 1 destaque, 2 erro}
+                        ln2.Add(new string[] { Lang.T("Teste") + " " + (ti + 1) + "/" + tn + ": " + Lang.T(Bench.RamTestNames[ti]), "1" });
+                        ln2.Add(new string[] { Lang.T("Ciclo") + " " + (Bench.RamCycle + 1) + "   " + (Bench.RamWait ? Lang.T("Aguardando (retenção)...") : ""), "0" });
+                        ln2.Add(new string[] { Lang.T("Verificado") + ": " + gb.ToString("0.0") + " GB", "0" });
+                        ln2.Add(new string[] { Lang.T("Erros neste teste") + ": " + te + "   " + Lang.T("Erros no total") + ": " + tot, tot > 0 ? "2" : "0" });
+                        ln2.Add(new string[] { Lang.T("Bits com falha") + ": " + (bm == 0 ? Lang.T("nenhum") : "0x" + bm.ToString("X16")), bm != 0 ? "2" : "0" });
+                        string[] lg = Bench.RamLogGet();
+                        if (lg.Length > 0 && rowsI > 5)
+                        {
+                            ln2.Add(new string[] { Lang.T("Último erro") + ":", "2" });
+                            for (int i = lg.Length - 1; i >= 0 && ln2.Count < rowsI; i--)
+                            {
+                                string e1 = lg[i]; int k1 = e1.IndexOf("  esperado");
+                                ln2.Add(new string[] { k1 > 0 ? Lang.T("bloco") + e1.Substring(5, k1 - 5) : e1, "2" });
+                                if (ln2.Count < rowsI && k1 > 0) ln2.Add(new string[] { "  " + Lang.T("esperado") + e1.Substring(k1 + 10).Replace("  lido", "  " + Lang.T("lido")), "2" });
+                                break;
+                            }
+                        }
+                        for (int row = 0; row < rowsI && row < ln2.Count; row++)
+                            TextRenderer.DrawText(g, ln2[row][0], hf, new Rectangle(px, top2 + row * 17, pw, 17), ln2[row][1] == "2" ? cBadT : (ln2[row][1] == "1" ? cHd : cInf), TextFormatFlags.Left | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
+                    }
+                }
             }
         }
 
@@ -14021,6 +14056,20 @@ namespace BunoTunner
         public static volatile int[] RamProg = new int[0];               // 0..1000 dentro da fase atual do bloco
         public static volatile int RamRound, RamViewPos; public static long RamPattern;
         public static volatile long[] RamView;                           // bloco que a primeira thread esta gravando/conferindo agora
+        public static readonly string[] RamTestNames = { "Endereço XOR padrão", "Bits caminhando (1)", "Bits caminhando (0)", "Pseudoaleatório", "Inversão móvel", "Espelho AB-BA", "Movimento de bloco", "Módulo 20", "Retenção (refresh)" };
+        public static volatile int RamTest, RamCycle; public static volatile bool RamWait;   // teste atual (da 1a thread), ciclos completos, aguardando na retencao
+        public static long RamChecked, RamBitMask; public static long[] RamTestErr = new long[9];
+        static readonly List<string> ramLog = new List<string>(); static readonly object ramLk = new object();
+        public static string[] RamLogGet() { lock (ramLk) { return ramLog.ToArray(); } }
+        static void RamLogErr(int test, int blk, long off, long exp, long got)
+        {
+            lock (ramLk)
+            {
+                RamBitMask |= exp ^ got;
+                ramLog.Add("bloco " + blk + " +0x" + off.ToString("X8") + "  esperado 0x" + exp.ToString("X16") + "  lido 0x" + got.ToString("X16"));
+                if (ramLog.Count > 6) ramLog.RemoveAt(0);
+            }
+        }
         public static volatile byte[] SsdMap = new byte[128];            // mapa do arquivo de teste: 0 intocado, 1 gravado, 2 lido e conferido, 3 erro
         public static int[] SsdHit = new int[512];                       // ultimo acesso 4K aleatorio por regiao do arquivo (TickCount)
         public static volatile int SsdPhase, SsdMb, SsdPos;              // fase: 0 escrita seq, 1 leitura seq, 2 leitura 4K aleatoria
@@ -14079,12 +14128,14 @@ namespace BunoTunner
                 case 3:
                     {
                         long avail = AvailPhys();
-                        long total = Math.Min(avail * ramPct / 100, avail - 1024L * 1048576L);
+                        long total = avail - Math.Max(640L * 1048576L, avail / 10);   // usa o maximo possivel, deixando uma reserva para o Windows
                         if (total < 128L * 1048576L) { Fail = "Memória livre insuficiente para o teste."; break; }
-                        int th = Math.Max(1, Math.Min(4, Environment.ProcessorCount / 2));
+                        int th = Math.Max(1, Math.Min(8, Environment.ProcessorCount / 2));
                         long per = total / th;
                         int nPer = (int)Math.Max(1, per / (RamChunk * 8L));
                         RamState = new byte[th * nPer]; RamProg = new int[th * nPer]; RamRound = 0; RamView = null; RamViewPos = 0;
+                        RamTest = 0; RamCycle = 0; RamWait = false; RamChecked = 0; RamBitMask = 0; RamTestErr = new long[9]; lock (ramLk) { ramLog.Clear(); }
+                        total = (long)th * nPer * RamChunk * 8L;
                         for (int i = 0; i < th; i++) { int bi = i * nPer; Spawn(delegate(object o) { RamWorker(per, bi, nPer); }, i, "bench-ram"); }
                         Extra = "Usando " + (total >> 20) + " MB em " + th + " thread(s)";
                         break;
@@ -14150,40 +14201,169 @@ namespace BunoTunner
         }
 
         // ---------- RAM ----------
+        // ---------- RAM: bateria de testes (varios padroes, espelho, movimento de bloco, retencao) ----------
+        // modos de preenchimento: 0 endereco XOR padrao, 1 bit caminhando 1, 2 bit caminhando 0, 3 pseudoaleatorio, 4 constante p, 5 constante ~p, 6 modulo 20
+        static void RamFill(long[] b, int s0, int e0, int mode, long p, ref ulong rs, int sh)
+        {
+            switch (mode)
+            {
+                case 0: for (int i = s0; i < e0; i++) b[i] = p ^ i; break;
+                case 1: for (int i = s0; i < e0; i++) b[i] = 1L << (i & 63); break;
+                case 2: for (int i = s0; i < e0; i++) b[i] = ~(1L << (i & 63)); break;
+                case 3: { ulong x = rs; for (int i = s0; i < e0; i++) { x ^= x << 13; x ^= x >> 7; x ^= x << 17; b[i] = (long)x; } rs = x; break; }
+                case 4: for (int i = s0; i < e0; i++) b[i] = p; break;
+                case 5: for (int i = s0; i < e0; i++) b[i] = ~p; break;
+                default: { int m = (s0 + sh) % 20; for (int i = s0; i < e0; i++) { b[i] = m == 0 ? p : ~p; if (++m == 20) m = 0; } break; }
+            }
+        }
+        static long RamCheck(long[] b, int s0, int e0, int mode, long p, ref ulong rs, int sh, int test, int blk)
+        {
+            long bad = 0, e, v;
+            switch (mode)
+            {
+                case 0: for (int i = s0; i < e0; i++) { e = p ^ i; v = b[i]; if (v != e) { if (++bad <= 3) RamLogErr(test, blk, (long)i * 8, e, v); } } break;
+                case 1: for (int i = s0; i < e0; i++) { e = 1L << (i & 63); v = b[i]; if (v != e) { if (++bad <= 3) RamLogErr(test, blk, (long)i * 8, e, v); } } break;
+                case 2: for (int i = s0; i < e0; i++) { e = ~(1L << (i & 63)); v = b[i]; if (v != e) { if (++bad <= 3) RamLogErr(test, blk, (long)i * 8, e, v); } } break;
+                case 3: { ulong x = rs; for (int i = s0; i < e0; i++) { x ^= x << 13; x ^= x >> 7; x ^= x << 17; e = (long)x; v = b[i]; if (v != e) { if (++bad <= 3) RamLogErr(test, blk, (long)i * 8, e, v); } } rs = x; break; }
+                case 4: for (int i = s0; i < e0; i++) { v = b[i]; if (v != p) { if (++bad <= 3) RamLogErr(test, blk, (long)i * 8, p, v); } } break;
+                case 5: { long q = ~p; for (int i = s0; i < e0; i++) { v = b[i]; if (v != q) { if (++bad <= 3) RamLogErr(test, blk, (long)i * 8, q, v); } } break; }
+                default: { int m = (s0 + sh) % 20; for (int i = s0; i < e0; i++) { e = m == 0 ? p : ~p; v = b[i]; if (v != e) { if (++bad <= 3) RamLogErr(test, blk, (long)i * 8, e, v); } if (++m == 20) m = 0; } break; }
+            }
+            return bad;
+        }
+        static void RamStep(int idx, int e0, int len, int s0, bool lead) { RamProg[idx] = (int)(e0 * 1000L / len); if (lead) RamViewPos = s0; }
+
+        // escreve o bloco inteiro com "mode" (fase 1) e depois confere (fase 2); devolve os erros
+        static long RamWriteCheck(long[] b, int idx, int mode, long p, int sh, int test, bool lead, ulong seed)
+        {
+            const int SL = 1 << 16; int N = b.Length; long bad = 0; ulong rs = seed;
+            RamState[idx] = 1;
+            for (int s0 = 0; s0 < N && !Stop; s0 += SL) { int e0 = Math.Min(N, s0 + SL); RamFill(b, s0, e0, mode, p, ref rs, sh); RamStep(idx, e0, N, s0, lead); }
+            Th.Interlocked.Add(ref Counter, (long)N * 8);
+            RamState[idx] = 2; RamProg[idx] = 0; rs = seed;
+            for (int s0 = 0; s0 < N && !Stop; s0 += SL) { int e0 = Math.Min(N, s0 + SL); bad += RamCheck(b, s0, e0, mode, p, ref rs, sh, test, idx); RamStep(idx, e0, N, s0, lead); }
+            Th.Interlocked.Add(ref Counter, (long)N * 8); Th.Interlocked.Add(ref RamChecked, (long)N * 8);
+            return bad;
+        }
+
+        // inversao movel: p ascendente; confere p e grava ~p ascendente; confere ~p e grava p descendente; confere p
+        static long RamMoveInv(long[] b, int idx, long p, int test, bool lead)
+        {
+            const int SL = 1 << 16; int N = b.Length; long bad = 0, q = ~p, v; ulong rs = 0;
+            RamState[idx] = 1;
+            for (int s0 = 0; s0 < N && !Stop; s0 += SL) { int e0 = Math.Min(N, s0 + SL); RamFill(b, s0, e0, 4, p, ref rs, 0); RamStep(idx, e0, N, s0, lead); }
+            RamState[idx] = 2; RamProg[idx] = 0;
+            for (int s0 = 0; s0 < N && !Stop; s0 += SL)
+            {
+                int e0 = Math.Min(N, s0 + SL);
+                for (int i = s0; i < e0; i++) { v = b[i]; if (v != p) { if (++bad <= 3) RamLogErr(test, idx, (long)i * 8, p, v); } b[i] = q; }
+                RamStep(idx, e0, N, s0, lead);
+            }
+            RamProg[idx] = 0;
+            for (int e0 = N; e0 > 0 && !Stop; e0 -= SL)
+            {
+                int s0 = Math.Max(0, e0 - SL);
+                for (int i = e0 - 1; i >= s0; i--) { v = b[i]; if (v != q) { if (++bad <= 3) RamLogErr(test, idx, (long)i * 8, q, v); } b[i] = p; }
+                RamStep(idx, e0, N, s0, lead);
+            }
+            RamProg[idx] = 0; ulong r2 = 0;
+            for (int s0 = 0; s0 < N && !Stop; s0 += SL) { int e0 = Math.Min(N, s0 + SL); bad += RamCheck(b, s0, e0, 4, p, ref r2, 0, test, idx); RamStep(idx, e0, N, s0, lead); }
+            Th.Interlocked.Add(ref Counter, (long)N * 8 * 6); Th.Interlocked.Add(ref RamChecked, (long)N * 8 * 3);
+            return bad;
+        }
+
+        // espelho AB-BA: a metade A troca de lugar com a metade B (invertida) varias vezes; no fim (numero par de trocas) tudo tem de estar igual ao original
+        static long RamMirror(long[] b, int idx, long p, int test, bool lead)
+        {
+            const int SL = 1 << 16; int N = b.Length, H = N / 2; long bad = 0; ulong rs = 0;
+            RamState[idx] = 1;
+            for (int s0 = 0; s0 < N && !Stop; s0 += SL) { int e0 = Math.Min(N, s0 + SL); RamFill(b, s0, e0, 0, p, ref rs, 0); RamStep(idx, e0, N, s0, lead); }
+            RamState[idx] = 2;
+            for (int k = 0; k < 4 && !Stop; k++)
+                for (int s0 = 0; s0 < H && !Stop; s0 += SL)
+                {
+                    int e0 = Math.Min(H, s0 + SL);
+                    for (int i = s0; i < e0; i++) { int j = N - 1 - i; long t = b[i]; b[i] = b[j]; b[j] = t; }
+                    RamProg[idx] = (int)(((long)k * H + e0) * 1000L / ((long)4 * H)); if (lead) RamViewPos = s0;
+                }
+            RamProg[idx] = 0;
+            for (int s0 = 0; s0 < N && !Stop; s0 += SL) { int e0 = Math.Min(N, s0 + SL); bad += RamCheck(b, s0, e0, 0, p, ref rs, 0, test, idx); RamStep(idx, e0, N, s0, lead); }
+            Th.Interlocked.Add(ref Counter, (long)N * 8 * 10); Th.Interlocked.Add(ref RamChecked, (long)N * 8);
+            return bad;
+        }
+
+        // movimento de bloco (estilo MemTest86): copia a 1a metade para a 2a com Array.Copy e confere as duas contra o padrao
+        static long RamBlockMove(long[] b, int idx, long p, int test, bool lead)
+        {
+            const int SL = 1 << 16; int N = b.Length, H = N / 2; long bad = 0, v; ulong rs = 0;
+            RamState[idx] = 1;
+            for (int s0 = 0; s0 < H && !Stop; s0 += SL) { int e0 = Math.Min(H, s0 + SL); RamFill(b, s0, e0, 0, p, ref rs, 0); RamStep(idx, e0, H, s0, lead); }
+            for (int s0 = 0; s0 < H && !Stop; s0 += SL) { int e0 = Math.Min(H, s0 + SL); Array.Copy(b, s0, b, H + s0, e0 - s0); }
+            RamState[idx] = 2; RamProg[idx] = 0;
+            for (int s0 = 0; s0 < H && !Stop; s0 += SL)
+            {
+                int e0 = Math.Min(H, s0 + SL);
+                bad += RamCheck(b, s0, e0, 0, p, ref rs, 0, test, idx);
+                for (int i = s0; i < e0; i++) { long e = p ^ i; v = b[H + i]; if (v != e) { if (++bad <= 3) RamLogErr(test, idx, (long)(H + i) * 8, e, v); } }
+                RamStep(idx, e0, H, s0, lead);
+            }
+            Th.Interlocked.Add(ref Counter, (long)N * 8 * 2); Th.Interlocked.Add(ref RamChecked, (long)N * 8);
+            return bad;
+        }
+
         static void RamWorker(long bytes, int baseIdx, int n)
         {
-            int chunk = RamChunk;
+            int chunk = RamChunk; bool lead = baseIdx == 0;
             List<long[]> bufs = new List<long[]>();
             for (int i = 0; i < n && !Stop; i++) bufs.Add(new long[chunk]);
             ulong[] pats = { 0xAAAAAAAAAAAAAAAAUL, 0x5555555555555555UL, 0xFFFFFFFF00000000UL, 0x00000000FFFFFFFFUL };
-            int round = 0; const int SL = 1 << 16;
+            int round = 0, nt = RamTestNames.Length;
             while (!Stop)
             {
-                long p = (long)pats[round++ & 3];
-                if (baseIdx == 0) { RamPattern = p; RamRound = round; }
-                for (int bi = 0; bi < bufs.Count; bi++)
+                int test = round % nt; long p = (long)pats[(round / nt + round) & 3]; round++;
+                ulong seed = 0x9E3779B97F4A7C15UL * (ulong)(round + baseIdx * 977) | 1UL; int sh = round % 20;
+                if (lead) { RamPattern = p; RamRound = round; RamTest = test; RamCycle = (round - 1) / nt; RamWait = false; }
+                if (test == 8)
+                {
+                    // retencao (Refresh/Stable): grava tudo, espera sem tocar na memoria e so depois confere
+                    ulong rs = seed;
+                    for (int bi = 0; bi < bufs.Count && !Stop; bi++)
+                    {
+                        long[] b = bufs[bi]; int idx = baseIdx + bi; if (lead) RamView = b; RamState[idx] = 1; rs = seed ^ (ulong)bi;
+                        for (int s0 = 0; s0 < b.Length && !Stop; s0 += 1 << 16) { int e0 = Math.Min(b.Length, s0 + (1 << 16)); RamFill(b, s0, e0, 3, p, ref rs, 0); RamStep(idx, e0, b.Length, s0, lead); }
+                        Th.Interlocked.Add(ref Counter, (long)b.Length * 8); RamState[idx] = 1; RamProg[idx] = 1000;
+                    }
+                    if (lead) RamWait = true;
+                    for (int w = 0; w < 50 && !Stop; w++) System.Threading.Thread.Sleep(100);
+                    if (lead) RamWait = false;
+                    for (int bi = 0; bi < bufs.Count && !Stop; bi++)
+                    {
+                        long[] b = bufs[bi]; int idx = baseIdx + bi; if (lead) RamView = b; RamState[idx] = 2; RamProg[idx] = 0; rs = seed ^ (ulong)bi; long bad = 0;
+                        for (int s0 = 0; s0 < b.Length && !Stop; s0 += 1 << 16) { int e0 = Math.Min(b.Length, s0 + (1 << 16)); bad += RamCheck(b, s0, e0, 3, p, ref rs, 0, test, idx); RamStep(idx, e0, b.Length, s0, lead); }
+                        Th.Interlocked.Add(ref Counter, (long)b.Length * 8); Th.Interlocked.Add(ref RamChecked, (long)b.Length * 8);
+                        if (bad > 0) { Th.Interlocked.Add(ref Errors, bad); Th.Interlocked.Add(ref RamTestErr[test], bad); }
+                        RamState[idx] = (byte)(bad > 0 ? 4 : 3); RamProg[idx] = 0;
+                    }
+                    continue;
+                }
+                for (int bi = 0; bi < bufs.Count && !Stop; bi++)
                 {
                     long[] b = bufs[bi]; int idx = baseIdx + bi;
-                    if (Stop) break;
-                    RamState[idx] = 1; if (baseIdx == 0) RamView = b;
-                    for (int s0 = 0; s0 < b.Length && !Stop; s0 += SL)
+                    if (lead) RamView = b;
+                    long bad;
+                    switch (test)
                     {
-                        int e0 = Math.Min(b.Length, s0 + SL);
-                        for (int i = s0; i < e0; i++) b[i] = p ^ i;
-                        RamProg[idx] = (int)(e0 * 1000L / b.Length); if (baseIdx == 0) RamViewPos = s0;
+                        case 0: bad = RamWriteCheck(b, idx, 0, p, 0, test, lead, 0); break;
+                        case 1: bad = RamWriteCheck(b, idx, 1, p, 0, test, lead, 0); break;
+                        case 2: bad = RamWriteCheck(b, idx, 2, p, 0, test, lead, 0); break;
+                        case 3: bad = RamWriteCheck(b, idx, 3, p, 0, test, lead, seed ^ (ulong)bi); break;
+                        case 4: bad = RamMoveInv(b, idx, p, test, lead); break;
+                        case 5: bad = RamMirror(b, idx, p, test, lead); break;
+                        case 6: bad = RamBlockMove(b, idx, p, test, lead); break;
+                        default: bad = RamWriteCheck(b, idx, 6, p, sh, test, lead, 0); break;
                     }
-                    Th.Interlocked.Add(ref Counter, (long)b.Length * 8);
-                    RamState[idx] = 2; RamProg[idx] = 0;
-                    long bad = 0;
-                    for (int s0 = 0; s0 < b.Length && !Stop; s0 += SL)
-                    {
-                        int e0 = Math.Min(b.Length, s0 + SL);
-                        for (int i = s0; i < e0; i++) if (b[i] != (p ^ i)) bad++;
-                        RamProg[idx] = (int)(e0 * 1000L / b.Length); if (baseIdx == 0) RamViewPos = s0;
-                    }
-                    if (bad > 0) Th.Interlocked.Add(ref Errors, bad);
-                    RamState[idx] = (byte)(bad > 0 ? 4 : 3);
-                    Th.Interlocked.Add(ref Counter, (long)b.Length * 8);
+                    if (bad > 0) { Th.Interlocked.Add(ref Errors, bad); Th.Interlocked.Add(ref RamTestErr[test], bad); }
+                    RamState[idx] = (byte)(bad > 0 ? 4 : 3); RamProg[idx] = 0;
                 }
             }
         }
@@ -20958,8 +21138,13 @@ namespace BunoTunner
             AddDrivers();
             AddAll();
             Section("Limpeza e manutenção", "Libera espaço no disco.", false);
-            Add("Limpar arquivos temporários", "Apaga C:\\Windows\\Temp, Prefetch e a pasta %temp% do usuário (itens em uso são ignorados). Nenhum documento pessoal é tocado.",
-                "Limpar", delegate { return Clean(); }, null, null, null, null);
+            Add("Limpar arquivos temporários", "Apaga C:\\Windows\\Temp, Prefetch e a pasta %temp% do usuário (itens em uso são ignorados) e, se você quiser, esvazia a lixeira. Nenhum documento pessoal é tocado.",
+                "Limpar", delegate
+                {
+                    bool bin = false;
+                    try { Invoke(new Action(delegate { bin = Dlg.Show(FindForm(), "Limpar a lixeira?", "Limpar arquivos temporários", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes; })); } catch (Exception) { }
+                    return Clean(bin);
+                }, null, null, null, null);
             Add("Hibernação", "Liga ou desliga a hibernação (powercfg /hibernate). Desligada, apaga o hiberfil.dat (libera vários GB no disco) e também desativa a Inicialização Rápida.",
                 "Desativar", delegate { return Pc("off", "Hibernação DESATIVADA (hiberfil.sys removido)."); },
                 "Ativar", delegate { return Pc("on", "Hibernação ATIVADA."); },
@@ -21359,7 +21544,10 @@ namespace BunoTunner
             return c == 0 ? ok : "Falhou (execute como administrador): " + o;
         }
 
-        static string Clean()
+        [StructLayout(LayoutKind.Sequential, Pack = 1)] struct RbInfo { public int cbSize; public long Size; public long Items; }
+        [DllImport("shell32.dll", CharSet = CharSet.Unicode)] static extern int SHQueryRecycleBin(string root, ref RbInfo info);
+        [DllImport("shell32.dll", CharSet = CharSet.Unicode)] static extern int SHEmptyRecycleBin(IntPtr hwnd, string root, uint flags);
+        static string Clean(bool bin)
         {
             string tmp = Environment.GetEnvironmentVariable("TEMP") ?? "";
             string win = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
@@ -21378,7 +21566,20 @@ namespace BunoTunner
                 }
                 catch (Exception) { }
             }
-            return "Concluído: " + files + " arquivo(s) apagado(s), " + (freed / 1048576.0).ToString("0.0") + " MB liberados.";
+            string binMsg = "";
+            if (bin)
+            {
+                try
+                {
+                    RbInfo ri = new RbInfo(); ri.cbSize = Marshal.SizeOf(typeof(RbInfo));
+                    long bsz = 0, bit = 0; if (SHQueryRecycleBin(null, ref ri) == 0) { bsz = ri.Size; bit = ri.Items; }
+                    int hr = SHEmptyRecycleBin(IntPtr.Zero, null, 7);   // sem confirmacao, sem barra de progresso, sem som
+                    if (hr == 0 || hr == unchecked((int)0x8000FFFF) || bit == 0) { freed += bsz; binMsg = "  Lixeira esvaziada (" + bit + " item(ns))."; }
+                    else binMsg = "  Não foi possível esvaziar a lixeira.";
+                }
+                catch (Exception) { binMsg = "  Não foi possível esvaziar a lixeira."; }
+            }
+            return "Concluído: " + files + " arquivo(s) apagado(s), " + (freed / 1048576.0).ToString("0.0") + " MB liberados." + binMsg;
         }
 
         // plano de energia "Desempenho Maximo": cria (powercfg -duplicatescheme) e ja ATIVA (powercfg -setactive)
@@ -22152,23 +22353,14 @@ namespace BunoTunner
             cbBThrF.SelectedIndexChanged += delegate { if (cbBThr.SelectedIndex != cbBThrF.SelectedIndex) cbBThr.SelectedIndex = cbBThrF.SelectedIndex; };
             p.Controls.Add(gF);
 
-            XpGroup gR = BenchBlock(3, "RAM  -  escrita e leitura com verificação", "Grava e le padrões na memória e confere cada valor; qualquer diferença conta como erro.", "ram", "Iniciar / parar o estresse de RAM");
-            UI.Lbl(gR, "Usar (% da livre):", 384, 48);
-            cbBRam = Combo(gR, 490, 44, 70, "25%", "50%", "70%"); cbBRam.SelectedIndex = 1;
+            XpGroup gR = BenchBlock(3, "RAM  -  escrita e leitura com verificação", "Usa o máximo de memória livre possível e roda uma bateria de testes (endereço XOR padrão, bits caminhando, pseudoaleatório, inversão móvel, espelho AB-BA, movimento de bloco, módulo 20 e retenção); qualquer diferença conta como erro.", "ram", "Iniciar / parar o estresse de RAM");
+            cbBRam = Combo(gR, 490, 44, 70, "25%", "50%", "70%"); cbBRam.SelectedIndex = 1; cbBRam.Visible = false;   // fixo: o teste usa o maximo possivel
             p.Controls.Add(gR);
 
             XpGroup gS = BenchBlock(4, "SSD  -  estilo CrystalDiskMark", "Estilo CrystalDiskMark: SEQ1M Q8T1, SEQ1M Q1T1, RND4K Q32T1 e RND4K Q1T1 (leitura e escrita, cerca de 3 a 5 s cada). Arquivo temporário no drive escolhido, apagado ao fim.", "ssd", "Iniciar / parar o estresse de SSD");
             UI.Lbl(gS, "Drive:", 384, 48);
             cbBDrive = Combo(gS, 426, 44, 62);
-            foreach (DriveInfo d in DriveInfo.GetDrives())
-            {
-                try { if (d.DriveType == DriveType.Fixed && d.IsReady) cbBDrive.Items.Add(d.Name); } catch (Exception) { }
-            }
-            if (cbBDrive.Items.Count > 0)
-            {
-                int si = cbBDrive.Items.IndexOf(Path.GetPathRoot(Environment.SystemDirectory));
-                cbBDrive.SelectedIndex = si >= 0 ? si : 0;
-            }
+            FillBenchDrives();
             UI.Lbl(gS, "Tamanho:", 496, 48);
             cbBSize = Combo(gS, 556, 44, 90, "512 MB", "1 GB", "2 GB", "4 GB", "8 GB"); cbBSize.SelectedIndex = 1;
             UI.Lbl(gS, "Passadas:", 384, 24);
@@ -22632,6 +22824,22 @@ namespace BunoTunner
         }
 
         // ---------------- atualizar tudo ----------------
+        // lista os drives fixos do Benchmark de SSD (mantem o drive escolhido se ele ainda existir)
+        void FillBenchDrives()
+        {
+            string keep = cbBDrive.SelectedItem as string;
+            cbBDrive.Items.Clear();
+            foreach (DriveInfo d in DriveInfo.GetDrives())
+            {
+                try { if ((d.DriveType == DriveType.Fixed || d.DriveType == DriveType.Removable) && d.IsReady) cbBDrive.Items.Add(d.Name); } catch (Exception) { }
+            }
+            if (cbBDrive.Items.Count > 0)
+            {
+                int si = keep != null ? cbBDrive.Items.IndexOf(keep) : -1;
+                if (si < 0) si = cbBDrive.Items.IndexOf(Path.GetPathRoot(Environment.SystemDirectory));
+                cbBDrive.SelectedIndex = si >= 0 ? si : 0;
+            }
+        }
         void RefreshAll()
         {
             if (refBusy) return;
@@ -22641,6 +22849,7 @@ namespace BunoTunner
             try { LoadGpu(); } catch (Exception) { }
             try { ramPage.ReadAsync(); ramPage.LoadAsync(); } catch (Exception) { }
             try { ((StoragePage)pgSto).Reload(); } catch (Exception) { }
+            try { if (!bRunning) FillBenchDrives(); } catch (Exception) { }
             System.Threading.ThreadPool.QueueUserWorkItem(delegate
             {
                 List<string[]> rows = null;

@@ -710,3 +710,9 @@ v1.49.60 (TESTE)
 
 v1.49.61 (TESTE)
 - Overlay: nova funcao "linha de texto". Na tela de configuracao do overlay, o botao "+T" (ou clique direito na lista da esquerda > "Adicionar linha de texto...") pede um texto livre e adiciona uma linha com ele ao overlay. Voce pode reordenar, trocar a cor, editar o texto (clique direito > Renomear...) e remover como qualquer outro item; pode ter varias linhas. No modo Compacto o texto aparece normalmente.
+
+v1.49.62 (TESTE)
+- Benchmark de RAM reformulado (inspirado no TestMem5, codigo proprio): removido o campo "Usar (% da livre)"; agora o teste usa o maximo de memoria livre possivel (deixando so uma reserva para o Windows). Roda uma bateria de 9 testes em ciclos: Endereco XOR padrao, Bits caminhando (1), Bits caminhando (0), Pseudoaleatorio, Inversao movel, Espelho AB-BA, Movimento de bloco (Array.Copy), Modulo 20 e Retencao (grava, espera 5 s sem tocar na memoria e so depois confere). Ate 8 threads.
+- Janela do teste de RAM: a animacao foi mantida e, na area que estava vazia (a direita das palavras de memoria), agora aparecem em tempo real: teste atual (n/9) e nome, ciclo, total verificado em GB, erros no teste atual e no total, mascara dos bits com falha (quais linhas de dados estao erradas) e o ultimo erro (bloco, posicao, valor esperado e lido).
+- Limpar arquivos temporarios: ao clicar em "Limpar" aparece "Limpar a lixeira?" (Sim/Nao). Sim: apaga os temporarios e esvazia a lixeira; Nao: apaga so os temporarios.
+- Atualizar tudo: agora tambem relê a lista de drives do Benchmark de SSD (um disco novo aparece sem reiniciar o programa).
