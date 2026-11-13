@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.63.0")]
-[assembly: AssemblyFileVersion("1.49.63.0")]
-[assembly: AssemblyInformationalVersion("1.49.63")]
+[assembly: AssemblyVersion("1.49.64.0")]
+[assembly: AssemblyFileVersion("1.49.64.0")]
+[assembly: AssemblyInformationalVersion("1.49.64")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -2020,7 +2020,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.63";
+        public const string Version = "v1.49.64";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -14093,6 +14093,19 @@ namespace BunoTunner
             return GlobalMemoryStatusEx(ref m) ? (long)m.ullAvailPhys : 0;
         }
 
+        [DllImport("psapi.dll")] static extern bool EmptyWorkingSet(IntPtr h);
+        // ao terminar o teste de RAM: solta as referencias, forca o coletor (compactando a area de objetos grandes) e devolve a memoria ao Windows
+        static void RamRelease()
+        {
+            RamView = null; RamState = new byte[0]; RamProg = new int[0];
+            try
+            {
+                System.Runtime.GCSettings.LargeObjectHeapCompactionMode = System.Runtime.GCLargeObjectHeapCompactionMode.CompactOnce;
+                GC.Collect(2, GCCollectionMode.Forced, true); GC.WaitForPendingFinalizers(); GC.Collect(2, GCCollectionMode.Forced, true);
+                EmptyWorkingSet(System.Diagnostics.Process.GetCurrentProcess().Handle);
+            }
+            catch (Exception) { }
+        }
         static void Spawn(Th.ParameterizedThreadStart fn, object arg, string name)
         {
             Th.Interlocked.Increment(ref alive);
@@ -14100,7 +14113,7 @@ namespace BunoTunner
             {
                 try { fn(o); }
                 catch (Exception ex) { Fail = name + ": " + ex.Message; }
-                finally { Th.Interlocked.Decrement(ref alive); }
+                finally { if (Th.Interlocked.Decrement(ref alive) == 0 && name == "bench-ram") RamRelease(); }
             });
             t.IsBackground = true; t.Priority = Th.ThreadPriority.BelowNormal; t.Name = name;
             t.Start(arg);

@@ -719,3 +719,6 @@ v1.49.62 (TESTE)
 
 v1.49.63 (TESTE)
 - Correcao interna: removidos 2 avisos do compilador (codigo inalcancavel no painel da RAM e campo sem uso no overlay). Sem mudanca de comportamento.
+
+v1.49.64 (TESTE)
+- Corrigido: depois de fechar o teste de RAM (X ou Esc) o programa continuava segurando a memoria. Os blocos de 64 MB ficavam alocados ate o coletor de lixo do .NET rodar. Agora, quando a ultima thread do teste termina, as referencias sao soltas, o coletor e forcado (compactando a area de objetos grandes) e a memoria e devolvida ao Windows.
