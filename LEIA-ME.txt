@@ -716,3 +716,6 @@ v1.49.62 (TESTE)
 - Janela do teste de RAM: a animacao foi mantida e, na area que estava vazia (a direita das palavras de memoria), agora aparecem em tempo real: teste atual (n/9) e nome, ciclo, total verificado em GB, erros no teste atual e no total, mascara dos bits com falha (quais linhas de dados estao erradas) e o ultimo erro (bloco, posicao, valor esperado e lido).
 - Limpar arquivos temporarios: ao clicar em "Limpar" aparece "Limpar a lixeira?" (Sim/Nao). Sim: apaga os temporarios e esvazia a lixeira; Nao: apaga so os temporarios.
 - Atualizar tudo: agora tambem relê a lista de drives do Benchmark de SSD (um disco novo aparece sem reiniciar o programa).
+
+v1.49.63 (TESTE)
+- Correcao interna: removidos 2 avisos do compilador (codigo inalcancavel no painel da RAM e campo sem uso no overlay). Sem mudanca de comportamento.

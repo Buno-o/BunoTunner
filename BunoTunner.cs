@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.62.0")]
-[assembly: AssemblyFileVersion("1.49.62.0")]
-[assembly: AssemblyInformationalVersion("1.49.62")]
+[assembly: AssemblyVersion("1.49.63.0")]
+[assembly: AssemblyFileVersion("1.49.63.0")]
+[assembly: AssemblyInformationalVersion("1.49.63")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -2020,7 +2020,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.62";
+        public const string Version = "v1.49.63";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -8177,7 +8177,7 @@ namespace BunoTunner
 
     static class Overlay
     {
-        public class Row { public string Key, Label, Value; public bool Hot, HasCol, HasNCol; public Color Col, NCol; public float? Num; public float[] Hist; }
+        public class Row { public string Key, Label, Value; public bool Hot, HasCol, HasNCol; public Color Col, NCol; public float[] Hist; }
         public static readonly string[][] Specials = {
             new string[] { "@FPS", "FPS (API + quadros/s)" }, new string[] { "@FT", "Frametime atual (ms)" }, new string[] { "@FTA", "Frametime médio (ms)" },
             new string[] { "@L1", "1% low (FPS)" }, new string[] { "@L01", "0,1% low (FPS)" } };
@@ -12600,13 +12600,9 @@ namespace BunoTunner
                         if (lg.Length > 0 && rowsI > 5)
                         {
                             ln2.Add(new string[] { Lang.T("Último erro") + ":", "2" });
-                            for (int i = lg.Length - 1; i >= 0 && ln2.Count < rowsI; i--)
-                            {
-                                string e1 = lg[i]; int k1 = e1.IndexOf("  esperado");
-                                ln2.Add(new string[] { k1 > 0 ? Lang.T("bloco") + e1.Substring(5, k1 - 5) : e1, "2" });
-                                if (ln2.Count < rowsI && k1 > 0) ln2.Add(new string[] { "  " + Lang.T("esperado") + e1.Substring(k1 + 10).Replace("  lido", "  " + Lang.T("lido")), "2" });
-                                break;
-                            }
+                            string e1 = lg[lg.Length - 1]; int k1 = e1.IndexOf("  esperado");
+                            ln2.Add(new string[] { k1 > 0 ? Lang.T("bloco") + e1.Substring(5, k1 - 5) : e1, "2" });
+                            if (k1 > 0) ln2.Add(new string[] { "  " + Lang.T("esperado") + e1.Substring(k1 + 10).Replace("  lido", "  " + Lang.T("lido")), "2" });
                         }
                         for (int row = 0; row < rowsI && row < ln2.Count; row++)
                             TextRenderer.DrawText(g, ln2[row][0], hf, new Rectangle(px, top2 + row * 17, pw, 17), ln2[row][1] == "2" ? cBadT : (ln2[row][1] == "1" ? cHd : cInf), TextFormatFlags.Left | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
