@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.65.0")]
-[assembly: AssemblyFileVersion("1.49.65.0")]
-[assembly: AssemblyInformationalVersion("1.49.65")]
+[assembly: AssemblyVersion("1.49.66.0")]
+[assembly: AssemblyFileVersion("1.49.66.0")]
+[assembly: AssemblyInformationalVersion("1.49.66")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -2027,7 +2027,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.65";
+        public const string Version = "v1.49.66";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -21308,9 +21308,9 @@ namespace BunoTunner
             for (int i = 0; i < apps.Length; i++)
             {
                 int col = i / per, row = i % per, x = 8 + col * 300, y = 78 + row * 30;
-                PictureBox pb0 = new PictureBox(); pb0.SetBounds(x, y - 1, 20, 20); pb0.SizeMode = PictureBoxSizeMode.Zoom; pb0.BackColor = Color.Transparent; pb0.Image = Fallback(apps[i].Name);
+                PictureBox pb0 = new PictureBox(); pb0.SetBounds(x, y - 3, 24, 24); pb0.SizeMode = PictureBoxSizeMode.Normal; pb0.BackColor = Color.Transparent; pb0.Image = Fallback(apps[i].Name);
                 body.Controls.Add(pb0); pic[i] = pb0;
-                chk[i] = UI.Opt(body, apps[i].Name, x + 28, y, 250, false);
+                chk[i] = UI.Opt(body, apps[i].Name, x + 34, y, 244, false);
             }
             lblSt = UI.Lbl(body, "", 8, 446, Xp.UiBold, Xp.GroupText); lblSt.AutoSize = false; lblSt.SetBounds(8, 446, 586, 18);
             pb = new ProgressBar(); pb.SetBounds(8, 468, 586, 18); body.Controls.Add(pb);
@@ -21325,17 +21325,43 @@ namespace BunoTunner
 
         static Bitmap Fallback(string name)
         {
-            Bitmap b = new Bitmap(20, 20);
+            Bitmap b = new Bitmap(24, 24);
             using (Graphics g = Graphics.FromImage(b))
             {
                 g.SmoothingMode = SmoothingMode.AntiAlias; int h = 0; foreach (char ch in name) h = h * 31 + ch;
                 Color c = Color.FromArgb(70 + Math.Abs(h) % 120, 70 + Math.Abs(h / 7) % 120, 70 + Math.Abs(h / 13) % 120);
-                using (SolidBrush sb = new SolidBrush(c)) g.FillEllipse(sb, 0, 0, 19, 19);
-                TextRenderer.DrawText(g, name.Substring(0, 1).ToUpperInvariant(), Xp.UiBold, new Rectangle(0, 0, 20, 20), Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                using (SolidBrush sb = new SolidBrush(c)) g.FillEllipse(sb, 0, 0, 23, 23);
+                TextRenderer.DrawText(g, name.Substring(0, 1).ToUpperInvariant(), Xp.UiBold, new Rectangle(0, 0, 24, 24), Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
             }
             return b;
         }
-        // logos: favicon oficial de cada site, baixado em segundo plano (enquanto isso vale a bolinha com a inicial)
+        // logos: baixa o icone de varias fontes (maior resolucao primeiro) e fica com o maior; reduz com qualidade para 24x24.
+        // Enquanto isso (ou se nada for achado) vale a bolinha com a inicial.
+        static Bitmap DecodeIcon(byte[] data)
+        {
+            if (data == null || data.Length < 16) return null;
+            try
+            {
+                using (MemoryStream ms = new MemoryStream(data))
+                {
+                    if (data[0] == 0 && data[1] == 0 && data[2] == 1 && data[3] == 0)
+                        using (Icon ic = new Icon(ms, new Size(256, 256))) return new Bitmap(ic.ToBitmap());
+                    using (Image im = Image.FromStream(ms)) return new Bitmap(im);
+                }
+            }
+            catch (Exception) { return null; }
+        }
+        static Bitmap Scale24(Bitmap src)
+        {
+            Bitmap o = new Bitmap(24, 24, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            using (Graphics g = Graphics.FromImage(o))
+            {
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic; g.PixelOffsetMode = PixelOffsetMode.HighQuality; g.SmoothingMode = SmoothingMode.HighQuality;
+                float k = Math.Min(24f / src.Width, 24f / src.Height); float w = src.Width * k, h = src.Height * k;
+                g.DrawImage(src, (24 - w) / 2f, (24 - h) / 2f, w, h);
+            }
+            return o;
+        }
         void LoadIcons()
         {
             System.Threading.ThreadPool.QueueUserWorkItem(delegate
@@ -21343,14 +21369,28 @@ namespace BunoTunner
                 try { ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072; } catch (Exception) { }
                 for (int i = 0; i < apps.Length; i++)
                 {
-                    int k = i;
-                    try
+                    int k = i; string site = apps[k].Site; int sl = site.IndexOf('/'); string host = sl > 0 ? site.Substring(0, sl) : site;
+                    string[] urls = {
+                        "https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://" + site + "&size=128",
+                        "https://" + host + "/apple-touch-icon.png",
+                        "https://www.google.com/s2/favicons?sz=128&domain_url=https://" + site + "/",
+                        "https://icons.duckduckgo.com/ip3/" + host + ".ico",
+                        "https://" + host + "/favicon.ico" };
+                    Bitmap best = null;
+                    foreach (string u in urls)
                     {
-                        byte[] data; using (WebClient w = new WebClient()) data = w.DownloadData("https://www.google.com/s2/favicons?sz=64&domain_url=https://" + apps[k].Site + "/");
-                        Bitmap bm; using (MemoryStream ms = new MemoryStream(data)) using (Image im = Image.FromStream(ms)) bm = new Bitmap(im);
-                        BeginInvoke(new Action(delegate { if (!IsDisposed) pic[k].Image = bm; }));
+                        try
+                        {
+                            byte[] data; using (WebClient w = new WebClient()) { w.Headers[HttpRequestHeader.UserAgent] = "Mozilla/5.0"; data = w.DownloadData(u); }
+                            Bitmap bm = DecodeIcon(data);
+                            if (bm != null && (best == null || bm.Width > best.Width)) { if (best != null) best.Dispose(); best = bm; } else if (bm != null) bm.Dispose();
+                            if (best != null && best.Width >= 96) break;
+                        }
+                        catch (Exception) { }
                     }
-                    catch (Exception) { }
+                    if (best == null) continue;
+                    Bitmap fin = Scale24(best); best.Dispose();
+                    try { BeginInvoke(new Action(delegate { if (!IsDisposed) pic[k].Image = fin; })); } catch (Exception) { }
                 }
             });
         }
@@ -21643,11 +21683,13 @@ namespace BunoTunner
         void AddAll()
         {
             top += 12;   // afasta do bloco de Drivers: sao funcoes separadas
-            Section("Aplicativos", "Instale vários programas de uma vez.", false, false);
+            top += 6;
+            SecBar vb = new SecBar("Aplicativos", "Instale vários programas de uma vez.", false); vb.Alt2 = true; vb.SetBounds(0, top, 650, 30);
+            box.Controls.Add(vb); top += 38;
             XpGroup g = new XpGroup(); g.Title = "Instalar aplicativos"; g.SetBounds(12, top, 638, 70); top += 80;
             Label d = UI.Lbl(g, "Escolha navegadores, ferramentas, jogos e outros programas numa lista; o BunoTunner baixa e instala todos os selecionados sozinho.", 12, 24, Xp.Ui, Xp.Dim);
-            d.AutoSize = false; d.SetBounds(12, 24, 500, 36);
-            XpButton bApps = UI.Btn(g, "Instalar aplicativos...", 504, 24, 132, delegate { new AppInstallForm().ShowDialog(FindForm()); }); bApps.Height = 28;
+            d.AutoSize = false; d.SetBounds(12, 24, 490, 36);
+            XpButton bApps = UI.Btn(g, "Instalar aplicativos...", 508, 24, 128, delegate { new AppInstallForm().ShowDialog(FindForm()); }); bApps.Height = 28;
             box.Controls.Add(g);
         }
 
@@ -21662,7 +21704,7 @@ namespace BunoTunner
 
         class SecBar : Control
         {
-            string t, sub; bool warn; public bool Alt;
+            string t, sub; bool warn; public bool Alt, Alt2;
             public SecBar(string title, string subtitle, bool w) { t = title; sub = subtitle; warn = w; SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw, true); }
             protected override void OnPaint(PaintEventArgs e)
             {
@@ -21670,17 +21712,17 @@ namespace BunoTunner
                 if (Xp.Theme == 0)
                 {
                     // Luna: barra no estilo da barra de titulo do XP (azul vivo, brilho no topo, texto branco)
-                    using (LinearGradientBrush br = new LinearGradientBrush(r, Alt ? Color.FromArgb(104, 188, 72) : Color.FromArgb(78, 130, 236), Alt ? Color.FromArgb(44, 132, 30) : Color.FromArgb(30, 82, 206), 90f)) g.FillRectangle(br, r);
-                    using (Pen hl = new Pen(Alt ? Color.FromArgb(170, 226, 140) : Color.FromArgb(140, 178, 248))) g.DrawLine(hl, 1, 1, Width - 3, 1);
-                    using (Pen p = new Pen(Alt ? Color.FromArgb(18, 92, 12) : Color.FromArgb(0, 48, 152))) g.DrawRectangle(p, r);
+                    using (LinearGradientBrush br = new LinearGradientBrush(r, Alt2 ? Color.FromArgb(176, 112, 226) : Alt ? Color.FromArgb(104, 188, 72) : Color.FromArgb(78, 130, 236), Alt2 ? Color.FromArgb(104, 48, 170) : Alt ? Color.FromArgb(44, 132, 30) : Color.FromArgb(30, 82, 206), 90f)) g.FillRectangle(br, r);
+                    using (Pen hl = new Pen(Alt2 ? Color.FromArgb(216, 178, 248) : Alt ? Color.FromArgb(170, 226, 140) : Color.FromArgb(140, 178, 248))) g.DrawLine(hl, 1, 1, Width - 3, 1);
+                    using (Pen p = new Pen(Alt2 ? Color.FromArgb(70, 24, 124) : Alt ? Color.FromArgb(18, 92, 12) : Color.FromArgb(0, 48, 152))) g.DrawRectangle(p, r);
                     TextRenderer.DrawText(g, Lang.T(t), Xp.UiBold, new Rectangle(10, 0, 230, Height), Color.White, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix | TextFormatFlags.EndEllipsis);
                     TextRenderer.DrawText(g, Lang.T(sub), Xp.Ui, new Rectangle(240, 0, Width - 250, Height), Color.FromArgb(222, 234, 255), TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix | TextFormatFlags.EndEllipsis);
                     return;
                 }
-                Color a = warn ? Xp.Bad : (Alt ? Color.FromArgb(70, 150, 80) : Xp.PaneTop), bcol = warn ? Color.FromArgb(Math.Max(0, Xp.Bad.R - 60), Math.Max(0, Xp.Bad.G - 30), Math.Max(0, Xp.Bad.B - 30)) : (Alt ? Color.FromArgb(34, 100, 48) : Xp.PaneBot);
+                Color a = warn ? Xp.Bad : (Alt2 ? Color.FromArgb(140, 84, 190) : Alt ? Color.FromArgb(70, 150, 80) : Xp.PaneTop), bcol = warn ? Color.FromArgb(Math.Max(0, Xp.Bad.R - 60), Math.Max(0, Xp.Bad.G - 30), Math.Max(0, Xp.Bad.B - 30)) : (Alt2 ? Color.FromArgb(88, 44, 136) : Alt ? Color.FromArgb(34, 100, 48) : Xp.PaneBot);
                 using (LinearGradientBrush br = new LinearGradientBrush(r, a, bcol, 0f)) g.FillRectangle(br, r);
                 using (Pen p = new Pen(Xp.Border)) g.DrawRectangle(p, r);
-                Color tc = (warn || Alt) ? Color.White : Xp.PaneText;
+                Color tc = (warn || Alt || Alt2) ? Color.White : Xp.PaneText;
                 TextRenderer.DrawText(g, Lang.T(t), Xp.UiBold, new Rectangle(10, 0, 230, Height), tc, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix | TextFormatFlags.EndEllipsis);
                 TextRenderer.DrawText(g, Lang.T(sub), Xp.Ui, new Rectangle(240, 0, Width - 250, Height), tc, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix | TextFormatFlags.EndEllipsis);
             }

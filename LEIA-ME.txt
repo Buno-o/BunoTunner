@@ -728,3 +728,8 @@ v1.49.65 (TESTE)
 - Metodo: winget (Gerenciador de Pacotes da Microsoft), silencioso e aceitando os termos. Antes de baixar, o programa confere se o winget funciona e se cada aplicativo escolhido existe na fonte; os indisponiveis sao avisados e pulados. Se o winget nao existir, baixa o App Installer oficial da Microsoft. O ArtCraft Launcher vem direto do GitHub: o .msi da versao mais recente (x64/ARM64/x86 conforme o PC), instalado com msiexec. Logos: favicon de cada site baixado ao abrir a janela (sem internet aparece uma bolinha com a inicial).
 - Novo botao em Otimizacoes: "Recursos ocultos do Windows 11 (FeatureManagement)": grava 735209102, 1853569164 e 156965516 = 1 (DWORD) em HKLM\SYSTEM\CurrentControlSet\Policies\Microsoft\FeatureManagement\Overrides. Tem "Desfazer" (remove os 3 valores) e mostra o estado.
 - Atencao: o "ExitLag" nao foi confirmado no winget (nao achei link direto estavel); se nao existir, aparece como indisponivel e e pulado.
+
+v1.49.66 (TESTE)
+- Instalar aplicativos: logos em resolucao muito maior. Agora cada logo e buscada em varias fontes (Google faviconV2 128 px, apple-touch-icon do site, favicon do Google, DuckDuckGo e favicon.ico), fica a de maior resolucao e e reduzida com interpolacao de qualidade para 24x24 (antes eram 20x20 esticadas). Se nenhuma fonte tiver o icone (pode acontecer com o Iriun Webcam), aparece uma bolinha colorida com a inicial.
+- Botao "Instalar aplicativos..." reposicionado: nao fica mais cortado na esquerda (o texto da descricao nao passa por baixo dele).
+- A faixa "Aplicativos" ganhou cor propria (roxo), diferente da faixa de Drivers (verde) e das demais (azul/teal).
