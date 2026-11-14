@@ -722,3 +722,9 @@ v1.49.63 (TESTE)
 
 v1.49.64 (TESTE)
 - Corrigido: depois de fechar o teste de RAM (X ou Esc) o programa continuava segurando a memoria. Os blocos de 64 MB ficavam alocados ate o coletor de lixo do .NET rodar. Agora, quando a ultima thread do teste termina, as referencias sao soltas, o coletor e forcado (compactando a area de objetos grandes) e a memoria e devolvida ao Windows.
+
+v1.49.65 (TESTE)
+- Otimizacoes: o bloco "Aplicar todos / Desfazer todos" foi trocado por "Instalar aplicativos": uma descricao e um botao que abre uma janela (nao fecha nem minimiza ate o processo terminar) com 24 aplicativos em ordem alfabetica, cada um com a logo pequena e uma caixa de selecao: 7-Zip, ArtCraft Launcher, Audacity, Brave, Chrome, Claude Desktop, Discord, Epic Games, Everything, ExitLag, Firefox, Iriun Webcam, Logitech G HUB, OBS Studio, Ollama, Opera GX, Parsec, Radmin VPN, Spotify, Steam, Stream Deck, VLC, VoiceMeeter Potato e WinRAR. Botoes "Instalar" e "Cancelar" no canto inferior direito.
+- Metodo: winget (Gerenciador de Pacotes da Microsoft), silencioso e aceitando os termos. Antes de baixar, o programa confere se o winget funciona e se cada aplicativo escolhido existe na fonte; os indisponiveis sao avisados e pulados. Se o winget nao existir, baixa o App Installer oficial da Microsoft. O ArtCraft Launcher vem direto do GitHub: o .msi da versao mais recente (x64/ARM64/x86 conforme o PC), instalado com msiexec. Logos: favicon de cada site baixado ao abrir a janela (sem internet aparece uma bolinha com a inicial).
+- Novo botao em Otimizacoes: "Recursos ocultos do Windows 11 (FeatureManagement)": grava 735209102, 1853569164 e 156965516 = 1 (DWORD) em HKLM\SYSTEM\CurrentControlSet\Policies\Microsoft\FeatureManagement\Overrides. Tem "Desfazer" (remove os 3 valores) e mostra o estado.
+- Atencao: o "ExitLag" nao foi confirmado no winget (nao achei link direto estavel); se nao existir, aparece como indisponivel e e pulado.

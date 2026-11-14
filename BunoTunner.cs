@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.64.0")]
-[assembly: AssemblyFileVersion("1.49.64.0")]
-[assembly: AssemblyInformationalVersion("1.49.64")]
+[assembly: AssemblyVersion("1.49.65.0")]
+[assembly: AssemblyFileVersion("1.49.65.0")]
+[assembly: AssemblyInformationalVersion("1.49.65")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -259,6 +259,13 @@ namespace BunoTunner
             "Resultado ao vivo", "Live result",
             "Taxa atual", "Current rate",
             "Teste", "Test",
+            "Aplicativos", "Applications", "Instale vários programas de uma vez.", "Install several programs at once.", "Instalar aplicativos", "Install applications",
+            "Escolha navegadores, ferramentas, jogos e outros programas numa lista; o BunoTunner baixa e instala todos os selecionados sozinho.", "Pick browsers, tools, games and other programs from a list; BunoTunner downloads and installs all the selected ones by itself.",
+            "Instalar aplicativos...", "Install applications...", "Marcar todos", "Select all", "Desmarcar todos", "Clear all", "Instalar", "Install",
+            "Marque os aplicativos que quer instalar e clique em Instalar. O BunoTunner baixa e instala tudo sozinho (usando o winget da Microsoft; o ArtCraft Launcher vem do GitHub, sempre na versão mais recente). Precisa de internet.", "Tick the applications you want and click Install. BunoTunner downloads and installs everything by itself (using Microsoft's winget; ArtCraft Launcher comes from GitHub, always the latest version). Internet required.",
+            "Marque pelo menos um aplicativo.", "Tick at least one application.", "Verificando o método de instalação (winget)...", "Checking the install method (winget)...", "Falhou: winget indisponível.", "Failed: winget unavailable.",
+            "Conferindo", "Checking", "Instalando", "Installing", "pode demorar", "may take a while", "instalado(s)", "installed", "já instalado(s)", "already installed", "com falha", "failed", "Falhou", "Failed",
+            "Recursos ocultos do Windows 11 (FeatureManagement)", "Hidden Windows 11 features (FeatureManagement)",
             "Dur.", "Dur.",
             "Media", "Average",
             "Pico", "Peak",
@@ -2020,7 +2027,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.64";
+        public const string Version = "v1.49.65";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -17568,7 +17575,7 @@ namespace BunoTunner
             return Regex.Replace(txt, @"EXITCODE=-?\d+\s*", "").Trim();
         }
         // executa um programa sem prender a janela: entrada fechada (nada fica esperando tecla) e tempo limite de verdade
-        static string Run2(string exe, string args, int timeoutMs, out int code)
+        public static string Run2(string exe, string args, int timeoutMs, out int code)
         {
             code = -1;
             try
@@ -21134,6 +21141,281 @@ namespace BunoTunner
         }
     }
 
+    // ---------- instalador de aplicativos (winget; o ArtCraft Launcher vem direto do GitHub) ----------
+    static class AppInstaller
+    {
+        public class App
+        {
+            public string Name, Id, Site;
+            public App(string n, string id, string site) { Name = n; Id = id; Site = site; }
+        }
+        // Id "@artcraft" = MSI da ultima versao no GitHub; os demais sao ids do winget (repositorio oficial, fonte "winget")
+        public static readonly App[] Apps = {
+            new App("7-Zip", "7zip.7zip", "7-zip.org"),
+            new App("ArtCraft Launcher", "@artcraft", "getartcraft.com"),
+            new App("Audacity", "Audacity.Audacity", "audacityteam.org"),
+            new App("Brave", "Brave.Brave", "brave.com"),
+            new App("Chrome", "Google.Chrome", "google.com/chrome"),
+            new App("Claude Desktop", "Anthropic.Claude", "claude.ai"),
+            new App("Discord", "Discord.Discord", "discord.com"),
+            new App("Epic Games", "EpicGames.EpicGamesLauncher", "epicgames.com"),
+            new App("Everything", "voidtools.Everything", "voidtools.com"),
+            new App("ExitLag", "ExitLag.ExitLag", "exitlag.com"),
+            new App("Firefox", "Mozilla.Firefox", "mozilla.org/firefox"),
+            new App("Iriun Webcam", "Iriun.IriunWebcam", "iriun.com"),
+            new App("Logitech G HUB", "Logitech.GHUB", "logitechg.com"),
+            new App("OBS Studio", "OBSProject.OBSStudio", "obsproject.com"),
+            new App("Ollama", "Ollama.Ollama", "ollama.com"),
+            new App("Opera GX", "Opera.OperaGX", "opera.com/gx"),
+            new App("Parsec", "Parsec.Parsec", "parsec.app"),
+            new App("Radmin VPN", "Famatech.RadminVPN", "radmin-vpn.com"),
+            new App("Spotify", "Spotify.Spotify", "spotify.com"),
+            new App("Steam", "Valve.Steam", "steampowered.com"),
+            new App("Stream Deck", "Elgato.StreamDeck", "elgato.com"),
+            new App("VLC Media Player", "VideoLAN.VLC", "videolan.org"),
+            new App("VoiceMeeter Potato", "VB-Audio.Voicemeeter.Potato", "vb-audio.com"),
+            new App("WinRAR", "RARLab.WinRAR", "win-rar.com")
+        };
+        static string wg = "winget.exe";
+
+        static void Tls() { try { ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072; } catch (Exception) { } }
+
+        public static bool FindWinget()
+        {
+            int c; string o = XFastRam.Run2("winget.exe", "--version", 30000, out c);
+            if (c == 0 && o.Length > 0 && o.Length < 40) { wg = "winget.exe"; return true; }
+            string p = Path.Combine(Environment.GetEnvironmentVariable("LOCALAPPDATA") ?? "", @"Microsoft\WindowsApps\winget.exe");
+            if (File.Exists(p)) { o = XFastRam.Run2(p, "--version", 30000, out c); if (c == 0 && o.Length > 0 && o.Length < 40) { wg = p; return true; } }
+            return false;
+        }
+
+        // se o winget nao existe (Windows 10 antigo / LTSC), baixa o App Installer oficial da Microsoft e instala
+        public static bool BootstrapWinget(Action<string> log)
+        {
+            log("winget não encontrado. Baixando o App Installer da Microsoft...");
+            string f = Path.Combine(Path.GetTempPath(), "BunoTunner-winget.msixbundle");
+            try { Tls(); using (WebClient w = new WebClient()) w.DownloadFile("https://aka.ms/getwinget", f); }
+            catch (Exception ex) { log("Falha ao baixar o App Installer: " + ex.Message); return false; }
+            int c; string o = XFastRam.Run2("powershell.exe", "-NoProfile -NonInteractive -Command \"$ProgressPreference='SilentlyContinue'; Add-AppxPackage -ForceApplicationShutdown -Path '" + f + "'\"", 300000, out c);
+            try { File.Delete(f); } catch (Exception) { }
+            if (c != 0) log("Não foi possível instalar o App Installer: " + Last(o));
+            return FindWinget();
+        }
+
+        static string Last(string o)
+        {
+            string r = "";
+            foreach (string ln0 in (o ?? "").Replace("\r", "\n").Split('\n'))
+            {
+                string ln = ln0.Trim();
+                if (ln.Length < 3 || ln.IndexOf('█') >= 0 || ln.IndexOf('▒') >= 0 || ln.StartsWith("-") && ln.Length < 4 || ln == "\\" || ln == "|" || ln == "/") continue;
+                r = ln;
+            }
+            return r.Length > 180 ? r.Substring(0, 180) : r;
+        }
+
+        static string Arch()
+        {
+            string a = (Environment.GetEnvironmentVariable("PROCESSOR_ARCHITEW6432") ?? Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE") ?? "").ToUpperInvariant();
+            if (a == "ARM64") return "arm64";
+            return Environment.Is64BitOperatingSystem ? "x64" : "x86";
+        }
+
+        // URL do .msi da versao mais recente do ArtCraft Launcher (API do GitHub; se falhar, usa o redirecionamento de /releases/latest)
+        public static string ArtUrl(out string err)
+        {
+            err = null; string arch = Arch(); Tls();
+            try
+            {
+                using (WebClient w = new WebClient())
+                {
+                    w.Headers[HttpRequestHeader.UserAgent] = "BunoTunner";
+                    string j = w.DownloadString("https://api.github.com/repos/storytold/craft-launcher/releases?per_page=10");
+                    System.Text.RegularExpressions.Match m = System.Text.RegularExpressions.Regex.Match(j, "\"browser_download_url\"\\s*:\\s*\"([^\"]+windows-" + arch + "\\.msi)\"");
+                    if (m.Success) return m.Groups[1].Value;
+                }
+            }
+            catch (Exception) { }
+            try
+            {
+                HttpWebRequest rq = (HttpWebRequest)WebRequest.Create("https://github.com/storytold/craft-launcher/releases/latest");
+                rq.AllowAutoRedirect = false; rq.UserAgent = "BunoTunner"; rq.Timeout = 30000;
+                using (HttpWebResponse rs = (HttpWebResponse)rq.GetResponse())
+                {
+                    string loc = rs.Headers["Location"]; string tag = loc == null ? "" : loc.Substring(loc.LastIndexOf('/') + 1);
+                    if (tag.Length > 0)
+                    {
+                        string ver = tag.TrimStart('v', 'V');
+                        string url = "https://github.com/storytold/craft-launcher/releases/download/" + tag + "/artcraft-launcher-" + ver + "-windows-" + arch + ".msi";
+                        HttpWebRequest h = (HttpWebRequest)WebRequest.Create(url); h.Method = "HEAD"; h.UserAgent = "BunoTunner"; h.Timeout = 30000;
+                        using (HttpWebResponse hr = (HttpWebResponse)h.GetResponse()) { if ((int)hr.StatusCode == 200) return url; }
+                    }
+                }
+            }
+            catch (Exception ex) { err = ex.Message; }
+            if (err == null) err = "não achei o arquivo .msi na última versão";
+            return null;
+        }
+
+        // confere (sem baixar nada) se o aplicativo existe na fonte; devolve null se ok ou o motivo
+        public static string Check(App a)
+        {
+            if (a.Id == "@artcraft") { string err; return ArtUrl(out err) != null ? null : "ArtCraft: " + err; }
+            int c; string o = XFastRam.Run2(wg, "show --id " + a.Id + " --exact --source winget --accept-source-agreements --disable-interactivity", 120000, out c);
+            return c == 0 ? null : "não encontrado no winget" + (o.Length > 0 ? " (" + Last(o) + ")" : "");
+        }
+
+        // instala; devolve {"ok"|"ja"|"erro", mensagem}
+        public static string[] Install(App a)
+        {
+            int c;
+            if (a.Id == "@artcraft")
+            {
+                string err; string url = ArtUrl(out err);
+                if (url == null) return new string[] { "erro", err };
+                string f = Path.Combine(Path.GetTempPath(), "BunoTunner-" + Path.GetFileName(new Uri(url).LocalPath));
+                try { Tls(); using (WebClient w = new WebClient()) { w.Headers[HttpRequestHeader.UserAgent] = "BunoTunner"; w.DownloadFile(url, f); } }
+                catch (Exception ex) { return new string[] { "erro", "falha ao baixar: " + ex.Message }; }
+                string o2 = XFastRam.Run2("msiexec.exe", "/i \"" + f + "\" /qn /norestart", 1200000, out c);
+                try { File.Delete(f); } catch (Exception) { }
+                return c == 0 || c == 3010 ? new string[] { "ok", Path.GetFileName(url) } : new string[] { "erro", "msiexec código " + c + (o2.Length > 0 ? ": " + Last(o2) : "") };
+            }
+            string o = XFastRam.Run2(wg, "install --id " + a.Id + " --exact --source winget --silent --accept-package-agreements --accept-source-agreements --disable-interactivity", 1800000, out c);
+            if (c == 0) return new string[] { "ok", "" };
+            if (c == unchecked((int)0x8A150061) || c == unchecked((int)0x8A15002B)) return new string[] { "ja", "" };
+            return new string[] { "erro", "winget código 0x" + c.ToString("X8") + (o.Length > 0 ? ": " + Last(o) : "") };
+        }
+    }
+
+    class AppInstallForm : XpForm
+    {
+        XpOption[] chk; PictureBox[] pic; AppInstaller.App[] apps; XpButton bInst, bCancel, bAll, bNone; Label lblSt; ProgressBar pb; TextBox log; bool busy;
+        [DllImport("user32.dll")] static extern IntPtr GetSystemMenu(IntPtr h, bool revert);
+        [DllImport("user32.dll")] static extern bool EnableMenuItem(IntPtr m, uint id, uint flags);
+
+        public AppInstallForm()
+        {
+            Text = "Instalar aplicativos"; Size = new Size(610, 700); StartPosition = FormStartPosition.CenterParent; ShowInTaskbar = false;
+            Panel body = new Panel(); body.Dock = DockStyle.Fill; Controls.Add(body);
+            Label info = UI.Lbl(body, "Marque os aplicativos que quer instalar e clique em Instalar. O BunoTunner baixa e instala tudo sozinho (usando o winget da Microsoft; o ArtCraft Launcher vem do GitHub, sempre na versão mais recente). Precisa de internet.", 8, 6);
+            info.AutoSize = false; info.SetBounds(8, 6, 586, 34);
+            bAll = UI.Btn(body, "Marcar todos", 8, 44, 110, delegate { foreach (XpOption o in chk) o.Checked = true; });
+            bNone = UI.Btn(body, "Desmarcar todos", 124, 44, 120, delegate { foreach (XpOption o in chk) o.Checked = false; });
+            apps = (AppInstaller.App[])AppInstaller.Apps.Clone();
+            Array.Sort(apps, delegate(AppInstaller.App x, AppInstaller.App y) { return string.Compare(x.Name, y.Name, StringComparison.OrdinalIgnoreCase); });
+            chk = new XpOption[apps.Length]; pic = new PictureBox[apps.Length];
+            int per = (apps.Length + 1) / 2;
+            for (int i = 0; i < apps.Length; i++)
+            {
+                int col = i / per, row = i % per, x = 8 + col * 300, y = 78 + row * 30;
+                PictureBox pb0 = new PictureBox(); pb0.SetBounds(x, y - 1, 20, 20); pb0.SizeMode = PictureBoxSizeMode.Zoom; pb0.BackColor = Color.Transparent; pb0.Image = Fallback(apps[i].Name);
+                body.Controls.Add(pb0); pic[i] = pb0;
+                chk[i] = UI.Opt(body, apps[i].Name, x + 28, y, 250, false);
+            }
+            lblSt = UI.Lbl(body, "", 8, 446, Xp.UiBold, Xp.GroupText); lblSt.AutoSize = false; lblSt.SetBounds(8, 446, 586, 18);
+            pb = new ProgressBar(); pb.SetBounds(8, 468, 586, 18); body.Controls.Add(pb);
+            log = new TextBox(); log.Multiline = true; log.ReadOnly = true; log.ScrollBars = ScrollBars.Vertical; log.SetBounds(8, 494, 586, 128);
+            log.Font = new Font("Consolas", 8.5f); log.BackColor = Xp.EditBg; log.ForeColor = Xp.Text; body.Controls.Add(log);
+            bInst = UI.Btn(body, "Instalar", 386, 632, 100, delegate { Go(); });
+            bCancel = UI.Btn(body, "Cancelar", 494, 632, 100, delegate { Close(); });
+            FormClosing += delegate(object o, FormClosingEventArgs e) { if (busy) e.Cancel = true; };
+            Shown += delegate { LoadIcons(); };
+        }
+        protected override void OnMinimizeClick() { if (!busy) base.OnMinimizeClick(); }
+
+        static Bitmap Fallback(string name)
+        {
+            Bitmap b = new Bitmap(20, 20);
+            using (Graphics g = Graphics.FromImage(b))
+            {
+                g.SmoothingMode = SmoothingMode.AntiAlias; int h = 0; foreach (char ch in name) h = h * 31 + ch;
+                Color c = Color.FromArgb(70 + Math.Abs(h) % 120, 70 + Math.Abs(h / 7) % 120, 70 + Math.Abs(h / 13) % 120);
+                using (SolidBrush sb = new SolidBrush(c)) g.FillEllipse(sb, 0, 0, 19, 19);
+                TextRenderer.DrawText(g, name.Substring(0, 1).ToUpperInvariant(), Xp.UiBold, new Rectangle(0, 0, 20, 20), Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+            }
+            return b;
+        }
+        // logos: favicon oficial de cada site, baixado em segundo plano (enquanto isso vale a bolinha com a inicial)
+        void LoadIcons()
+        {
+            System.Threading.ThreadPool.QueueUserWorkItem(delegate
+            {
+                try { ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072; } catch (Exception) { }
+                for (int i = 0; i < apps.Length; i++)
+                {
+                    int k = i;
+                    try
+                    {
+                        byte[] data; using (WebClient w = new WebClient()) data = w.DownloadData("https://www.google.com/s2/favicons?sz=64&domain_url=https://" + apps[k].Site + "/");
+                        Bitmap bm; using (MemoryStream ms = new MemoryStream(data)) using (Image im = Image.FromStream(ms)) bm = new Bitmap(im);
+                        BeginInvoke(new Action(delegate { if (!IsDisposed) pic[k].Image = bm; }));
+                    }
+                    catch (Exception) { }
+                }
+            });
+        }
+
+        void Log(string s) { try { BeginInvoke(new Action(delegate { log.AppendText(s + "\r\n"); })); } catch (Exception) { } }
+        void Status(string s) { try { BeginInvoke(new Action(delegate { lblSt.Text = s; })); } catch (Exception) { } }
+        void SetBusy(bool b)
+        {
+            busy = b; bInst.Enabled = !b; bCancel.Enabled = !b; bAll.Enabled = !b; bNone.Enabled = !b;
+            foreach (XpOption o in chk) o.Enabled = !b;
+            try { EnableMenuItem(GetSystemMenu(Handle, false), 0xF060, b ? 0x1u : 0x0u); } catch (Exception) { }   // SC_CLOSE cinza enquanto instala
+            Invalidate();
+        }
+
+        void Go()
+        {
+            List<AppInstaller.App> sel = new List<AppInstaller.App>();
+            for (int i = 0; i < apps.Length; i++) if (chk[i].Checked) sel.Add(apps[i]);
+            if (sel.Count == 0) { Dlg.Show(this, "Marque pelo menos um aplicativo.", "Instalar aplicativos"); return; }
+            log.Clear(); pb.Value = 0; pb.Maximum = sel.Count; SetBusy(true);
+            System.Threading.ThreadPool.QueueUserWorkItem(delegate { Work(sel); });
+        }
+
+        void Work(List<AppInstaller.App> sel)
+        {
+            int ok = 0, ja = 0, bad = 0;
+            try
+            {
+                Status(Lang.T("Verificando o método de instalação (winget)..."));
+                bool needWg = false; foreach (AppInstaller.App a in sel) if (a.Id != "@artcraft") needWg = true;
+                if (needWg && !AppInstaller.FindWinget())
+                {
+                    if (!AppInstaller.BootstrapWinget(delegate(string s) { Log(s); }))
+                    {
+                        Log("O winget não está disponível neste Windows e não consegui instalá-lo. Atualize o \"Instalador de Aplicativo\" na Microsoft Store e tente de novo.");
+                        Status(Lang.T("Falhou: winget indisponível."));
+                        try { BeginInvoke(new Action(delegate { SetBusy(false); })); } catch (Exception) { }
+                        return;
+                    }
+                }
+                Log("Método OK: " + (needWg ? "winget" : "GitHub") + ". Conferindo se os aplicativos existem na fonte...");
+                List<AppInstaller.App> okList = new List<AppInstaller.App>();
+                foreach (AppInstaller.App a in sel)
+                {
+                    Status(Lang.T("Conferindo") + ": " + a.Name);
+                    string why = AppInstaller.Check(a);
+                    if (why == null) okList.Add(a); else { bad++; Log("[indisponível] " + a.Name + ": " + why); try { BeginInvoke(new Action(delegate { pb.Value = Math.Min(pb.Maximum, pb.Value + 1); })); } catch (Exception) { } }
+                }
+                int n = 0;
+                foreach (AppInstaller.App a in okList)
+                {
+                    n++; Status(Lang.T("Instalando") + " " + n + "/" + okList.Count + ": " + a.Name + "  (" + Lang.T("pode demorar") + ")");
+                    string[] r = AppInstaller.Install(a);
+                    if (r[0] == "ok") { ok++; Log("[ok] " + a.Name + (r[1].Length > 0 ? " - " + r[1] : "")); }
+                    else if (r[0] == "ja") { ja++; Log("[já instalado] " + a.Name); }
+                    else { bad++; Log("[erro] " + a.Name + ": " + r[1]); }
+                    try { BeginInvoke(new Action(delegate { pb.Value = Math.Min(pb.Maximum, pb.Value + 1); })); } catch (Exception) { }
+                }
+                Status(Lang.T("Concluído") + ": " + ok + " " + Lang.T("instalado(s)") + ", " + ja + " " + Lang.T("já instalado(s)") + ", " + bad + " " + Lang.T("com falha") + ".");
+            }
+            catch (Exception ex) { Log("Erro: " + ex.Message); Status(Lang.T("Falhou") + ": " + ex.Message); }
+            try { BeginInvoke(new Action(delegate { SetBusy(false); bCancel.Text = Lang.T("Fechar"); pb.Value = pb.Maximum; })); } catch (Exception) { }
+        }
+    }
+
     class OptPage : Panel
     {
         // cada otimizacao e uma linha padrao: titulo, descricao, botao principal (e opcional de desfazer) e o resultado
@@ -21197,6 +21479,12 @@ namespace BunoTunner
                 "Ativar", delegate { using (RegistryKey k = Root(false).CreateSubKey(ClickKey + "\\InprocServer32")) { k.SetValue("", ""); } return "Menu clássico ativado. Reinicie o Explorer ou faça logoff."; },
                 "Desfazer", delegate { Root(false).DeleteSubKeyTree(ClickKey, false); return "Menu padrão do Windows 11 restaurado. Reinicie o Explorer ou faça logoff."; },
                 delegate { using (RegistryKey k = Root(false).OpenSubKey(ClickKey + "\\InprocServer32")) return k != null ? "Estado: menu clássico ATIVO" : "Estado: menu padrão do Windows 11"; }, null);
+            const string FmKey = @"SYSTEM\CurrentControlSet\Policies\Microsoft\FeatureManagement\Overrides";
+            string[] fmIds = { "735209102", "1853569164", "156965516" };
+            Add("Recursos ocultos do Windows 11 (FeatureManagement)", "Grava 3 valores (735209102, 1853569164 e 156965516 = 1) em HKLM\\SYSTEM\\CurrentControlSet\\Policies\\Microsoft\\FeatureManagement\\Overrides, liberando recursos escondidos do Windows 11. Pode ser preciso reiniciar o PC.",
+                "Ativar", delegate { foreach (string id in fmIds) Sub(true, FmKey, id, 1); return "Chaves gravadas. Reinicie o PC para valer."; },
+                "Desfazer", delegate { foreach (string id in fmIds) Del(true, FmKey, id); return "Chaves removidas. Reinicie o PC para valer."; },
+                delegate { int n = 0; foreach (string id in fmIds) { object v = Get(true, FmKey, id); if (v != null && v.ToString() == "1") n++; } return n == fmIds.Length ? "Estado: ATIVADO" : (n == 0 ? "Estado: desativado" : "Estado: parcial (" + n + "/3)"); }, null);
             AddPrivacy();
         }
 
@@ -21215,7 +21503,6 @@ namespace BunoTunner
         readonly List<Tw> tws = new List<Tw>();
         class Itm { public string Title; public Func<string> Run, Undo; public Label St; }
         readonly List<Itm> itms = new List<Itm>();
-        static bool batch;   // durante "Aplicar todos" o Explorer so reinicia uma vez, no fim
 
         static void SetR(R r, bool apply)
         {
@@ -21339,7 +21626,7 @@ namespace BunoTunner
                     new R(false, @"SOFTWARE\Policies\Microsoft\Windows\Explorer", "DisableSearchBoxSuggestions", 1, null),
                     new R(false, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Search", "BingSearchEnabled", 0, 1),
                     new R(false, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Search", "CortanaConsent", 0, null) },
-                Extra = delegate(bool on) { if (!batch) RestartExplorer(); return null; } });
+                Extra = delegate(bool on) { RestartExplorer(); return null; } });
             AddTw(new Tw { Title = "Desativar recomendações da Microsoft Store na pesquisa", Desc = "Bloqueia o arquivo store.db da Microsoft Store (icacls /deny) para o Iniciar parar de sugerir apps da loja ao pesquisar. Se o arquivo ainda não existir, abra a Store uma vez.",
                 Extra = delegate(bool on)
                 {
@@ -21356,40 +21643,11 @@ namespace BunoTunner
         void AddAll()
         {
             top += 12;   // afasta do bloco de Drivers: sao funcoes separadas
-            Section("Tweaks e DeBloat", "Aplique ou desfaça todos os ajustes desta página de uma vez.", false, false);
-            XpGroup g = new XpGroup(); g.Title = "Aplicar todos os ajustes (1 clique)"; g.SetBounds(12, top, 638, 84); top += 94;
-            Label d = UI.Lbl(g, "Executa TODOS os ajustes desta página, um após o outro. O overlay do DLSS não vai ser executado.", 12, 22, Xp.Ui, Xp.Dim);
-            d.AutoSize = false; d.SetBounds(12, 22, 500, 34);
-            Label st = UI.Lbl(g, "", 12, 58, Xp.Ui, Xp.GroupText); st.AutoSize = false; st.SetBounds(12, 58, 500, 18);
-            XpButton bAll = UI.Btn(g, "Aplicar todos", 524, 22, 112, null); bAll.Height = 28;
-            XpButton bUn = UI.Btn(g, "Desfazer todos", 524, 52, 112, null);
-            Action<bool> go = delegate(bool apply)
-            {
-                string msg = apply
-                    ? "Serão executados TODOS os ajustes desta página (menos o overlay do DLSS), incluindo os que REDUZEM A SEGURANÇA: Isolamento de núcleo (HVCI) e mitigações Spectre/Meltdown desativados, hibernação desligada, limpeza de temporários, privacidade/telemetria (serviços, Recall, Brave, pesquisa) e outros. O Explorer será reiniciado no fim e alguns itens pedem reiniciar o PC.\n\nContinuar?"
-                    : "Serão desfeitos todos os ajustes desta página que tem opção de desfazer (a limpeza de temporários não tem). Alguns itens pedem reiniciar o PC.\n\nContinuar?";
-                if (Dlg.Show(this, msg, "BunoTunner - Otimizações", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) != DialogResult.OK) return;
-                bAll.Enabled = false; bUn.Enabled = false;
-                List<Itm> list = new List<Itm>();
-                foreach (Itm it in itms) if (!it.Title.StartsWith("Overlay DLSS") && (apply ? it.Run != null : it.Undo != null)) list.Add(it);   // o overlay do DLSS nunca entra
-                System.Threading.ThreadPool.QueueUserWorkItem(delegate
-                {
-                    batch = true; int n = 0, warn = 0;
-                    foreach (Itm t in list)
-                    {
-                        n++; Itm tt = t; int k = n;
-                        try { BeginInvoke(new Action(delegate { st.Text = Lang.T(apply ? "Aplicando" : "Desfazendo") + " " + k + "/" + list.Count + ": " + Lang.T(tt.Title); tt.St.Text = Lang.T("Executando..."); })); } catch (Exception) { }
-                        string r; try { r = (apply ? t.Run : t.Undo)(); } catch (Exception ex) { r = "Erro: " + ex.Message; }
-                        if (r.StartsWith("Concluído com avisos") || r.StartsWith("Erro") || r.StartsWith("Falhou")) warn++;
-                        try { BeginInvoke(new Action(delegate { tt.St.Text = r; })); } catch (Exception) { }
-                    }
-                    batch = false;
-                    if (apply) { try { BeginInvoke(new Action(delegate { st.Text = Lang.T("Reiniciando o Explorer..."); })); } catch (Exception) { } RestartExplorer(); }
-                    try { BeginInvoke(new Action(delegate { st.Text = Lang.T(apply ? "Todos aplicados" : "Todos desfeitos") + ": " + (list.Count - warn) + "/" + list.Count + (warn > 0 ? "  (" + warn + " " + Lang.T("com aviso, veja a lista abaixo") + ")" : ""); bAll.Enabled = true; bUn.Enabled = true; })); } catch (Exception) { }
-                });
-            };
-            bAll.Click += delegate { go(true); };
-            bUn.Click += delegate { go(false); };
+            Section("Aplicativos", "Instale vários programas de uma vez.", false, false);
+            XpGroup g = new XpGroup(); g.Title = "Instalar aplicativos"; g.SetBounds(12, top, 638, 70); top += 80;
+            Label d = UI.Lbl(g, "Escolha navegadores, ferramentas, jogos e outros programas numa lista; o BunoTunner baixa e instala todos os selecionados sozinho.", 12, 24, Xp.Ui, Xp.Dim);
+            d.AutoSize = false; d.SetBounds(12, 24, 500, 36);
+            XpButton bApps = UI.Btn(g, "Instalar aplicativos...", 504, 24, 132, delegate { new AppInstallForm().ShowDialog(FindForm()); }); bApps.Height = 28;
             box.Controls.Add(g);
         }
 
