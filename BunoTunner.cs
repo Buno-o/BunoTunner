@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.67.0")]
-[assembly: AssemblyFileVersion("1.49.67.0")]
-[assembly: AssemblyInformationalVersion("1.49.67")]
+[assembly: AssemblyVersion("1.49.68.0")]
+[assembly: AssemblyFileVersion("1.49.68.0")]
+[assembly: AssemblyInformationalVersion("1.49.68")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -2027,7 +2027,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.67";
+        public const string Version = "v1.49.68";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -14961,6 +14961,17 @@ namespace BunoTunner
             "2A8 tECSc - - 8 0" };
         static readonly HashSet<string> AmdBool = new HashSet<string> { "ECC", "AggrPD", "PowerDown", "GDM", "BankGroupEn", "Preamble2t" };
 
+        // DDR5 = Zen 4 em diante (familia 25 modelos 16-31, 64-79, 96-127, 160-175; familia 26+). O valor do registrador NAO serve para isso:
+        // em DDR4 os bits 8-12 (BGS, 2T, GDM...) elevam o valor e ele parecia "DDR5" (dava velocidade 12908 e GDM lido no bit errado).
+        static bool IsDdr5(uint r200)
+        {
+            int f = CpuId.Family, m = CpuId.Model;
+            if (f >= 26) return true;
+            if (f == 25) return (m >= 16 && m <= 31) || (m >= 64 && m <= 79) || (m >= 96 && m <= 127) || (m >= 160 && m <= 175);
+            if (f > 0) return false;   // Zen / Zen+ / Zen 2 (familia 23): sempre DDR4
+            return (r200 & 0xFFFF) >= 1000 && (r200 & 0xFFFF) <= 5200;   // familia desconhecida: palpite pelo valor
+        }
+
         static Result NativeAmdFull()
         {
             Result r = new Result();
@@ -14980,7 +14991,7 @@ namespace BunoTunner
                     }
                     uint cl = r204 & 0x3F, rcd = (r204 >> 16) & 0x3F, ras = (r204 >> 8) & 0x7F;
                     if (cl < 6 || rcd < 4 || ras < rcd || ras > 127) continue;
-                    off = o; five = (r200 & 0xFFFF) >= 1000; found = true;
+                    off = o; five = IsDdr5(r200); found = true;
                     cache[0x200] = r200;
                 }
             if (!found) return r;
@@ -21236,6 +21247,40 @@ namespace BunoTunner
         [StructLayout(LayoutKind.Sequential, Pack = 1)] struct RbInfo { public int cbSize; public long Size; public long Items; }
         [DllImport("shell32.dll", CharSet = CharSet.Unicode)] static extern int SHQueryRecycleBin(string root, ref RbInfo info);
         [DllImport("shell32.dll", CharSet = CharSet.Unicode)] static extern int SHEmptyRecycleBin(IntPtr hwnd, string root, uint flags);
+        // soma o tamanho e conta os itens da lixeira de todos os drives fixos (cada item apagado tem um arquivo $I... de metadados)
+        static void BinCount(out long size, out long items)
+        {
+            size = 0; items = 0;
+            foreach (DriveInfo d in DriveInfo.GetDrives())
+            {
+                try
+                {
+                    if (d.DriveType != DriveType.Fixed || !d.IsReady) continue;
+                    string root = Path.Combine(d.Name, "$Recycle.Bin");
+                    if (!Directory.Exists(root)) continue;
+                    foreach (string sid in Directory.GetDirectories(root))
+                    {
+                        try
+                        {
+                            foreach (string e in Directory.GetFileSystemEntries(sid))
+                            {
+                                string n = Path.GetFileName(e);
+                                if (n.Equals("desktop.ini", StringComparison.OrdinalIgnoreCase)) continue;
+                                if (n.StartsWith("$I", StringComparison.OrdinalIgnoreCase)) { items++; continue; }
+                                try
+                                {
+                                    if (Directory.Exists(e)) { foreach (string f in Directory.GetFiles(e, "*", SearchOption.AllDirectories)) try { size += new FileInfo(f).Length; } catch (Exception) { } }
+                                    else size += new FileInfo(e).Length;
+                                }
+                                catch (Exception) { }
+                            }
+                        }
+                        catch (Exception) { }
+                    }
+                }
+                catch (Exception) { }
+            }
+        }
         static string Clean(bool bin)
         {
             string tmp = Environment.GetEnvironmentVariable("TEMP") ?? "";
@@ -21262,8 +21307,10 @@ namespace BunoTunner
                 {
                     RbInfo ri = new RbInfo(); ri.cbSize = Marshal.SizeOf(typeof(RbInfo));
                     long bsz = 0, bit = 0; if (SHQueryRecycleBin(null, ref ri) == 0) { bsz = ri.Size; bit = ri.Items; }
+                    long esz, eit; BinCount(out esz, out eit);   // contagem propria (pastas $Recycle.Bin): a API as vezes devolve 0
+                    if (esz > bsz) bsz = esz; if (eit > bit) bit = eit;
                     int hr = SHEmptyRecycleBin(IntPtr.Zero, null, 7);   // sem confirmacao, sem barra de progresso, sem som
-                    if (hr == 0 || hr == unchecked((int)0x8000FFFF) || bit == 0) { freed += bsz; binMsg = "  Lixeira esvaziada (" + bit + " item(ns))."; }
+                    if (hr == 0 || hr == unchecked((int)0x8000FFFF) || bit == 0) { freed += bsz; files += (int)bit; binMsg = "  Lixeira esvaziada: " + bit + " item(ns), " + (bsz / 1048576.0).ToString("0.0") + " MB (já somados acima)."; }
                     else binMsg = "  Não foi possível esvaziar a lixeira.";
                 }
                 catch (Exception) { binMsg = "  Não foi possível esvaziar a lixeira."; }
