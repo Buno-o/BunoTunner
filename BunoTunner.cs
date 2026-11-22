@@ -13588,7 +13588,7 @@ namespace BunoTunner
                 TextRenderer.DrawText(g, l1, fT, new Point(8, 5), Color.FromArgb(255, 140, 20));
                 TextRenderer.DrawText(g, "GPU: " + (h.Renderer.Length > 0 ? h.Renderer : "-"), fS, new Point(8, 23), grey);
                 TextRenderer.DrawText(g, Lang.T("Tempo") + ": " + tm2 + "    " + Lang.T("Erros") + ": " + (cv != null ? cv.Errors : 0) + "    " + Lang.T("Carga") + ": " + h.LoadTxt, fS, new Rectangle(8, 38, Width - 230, 16), Color.White, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
-                TextRenderer.DrawText(g, h.FpsNow.ToString("0") + " FPS", fBig, new Rectangle(Width - 220, 2, 212, 32), Color.White, TextFormatFlags.Right | TextFormatFlags.VerticalCenter);
+                float fpsv = h.FpsNow; TextRenderer.DrawText(g, fpsv.ToString("0") + " FPS", fBig, new Rectangle(Width - 220, 2, 212, 32), Color.White, TextFormatFlags.Right | TextFormatFlags.VerticalCenter);
                 TextRenderer.DrawText(g, Lang.T("Temp. GPU") + ": " + (double.IsNaN(tmp) ? "--" : tmp.ToString("0")) + "°C", fS, new Rectangle(Width - 220, 36, 212, 18), Color.FromArgb(235, 60, 50), TextFormatFlags.Right);
             }
         }
