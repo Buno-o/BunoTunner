@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.69.0")]
-[assembly: AssemblyFileVersion("1.49.69.0")]
-[assembly: AssemblyInformationalVersion("1.49.69")]
+[assembly: AssemblyVersion("1.49.70.0")]
+[assembly: AssemblyFileVersion("1.49.70.0")]
+[assembly: AssemblyInformationalVersion("1.49.70")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -218,7 +218,7 @@ namespace BunoTunner
             "Desativar MPO", "Disable MPO",
             "Executando...", "Running...",
             "GPU  -  render 3D (estilo FurMark)", "GPU  -  3D render (FurMark style)",
-            "Janela OpenGL com bola de filamentos e shader; mostra o FPS. Fechar a janela para o teste.", "Opens an OpenGL window with shaders and filaments and shows FPS. Closing the window stops the test.",
+            "Janela OpenGL, Vulkan ou DirectX 12 com bola de filamentos e shader; mostra o FPS. Fechar a janela para o teste.", "OpenGL, Vulkan or DirectX 12 window with a filament ball and shader; shows the FPS. Close the window to stop the test.",
             "CPU  -  ray tracing 3D (estilo Cinebench)", "CPU  -  3D ray tracing (Cinebench style)",
             "Renderiza uma cena em todos os núcleos, bloco a bloco. Pontos = Mrays/s x 100.", "Renders a scene on all cores, block by block. Points = Mrays/s x 100.",
             "FPU  -  campo de ondas em ponto flutuante", "FPU  -  floating-point wave field",
@@ -259,6 +259,8 @@ namespace BunoTunner
             "Resultado ao vivo", "Live result",
             "Taxa atual", "Current rate",
             "Teste", "Test",
+            "Tempo", "Time", "API:", "API:", "Iniciando o render em", "Starting the render in", "indisponível", "unavailable", "usando o teste OpenCL.", "using the OpenCL test.", "Carga", "Load", "Temp. GPU", "GPU temp.",
+            "API gráfica do render. Vulkan e DirectX 12 rodam em um processo separado (se o driver falhar, o BunoTunner continua aberto) e abrem na placa escolhida.", "Graphics API of the render. Vulkan and DirectX 12 run in a separate process (if the driver fails, BunoTunner stays open) and open on the selected card.",
             "Aplicativos", "Applications", "Instale vários programas de uma vez.", "Install several programs at once.", "Instalar aplicativos", "Install applications",
             "Escolha navegadores, ferramentas, jogos e outros programas numa lista; o BunoTunner baixa e instala todos os selecionados sozinho.", "Pick browsers, tools, games and other programs from a list; BunoTunner downloads and installs all the selected ones by itself.",
             "Instalar aplicativos...", "Install applications...", "Marcar todos", "Select all", "Desmarcar todos", "Clear all", "Instalar", "Install",
@@ -1613,6 +1615,13 @@ namespace BunoTunner
         [STAThread]
         static void Main()
         {
+            // processo filho do Benchmark de GPU (Vulkan / DirectX 12): so abre a janela do render, sem o resto do programa
+            try
+            {
+                string[] ra = Environment.GetCommandLineArgs();
+                for (int i = 1; i < ra.Length; i++) if (ra[i] == "--render") { Environment.Exit(RChild.Entry(ra)); return; }
+            }
+            catch (Exception) { }
             // reinicio apos atualizar: espera o processo antigo terminar
             try
             {
@@ -2027,7 +2036,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.69";
+        public const string Version = "v1.49.70";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -8515,10 +8524,12 @@ namespace BunoTunner
             if (pid != fpsPid || (DateTime.UtcNow - fpsAt).TotalMilliseconds >= 480)
             {
                 fpsPid = pid; fpsAt = DateTime.UtcNow; fpsApi = null; fpsVal = 0;
-                bool ownRender = pid == myPid && Control.FromHandle(fg) is RenderForm;   // janela de render do Benchmark (OpenGL) tambem e medida
-                fpsGame = (pid != myPid || ownRender) && pid != 0 && FpsMon.Get(pid, out fpsVal, out fpsApi);
-                ftOk = fpsGame && FpsMon.GetFt(pid, out ftCur, out ftAvg, out ftL1, out ftL01);
-                if (ownRender && fpsGame && ((RenderForm)Control.FromHandle(fg)).Gl != null) fpsApi = "OpenGL";   // o proprio render sabe qual API usa (o processo tambem carrega D3D11 por causa da interface)
+                bool ownRender = pid == myPid && Control.FromHandle(fg) is RenderForm;   // janela de render do Benchmark tambem e medida
+                RenderHost rh = ownRender ? ((RenderForm)Control.FromHandle(fg)).Gl : null;
+                uint mpid = pid; ApiHost ahh = rh as ApiHost; if (ahh != null && ahh.ChildPid > 0) mpid = (uint)ahh.ChildPid;   // Vulkan/DX12: quem apresenta os quadros e o processo de render
+                fpsGame = (pid != myPid || ownRender) && pid != 0 && FpsMon.Get(mpid, out fpsVal, out fpsApi);
+                ftOk = fpsGame && FpsMon.GetFt(mpid, out ftCur, out ftAvg, out ftL1, out ftL01);
+                if (ownRender && fpsGame && rh != null) fpsApi = rh.ApiName;   // o proprio render sabe qual API usa (o processo tambem carrega D3D11 por causa da interface)
             }
             int fps = fpsVal; string api = fpsApi; bool game = fpsGame;
             if (Hidden && !Editing) { if (win != null && win.Visible) win.Hide(); return; }
@@ -12092,7 +12103,7 @@ namespace BunoTunner
 
     class RenderForm : XpForm
     {
-        public BenchCanvas Cv; public GlCanvas Gl;
+        public BenchCanvas Cv; public RenderHost Gl;
         public RenderForm(int kind, int threads)
         {
             Text = "BunoTunner - Render do teste (Esc fecha e para)";
@@ -12101,8 +12112,19 @@ namespace BunoTunner
             if (kind == 0)
             {
                 Cv.HudOnly = true; Cv.Dock = DockStyle.Bottom; Cv.Height = 10; Cv.Visible = false;
-                Gl = new GlCanvas(); Gl.Dock = DockStyle.Fill; Gl.Hud = Cv;
-                Controls.Add(Gl); Controls.Add(Cv);
+                if (Bench.GpuApi == 1 || Bench.GpuApi == 2)
+                {
+                    // Vulkan / DirectX 12: render em outro processo, encaixado aqui; o HUD fica numa faixa embaixo
+                    ApiHost ah = new ApiHost(Bench.GpuApi); ah.Dock = DockStyle.Fill; ah.Hud = Cv; Gl = ah;
+                    Text = "BunoTunner - Render do teste em " + ah.ApiName + " (Esc fecha e para)";
+                    ApiHud hud = new ApiHud(ah, Cv); hud.Dock = DockStyle.Bottom;
+                    Controls.Add(ah); Controls.Add(hud); Controls.Add(Cv);
+                }
+                else
+                {
+                    Gl = new GlCanvas(); Gl.Dock = DockStyle.Fill; Gl.Hud = Cv;
+                    Controls.Add(Gl); Controls.Add(Cv);
+                }
             }
             else { Cv.Dock = DockStyle.Fill; Controls.Add(Cv); }
             KeyPreview = true;
@@ -12933,7 +12955,7 @@ namespace BunoTunner
     // ------------------------------------------------------------------
     //  Render OpenGL real (carga da GPU): pelos em um toro, estilo FurMark
     // ------------------------------------------------------------------
-    class GlCanvas : Control
+    class GlCanvas : RenderHost
     {
         [StructLayout(LayoutKind.Sequential)]
         struct PFD
@@ -13006,11 +13028,9 @@ namespace BunoTunner
         [UnmanagedFunctionPointer(CallingConvention.StdCall)] delegate void DUniform2f(int loc, float a, float b);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)] delegate int DSwapInterval(int i);
 
-        public volatile int State; // 0 iniciando, 1 ok, 2 falhou
-        public string Error = "", Renderer = "", GlVersion = "", GlVendor = "";
-        public BenchCanvas Hud; public string LoadTxt = "";
+        public string GlVersion = "", GlVendor = "";   // State, Error, Renderer, Hud e LoadTxt vem de RenderHost
         volatile bool quit;
-        public void StopRender() { quit = true; } volatile int vw = 640, vh = 400;
+        public override void StopRender() { quit = true; } volatile int vw = 640, vh = 400;
         Th.Thread th;
 
         public GlCanvas()
@@ -13431,6 +13451,1230 @@ namespace BunoTunner
     }
 
 
+    // base comum dos renders da GPU (OpenGL no proprio processo; Vulkan e DirectX 12 em processo separado)
+    abstract class RenderHost : Control
+    {
+        public volatile int State;   // 0 iniciando, 1 ok, 2 falhou
+        public string Error = "", Renderer = "", LoadTxt = "", ApiName = "OpenGL", ApiVer = "";
+        public BenchCanvas Hud;
+        public volatile float FpsNow;
+        public abstract void StopRender();
+    }
+
+    // hospeda a janela do processo de render (Vulkan / DirectX 12) e le o relatorio dele pelo stdout
+    class ApiHost : RenderHost
+    {
+        [DllImport("user32.dll")] static extern IntPtr SetParent(IntPtr c, IntPtr p);
+        [DllImport("user32.dll")] static extern int GetWindowLong(IntPtr h, int i);
+        [DllImport("user32.dll")] static extern int SetWindowLong(IntPtr h, int i, int v);
+        [DllImport("user32.dll")] static extern bool SetWindowPos(IntPtr h, IntPtr after, int x, int y, int w, int hh, uint f);
+        [DllImport("user32.dll")] static extern bool MoveWindow(IntPtr h, int x, int y, int w, int hh, bool repaint);
+        readonly int api; Process proc; volatile bool stopping; IntPtr child; long lastF; DateTime lastT = DateTime.UtcNow;
+        public int ChildPid { get { try { return proc != null && !proc.HasExited ? proc.Id : 0; } catch (Exception) { return 0; } } }
+
+        public ApiHost(int api)
+        {
+            this.api = api; ApiName = api == 2 ? "DirectX 12" : "Vulkan"; ApiVer = ApiName;
+            SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw, true);
+            BackColor = Color.Black;
+        }
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            e.Graphics.Clear(Color.Black);
+            if (child != IntPtr.Zero && State != 2) return;
+            string t = State == 2 ? ApiName + ": " + Error : Lang.T("Iniciando o render em") + " " + ApiName + "...";
+            TextRenderer.DrawText(e.Graphics, t, Xp.UiBold, ClientRectangle, State == 2 ? Color.FromArgb(255, 110, 90) : Color.FromArgb(255, 196, 40), TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak);
+        }
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            if (proc != null) return;
+            try
+            {
+                string gpu = (Bench.GpuName ?? "").Replace("\"", "");
+                ProcessStartInfo psi = new ProcessStartInfo(Application.ExecutablePath,
+                    "--render " + (api == 2 ? "dx12" : "vk") + " --fur " + Bench.FurCount + " --ppid " + Process.GetCurrentProcess().Id + " --gpu \"" + gpu + "\"");
+                psi.UseShellExecute = false; psi.CreateNoWindow = true; psi.RedirectStandardOutput = true; psi.RedirectStandardInput = true;
+                psi.StandardOutputEncoding = Encoding.UTF8;
+                proc = Process.Start(psi);
+                Th.Thread rd = new Th.Thread(ReadLoop); rd.IsBackground = true; rd.Name = "render-host"; rd.Start();
+            }
+            catch (Exception ex) { Error = "não consegui abrir o processo de render: " + ex.Message; State = 2; Invalidate(); }
+        }
+        void Ui(Action a) { try { if (IsHandleCreated && !IsDisposed) BeginInvoke(a); } catch (Exception) { } }
+        void ReadLoop()
+        {
+            try
+            {
+                string l;
+                while ((l = proc.StandardOutput.ReadLine()) != null)
+                {
+                    if (l.StartsWith("HWND "))
+                    {
+                        long v; if (long.TryParse(l.Substring(5), out v)) { IntPtr hw = new IntPtr(v); Ui(delegate { Attach(hw); }); }
+                    }
+                    else if (l.StartsWith("FR "))
+                    {
+                        long f; if (!long.TryParse(l.Substring(3), out f)) continue;
+                        Th.Interlocked.Exchange(ref Bench.Counter, f);
+                        double dt = (DateTime.UtcNow - lastT).TotalSeconds;
+                        if (dt >= 0.5) { FpsNow = (float)Math.Max(0, (f - lastF) / dt); lastF = f; lastT = DateTime.UtcNow; }
+                    }
+                    else if (l.StartsWith("INFO "))
+                    {
+                        string[] p = l.Substring(5).Split('|');
+                        if (p.Length >= 3) { Renderer = p[0]; ApiVer = p[1]; LoadTxt = p[2]; }
+                    }
+                    else if (l == "STATE 1") { State = 1; Ui(delegate { Invalidate(); }); }
+                    else if (l.StartsWith("EXTRA ")) Bench.Extra = l.Substring(6);
+                    else if (l.StartsWith("ERR ")) Error = l.Substring(4);
+                    else if (l == "ESC") Ui(delegate { Form f = FindForm(); if (f != null) f.Close(); });
+                }
+            }
+            catch (Exception) { }
+            if (!stopping)
+            {
+                if (Error.Length == 0) { int c = 0; try { proc.WaitForExit(2000); c = proc.ExitCode; } catch (Exception) { } Error = "o processo de render terminou (código " + c + ")"; }
+                State = 2; child = IntPtr.Zero; Ui(delegate { Invalidate(); });
+            }
+        }
+        void Attach(IntPtr hw)
+        {
+            if (stopping || IsDisposed) return;
+            child = hw;
+            SetParent(hw, Handle);
+            int st = GetWindowLong(hw, -16);
+            st = (st & ~unchecked((int)0x80000000) & ~0x00C00000) | 0x40000000 | 0x10000000;   // tira WS_POPUP/legenda, vira WS_CHILD visivel
+            SetWindowLong(hw, -16, st);
+            SetWindowPos(hw, IntPtr.Zero, 0, 0, Math.Max(1, ClientSize.Width), Math.Max(1, ClientSize.Height), 0x0020 | 0x0004 | 0x0040);
+        }
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            if (child != IntPtr.Zero) MoveWindow(child, 0, 0, Math.Max(1, ClientSize.Width), Math.Max(1, ClientSize.Height), true);
+        }
+        public override void StopRender()
+        {
+            if (stopping) return;
+            stopping = true;
+            Process p = proc; if (p == null) return;
+            try { p.StandardInput.WriteLine("Q"); p.StandardInput.Flush(); } catch (Exception) { }
+            Th.ThreadPool.QueueUserWorkItem(delegate { try { if (!p.WaitForExit(3000)) p.Kill(); } catch (Exception) { } });
+        }
+        protected override void Dispose(bool d) { StopRender(); base.Dispose(d); }
+    }
+
+    // faixa de informacoes embaixo do render Vulkan / DirectX 12 (o render fica em outro processo, entao o texto e desenhado aqui)
+    class ApiHud : Control
+    {
+        readonly ApiHost h; readonly BenchCanvas cv; readonly Timer tm = new Timer();
+        public ApiHud(ApiHost host, BenchCanvas c)
+        {
+            h = host; cv = c; Height = 58; BackColor = Color.Black;
+            SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw, true);
+            tm.Interval = 250; tm.Tick += delegate { Invalidate(); }; tm.Start();
+        }
+        protected override void Dispose(bool d) { if (d) tm.Dispose(); base.Dispose(d); }
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            Graphics g = e.Graphics; g.Clear(Color.Black);
+            using (Pen p = new Pen(Color.FromArgb(70, 60, 30))) g.DrawLine(p, 0, 0, Width, 0);
+            Color gold = Color.FromArgb(255, 196, 40), grey = Color.FromArgb(170, 170, 170);
+            double tmp = cv != null ? cv.Temp : double.NaN; int es = cv != null ? (int)cv.Elapsed : 0;
+            string tm2 = (es / 60).ToString("00") + ":" + (es % 60).ToString("00");
+            using (Font fT = new Font("Consolas", 10f, FontStyle.Bold), fS = new Font("Consolas", 8.5f, FontStyle.Bold), fBig = new Font("Consolas", 20f, FontStyle.Bold))
+            {
+                string l1 = "FURBALL BENCHMARK " + Xp.Version + "   " + h.ApiVer + "   " + Size2();
+                TextRenderer.DrawText(g, l1, fT, new Point(8, 5), Color.FromArgb(255, 140, 20));
+                TextRenderer.DrawText(g, "GPU: " + (h.Renderer.Length > 0 ? h.Renderer : "-"), fS, new Point(8, 23), grey);
+                TextRenderer.DrawText(g, Lang.T("Tempo") + ": " + tm2 + "    " + Lang.T("Erros") + ": " + (cv != null ? cv.Errors : 0) + "    " + Lang.T("Carga") + ": " + h.LoadTxt, fS, new Rectangle(8, 38, Width - 230, 16), Color.White, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
+                TextRenderer.DrawText(g, h.FpsNow.ToString("0") + " FPS", fBig, new Rectangle(Width - 220, 2, 212, 32), Color.White, TextFormatFlags.Right | TextFormatFlags.VerticalCenter);
+                TextRenderer.DrawText(g, Lang.T("Temp. GPU") + ": " + (double.IsNaN(tmp) ? "--" : tmp.ToString("0")) + "°C", fS, new Rectangle(Width - 220, 36, 212, 18), Color.FromArgb(235, 60, 50), TextFormatFlags.Right);
+            }
+        }
+        string Size2() { return h.Width + "x" + h.Height; }
+    }
+
+    // =====================================================================
+    //  Benchmark de GPU em Vulkan e DirectX 12.
+    //  Roda em um PROCESSO SEPARADO (o proprio BunoTunner.exe com --render): se o driver der erro, so esse
+    //  processo cai e o BunoTunner continua aberto. A janela do render e encaixada dentro da janela do teste.
+    //  Mesma cena do OpenGL: esfera dourada pixelada + bola de filamentos + fundo com laco pesado de ALU.
+    // =====================================================================
+    static class FurScene
+    {
+        [StructLayout(LayoutKind.Sequential)] public struct V { public float X, Y, Z; public uint C; }   // 16 bytes: posicao + cor RGBA8
+        public const int XSTR = 2000000;   // filamentos por bloco no modo EXTREMO (64 MB)
+
+        // n filamentos = 2n vertices (linhas). Mesmas cores e proporcoes do render OpenGL.
+        public static V[] Build(int n, bool xt)
+        {
+            V[] a = new V[(long)n * 2]; Random r = new Random(xt ? 7 : 3);
+            for (int i = 0; i < n; i++)
+            {
+                double z = r.NextDouble() * 2 - 1, ph = r.NextDouble() * Math.PI * 2, rr = Math.Sqrt(1 - z * z);
+                double nx = rr * Math.Cos(ph), ny = z, nz = rr * Math.Sin(ph);
+                double R0 = xt ? 0.30 + r.NextDouble() * 0.25 : 0.5;
+                double u = r.NextDouble(), len = xt ? 0.05 + u * u * 0.9 : 0.28 + u * u * 0.62, jit = xt ? 0.12 : 0.1;
+                double tone = xt ? Math.Min(1.0, len / 0.9 + r.NextDouble() * 0.25) : r.NextDouble();
+                a[i * 2].X = (float)(nx * R0); a[i * 2].Y = (float)(ny * R0); a[i * 2].Z = (float)(nz * R0);
+                a[i * 2 + 1].X = (float)(nx * (R0 + len) + (r.NextDouble() - 0.5) * jit);
+                a[i * 2 + 1].Y = (float)(ny * (R0 + len) + (r.NextDouble() - 0.5) * jit);
+                a[i * 2 + 1].Z = (float)(nz * (R0 + len) + (r.NextDouble() - 0.5) * jit);
+                a[i * 2].C = 82u | (43u << 8) | (10u << 16) | ((xt ? 200u : 217u) << 24);
+                a[i * 2 + 1].C = (uint)(217 + 38 * tone) | ((uint)(158 + 77 * tone) << 8) | ((uint)(46 + 100 * tone) << 16) | ((xt ? 190u : 204u) << 24);
+            }
+            return a;
+        }
+
+        // matrizes 4x4 por linhas (vetor coluna: v' = M * v)
+        public static float[] Mul(float[] a, float[] b)
+        {
+            float[] r = new float[16];
+            for (int i = 0; i < 4; i++)
+                for (int j = 0; j < 4; j++)
+                    r[i * 4 + j] = a[i * 4] * b[j] + a[i * 4 + 1] * b[4 + j] + a[i * 4 + 2] * b[8 + j] + a[i * 4 + 3] * b[12 + j];
+            return r;
+        }
+        public static float[] Ident() { return new float[] { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 }; }
+        public static float[] Trans(float x, float y, float z) { float[] r = Ident(); r[3] = x; r[7] = y; r[11] = z; return r; }
+        public static float[] Scale(float s) { float[] r = Ident(); r[0] = s; r[5] = s; r[10] = s; return r; }
+        public static float[] Rot(float deg, float x, float y, float z)
+        {
+            double l = Math.Sqrt(x * x + y * y + z * z); if (l < 1e-9) return Ident();
+            x = (float)(x / l); y = (float)(y / l); z = (float)(z / l);
+            double a = deg * Math.PI / 180.0; float c = (float)Math.Cos(a), s = (float)Math.Sin(a), k = 1 - c;
+            return new float[] {
+                x * x * k + c,     x * y * k - z * s, x * z * k + y * s, 0,
+                y * x * k + z * s, y * y * k + c,     y * z * k - x * s, 0,
+                x * z * k - y * s, y * z * k + x * s, z * z * k + c,     0,
+                0, 0, 0, 1 };
+        }
+        // mesma piramide do glFrustum(-asp*0.1, asp*0.1, -0.1, 0.1, 0.2, 50), com profundidade 0..1; yFlip = Vulkan (Y para baixo)
+        public static float[] Proj(float asp, bool yFlip)
+        {
+            const float n = 0.2f, f = 50f;
+            float[] r = new float[16];
+            r[0] = 2f / asp; r[5] = yFlip ? -2f : 2f; r[10] = f / (n - f); r[11] = n * f / (n - f); r[14] = -1f;
+            return r;
+        }
+        public static float[] Model(float t)
+        {
+            return Mul(Trans(0, 0, -3.4f), Mul(Rot(30f + 12f * (float)Math.Sin(t * 0.4), 1, 0, 0), Rot(t * 35f, 0, 1, 0)));
+        }
+        // bloco k do modo EXTREMO: rotacao e escala proprias (camadas de pelos)
+        public static float[] Block(int k)
+        {
+            float sc = 0.78f + 0.5f * ((k * 7) % 11) / 11f;
+            return Mul(Rot(k * 61.8f, (k % 3) * 0.5f + 0.2f, 1f, (k % 5) * 0.2f), Scale(sc));
+        }
+        // constantes do shader: mvp (16) + t + largura + altura + iteracoes = 20 floats (80 bytes)
+        public static void Consts(float[] d, float[] mvp, float t, int w, int h, float it)
+        {
+            Array.Copy(mvp, d, 16); d[16] = t; d[17] = w; d[18] = h; d[19] = it;
+        }
+    }
+
+    // memoria nao gerenciada para as estruturas das APIs (zerada; liberada no fim)
+    sealed class NMem : IDisposable
+    {
+        readonly List<IntPtr> all = new List<IntPtr>();
+        public IntPtr A(int n) { IntPtr p = Marshal.AllocHGlobal(n); byte[] z = new byte[n]; Marshal.Copy(z, 0, p, n); all.Add(p); return p; }
+        public IntPtr S(string s) { IntPtr p = Marshal.StringToHGlobalAnsi(s); all.Add(p); return p; }
+        public IntPtr Ptrs(params IntPtr[] v) { IntPtr p = A(Math.Max(1, v.Length) * 8); for (int i = 0; i < v.Length; i++) Marshal.WriteIntPtr(p, i * 8, v[i]); return p; }
+        public IntPtr Bytes(byte[] b) { IntPtr p = A(b.Length); Marshal.Copy(b, 0, p, b.Length); return p; }
+        public void Dispose() { foreach (IntPtr p in all) Marshal.FreeHGlobal(p); all.Clear(); }
+        public static void I(IntPtr p, int o, int v) { Marshal.WriteInt32(p, o, v); }
+        public static void U(IntPtr p, int o, uint v) { Marshal.WriteInt32(p, o, unchecked((int)v)); }
+        public static void L(IntPtr p, int o, long v) { Marshal.WriteInt64(p, o, v); }
+        public static void P(IntPtr p, int o, IntPtr v) { Marshal.WriteIntPtr(p, o, v); }
+        public static void F(IntPtr p, int o, float v) { Marshal.WriteInt32(p, o, BitConverter.ToInt32(BitConverter.GetBytes(v), 0)); }
+    }
+
+    // ---------- processo filho: janela + render + relatorio pelo stdout ----------
+    static class RChild
+    {
+        static readonly object lk = new object();
+        public static void Out(string s) { lock (lk) { try { Console.Out.WriteLine(s.Replace('\n', ' ').Replace('\r', ' ')); Console.Out.Flush(); } catch (Exception) { } } }
+        public static volatile bool Quit;
+        public static long Frames;
+        public static volatile string Extra = "";
+        public static string Gpu = ""; public static int Fur = 250000;
+        public static bool Xt { get { return Fur < 0; } }
+        [DllImport("user32.dll")] static extern bool GetClientRect(IntPtr h, out RECT r);
+        struct RECT { public int L, T, R, B; }
+        public static void Size(IntPtr h, out int w, out int hh)
+        {
+            RECT r; if (h != IntPtr.Zero && GetClientRect(h, out r)) { w = r.R - r.L; hh = r.B - r.T; } else { w = 0; hh = 0; }
+        }
+        // ajusta quantos blocos desenhar no EXTREMO para cada quadro levar ~0,4 a 0,9 s (pesadissimo, sem estourar o TDR)
+        public static int Adapt(int draw, int count, double ms)
+        {
+            if (ms > 900) return Math.Max(1, draw * 2 / 3);
+            if (ms < 400) return Math.Min(count, draw + 1 + draw / 8);
+            return draw;
+        }
+
+        class Win : NativeWindow
+        {
+            protected override void WndProc(ref Message m)
+            {
+                if (m.Msg == 0x14) { m.Result = (IntPtr)1; return; }                           // WM_ERASEBKGND: o render pinta tudo
+                if (m.Msg == 0x100 && (long)m.WParam == 0x1B) { Out("ESC"); return; }           // Esc fecha o teste
+                if (m.Msg == 0x10) { Quit = true; return; }                                     // WM_CLOSE
+                if (m.Msg == 0x21) { m.Result = (IntPtr)1; return; }                            // WM_MOUSEACTIVATE: ativa sem roubar a janela do teste
+                base.WndProc(ref m);
+            }
+        }
+
+        public static int Entry(string[] a)
+        {
+            string api = ""; int ppid = 0;
+            for (int i = 0; i + 1 < a.Length; i++)
+            {
+                if (a[i] == "--render") api = a[i + 1];
+                else if (a[i] == "--fur") int.TryParse(a[i + 1], out Fur);
+                else if (a[i] == "--gpu") Gpu = a[i + 1];
+                else if (a[i] == "--ppid") int.TryParse(a[i + 1], out ppid);
+            }
+            Win w = new Win();
+            CreateParams cp = new CreateParams();
+            cp.Caption = "BunoTunner render"; cp.Style = unchecked((int)0x80000000) | 0x02000000;   // WS_POPUP | WS_CLIPCHILDREN (o BunoTunner encaixa como filha)
+            cp.ExStyle = 0x80;                                                                        // WS_EX_TOOLWINDOW (fora da barra de tarefas)
+            cp.X = -32000; cp.Y = -32000; cp.Width = 640; cp.Height = 480;
+            w.CreateHandle(cp);
+            IntPtr h = w.Handle;
+            Out("HWND " + h.ToInt64());
+            Th.Thread tin = new Th.Thread(delegate()
+            {
+                try { string l; while ((l = Console.In.ReadLine()) != null) if (l.Trim() == "Q") break; } catch (Exception) { }
+                Quit = true;
+            });
+            tin.IsBackground = true; tin.Start();
+            Th.Thread rt = new Th.Thread(delegate()
+            {
+                try { if (api == "vk") VkR.Run(h); else Dx12R.Run(h); }
+                catch (Exception ex) { Out("ERR " + ex.Message); }
+                Quit = true;
+            });
+            rt.IsBackground = true; rt.Name = "render-" + api; rt.Start();
+            Timer tm = new Timer(); tm.Interval = 250; string lastX = null; DateTime pc = DateTime.UtcNow;
+            tm.Tick += delegate
+            {
+                Out("FR " + Th.Interlocked.Read(ref Frames));
+                string x = Extra; if (x != lastX) { lastX = x; Out("EXTRA " + x); }
+                if (ppid > 0 && (DateTime.UtcNow - pc).TotalSeconds >= 1)
+                {
+                    pc = DateTime.UtcNow;
+                    try { using (Process pp = Process.GetProcessById(ppid)) { if (pp.HasExited) Quit = true; } } catch (Exception) { Quit = true; }
+                }
+                if (Quit) { tm.Stop(); rt.Join(3000); Application.ExitThread(); }
+            };
+            tm.Start();
+            Application.Run();
+            try { w.DestroyHandle(); } catch (Exception) { }
+            return 0;
+        }
+    }
+
+    // ---------- DirectX 12 (COM puro, sem bibliotecas) ----------
+    static class Dx12R
+    {
+        [DllImport("d3d12.dll")] static extern int D3D12CreateDevice(IntPtr adapter, int fl, ref Guid riid, out IntPtr dev);
+        [DllImport("d3d12.dll", EntryPoint = "D3D12CreateDevice")] static extern int D3D12Test(IntPtr adapter, int fl, ref Guid riid, IntPtr dev);
+        [DllImport("d3d12.dll")] static extern int D3D12SerializeRootSignature(IntPtr desc, int ver, out IntPtr blob, out IntPtr err);
+        [DllImport("dxgi.dll")] static extern int CreateDXGIFactory1(ref Guid riid, out IntPtr f);
+        [DllImport("d3dcompiler_47.dll", CharSet = CharSet.Ansi)] static extern int D3DCompile(string src, IntPtr size, string name, IntPtr defs, IntPtr inc, string entry, string target, uint f1, uint f2, out IntPtr code, out IntPtr err);
+        [DllImport("kernel32.dll")] static extern IntPtr CreateEvent(IntPtr a, bool manual, bool init, IntPtr name);
+        [DllImport("kernel32.dll")] static extern uint WaitForSingleObject(IntPtr h, uint ms);
+        [DllImport("kernel32.dll", EntryPoint = "RtlMoveMemory")] static extern void CopyMem(IntPtr d, IntPtr s, IntPtr n);
+
+        delegate uint DRel(IntPtr s);
+        delegate int DQI(IntPtr s, ref Guid g, out IntPtr o);
+        delegate IntPtr DBlobPtr(IntPtr s);
+        delegate IntPtr DBlobSize(IntPtr s);
+        delegate int DEnumAdapters1(IntPtr s, uint i, out IntPtr a);
+        delegate int DGetDesc1(IntPtr s, IntPtr desc);
+        delegate int DMakeWA(IntPtr s, IntPtr hwnd, uint flags);
+        delegate int DCreateSCHwnd(IntPtr s, IntPtr dev, IntPtr hwnd, IntPtr desc, IntPtr fs, IntPtr output, out IntPtr sc);
+        delegate int DQueryVMI(IntPtr s, uint node, int group, IntPtr info);
+        delegate int DPresent(IntPtr s, uint sync, uint flags);
+        delegate int DGetBuffer(IntPtr s, uint i, ref Guid g, out IntPtr r);
+        delegate int DResizeBuffers(IntPtr s, uint n, uint w, uint h, int fmt, uint flags);
+        delegate uint DCurIdx(IntPtr s);
+        delegate int DCreateQueue(IntPtr s, IntPtr desc, ref Guid g, out IntPtr q);
+        delegate int DCreateAlloc(IntPtr s, int type, ref Guid g, out IntPtr a);
+        delegate int DCreateGPSO(IntPtr s, IntPtr desc, ref Guid g, out IntPtr p);
+        delegate int DCreateList(IntPtr s, uint node, int type, IntPtr alloc, IntPtr pso, ref Guid g, out IntPtr l);
+        delegate int DCreateHeap(IntPtr s, IntPtr desc, ref Guid g, out IntPtr h);
+        delegate uint DIncSize(IntPtr s, int type);
+        delegate int DCreateRS(IntPtr s, uint node, IntPtr blob, IntPtr size, ref Guid g, out IntPtr rs);
+        delegate void DCreateView(IntPtr s, IntPtr res, IntPtr desc, IntPtr handle);
+        delegate int DCreateCommitted(IntPtr s, IntPtr heapProps, int heapFlags, IntPtr desc, int state, IntPtr clear, ref Guid g, out IntPtr r);
+        delegate int DCreateFence(IntPtr s, ulong init, int flags, ref Guid g, out IntPtr f);
+        delegate int DRemovedReason(IntPtr s);
+        delegate IntPtr DHeapStart(IntPtr s, out IntPtr h);
+        delegate int DMap(IntPtr s, uint sub, IntPtr range, out IntPtr data);
+        delegate void DUnmap(IntPtr s, uint sub, IntPtr range);
+        delegate ulong DGpuVA(IntPtr s);
+        delegate void DExec(IntPtr s, uint n, IntPtr lists);
+        delegate int DSignal(IntPtr s, IntPtr fence, ulong v);
+        delegate int DReset0(IntPtr s);
+        delegate ulong DCompleted(IntPtr s);
+        delegate int DSetEvent(IntPtr s, ulong v, IntPtr ev);
+        delegate int DClose(IntPtr s);
+        delegate int DListReset(IntPtr s, IntPtr alloc, IntPtr pso);
+        delegate void DDraw(IntPtr s, uint vc, uint ic, uint sv, uint si);
+        delegate void DCopyBuf(IntPtr s, IntPtr dst, ulong dOff, IntPtr src, ulong sOff, ulong n);
+        delegate void DTopo(IntPtr s, int t);
+        delegate void DSetN(IntPtr s, uint n, IntPtr p);
+        delegate void DSetPtr(IntPtr s, IntPtr p);
+        delegate void DRootConsts(IntPtr s, uint idx, uint n, float[] data, uint off);
+        delegate void DSetVB(IntPtr s, uint start, uint n, IntPtr views);
+        delegate void DOMSetRT(IntPtr s, uint n, ref IntPtr rtv, int single, ref IntPtr dsv);
+        delegate void DClearDSV(IntPtr s, IntPtr h, int flags, float d, byte st, uint n, IntPtr rects);
+        delegate void DClearRTV(IntPtr s, IntPtr h, float[] c, uint n, IntPtr rects);
+
+        static T F<T>(IntPtr o, int i) where T : class { return Marshal.GetDelegateForFunctionPointer(Marshal.ReadIntPtr(Marshal.ReadIntPtr(o), i * IntPtr.Size), typeof(T)) as T; }
+        static void Rel(IntPtr o) { if (o != IntPtr.Zero) F<DRel>(o, 2)(o); }
+        static void Ck(int hr, string what) { if (hr < 0) throw new Exception(what + " falhou (0x" + hr.ToString("X8") + ")"); }
+
+        static Guid IID_Factory2 = new Guid("50c83a1c-e072-4c48-87b0-3630fa36a6d0"), IID_Adapter3 = new Guid("645967a4-1392-4310-a798-8053ce3e93fd");
+        static Guid IID_Device = new Guid("189819f1-1db6-4b57-be54-1821339b85f7"), IID_Queue = new Guid("0ec870a6-5d7e-4c22-8cfc-5baae07616ed");
+        static Guid IID_Alloc = new Guid("6102dee4-af59-4b09-b999-b44d73f09b24"), IID_List = new Guid("5b160d0f-ac1b-4185-8ba8-b3ae42a5a455");
+        static Guid IID_Fence = new Guid("0a753dcf-c4d8-4b91-adf6-be5a60d95a76"), IID_Heap = new Guid("8efb471d-616c-4f49-90f7-127bb763fa51");
+        static Guid IID_Res = new Guid("696442be-a72e-4059-bc79-5b5c98040fad"), IID_RS = new Guid("c54a6b66-72df-4ee8-8be5-a946a1429214");
+        static Guid IID_PSO = new Guid("765a30f3-f624-4c6f-a828-ace948622445"), IID_SC3 = new Guid("94d99bdb-f1f8-4ab0-b236-7da0170edab1");
+
+        const string HLSL = @"cbuffer C : register(b0) { row_major float4x4 mvp; float t; float2 res; float it; };
+static const float3 PAL[7] = { float3(0.42,0.26,0.04), float3(0.62,0.40,0.06), float3(0.80,0.55,0.08), float3(0.93,0.70,0.14), float3(0.98,0.80,0.25), float3(1.0,0.90,0.50), float3(1.0,0.97,0.78) };
+struct VO { float4 pos : SV_Position; };
+VO VB(uint id : SV_VertexID) { VO o; float2 uv = float2((id << 1) & 2, id & 2); o.pos = float4(uv.x * 2.0 - 1.0, 1.0 - uv.y * 2.0, 0.0, 1.0); return o; }
+struct PO { float4 c : SV_Target; float d : SV_Depth; };
+PO PB(VO i) {
+    PO o;
+    float2 fc = float2(i.pos.x, res.y - i.pos.y);
+    float2 p = (fc - 0.5 * res) / res.y; float2 q = p * 3.0; float a = 0.0;
+    int n = (int)min(it, 6000.0);
+    [loop] for (int k = 0; k < n; k++) { q = float2(sin(q.y * 1.7 + t) + q.x * 0.3, cos(q.x * 1.3 - t) - q.y * 0.3); a += length(q) * 0.01; }
+    float r = length(p); float ang = atan2(p.y, p.x);
+    float rl = abs(frac(r * 6.0) - 0.5); float ring = smoothstep(0.47, 0.5, rl);
+    float sa = abs(frac(ang * 3.8197186) - 0.5); float spoke = smoothstep(0.46, 0.5, sa);
+    float fade = 1.0 - smoothstep(0.25, 1.3, r) * 0.7;
+    float3 c = float3(0.03, 0.04, 0.06) + float3(0.10, 0.13, 0.20) * max(ring, spoke) * fade + a * 0.0001;
+    float dep = 1.0;
+    float cell = max(2.0, floor(res.y / 110.0));
+    float2 ci = floor(fc / cell);
+    float2 fq = (ci + 0.5) * cell;
+    float asp = res.x / res.y;
+    float2 nd = fq / res * 2.0 - 1.0;
+    float3 d = normalize(float3(nd.x * asp * 0.5, nd.y * 0.5, -1.0));
+    float3 Cc = float3(0.0, 0.0, -3.4);
+    float b = dot(d, Cc); float h = b * b - (dot(Cc, Cc) - 0.25);
+    if (h > 0.0) {
+        float tt = b - sqrt(h); float3 P = d * tt; float3 N = normalize(P - Cc);
+        float lt = dot(N, normalize(float3(-0.5, 0.55, 0.65)));
+        lt += (fmod(ci.x * 7.0 + ci.y * 13.0 + ci.x * ci.y, 5.0) - 2.0) * 0.05;
+        int lev = (int)clamp(floor((lt + 0.1) * 5.2), 0.0, 6.0);
+        if (N.z < 0.37) lev = max(0, lev - 2);
+        c = PAL[lev];
+        dep = 0.0;   // como no OpenGL: a esfera fica sempre na frente dos pelos
+    }
+    o.c = float4(c, 1.0); o.d = dep;
+    return o;
+}
+struct FI { float3 p : POSITION; float4 c : COLOR; };
+struct FO { float4 pos : SV_Position; float4 c : COLOR; };
+FO VF(FI i) { FO o; o.pos = mul(mvp, float4(i.p, 1.0)); o.c = i.c; return o; }
+float4 PF(FO i) : SV_Target { return i.c; }
+";
+
+        static IntPtr Compile(string entry, string target)
+        {
+            IntPtr code, err;
+            int hr = D3DCompile(HLSL, (IntPtr)HLSL.Length, "furball", IntPtr.Zero, IntPtr.Zero, entry, target, 1u << 15, 0, out code, out err);
+            if (hr < 0)
+            {
+                string m = "";
+                if (err != IntPtr.Zero) { m = Marshal.PtrToStringAnsi(F<DBlobPtr>(err, 3)(err)); Rel(err); }
+                throw new Exception("shader " + entry + ": " + m);
+            }
+            if (err != IntPtr.Zero) Rel(err);
+            return code;
+        }
+
+        // ---- estado ----
+        static IntPtr dev, queue, sc, sc3, alloc, list, fence, fenceEv, rtvHeap, dsvHeap, rs, psoBg, psoFur, depth;
+        static IntPtr[] bb = new IntPtr[3];
+        static IntPtr rtvStart, dsvStart; static uint rtvInc; static ulong fenceVal;
+        static int curW, curH, manualIdx;
+        static NMem m = new NMem();
+
+        static void Wait()
+        {
+            fenceVal++;
+            Ck(F<DSignal>(queue, 14)(queue, fence, fenceVal), "Signal");
+            if (F<DCompleted>(fence, 8)(fence) < fenceVal)
+            {
+                Ck(F<DSetEvent>(fence, 9)(fence, fenceVal, fenceEv), "SetEventOnCompletion");
+                WaitForSingleObject(fenceEv, 0xFFFFFFFF);
+            }
+        }
+
+        static IntPtr Committed(int heapType, long width, int height, int format, int dim, int layout, int flags, int state, IntPtr clear)
+        {
+            IntPtr hp = m.A(20); NMem.I(hp, 0, heapType);
+            IntPtr rd = m.A(56);
+            NMem.I(rd, 0, dim); NMem.L(rd, 16, width); NMem.I(rd, 24, height); Marshal.WriteInt16(rd, 28, 1); Marshal.WriteInt16(rd, 30, 1);
+            NMem.I(rd, 32, format); NMem.I(rd, 36, 1); NMem.I(rd, 44, layout); NMem.I(rd, 48, flags);
+            IntPtr r; int hr = F<DCreateCommitted>(dev, 27)(dev, hp, 0, rd, state, clear, ref IID_Res, out r);
+            return hr < 0 ? IntPtr.Zero : r;
+        }
+
+        static void Targets(int w, int h)
+        {
+            for (uint i = 0; i < 3; i++)
+            {
+                IntPtr r; Ck(F<DGetBuffer>(sc, 9)(sc, i, ref IID_Res, out r), "GetBuffer"); bb[i] = r;
+                F<DCreateView>(dev, 20)(dev, r, IntPtr.Zero, (IntPtr)(rtvStart.ToInt64() + i * rtvInc));
+            }
+            IntPtr cv = m.A(20); NMem.I(cv, 0, 40); NMem.F(cv, 4, 1f);
+            depth = Committed(1, w, h, 40, 3, 0, 2, 0x10, cv);
+            if (depth == IntPtr.Zero) throw new Exception("não consegui criar o buffer de profundidade");
+            F<DCreateView>(dev, 21)(dev, depth, IntPtr.Zero, dsvStart);
+            curW = w; curH = h; manualIdx = 0;
+        }
+        static void FreeTargets() { for (int i = 0; i < 3; i++) { Rel(bb[i]); bb[i] = IntPtr.Zero; } Rel(depth); depth = IntPtr.Zero; }
+
+        static IntPtr Pso(IntPtr vs, IntPtr ps, bool fur)
+        {
+            IntPtr d = m.A(656);
+            NMem.P(d, 0, rs);
+            NMem.P(d, 8, F<DBlobPtr>(vs, 3)(vs)); NMem.P(d, 16, F<DBlobSize>(vs, 4)(vs));
+            NMem.P(d, 24, F<DBlobPtr>(ps, 3)(ps)); NMem.P(d, 32, F<DBlobSize>(ps, 4)(ps));
+            for (int i = 0; i < 8; i++)
+            {
+                int o = 120 + 8 + i * 40;
+                NMem.I(d, o, fur ? 1 : 0); NMem.I(d, o + 4, 0);
+                NMem.I(d, o + 8, 5); NMem.I(d, o + 12, 6); NMem.I(d, o + 16, 1);     // SRC_ALPHA, INV_SRC_ALPHA, ADD
+                NMem.I(d, o + 20, 2); NMem.I(d, o + 24, 1); NMem.I(d, o + 28, 1);     // ONE, ZERO, ADD
+                NMem.I(d, o + 32, 4); Marshal.WriteByte(d, o + 36, 0xF);              // NOOP, RGBA
+            }
+            NMem.U(d, 448, 0xFFFFFFFF);
+            NMem.I(d, 452, 3); NMem.I(d, 456, 1); NMem.I(d, 476, 1);                   // SOLID, NONE, DepthClip
+            NMem.I(d, 496, 1); NMem.I(d, 500, fur ? 0 : 1); NMem.I(d, 504, fur ? 2 : 8); // profundidade: fundo escreve sempre, pelos testam LESS
+            Marshal.WriteByte(d, 512, 0xFF); Marshal.WriteByte(d, 513, 0xFF);
+            for (int f = 0; f < 2; f++) { int o = 516 + f * 16; NMem.I(d, o, 1); NMem.I(d, o + 4, 1); NMem.I(d, o + 8, 1); NMem.I(d, o + 12, 8); }
+            if (fur)
+            {
+                IntPtr il = m.A(64);
+                NMem.P(il, 0, m.S("POSITION")); NMem.I(il, 12, 6); NMem.I(il, 20, 0);
+                NMem.P(il, 32, m.S("COLOR")); NMem.I(il, 44, 28); NMem.I(il, 52, 12);
+                NMem.P(d, 552, il); NMem.I(d, 560, 2);
+            }
+            NMem.I(d, 572, fur ? 2 : 3);
+            NMem.I(d, 576, 1); NMem.I(d, 580, 28); NMem.I(d, 612, 40); NMem.I(d, 616, 1);
+            IntPtr p; Ck(F<DCreateGPSO>(dev, 10)(dev, d, ref IID_PSO, out p), "CreateGraphicsPipelineState");
+            return p;
+        }
+
+        public static void Run(IntPtr hwnd)
+        {
+            if (IntPtr.Size != 8) throw new Exception("o DirectX 12 precisa do BunoTunner rodando em 64 bits");
+            IntPtr fac; Ck(CreateDXGIFactory1(ref IID_Factory2, out fac), "CreateDXGIFactory1");
+            // placa: a selecionada no BunoTunner (pelo nome); senao a de mais memoria dedicada
+            IntPtr adapter = IntPtr.Zero; string aName = ""; long aMem = 0;
+            IntPtr desc = m.A(512);
+            for (uint i = 0; ; i++)
+            {
+                IntPtr a; int hr = F<DEnumAdapters1>(fac, 12)(fac, i, out a);
+                if (hr < 0) break;
+                F<DGetDesc1>(a, 10)(a, desc);
+                string nm = Marshal.PtrToStringUni(desc) ?? ""; long mem = Marshal.ReadIntPtr(desc, 272).ToInt64(); int fl = Marshal.ReadInt32(desc, 304);
+                Guid gd = IID_Device;
+                bool ok = (fl & 2) == 0 && D3D12Test(a, 0xb000, ref gd, IntPtr.Zero) >= 0;
+                bool match = RChild.Gpu.Length > 0 && Bench.GpuNameMatch(nm, RChild.Gpu);
+                if (ok && (adapter == IntPtr.Zero || match || (!Bench.GpuNameMatch(aName, RChild.Gpu) && mem > aMem)))
+                {
+                    if (adapter != IntPtr.Zero) Rel(adapter);
+                    adapter = a; aName = nm.Trim(); aMem = mem;
+                }
+                else Rel(a);
+            }
+            if (adapter == IntPtr.Zero) throw new Exception("nenhuma placa com suporte a DirectX 12");
+            Ck(D3D12CreateDevice(adapter, 0xb000, ref IID_Device, out dev), "D3D12CreateDevice");
+
+            IntPtr qd = m.A(16);
+            Ck(F<DCreateQueue>(dev, 8)(dev, qd, ref IID_Queue, out queue), "CreateCommandQueue");
+            int w, h; RChild.Size(hwnd, out w, out h); w = Math.Max(8, w); h = Math.Max(8, h);
+            IntPtr sd = m.A(48);
+            NMem.I(sd, 0, w); NMem.I(sd, 4, h); NMem.I(sd, 8, 28); NMem.I(sd, 16, 1); NMem.I(sd, 24, 0x20); NMem.I(sd, 28, 3); NMem.I(sd, 36, 4);
+            Ck(F<DCreateSCHwnd>(fac, 15)(fac, queue, hwnd, sd, IntPtr.Zero, IntPtr.Zero, out sc), "CreateSwapChainForHwnd");
+            F<DMakeWA>(fac, 8)(fac, hwnd, 2);
+            if (F<DQI>(sc, 0)(sc, ref IID_SC3, out sc3) < 0) sc3 = IntPtr.Zero;
+
+            IntPtr hd = m.A(16); NMem.I(hd, 0, 2); NMem.I(hd, 4, 3);
+            Ck(F<DCreateHeap>(dev, 14)(dev, hd, ref IID_Heap, out rtvHeap), "CreateDescriptorHeap(RTV)");
+            IntPtr hd2 = m.A(16); NMem.I(hd2, 0, 3); NMem.I(hd2, 4, 1);
+            Ck(F<DCreateHeap>(dev, 14)(dev, hd2, ref IID_Heap, out dsvHeap), "CreateDescriptorHeap(DSV)");
+            F<DHeapStart>(rtvHeap, 9)(rtvHeap, out rtvStart);
+            F<DHeapStart>(dsvHeap, 9)(dsvHeap, out dsvStart);
+            rtvInc = F<DIncSize>(dev, 15)(dev, 2);
+            Targets(w, h);
+
+            // assinatura: 20 constantes de 32 bits (mvp + t + tamanho + iteracoes) para os dois shaders
+            IntPtr prm = m.A(32); NMem.I(prm, 0, 1); NMem.I(prm, 8, 0); NMem.I(prm, 12, 0); NMem.I(prm, 16, 20); NMem.I(prm, 24, 0);
+            IntPtr rsd = m.A(40); NMem.I(rsd, 0, 1); NMem.P(rsd, 8, prm); NMem.I(rsd, 32, 1);
+            IntPtr blob, berr;
+            if (D3D12SerializeRootSignature(rsd, 1, out blob, out berr) < 0) throw new Exception("D3D12SerializeRootSignature falhou");
+            Ck(F<DCreateRS>(dev, 16)(dev, 0, F<DBlobPtr>(blob, 3)(blob), F<DBlobSize>(blob, 4)(blob), ref IID_RS, out rs), "CreateRootSignature");
+            Rel(blob);
+
+            IntPtr vb = Compile("VB", "vs_5_0"), pb = Compile("PB", "ps_5_0"), vf = Compile("VF", "vs_5_0"), pf = Compile("PF", "ps_5_0");
+            psoBg = Pso(vb, pb, false); psoFur = Pso(vf, pf, true);
+            Rel(vb); Rel(pb); Rel(vf); Rel(pf);
+
+            Ck(F<DCreateAlloc>(dev, 9)(dev, 0, ref IID_Alloc, out alloc), "CreateCommandAllocator");
+            Ck(F<DCreateList>(dev, 12)(dev, 0, 0, alloc, IntPtr.Zero, ref IID_List, out list), "CreateCommandList");
+            F<DClose>(list, 9)(list);
+            Ck(F<DCreateFence>(dev, 36)(dev, 0, 0, ref IID_Fence, out fence), "CreateFence");
+            fenceEv = CreateEvent(IntPtr.Zero, false, false, IntPtr.Zero);
+
+            // ---- filamentos na memoria de video ----
+            bool xt = RChild.Xt;
+            int N = xt ? FurScene.XSTR : Math.Max(10000, Math.Min(1000000, RChild.Fur));
+            long chunk = (long)N * 2 * 16;
+            List<IntPtr> vbs = new List<IntPtr>(); List<ulong> vas = new List<ulong>();
+            long target = chunk;
+            if (xt)
+            {
+                target = Math.Max(512L << 20, aMem * 3 / 4);
+                IntPtr a3;
+                if (F<DQI>(adapter, 0)(adapter, ref IID_Adapter3, out a3) >= 0)
+                {
+                    IntPtr vi = m.A(32);
+                    if (F<DQueryVMI>(a3, 14)(a3, 0, 0, vi) >= 0)
+                    {
+                        long budget = Marshal.ReadInt64(vi, 0), used = Marshal.ReadInt64(vi, 8);
+                        if (budget > used) target = (long)((budget - used) * 0.82);
+                    }
+                    Rel(a3);
+                }
+                target = Math.Max(512L << 20, Math.Min(14L << 30, target));
+                RChild.Extra = "EXTREMO: alocando a VRAM...";
+            }
+            FurScene.V[] tmpl = FurScene.Build(N, xt);
+            IntPtr up = Committed(2, chunk, 1, 0, 1, 1, 0, 0xAC3, IntPtr.Zero);
+            if (up == IntPtr.Zero) throw new Exception("não consegui criar o buffer de envio (" + (chunk >> 20) + " MB)");
+            IntPtr dst; IntPtr rng = m.A(16);
+            Ck(F<DMap>(up, 8)(up, 0, rng, out dst), "Map");
+            GCHandle gh = GCHandle.Alloc(tmpl, GCHandleType.Pinned);
+            try { CopyMem(dst, gh.AddrOfPinnedObject(), (IntPtr)chunk); } finally { gh.Free(); }
+            F<DUnmap>(up, 9)(up, 0, IntPtr.Zero);
+            tmpl = null;
+            while (vbs.Count < (xt ? 256 : 1) && (long)(vbs.Count + 1) * chunk <= Math.Max(chunk, target) && !RChild.Quit)
+            {
+                IntPtr b = Committed(1, chunk, 1, 0, 1, 1, 0, 0, IntPtr.Zero);   // memoria de video (heap DEFAULT)
+                if (b == IntPtr.Zero) break;
+                F<DReset0>(alloc, 8)(alloc);
+                F<DListReset>(list, 10)(list, alloc, IntPtr.Zero);
+                F<DCopyBuf>(list, 15)(list, b, 0, up, 0, (ulong)chunk);
+                F<DClose>(list, 9)(list);
+                IntPtr lp = m.Ptrs(list); F<DExec>(queue, 10)(queue, 1, lp);
+                Wait();
+                vbs.Add(b); vas.Add(F<DGpuVA>(b, 11)(b));
+                if (xt) RChild.Extra = "EXTREMO: alocando a VRAM... " + ((vbs.Count * chunk) >> 20) + " MB";
+            }
+            Rel(up);
+            if (vbs.Count == 0) throw new Exception("não consegui alocar memória de vídeo para os filamentos");
+            CultureInfo br = CultureInfo.GetCultureInfo("pt-BR");
+            float SHIT = xt ? 3500f : 1200f;
+            string load = xt ? "EXTREMO: " + ((vbs.Count * chunk) >> 20) + " MB de VRAM, " + ((long)vbs.Count * N).ToString("N0", br) + " filamentos + shader " + (int)SHIT + " it"
+                             : N.ToString("N0", br) + " filamentos + shader " + (int)SHIT + " it";
+            RChild.Out("INFO " + aName.Replace("|", "/") + "|DirectX 12|" + load);
+            RChild.Extra = aName + "  |  bola de filamentos DirectX 12 (" + load + ")";
+            RChild.Out("STATE 1");
+
+            // ---- laco de render ----
+            float[] cs = new float[20]; IntPtr vp = m.A(24), sr = m.A(16), bar = m.A(32), vbv = m.A(16);
+            float[] black = { 0.02f, 0.02f, 0.03f, 1f };
+            DPresent present = F<DPresent>(sc, 8); DReset0 aReset = F<DReset0>(alloc, 8); DListReset lReset = F<DListReset>(list, 10);
+            DSetN barrier = F<DSetN>(list, 26), viewports = F<DSetN>(list, 21), scissors = F<DSetN>(list, 22); DSetVB setVB = F<DSetVB>(list, 44);
+            DTopo topo = F<DTopo>(list, 20); DSetPtr setPso = F<DSetPtr>(list, 25), setRS = F<DSetPtr>(list, 30);
+            DRootConsts consts = F<DRootConsts>(list, 36); DDraw draw = F<DDraw>(list, 12); DClose close = F<DClose>(list, 9);
+            DOMSetRT omrt = F<DOMSetRT>(list, 46); DClearDSV cdsv = F<DClearDSV>(list, 47); DClearRTV crtv = F<DClearRTV>(list, 48);
+            DExec exec = F<DExec>(queue, 10); IntPtr lst = m.Ptrs(list);
+            DateTime t0 = DateTime.UtcNow; int xtDraw = 2, xtRot = 0;
+            while (!RChild.Quit)
+            {
+                DateTime fs = DateTime.UtcNow;
+                RChild.Size(hwnd, out w, out h);
+                if (w < 8 || h < 8) { Th.Thread.Sleep(50); continue; }
+                if (w != curW || h != curH)
+                {
+                    Wait(); FreeTargets();
+                    Ck(F<DResizeBuffers>(sc, 13)(sc, 0, (uint)w, (uint)h, 0, 0), "ResizeBuffers");
+                    Targets(w, h);
+                }
+                float t = (float)(DateTime.UtcNow - t0).TotalSeconds;
+                int idx = sc3 != IntPtr.Zero ? (int)F<DCurIdx>(sc3, 36)(sc3) : manualIdx;
+                aReset(alloc); lReset(list, alloc, psoBg);
+                NMem.I(bar, 0, 0); NMem.I(bar, 4, 0); NMem.P(bar, 8, bb[idx]); NMem.U(bar, 16, 0xFFFFFFFF); NMem.I(bar, 20, 0); NMem.I(bar, 24, 4);
+                barrier(list, 1, bar);
+                NMem.F(vp, 0, 0); NMem.F(vp, 4, 0); NMem.F(vp, 8, w); NMem.F(vp, 12, h); NMem.F(vp, 16, 0); NMem.F(vp, 20, 1);
+                viewports(list, 1, vp);
+                NMem.I(sr, 0, 0); NMem.I(sr, 4, 0); NMem.I(sr, 8, w); NMem.I(sr, 12, h); scissors(list, 1, sr);
+                IntPtr rtvH = (IntPtr)(rtvStart.ToInt64() + idx * rtvInc), dsvH = dsvStart;
+                omrt(list, 1, ref rtvH, 0, ref dsvH);
+                crtv(list, rtvH, black, 0, IntPtr.Zero);
+                cdsv(list, dsvH, 1, 1f, 0, 0, IntPtr.Zero);
+                setRS(list, rs);
+                FurScene.Consts(cs, FurScene.Ident(), t, w, h, SHIT);
+                consts(list, 0, 20, cs, 0);
+                topo(list, 4);
+                if (xt)
+                {
+                    // fundo em 16 ladrilhos (comandos curtos)
+                    for (int ty = 0; ty < 4; ty++)
+                        for (int tx = 0; tx < 4; tx++)
+                        {
+                            NMem.I(sr, 0, w * tx / 4); NMem.I(sr, 4, h * ty / 4); NMem.I(sr, 8, w * (tx + 1) / 4); NMem.I(sr, 12, h * (ty + 1) / 4);
+                            scissors(list, 1, sr); draw(list, 3, 1, 0, 0);
+                        }
+                    NMem.I(sr, 0, 0); NMem.I(sr, 4, 0); NMem.I(sr, 8, w); NMem.I(sr, 12, h); scissors(list, 1, sr);
+                }
+                else draw(list, 3, 1, 0, 0);
+                setPso(list, psoFur); topo(list, 2);
+                float[] bas = FurScene.Mul(FurScene.Proj(w / (float)h, false), FurScene.Model(t));
+                int nb = xt ? Math.Min(vbs.Count, xtDraw) : 2;
+                for (int d = 0; d < nb; d++)
+                {
+                    int bi = xt ? (xtRot + d) % vbs.Count : 0;
+                    NMem.L(vbv, 0, (long)vas[bi]); NMem.U(vbv, 8, (uint)chunk); NMem.I(vbv, 12, 16);
+                    setVB(list, 0, 1, vbv);
+                    float[] mvp = xt ? FurScene.Mul(bas, FurScene.Block(bi)) : FurScene.Mul(bas, FurScene.Rot(d * 0.35f, 0, 1, 0));
+                    FurScene.Consts(cs, mvp, t, w, h, SHIT);
+                    consts(list, 0, 20, cs, 0);
+                    draw(list, (uint)(N * 2), 1, 0, 0);
+                }
+                NMem.I(bar, 20, 4); NMem.I(bar, 24, 0);
+                barrier(list, 1, bar);
+                Ck(close(list), "Close");
+                exec(queue, 1, lst);
+                int phr = present(sc, 0, 0);
+                if (phr < 0)
+                {
+                    int why = F<DRemovedReason>(dev, 37)(dev);
+                    throw new Exception("Present falhou (0x" + phr.ToString("X8") + (why < 0 ? ", dispositivo removido 0x" + why.ToString("X8") : "") + ")");
+                }
+                manualIdx = (manualIdx + 1) % 3;
+                Wait();
+                Th.Interlocked.Increment(ref RChild.Frames);
+                if (xt)
+                {
+                    xtRot = (xtRot + nb) % vbs.Count;
+                    xtDraw = RChild.Adapt(xtDraw, vbs.Count, (DateTime.UtcNow - fs).TotalMilliseconds);
+                    RChild.Extra = aName + "  |  " + load + "  |  " + Math.Min(vbs.Count, xtDraw) + " blocos/quadro";
+                }
+            }
+            try { Wait(); } catch (Exception) { }
+        }
+    }
+
+    // ---------- Vulkan (funcoes carregadas do vulkan-1.dll do driver) ----------
+    static class VkR
+    {
+        [DllImport("kernel32.dll", CharSet = CharSet.Ansi)] static extern IntPtr LoadLibraryA(string n);
+        [DllImport("kernel32.dll", CharSet = CharSet.Ansi)] static extern IntPtr GetProcAddress(IntPtr m, string n);
+        [DllImport("kernel32.dll")] static extern IntPtr GetModuleHandleA(IntPtr n);
+        [DllImport("libdl.so.2")] static extern IntPtr dlopen(string f, int flags);
+        [DllImport("libdl.so.2")] static extern IntPtr dlsym(IntPtr h, string n);
+        [DllImport("kernel32.dll", EntryPoint = "RtlMoveMemory")] static extern void CopyMem(IntPtr d, IntPtr s, IntPtr n);
+        [DllImport("libc", EntryPoint = "memcpy")] static extern IntPtr memcpy(IntPtr d, IntPtr s, IntPtr n);
+        static bool Unix { get { int p = (int)Environment.OSVersion.Platform; return p == 4 || p == 6 || p == 128; } }
+        static void Copy(IntPtr d, IntPtr s, long n) { if (Unix) memcpy(d, s, (IntPtr)n); else CopyMem(d, s, (IntPtr)n); }
+
+        delegate IntPtr DGIPA(IntPtr inst, [MarshalAs(UnmanagedType.LPStr)] string name);
+        delegate int DCreateInstance(IntPtr ci, IntPtr alloc, out IntPtr inst);
+        delegate int DEnumPD(IntPtr inst, ref uint n, IntPtr pds);
+        delegate void DPDProps(IntPtr pd, IntPtr props);
+        delegate void DQFProps(IntPtr pd, ref uint n, IntPtr props);
+        delegate int DCreateSurf(IntPtr inst, IntPtr ci, IntPtr alloc, out ulong s);
+        delegate int DSurfSupport(IntPtr pd, uint qfi, ulong s, out uint ok);
+        delegate int DSurfCaps(IntPtr pd, ulong s, IntPtr caps);
+        delegate int DSurfList(IntPtr pd, ulong s, ref uint n, IntPtr list);
+        delegate int DCreateDevice(IntPtr pd, IntPtr ci, IntPtr alloc, out IntPtr dev);
+        delegate void DGetQueue(IntPtr dev, uint qfi, uint i, out IntPtr q);
+        delegate int DCreate(IntPtr dev, IntPtr ci, IntPtr alloc, out ulong h);
+        delegate void DDestroy(IntPtr dev, ulong h, IntPtr alloc);
+        delegate int DSwapImages(IntPtr dev, ulong sc, ref uint n, IntPtr imgs);
+        delegate void DMemReq(IntPtr dev, ulong h, IntPtr req);
+        delegate int DBind(IntPtr dev, ulong h, ulong mem, ulong off);
+        delegate int DPipelines(IntPtr dev, ulong cache, uint n, IntPtr ci, IntPtr alloc, out ulong p);
+        delegate int DAllocCmd(IntPtr dev, IntPtr ai, out IntPtr cmd);
+        delegate int DMapMem(IntPtr dev, ulong mem, ulong off, ulong size, uint flags, out IntPtr data);
+        delegate void DUnmapMem(IntPtr dev, ulong mem);
+        delegate int DBegin(IntPtr cmd, IntPtr bi);
+        delegate int DCmd0(IntPtr cmd);
+        delegate int DResetCmd(IntPtr cmd, uint flags);
+        delegate void DCmdCopy(IntPtr cmd, ulong src, ulong dst, uint n, IntPtr regions);
+        delegate void DCmdCopyImg(IntPtr cmd, ulong img, int layout, ulong buf, uint n, IntPtr regions);
+        delegate int DSubmit(IntPtr q, uint n, IntPtr submits, ulong fence);
+        delegate int DWaitIdle(IntPtr q);
+        delegate int DAcquire(IntPtr dev, ulong sc, ulong timeout, ulong sem, ulong fence, out uint idx);
+        delegate int DFences(IntPtr dev, uint n, ref ulong f, uint all, ulong timeout);
+        delegate int DResetFences(IntPtr dev, uint n, ref ulong f);
+        delegate void DBeginRP(IntPtr cmd, IntPtr bi, uint contents);
+        delegate void DEndRP(IntPtr cmd);
+        delegate void DBindPipe(IntPtr cmd, uint point, ulong p);
+        delegate void DSetVS(IntPtr cmd, uint first, uint n, IntPtr p);
+        delegate void DPush(IntPtr cmd, ulong layout, uint stages, uint off, uint size, float[] v);
+        delegate void DDraw(IntPtr cmd, uint vc, uint ic, uint fv, uint fi);
+        delegate void DBindVB(IntPtr cmd, uint first, uint n, ref ulong buf, ref ulong off);
+        delegate int DPresent(IntPtr q, IntPtr pi);
+
+        static DGIPA gipa; static IntPtr inst, pd, dev, queue; static uint qfi;
+        static T G<T>(string n) where T : class
+        {
+            IntPtr p = gipa(inst, n);
+            if (p == IntPtr.Zero) throw new Exception("função Vulkan ausente: " + n);
+            return Marshal.GetDelegateForFunctionPointer(p, typeof(T)) as T;
+        }
+        static void Ck(int r, string what) { if (r < 0) throw new Exception(what + " falhou (VkResult " + r + ")"); }
+
+        static readonly string[] SpvB64 = { "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" };
+
+        static NMem m = new NMem();
+        static ulong surface, swapchain, renderPass, layout, pipeBg, pipeFur, cmdPool, depthImg, depthMem, depthView, semAcq, fenceF;
+        static ulong[] images = new ulong[0], views = new ulong[0], fbs = new ulong[0], semDone = new ulong[0];
+        static int colorFmt = 44, curW, curH; static IntPtr memProps, cmd;
+        static bool headless;
+
+        static int MemType(uint bits, int want)
+        {
+            int n = Marshal.ReadInt32(memProps, 0);
+            for (int i = 0; i < n; i++)
+                if ((bits & (1u << i)) != 0 && (Marshal.ReadInt32(memProps, 4 + i * 8) & want) == want) return i;
+            return -1;
+        }
+        static ulong Alloc(ulong h, bool image, int want, out ulong mem)
+        {
+            IntPtr req = m.A(24);
+            if (image) G<DMemReq>("vkGetImageMemoryRequirements")(dev, h, req); else G<DMemReq>("vkGetBufferMemoryRequirements")(dev, h, req);
+            long size = Marshal.ReadInt64(req, 0); uint bits = (uint)Marshal.ReadInt32(req, 16);
+            int mt = MemType(bits, want); if (mt < 0 && want != 0) mt = MemType(bits, want & 1);
+            if (mt < 0) throw new Exception("nenhum tipo de memória compatível");
+            IntPtr ai = m.A(32); NMem.I(ai, 0, 5); NMem.L(ai, 16, size); NMem.I(ai, 24, mt);
+            int r = G<DCreate>("vkAllocateMemory")(dev, ai, IntPtr.Zero, out mem);
+            if (r < 0) { mem = 0; return 0; }
+            r = image ? G<DBind>("vkBindImageMemory")(dev, h, mem, 0) : G<DBind>("vkBindBufferMemory")(dev, h, mem, 0);
+            Ck(r, "vkBind*Memory");
+            return (ulong)size;
+        }
+        static ulong Buffer(long size, int usage)
+        {
+            IntPtr bi = m.A(56); NMem.I(bi, 0, 12); NMem.L(bi, 24, size); NMem.I(bi, 32, usage);
+            ulong b; int r = G<DCreate>("vkCreateBuffer")(dev, bi, IntPtr.Zero, out b);
+            return r < 0 ? 0 : b;
+        }
+        static ulong View(ulong img, int fmt, int aspect)
+        {
+            IntPtr vi = m.A(80); NMem.I(vi, 0, 15); NMem.L(vi, 24, (long)img); NMem.I(vi, 32, 1); NMem.I(vi, 36, fmt);
+            NMem.I(vi, 56, aspect); NMem.I(vi, 64, 1); NMem.I(vi, 72, 1);
+            ulong v; Ck(G<DCreate>("vkCreateImageView")(dev, vi, IntPtr.Zero, out v), "vkCreateImageView"); return v;
+        }
+        static ulong Image(int w, int h, int fmt, int usage, int want, out ulong mem)
+        {
+            IntPtr ii = m.A(88); NMem.I(ii, 0, 14); NMem.I(ii, 20, 1); NMem.I(ii, 24, fmt); NMem.I(ii, 28, w); NMem.I(ii, 32, h); NMem.I(ii, 36, 1);
+            NMem.I(ii, 40, 1); NMem.I(ii, 44, 1); NMem.I(ii, 48, 1); NMem.I(ii, 52, 0); NMem.I(ii, 56, usage);
+            ulong img; Ck(G<DCreate>("vkCreateImage")(dev, ii, IntPtr.Zero, out img), "vkCreateImage");
+            Alloc(img, true, want, out mem);
+            if (mem == 0) throw new Exception("sem memória para a imagem " + w + "x" + h);
+            return img;
+        }
+        static void OneShot(Action<IntPtr> rec)
+        {
+            IntPtr bi = m.A(32); NMem.I(bi, 0, 42); NMem.I(bi, 16, 1);
+            G<DResetCmd>("vkResetCommandBuffer")(cmd, 0);
+            Ck(G<DBegin>("vkBeginCommandBuffer")(cmd, bi), "vkBeginCommandBuffer");
+            rec(cmd);
+            Ck(G<DCmd0>("vkEndCommandBuffer")(cmd), "vkEndCommandBuffer");
+            IntPtr si = m.A(72); NMem.I(si, 0, 4); NMem.I(si, 40, 1); NMem.P(si, 48, m.Ptrs(cmd));
+            Ck(G<DSubmit>("vkQueueSubmit")(queue, 1, si, 0), "vkQueueSubmit");
+            Ck(G<DWaitIdle>("vkQueueWaitIdle")(queue), "vkQueueWaitIdle");
+        }
+
+        static void DestroyTargets()
+        {
+            DDestroy dfb = G<DDestroy>("vkDestroyFramebuffer"), dv = G<DDestroy>("vkDestroyImageView");
+            foreach (ulong f in fbs) if (f != 0) dfb(dev, f, IntPtr.Zero);
+            foreach (ulong v in views) if (v != 0) dv(dev, v, IntPtr.Zero);
+            if (depthView != 0) dv(dev, depthView, IntPtr.Zero);
+            if (depthImg != 0) G<DDestroy>("vkDestroyImage")(dev, depthImg, IntPtr.Zero);
+            if (depthMem != 0) G<DDestroy>("vkFreeMemory")(dev, depthMem, IntPtr.Zero);
+            if (headless && images.Length > 0) { G<DDestroy>("vkDestroyImage")(dev, images[0], IntPtr.Zero); if (hlMem != 0) G<DDestroy>("vkFreeMemory")(dev, hlMem, IntPtr.Zero); hlMem = 0; }
+            fbs = new ulong[0]; views = new ulong[0]; depthView = depthImg = depthMem = 0;
+        }
+
+        static ulong hlMem;
+        static void Targets(int w, int h)
+        {
+            if (headless)
+            {
+                images = new ulong[] { Image(w, h, colorFmt, 0x10 | 0x1, 1, out hlMem) };
+            }
+            else
+            {
+                IntPtr caps = m.A(52);
+                Ck(G<DSurfCaps>("vkGetPhysicalDeviceSurfaceCapabilitiesKHR")(pd, surface, caps), "vkGetPhysicalDeviceSurfaceCapabilitiesKHR");
+                int minImg = Marshal.ReadInt32(caps, 0), maxImg = Marshal.ReadInt32(caps, 4);
+                uint cw = (uint)Marshal.ReadInt32(caps, 8), ch = (uint)Marshal.ReadInt32(caps, 12);
+                if (cw != 0xFFFFFFFF) { w = (int)cw; h = (int)ch; }
+                int cnt = Math.Max(2, minImg + 1); if (maxImg > 0) cnt = Math.Min(cnt, maxImg);
+                int ca = Marshal.ReadInt32(caps, 44); int comp = (ca & 1) != 0 ? 1 : ((ca & 8) != 0 ? 8 : ((ca & 2) != 0 ? 2 : 4));
+                uint pmN = 0; DSurfList pml = G<DSurfList>("vkGetPhysicalDeviceSurfacePresentModesKHR");
+                pml(pd, surface, ref pmN, IntPtr.Zero); IntPtr pms = m.A((int)Math.Max(1, pmN) * 4); pml(pd, surface, ref pmN, pms);
+                int mode = 2; for (int i = 0; i < pmN; i++) { int v = Marshal.ReadInt32(pms, i * 4); if (v == 0) { mode = 0; break; } if (v == 1) mode = 1; }
+                IntPtr ci = m.A(104);
+                NMem.I(ci, 0, 1000001000); NMem.L(ci, 24, (long)surface); NMem.I(ci, 32, cnt); NMem.I(ci, 36, colorFmt); NMem.I(ci, 40, 0);
+                NMem.I(ci, 44, w); NMem.I(ci, 48, h); NMem.I(ci, 52, 1); NMem.I(ci, 56, 0x10); NMem.I(ci, 60, 0);
+                NMem.I(ci, 80, Marshal.ReadInt32(caps, 40)); NMem.I(ci, 84, comp); NMem.I(ci, 88, mode); NMem.I(ci, 92, 1); NMem.L(ci, 96, (long)swapchain);
+                ulong nsc; Ck(G<DCreate>("vkCreateSwapchainKHR")(dev, ci, IntPtr.Zero, out nsc), "vkCreateSwapchainKHR");
+                if (swapchain != 0) G<DDestroy>("vkDestroySwapchainKHR")(dev, swapchain, IntPtr.Zero);
+                swapchain = nsc;
+                uint n = 0; DSwapImages gi = G<DSwapImages>("vkGetSwapchainImagesKHR");
+                gi(dev, swapchain, ref n, IntPtr.Zero); IntPtr ims = m.A((int)n * 8); gi(dev, swapchain, ref n, ims);
+                images = new ulong[n]; for (int i = 0; i < n; i++) images[i] = (ulong)Marshal.ReadInt64(ims, i * 8);
+                if (semDone.Length != n)
+                {
+                    DDestroy ds = G<DDestroy>("vkDestroySemaphore"); foreach (ulong s in semDone) if (s != 0) ds(dev, s, IntPtr.Zero);
+                    semDone = new ulong[n];
+                    IntPtr sci = m.A(24); NMem.I(sci, 0, 9);
+                    for (int i = 0; i < n; i++) Ck(G<DCreate>("vkCreateSemaphore")(dev, sci, IntPtr.Zero, out semDone[i]), "vkCreateSemaphore");
+                }
+            }
+            depthImg = Image(w, h, 126, 0x20, 1, out depthMem);
+            depthView = View(depthImg, 126, 2);
+            views = new ulong[images.Length]; fbs = new ulong[images.Length];
+            for (int i = 0; i < images.Length; i++)
+            {
+                views[i] = View(images[i], colorFmt, 1);
+                IntPtr at = m.Ptrs(new IntPtr((long)views[i]), new IntPtr((long)depthView));
+                IntPtr fi = m.A(64); NMem.I(fi, 0, 37); NMem.L(fi, 24, (long)renderPass); NMem.I(fi, 32, 2); NMem.P(fi, 40, at);
+                NMem.I(fi, 48, w); NMem.I(fi, 52, h); NMem.I(fi, 56, 1);
+                Ck(G<DCreate>("vkCreateFramebuffer")(dev, fi, IntPtr.Zero, out fbs[i]), "vkCreateFramebuffer");
+            }
+            curW = w; curH = h;
+        }
+
+        static ulong Shader(string b64)
+        {
+            byte[] code = Convert.FromBase64String(b64);
+            IntPtr ci = m.A(40); NMem.I(ci, 0, 16); NMem.L(ci, 24, code.Length); NMem.P(ci, 32, m.Bytes(code));
+            ulong s; Ck(G<DCreate>("vkCreateShaderModule")(dev, ci, IntPtr.Zero, out s), "vkCreateShaderModule"); return s;
+        }
+
+        static ulong Pipeline(ulong vs, ulong fs, bool fur)
+        {
+            IntPtr main = m.S("main");
+            IntPtr st = m.A(96);
+            NMem.I(st, 0, 18); NMem.I(st, 20, 1); NMem.L(st, 24, (long)vs); NMem.P(st, 32, main);
+            NMem.I(st, 48, 18); NMem.I(st, 68, 0x10); NMem.L(st, 72, (long)fs); NMem.P(st, 80, main);
+            IntPtr vi = m.A(48); NMem.I(vi, 0, 19);
+            if (fur)
+            {
+                IntPtr bd = m.A(12); NMem.I(bd, 0, 0); NMem.I(bd, 4, 16); NMem.I(bd, 8, 0);
+                IntPtr ad = m.A(32); NMem.I(ad, 0, 0); NMem.I(ad, 8, 106); NMem.I(ad, 12, 0); NMem.I(ad, 16, 1); NMem.I(ad, 24, 37); NMem.I(ad, 28, 12);
+                NMem.I(vi, 20, 1); NMem.P(vi, 24, bd); NMem.I(vi, 32, 2); NMem.P(vi, 40, ad);
+            }
+            IntPtr ia = m.A(32); NMem.I(ia, 0, 20); NMem.I(ia, 20, fur ? 1 : 3);
+            IntPtr vp = m.A(48); NMem.I(vp, 0, 22); NMem.I(vp, 20, 1); NMem.I(vp, 32, 1);
+            IntPtr rs = m.A(64); NMem.I(rs, 0, 23); NMem.I(rs, 28, 0); NMem.I(rs, 32, 0); NMem.I(rs, 36, 0); NMem.F(rs, 56, 1f);
+            IntPtr ms = m.A(48); NMem.I(ms, 0, 24); NMem.I(ms, 20, 1);
+            IntPtr ds = m.A(104); NMem.I(ds, 0, 25); NMem.I(ds, 20, 1); NMem.I(ds, 24, fur ? 0 : 1); NMem.I(ds, 28, fur ? 1 : 7); NMem.F(ds, 100, 1f);
+            IntPtr ba = m.A(32);
+            NMem.I(ba, 0, fur ? 1 : 0); NMem.I(ba, 4, 6); NMem.I(ba, 8, 7); NMem.I(ba, 12, 0); NMem.I(ba, 16, 1); NMem.I(ba, 20, 0); NMem.I(ba, 24, 0); NMem.I(ba, 28, 0xF);
+            IntPtr cb = m.A(56); NMem.I(cb, 0, 26); NMem.I(cb, 28, 1); NMem.P(cb, 32, ba);
+            IntPtr dyn = m.A(8); NMem.I(dyn, 0, 0); NMem.I(dyn, 4, 1);
+            IntPtr dy = m.A(32); NMem.I(dy, 0, 27); NMem.I(dy, 20, 2); NMem.P(dy, 24, dyn);
+            IntPtr gp = m.A(144);
+            NMem.I(gp, 0, 28); NMem.I(gp, 20, 2); NMem.P(gp, 24, st); NMem.P(gp, 32, vi); NMem.P(gp, 40, ia); NMem.P(gp, 56, vp); NMem.P(gp, 64, rs);
+            NMem.P(gp, 72, ms); NMem.P(gp, 80, ds); NMem.P(gp, 88, cb); NMem.P(gp, 96, dy); NMem.L(gp, 104, (long)layout); NMem.L(gp, 112, (long)renderPass);
+            NMem.I(gp, 136, -1);
+            ulong p; Ck(G<DPipelines>("vkCreateGraphicsPipelines")(dev, 0, 1, gp, IntPtr.Zero, out p), "vkCreateGraphicsPipelines");
+            return p;
+        }
+
+        // hwnd = Zero: teste sem janela (renderiza alguns quadros e grava a imagem em BUNO_VK_OUT)
+        public static void Run(IntPtr hwnd)
+        {
+            if (IntPtr.Size != 8) throw new Exception("o Vulkan precisa do BunoTunner rodando em 64 bits");
+            headless = hwnd == IntPtr.Zero;
+            IntPtr lib = Unix ? dlopen("libvulkan.so.1", 2) : LoadLibraryA("vulkan-1.dll");
+            if (lib == IntPtr.Zero) throw new Exception("vulkan-1.dll não encontrado (driver da placa sem Vulkan)");
+            IntPtr gp0 = Unix ? dlsym(lib, "vkGetInstanceProcAddr") : GetProcAddress(lib, "vkGetInstanceProcAddr");
+            if (gp0 == IntPtr.Zero) throw new Exception("vkGetInstanceProcAddr ausente");
+            gipa = Marshal.GetDelegateForFunctionPointer(gp0, typeof(DGIPA)) as DGIPA;
+
+            // instancia
+            IntPtr app = m.A(48); NMem.I(app, 0, 0); NMem.P(app, 16, m.S("BunoTunner")); NMem.I(app, 24, 1); NMem.P(app, 32, m.S("Furball")); NMem.I(app, 40, 1); NMem.I(app, 44, 1 << 22);
+            IntPtr ici = m.A(64); NMem.I(ici, 0, 1); NMem.P(ici, 24, app);
+            if (!headless) { NMem.I(ici, 48, 2); NMem.P(ici, 56, m.Ptrs(m.S("VK_KHR_surface"), m.S("VK_KHR_win32_surface"))); }
+            if (Environment.GetEnvironmentVariable("BUNO_VK_VALIDATE") == "1") { NMem.I(ici, 32, 1); NMem.P(ici, 40, m.Ptrs(m.S("VK_LAYER_KHRONOS_validation"))); }
+            DCreateInstance cinst = Marshal.GetDelegateForFunctionPointer(gipa(IntPtr.Zero, "vkCreateInstance"), typeof(DCreateInstance)) as DCreateInstance;
+            Ck(cinst(ici, IntPtr.Zero, out inst), "vkCreateInstance");
+
+            if (!headless)
+            {
+                IntPtr sci = m.A(40); NMem.I(sci, 0, 1000009000); NMem.P(sci, 24, GetModuleHandleA(IntPtr.Zero)); NMem.P(sci, 32, hwnd);
+                Ck(G<DCreateSurf>("vkCreateWin32SurfaceKHR")(inst, sci, IntPtr.Zero, out surface), "vkCreateWin32SurfaceKHR");
+            }
+
+            // placa: a selecionada no BunoTunner (pelo nome); senao a primeira dedicada
+            uint n = 0; DEnumPD epd = G<DEnumPD>("vkEnumeratePhysicalDevices");
+            Ck(epd(inst, ref n, IntPtr.Zero), "vkEnumeratePhysicalDevices");
+            if (n == 0) throw new Exception("nenhuma placa com Vulkan");
+            IntPtr pds = m.A((int)n * 8); epd(inst, ref n, pds);
+            IntPtr props = m.A(1024); DPDProps gpp = G<DPDProps>("vkGetPhysicalDeviceProperties");
+            DQFProps gqf = G<DQFProps>("vkGetPhysicalDeviceQueueFamilyProperties"); DSurfSupport ssup = headless ? null : G<DSurfSupport>("vkGetPhysicalDeviceSurfaceSupportKHR");
+            string pName = ""; int bestScore = -1; uint apiVer = 0;
+            for (int i = 0; i < n; i++)
+            {
+                IntPtr cand = Marshal.ReadIntPtr(pds, i * 8);
+                gpp(cand, props);
+                string nm = Marshal.PtrToStringAnsi((IntPtr)(props.ToInt64() + 20)) ?? ""; int type = Marshal.ReadInt32(props, 16);
+                uint qn = 0; gqf(cand, ref qn, IntPtr.Zero); IntPtr qp = m.A((int)Math.Max(1, qn) * 24); gqf(cand, ref qn, qp);
+                int fam = -1;
+                for (uint q = 0; q < qn && fam < 0; q++)
+                {
+                    if ((Marshal.ReadInt32(qp, (int)q * 24) & 1) == 0) continue;
+                    uint ok = 1; if (!headless) ssup(cand, q, surface, out ok);
+                    if (ok != 0) fam = (int)q;
+                }
+                if (fam < 0) continue;
+                int score = (RChild.Gpu.Length > 0 && Bench.GpuNameMatch(nm, RChild.Gpu) ? 100 : 0) + (type == 2 ? 10 : (type == 1 ? 5 : 1));
+                if (score > bestScore) { bestScore = score; pd = cand; qfi = (uint)fam; pName = nm.Trim(); apiVer = (uint)Marshal.ReadInt32(props, 0); }
+            }
+            if (bestScore < 0) throw new Exception("nenhuma placa Vulkan consegue desenhar nesta janela");
+            memProps = m.A(520); G<DPDProps>("vkGetPhysicalDeviceMemoryProperties")(pd, memProps);
+
+            // dispositivo
+            IntPtr prio = m.A(4); NMem.F(prio, 0, 1f);
+            IntPtr qci = m.A(40); NMem.I(qci, 0, 2); NMem.I(qci, 20, (int)qfi); NMem.I(qci, 24, 1); NMem.P(qci, 32, prio);
+            IntPtr dci = m.A(72); NMem.I(dci, 0, 3); NMem.I(dci, 20, 1); NMem.P(dci, 24, qci);
+            if (!headless) { NMem.I(dci, 48, 1); NMem.P(dci, 56, m.Ptrs(m.S("VK_KHR_swapchain"))); }
+            Ck(G<DCreateDevice>("vkCreateDevice")(pd, dci, IntPtr.Zero, out dev), "vkCreateDevice");
+            G<DGetQueue>("vkGetDeviceQueue")(dev, qfi, 0, out queue);
+
+            // formato da tela
+            if (headless) colorFmt = 37;
+            else
+            {
+                uint fn = 0; DSurfList sfl = G<DSurfList>("vkGetPhysicalDeviceSurfaceFormatsKHR");
+                sfl(pd, surface, ref fn, IntPtr.Zero); IntPtr fl = m.A((int)Math.Max(1, fn) * 8); sfl(pd, surface, ref fn, fl);
+                colorFmt = fn > 0 ? Marshal.ReadInt32(fl, 0) : 44;
+                for (int i = 0; i < fn; i++) { int f = Marshal.ReadInt32(fl, i * 8), cs0 = Marshal.ReadInt32(fl, i * 8 + 4); if ((f == 44 || f == 37) && cs0 == 0) { colorFmt = f; break; } }
+                if (colorFmt == 0) colorFmt = 44;
+            }
+
+            // passo de render: cor + profundidade
+            IntPtr att = m.A(72);
+            NMem.I(att, 4, colorFmt); NMem.I(att, 8, 1); NMem.I(att, 12, 1); NMem.I(att, 16, 0); NMem.I(att, 20, 2); NMem.I(att, 24, 1); NMem.I(att, 28, 0); NMem.I(att, 32, headless ? 6 : 1000001002);
+            NMem.I(att, 40, 126); NMem.I(att, 44, 1); NMem.I(att, 48, 1); NMem.I(att, 52, 1); NMem.I(att, 56, 2); NMem.I(att, 60, 1); NMem.I(att, 64, 0); NMem.I(att, 68, 3);
+            IntPtr cref = m.A(8); NMem.I(cref, 0, 0); NMem.I(cref, 4, 2);
+            IntPtr dref = m.A(8); NMem.I(dref, 0, 1); NMem.I(dref, 4, 3);
+            IntPtr sub = m.A(72); NMem.I(sub, 4, 0); NMem.I(sub, 24, 1); NMem.P(sub, 32, cref); NMem.P(sub, 48, dref);
+            IntPtr dep = m.A(28); NMem.U(dep, 0, 0xFFFFFFFF); NMem.I(dep, 4, 0); NMem.I(dep, 8, 0x400 | 0x100); NMem.I(dep, 12, 0x400 | 0x100); NMem.I(dep, 16, 0); NMem.I(dep, 20, 0x100 | 0x400);
+            IntPtr rpi = m.A(64); NMem.I(rpi, 0, 38); NMem.I(rpi, 20, 2); NMem.P(rpi, 24, att); NMem.I(rpi, 32, 1); NMem.P(rpi, 40, sub); NMem.I(rpi, 48, 1); NMem.P(rpi, 56, dep);
+            Ck(G<DCreate>("vkCreateRenderPass")(dev, rpi, IntPtr.Zero, out renderPass), "vkCreateRenderPass");
+
+            // 80 bytes de constantes (mvp + t + tamanho + iteracoes) nos dois estagios
+            IntPtr pcr = m.A(12); NMem.I(pcr, 0, 0x11); NMem.I(pcr, 4, 0); NMem.I(pcr, 8, 80);
+            IntPtr pli = m.A(48); NMem.I(pli, 0, 30); NMem.I(pli, 32, 1); NMem.P(pli, 40, pcr);
+            Ck(G<DCreate>("vkCreatePipelineLayout")(dev, pli, IntPtr.Zero, out layout), "vkCreatePipelineLayout");
+            ulong sbv = Shader(SpvB64[0]), sbf = Shader(SpvB64[1]), sfv = Shader(SpvB64[2]), sff = Shader(SpvB64[3]);
+            pipeBg = Pipeline(sbv, sbf, false); pipeFur = Pipeline(sfv, sff, true);
+
+            IntPtr cpi = m.A(24); NMem.I(cpi, 0, 39); NMem.I(cpi, 16, 2); NMem.I(cpi, 20, (int)qfi);
+            Ck(G<DCreate>("vkCreateCommandPool")(dev, cpi, IntPtr.Zero, out cmdPool), "vkCreateCommandPool");
+            IntPtr cai = m.A(32); NMem.I(cai, 0, 40); NMem.L(cai, 16, (long)cmdPool); NMem.I(cai, 24, 0); NMem.I(cai, 28, 1);
+            Ck(G<DAllocCmd>("vkAllocateCommandBuffers")(dev, cai, out cmd), "vkAllocateCommandBuffers");
+            IntPtr sci2 = m.A(24); NMem.I(sci2, 0, 9); Ck(G<DCreate>("vkCreateSemaphore")(dev, sci2, IntPtr.Zero, out semAcq), "vkCreateSemaphore");
+            IntPtr fci = m.A(24); NMem.I(fci, 0, 8); NMem.I(fci, 16, 1); Ck(G<DCreate>("vkCreateFence")(dev, fci, IntPtr.Zero, out fenceF), "vkCreateFence");
+
+            int w, h;
+            if (headless) { w = 640; h = 400; } else { RChild.Size(hwnd, out w, out h); w = Math.Max(8, w); h = Math.Max(8, h); }
+            Targets(w, h);
+
+            // ---- filamentos na memoria de video (DEVICE_LOCAL), copiados de um buffer de envio ----
+            bool xt = RChild.Xt;
+            int N = xt ? FurScene.XSTR : Math.Max(10000, Math.Min(1000000, RChild.Fur));
+            long chunk = (long)N * 2 * 16;
+            long target = chunk;
+            if (xt)
+            {
+                long heap = 0; int hn = Marshal.ReadInt32(memProps, 260);
+                for (int i = 0; i < hn; i++) if ((Marshal.ReadInt32(memProps, 264 + i * 16 + 8) & 1) != 0) heap = Math.Max(heap, Marshal.ReadInt64(memProps, 264 + i * 16));
+                target = Math.Max(512L << 20, Math.Min(14L << 30, Math.Min(heap * 3 / 4, heap - (1536L << 20))));
+                string lim = Environment.GetEnvironmentVariable("BUNO_VK_MAXMB"); long lm; if (lim != null && long.TryParse(lim, out lm)) target = lm << 20;
+                RChild.Extra = "EXTREMO: alocando a VRAM...";
+            }
+            ulong stg = Buffer(chunk, 0x1), stgMem;
+            if (stg == 0) throw new Exception("não consegui criar o buffer de envio");
+            Alloc(stg, false, 2 | 4, out stgMem);
+            if (stgMem == 0) throw new Exception("sem memória para o buffer de envio (" + (chunk >> 20) + " MB)");
+            IntPtr map; Ck(G<DMapMem>("vkMapMemory")(dev, stgMem, 0, (ulong)chunk, 0, out map), "vkMapMemory");
+            FurScene.V[] tmpl = FurScene.Build(N, xt);
+            GCHandle gh = GCHandle.Alloc(tmpl, GCHandleType.Pinned);
+            try { Copy(map, gh.AddrOfPinnedObject(), chunk); } finally { gh.Free(); }
+            G<DUnmapMem>("vkUnmapMemory")(dev, stgMem);
+            tmpl = null;
+            List<ulong> vbs = new List<ulong>(), vmems = new List<ulong>();
+            IntPtr region = m.A(24); NMem.L(region, 16, chunk);
+            DCmdCopy ccopy = G<DCmdCopy>("vkCmdCopyBuffer");
+            while (vbs.Count < (xt ? 256 : 1) && (long)(vbs.Count + 1) * chunk <= Math.Max(chunk, target) && !RChild.Quit)
+            {
+                ulong b = Buffer(chunk, 0x2 | 0x80); if (b == 0) break;
+                ulong bm; Alloc(b, false, 1, out bm);
+                if (bm == 0) { G<DDestroy>("vkDestroyBuffer")(dev, b, IntPtr.Zero); break; }
+                ulong bb2 = b;
+                OneShot(delegate(IntPtr c) { ccopy(c, stg, bb2, 1, region); });
+                vbs.Add(b); vmems.Add(bm);
+                if (xt) RChild.Extra = "EXTREMO: alocando a VRAM... " + ((vbs.Count * chunk) >> 20) + " MB";
+            }
+            G<DDestroy>("vkDestroyBuffer")(dev, stg, IntPtr.Zero); G<DDestroy>("vkFreeMemory")(dev, stgMem, IntPtr.Zero);
+            if (vbs.Count == 0) throw new Exception("não consegui alocar memória de vídeo para os filamentos");
+            CultureInfo br = CultureInfo.GetCultureInfo("pt-BR");
+            float SHIT = xt ? 3500f : 1200f;
+            string ver = "Vulkan " + (apiVer >> 22) + "." + ((apiVer >> 12) & 0x3FF) + "." + (apiVer & 0xFFF);
+            string load = xt ? "EXTREMO: " + ((vbs.Count * chunk) >> 20) + " MB de VRAM, " + ((long)vbs.Count * N).ToString("N0", br) + " filamentos + shader " + (int)SHIT + " it"
+                             : N.ToString("N0", br) + " filamentos + shader " + (int)SHIT + " it";
+            RChild.Out("INFO " + pName.Replace("|", "/") + "|" + ver + "|" + load);
+            RChild.Extra = pName + "  |  bola de filamentos " + ver + " (" + load + ")";
+            RChild.Out("STATE 1");
+
+            // ---- laco de render ----
+            DFences wfen = G<DFences>("vkWaitForFences"); DResetFences rfen = G<DResetFences>("vkResetFences");
+            DAcquire acq = headless ? null : G<DAcquire>("vkAcquireNextImageKHR"); DPresent pres = headless ? null : G<DPresent>("vkQueuePresentKHR");
+            DResetCmd rcmd = G<DResetCmd>("vkResetCommandBuffer"); DBegin bcmd = G<DBegin>("vkBeginCommandBuffer"); DCmd0 ecmd = G<DCmd0>("vkEndCommandBuffer");
+            DBeginRP brp = G<DBeginRP>("vkCmdBeginRenderPass"); DEndRP erp = G<DEndRP>("vkCmdEndRenderPass"); DBindPipe bpipe = G<DBindPipe>("vkCmdBindPipeline");
+            DSetVS setVp = G<DSetVS>("vkCmdSetViewport"), setSc = G<DSetVS>("vkCmdSetScissor"); DPush push = G<DPush>("vkCmdPushConstants");
+            DDraw draw = G<DDraw>("vkCmdDraw"); DBindVB bvb = G<DBindVB>("vkCmdBindVertexBuffers"); DSubmit submit = G<DSubmit>("vkQueueSubmit");
+            DWaitIdle devIdle = G<DWaitIdle>("vkDeviceWaitIdle");
+            float[] cs = new float[20];
+            IntPtr cbi = m.A(32); NMem.I(cbi, 0, 42); NMem.I(cbi, 16, 1);
+            IntPtr clr = m.A(32); NMem.F(clr, 0, 0.02f); NMem.F(clr, 4, 0.02f); NMem.F(clr, 8, 0.03f); NMem.F(clr, 12, 1f); NMem.F(clr, 16, 1f);
+            IntPtr rbi = m.A(64); NMem.I(rbi, 0, 43); NMem.L(rbi, 16, (long)renderPass); NMem.I(rbi, 48, 2); NMem.P(rbi, 56, clr);
+            IntPtr vpm = m.A(24), scm = m.A(16), waitStage = m.A(4); NMem.I(waitStage, 0, 0x400);
+            IntPtr semA = m.A(8), semD = m.A(8), scs = m.A(8), idxp = m.A(4), cmdp = m.Ptrs(cmd);
+            IntPtr si = m.A(72); NMem.I(si, 0, 4); NMem.P(si, 32, waitStage); NMem.I(si, 40, 1); NMem.P(si, 48, cmdp);
+            IntPtr pi = m.A(64); NMem.I(pi, 0, 1000001001); NMem.I(pi, 16, 1); NMem.P(pi, 24, semD); NMem.I(pi, 32, 1); NMem.P(pi, 40, scs); NMem.P(pi, 48, idxp);
+            DateTime t0 = DateTime.UtcNow; int xtDraw = 2, xtRot = 0, hlFrames = 0; bool recreate = false;
+            while (!RChild.Quit)
+            {
+                DateTime fs = DateTime.UtcNow;
+                int cw = w, ch = h;
+                if (!headless)
+                {
+                    RChild.Size(hwnd, out cw, out ch);
+                    if (cw < 8 || ch < 8) { Th.Thread.Sleep(50); continue; }
+                    if (recreate || cw != curW || ch != curH) { devIdle(dev); DestroyTargets(); Targets(cw, ch); recreate = false; }
+                }
+                w = curW; h = curH;
+                ulong fen = fenceF;
+                Ck(wfen(dev, 1, ref fen, 1, ulong.MaxValue), "vkWaitForFences");
+                uint idx = 0;
+                if (!headless)
+                {
+                    int ar = acq(dev, swapchain, ulong.MaxValue, semAcq, 0, out idx);
+                    if (ar == -1000001004) { recreate = true; continue; }
+                    if (ar < 0) Ck(ar, "vkAcquireNextImageKHR");
+                }
+                fen = fenceF; rfen(dev, 1, ref fen);
+                float t = (float)(DateTime.UtcNow - t0).TotalSeconds;
+                rcmd(cmd, 0);
+                Ck(bcmd(cmd, cbi), "vkBeginCommandBuffer");
+                NMem.L(rbi, 24, (long)fbs[idx]); NMem.I(rbi, 32, 0); NMem.I(rbi, 36, 0); NMem.I(rbi, 40, w); NMem.I(rbi, 44, h);
+                brp(cmd, rbi, 0);
+                NMem.F(vpm, 0, 0); NMem.F(vpm, 4, 0); NMem.F(vpm, 8, w); NMem.F(vpm, 12, h); NMem.F(vpm, 16, 0); NMem.F(vpm, 20, 1);
+                setVp(cmd, 0, 1, vpm);
+                NMem.I(scm, 0, 0); NMem.I(scm, 4, 0); NMem.I(scm, 8, w); NMem.I(scm, 12, h); setSc(cmd, 0, 1, scm);
+                bpipe(cmd, 0, pipeBg);
+                FurScene.Consts(cs, FurScene.Ident(), t, w, h, SHIT);
+                push(cmd, layout, 0x11, 0, 80, cs);
+                if (xt)
+                {
+                    for (int ty = 0; ty < 4; ty++)
+                        for (int tx = 0; tx < 4; tx++)
+                        {
+                            int x0 = w * tx / 4, y0 = h * ty / 4;
+                            NMem.I(scm, 0, x0); NMem.I(scm, 4, y0); NMem.I(scm, 8, w * (tx + 1) / 4 - x0); NMem.I(scm, 12, h * (ty + 1) / 4 - y0);
+                            setSc(cmd, 0, 1, scm); draw(cmd, 3, 1, 0, 0);
+                        }
+                    NMem.I(scm, 0, 0); NMem.I(scm, 4, 0); NMem.I(scm, 8, w); NMem.I(scm, 12, h); setSc(cmd, 0, 1, scm);
+                }
+                else draw(cmd, 3, 1, 0, 0);
+                bpipe(cmd, 0, pipeFur);
+                float[] bas = FurScene.Mul(FurScene.Proj(w / (float)h, true), FurScene.Model(t));
+                int nb = xt ? Math.Min(vbs.Count, xtDraw) : 2;
+                for (int d = 0; d < nb; d++)
+                {
+                    int bi = xt ? (xtRot + d) % vbs.Count : 0;
+                    ulong vb = vbs[bi], off = 0; bvb(cmd, 0, 1, ref vb, ref off);
+                    float[] mvp = xt ? FurScene.Mul(bas, FurScene.Block(bi)) : FurScene.Mul(bas, FurScene.Rot(d * 0.35f, 0, 1, 0));
+                    FurScene.Consts(cs, mvp, t, w, h, SHIT);
+                    push(cmd, layout, 0x11, 0, 80, cs);
+                    draw(cmd, (uint)(N * 2), 1, 0, 0);
+                }
+                erp(cmd);
+                Ck(ecmd(cmd), "vkEndCommandBuffer");
+                if (headless) { NMem.I(si, 16, 0); NMem.I(si, 56, 0); }
+                else
+                {
+                    Marshal.WriteInt64(semA, (long)semAcq); Marshal.WriteInt64(semD, (long)semDone[idx]);
+                    NMem.I(si, 16, 1); NMem.P(si, 24, semA); NMem.I(si, 56, 1); NMem.P(si, 64, semD);
+                }
+                Ck(submit(queue, 1, si, fenceF), "vkQueueSubmit");
+                if (!headless)
+                {
+                    Marshal.WriteInt64(scs, (long)swapchain); NMem.U(idxp, 0, idx);
+                    int pr = pres(queue, pi);
+                    if (pr == -1000001004 || pr == 1000001003) recreate = true;
+                    else if (pr < 0) Ck(pr, "vkQueuePresentKHR");
+                }
+                Th.Interlocked.Increment(ref RChild.Frames);
+                if (xt)
+                {
+                    fen = fenceF; wfen(dev, 1, ref fen, 1, ulong.MaxValue);
+                    xtRot = (xtRot + nb) % vbs.Count;
+                    xtDraw = RChild.Adapt(xtDraw, vbs.Count, (DateTime.UtcNow - fs).TotalMilliseconds);
+                    RChild.Extra = pName + "  |  " + load + "  |  " + Math.Min(vbs.Count, xtDraw) + " blocos/quadro";
+                }
+                if (headless && ++hlFrames >= 3) { HeadlessSave(w, h); break; }
+            }
+            try { devIdle(dev); } catch (Exception) { }
+        }
+
+        // teste sem janela: copia a imagem para a memoria do processador e grava um PPM
+        static void HeadlessSave(int w, int h)
+        {
+            ulong fen = fenceF; G<DFences>("vkWaitForFences")(dev, 1, ref fen, 1, ulong.MaxValue);
+            long size = (long)w * h * 4;
+            ulong buf = Buffer(size, 0x2), mem; Alloc(buf, false, 2 | 4, out mem);
+            IntPtr rg = m.A(56); NMem.I(rg, 16, 1); NMem.I(rg, 28, 1); NMem.I(rg, 44, w); NMem.I(rg, 48, h); NMem.I(rg, 52, 1);
+            DCmdCopyImg ci = G<DCmdCopyImg>("vkCmdCopyImageToBuffer"); ulong img = images[0];
+            OneShot(delegate(IntPtr c) { ci(c, img, 6, buf, 1, rg); });
+            IntPtr p; Ck(G<DMapMem>("vkMapMemory")(dev, mem, 0, (ulong)size, 0, out p), "vkMapMemory");
+            byte[] px = new byte[size]; Marshal.Copy(p, px, 0, (int)size);
+            string path = Environment.GetEnvironmentVariable("BUNO_VK_OUT") ?? "vk.ppm";
+            using (FileStream fs = File.Create(path))
+            {
+                byte[] hd = Encoding.ASCII.GetBytes("P6\n" + w + " " + h + "\n255\n"); fs.Write(hd, 0, hd.Length);
+                for (long i = 0; i < (long)w * h; i++) { fs.WriteByte(px[i * 4]); fs.WriteByte(px[i * 4 + 1]); fs.WriteByte(px[i * 4 + 2]); }
+            }
+        }
+    }
+
     static class Tpu
     {
         public static string Query(string name, bool gpu)
@@ -13462,6 +14706,8 @@ namespace BunoTunner
     {
         public static volatile bool Stop;
         public static int FurCount = 250000;
+        public static int GpuApi;            // 0 OpenGL, 1 Vulkan, 2 DirectX 12
+        public static string GpuName = "";   // placa escolhida (o render em Vulkan/DX12 abre nela)
         static readonly string[] VendorWords = { "nvidia", "amd", "intel", "corporation", "graphics", "series", "generation", "laptop", "gpu", "pcie", "sse2", "microsoft" };
         static List<string> NameTokens(string s)
         {
@@ -22138,7 +23384,7 @@ namespace BunoTunner
 
         // ---------------- pagina de benchmark / estresse ----------------
         XpIconButton[] bBtn = new XpIconButton[5];
-        ComboBox[] cbDurK = new ComboBox[5]; ComboBox cbBFur; static readonly int[] FurSteps = { 50000, 100000, 250000, 500000, 1000000, -1 };
+        ComboBox[] cbDurK = new ComboBox[5]; ComboBox cbBFur, cbBApi; static readonly int[] FurSteps = { 50000, 100000, 250000, 500000, 1000000, -1 };
         ComboBox cbBThrF;
         XpButton btnBSeq; double bCpuTime;
 
@@ -22162,7 +23408,10 @@ namespace BunoTunner
         {
             Panel p = new Panel(); p.Dock = DockStyle.Fill;
 
-            XpGroup gG = BenchBlock(0, "GPU  -  render 3D (estilo FurMark)", "Janela OpenGL com bola de filamentos e shader; mostra o FPS. Fechar a janela para o teste.", "gpu", "Iniciar / parar o estresse de GPU");
+            XpGroup gG = BenchBlock(0, "GPU  -  render 3D (estilo FurMark)", "Janela OpenGL, Vulkan ou DirectX 12 com bola de filamentos e shader; mostra o FPS. Fechar a janela para o teste.", "gpu", "Iniciar / parar o estresse de GPU");
+            UI.Lbl(gG, "API:", 384, 24);
+            cbBApi = Combo(gG, 448, 20, 110, "OpenGL", "Vulkan", "DirectX 12"); { int ai; if (!int.TryParse(Settings.Get("benchApi", "0"), out ai) || ai < 0 || ai > 2) ai = 0; cbBApi.SelectedIndex = ai; }
+            tip.SetToolTip(cbBApi, "API gráfica do render. Vulkan e DirectX 12 rodam em um processo separado (se o driver falhar, o BunoTunner continua aberto) e abrem na placa escolhida.");
             UI.Lbl(gG, "Filamentos:", 384, 48);
             cbBFur = Combo(gG, 448, 44, 110, "50 mil", "100 mil", "250 mil", "500 mil", "1 milhão", "EXTREMO"); cbBFur.SelectedIndex = 2;
             tip.SetToolTip(cbBFur, "Quantidade de filamentos do render. Mais filamentos = teste mais pesado (FPS menor). EXTREMO: enche a VRAM com bilhões de filamentos e usa um shader muito pesado; passa do TDP da placa e deixa o FPS baixíssimo (de propósito).");
@@ -22320,7 +23569,7 @@ namespace BunoTunner
         void BenchLock(bool run)
         {
             for (int i = 0; i < 5; i++) { bBtn[i].Enabled = !run || i == bKind; cbDurK[i].Enabled = !run; }
-            cbBThrF.Enabled = !run; cbBThr.Enabled = !run; cbBFur.Enabled = !run; cbBRam.Enabled = !run; cbBDrive.Enabled = !run; cbBSize.Enabled = !run; cbBPass.Enabled = !run;
+            cbBThrF.Enabled = !run; cbBThr.Enabled = !run; cbBFur.Enabled = !run; cbBApi.Enabled = !run; cbBRam.Enabled = !run; cbBDrive.Enabled = !run; cbBSize.Enabled = !run; cbBPass.Enabled = !run;
         }
 
         void ToggleBench(int pick)
@@ -22337,6 +23586,7 @@ namespace BunoTunner
             bDurSec = 0; bCpuTime = 0;   // sem duracao: CPU e SSD terminam quando o teste acaba; GPU, FPU e RAM rodam ate o usuario parar
             Bench.FurCount = FurSteps[Math.Max(0, Math.Min(FurSteps.Length - 1, cbBFur.SelectedIndex))];
             Settings.Set("benchFur", cbBFur.SelectedIndex.ToString());
+            Bench.GpuApi = Math.Max(0, cbBApi.SelectedIndex); Settings.Set("benchApi", Bench.GpuApi.ToString());
             int cores = Environment.ProcessorCount;
             int thr = cbBThr.SelectedIndex == 0 ? cores : (cbBThr.SelectedIndex == 1 ? Math.Max(1, cores / 2) : 1);   // CPU e FPU compartilham
             int ramPct = new int[] { 25, 50, 70 }[cbBRam.SelectedIndex];
@@ -22348,7 +23598,7 @@ namespace BunoTunner
                 if (drive == null) { lblBMsg.Text = "Nenhum drive disponível para o teste de SSD."; return; }
             }
             BenchSave(kind); bGlChecked = false;
-            string gname = cur != null ? cur.Name : null;
+            string gname = cur != null ? cur.Name : null; Bench.GpuName = gname ?? "";
             bExt = kind <= 2; bU = BUnit[kind]; bSc = BScale[kind];
             if (kind == 0) { bU = "FPS"; bSc = 1.0; }
             bFallback = delegate { Bench.Start(kind, thr, ramPct, drive, mb, gname); };
@@ -22402,7 +23652,7 @@ namespace BunoTunner
         void BenchTick()
         {
             if (!bRunning) return;
-            if (bExt && bKind == 0 && !bGlChecked && rf != null && rf.Gl != null && rf.Gl.State == 1 && rf.Gl.Renderer.Length > 0)
+            if (bExt && bKind == 0 && !bGlChecked && rf != null && rf.Gl is GlCanvas && rf.Gl.State == 1 && rf.Gl.Renderer.Length > 0)
             {
                 bGlChecked = true;
                 string want = cur != null ? cur.Name : null;
@@ -22422,7 +23672,7 @@ namespace BunoTunner
             {
                 bExt = false; bU = BUnit[0]; bSc = BScale[0]; bLast = 0; bLastT = DateTime.UtcNow;
                 if (rf.Cv != null) rf.Cv.Unit = bU;
-                lblBMsg.Text = "OpenGL indisponível (" + rf.Gl.Error + "): usando o teste OpenCL.";
+                lblBMsg.Text = rf.Gl.ApiName + " " + Lang.T("indisponível") + " (" + rf.Gl.Error + "): " + Lang.T("usando o teste OpenCL.");
                 bFallback();
                 return;
             }
