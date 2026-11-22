@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.68.0")]
-[assembly: AssemblyFileVersion("1.49.68.0")]
-[assembly: AssemblyInformationalVersion("1.49.68")]
+[assembly: AssemblyVersion("1.49.69.0")]
+[assembly: AssemblyFileVersion("1.49.69.0")]
+[assembly: AssemblyInformationalVersion("1.49.69")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -2027,7 +2027,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.68";
+        public const string Version = "v1.49.69";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -7555,6 +7555,10 @@ namespace BunoTunner
 
             if (pc != null)
             {
+                // uma leitura ANTES de listar: o LibreHardwareMonitor so ativa os sensores de RPM das ventoinhas da placa-mae
+                // depois da primeira leitura (antes disso so existiam os de controle em %)
+                foreach (LHM.IHardware h in pc.Hardware) { try { UpdateRec(h); } catch (Exception) { } }
+                Startup.Mark("primeira leitura do LHM (ativa RPM das ventoinhas)");
                 foreach (LHM.IHardware h in pc.Hardware)
                 {
                     string t = h.HardwareType.ToString();
@@ -7649,13 +7653,59 @@ namespace BunoTunner
                     add.Add(z);
                 }
                 // copia e troca: quem esta lendo as listas nunca ve uma lista sendo alterada
-                List<Sn> np = new List<Sn>(PcSensors); np.AddRange(add);
-                List<Sn> na = new List<Sn>(all); na.AddRange(add);
-                foreach (Sn x in add) LoadAlertFor(x);
-                hwList = nh; all = na; PcSensors = np;
+                lock (scanLk)
+                {
+                    List<Sn> np = new List<Sn>(PcSensors); np.AddRange(add);
+                    List<Sn> na = new List<Sn>(all); na.AddRange(add);
+                    foreach (Sn x in add) LoadAlertFor(x);
+                    hwList = nh; all = na; PcSensors = np;
+                }
                 Startup.Mark("fase 2 concluída (+" + add.Count + " sensores)");
             }
             catch (Exception ex) { Startup.Mark("fase 2 erro: " + ex.Message); }
+        }
+
+        // sensores que o LibreHardwareMonitor so ativa depois (ex.: RPM de uma ventoinha que estava parada): entram na lista sozinhos
+        static readonly object scanLk = new object(); static DateTime lastScan = DateTime.MinValue;
+        static void Missing(LHM.IHardware h, string group, HashSet<LHM.ISensor> known, List<Sn> into)
+        {
+            foreach (LHM.ISensor s in h.Sensors)
+            {
+                if (known.Contains(s)) continue;
+                known.Add(s); LHM.ISensor sc = s;
+                Sn n = new Sn(); n.Group = group; n.Name = s.Name; n.Type = s.SensorType.ToString(); n.Ls = s;
+                n.Get = delegate { return sc.Value; };
+                into.Add(n);
+            }
+            foreach (LHM.IHardware sub in h.SubHardware) Missing(sub, group + " > " + sub.Name, known, into);
+        }
+        static void Rescan()
+        {
+            if (pc == null) return;
+            lock (scanLk)
+            {
+                HashSet<LHM.ISensor> known = new HashSet<LHM.ISensor>();
+                foreach (Sn s in all) if (s.Ls != null) known.Add(s.Ls);
+                List<Sn> addPc = new List<Sn>(), addGpu = new List<Sn>();
+                foreach (LHM.IHardware h in hwList)
+                {
+                    string t = h.HardwareType.ToString();
+                    if (t.StartsWith("Gpu"))
+                    {
+                        string gn = h.Name; foreach (Gpu g in Gpus) if (g.Hw == h) { gn = g.Name; break; }
+                        Missing(h, gn, known, addGpu);
+                    }
+                    else Missing(h, Kind(t) + " - " + h.Name, known, addPc);
+                }
+                if (addPc.Count + addGpu.Count == 0) return;
+                foreach (Sn x in addGpu) x.IsGpu = true;
+                List<Sn> na = new List<Sn>(all); na.AddRange(addGpu); na.AddRange(addPc);
+                if (addPc.Count > 0) { List<Sn> np = new List<Sn>(PcSensors); np.AddRange(addPc); PcSensors = np; }
+                if (addGpu.Count > 0) { List<Sn> ng = new List<Sn>(GpuSensors); ng.AddRange(addGpu); GpuSensors = ng; }
+                foreach (Sn x in addPc) LoadAlertFor(x);
+                foreach (Sn x in addGpu) LoadAlertFor(x);
+                all = na;
+            }
         }
 
         // Toda a leitura pesada (LibreHardwareMonitor) roda aqui, fora da tela -> sem travadas
@@ -7665,6 +7715,7 @@ namespace BunoTunner
             {
                 DateTime t0 = DateTime.UtcNow;
                 try { UpdateOnce(); } catch (Exception) { }
+                if ((DateTime.UtcNow - lastScan).TotalSeconds >= 10) { lastScan = DateTime.UtcNow; try { Rescan(); } catch (Exception) { } }
                 tickNo++;
                 int wait = IntervalMs - (int)(DateTime.UtcNow - t0).TotalMilliseconds;
                 System.Threading.Thread.Sleep(wait < 20 ? 20 : wait);
@@ -17411,34 +17462,34 @@ namespace BunoTunner
         void BuildClean()
         {
             rtip.InitialDelay = 300; rtip.AutoPopDelay = 9000;
-            XpGroup g = new XpGroup(); g.Title = "Limpar memória (Clear Memory)"; g.SetBounds(0, 0, 656, 280);
-            lblMcMem = UI.Lbl(g, "-", 14, 22, Xp.UiBold, Xp.GroupText); lblMcMem.AutoSize = false; lblMcMem.SetBounds(14, 22, 312, 18);
-            pbMc = new XpProgress(); pbMc.SetBounds(13, 45, 265, 11); g.Controls.Add(pbMc);
+            XpGroup g = new XpGroup(); g.Title = "Limpar memória (Clear Memory)"; g.SetBounds(0, 0, 322, 296);
+            lblMcMem = UI.Lbl(g, "-", 14, 22, Xp.UiBold, Xp.GroupText); lblMcMem.AutoSize = false; lblMcMem.AutoEllipsis = true; lblMcMem.SetBounds(14, 22, 300, 18);
+            pbMc = new XpProgress(); pbMc.SetBounds(14, 45, 294, 11); g.Controls.Add(pbMc);
 
-            Head(g, "Atalho e limpeza automática", 13, 68, 322);
-            UI.Lbl(g, "Atalho:", 13, 100);
-            btnHk = UI.Btn(g, "", 50, 94, 140, delegate { hkCap = true; MemClean.Pause(true); ShowHk(); });
+            Head(g, "Atalho e limpeza automática", 13, 68, 296);
+            Label lHk = UI.Lbl(g, "Atalho:", 13, 100); lHk.AutoSize = false; lHk.SetBounds(13, 100, 52, 16);
+            btnHk = UI.Btn(g, "", 66, 94, 160, delegate { hkCap = true; MemClean.Pause(true); ShowHk(); });
             btnHk.Height = 27;
             btnHk.LostFocus += delegate { if (hkCap) { hkCap = false; MemClean.Pause(false); ShowHk(); } };
             rtip.SetToolTip(btnHk, "Clique e aperte a combinação (Ctrl, Shift ou Alt + tecla, ou uma tecla F1 a F24). Esc cancela e Del remove. Funciona mesmo com o programa na bandeja e a combinação não chega aos outros programas.");
-            XpButton bRem = UI.Btn(g, "Remover", 194, 94, 50, delegate { MemClean.SetKey(0, 0); hkCap = false; MemClean.Pause(false); ShowHk(); });
+            XpButton bRem = UI.Btn(g, "Remover", 230, 94, 78, delegate { MemClean.SetKey(0, 0); hkCap = false; MemClean.Pause(false); ShowHk(); });
             bRem.Height = 27;
             rtip.SetToolTip(bRem, "Apaga o atalho.");
-            XpOption oa = UI.Opt(g, "Limpar automaticamente", 14, 132, 150, false);
+            XpOption oa = UI.Opt(g, "Limpar automaticamente", 14, 130, 190, false);
             oa.Checked = MemClean.Opt("mc_auto", false);
             oa.CheckedChanged += delegate { Settings.Set("mc_auto", oa.Checked ? "1" : "0"); };
-            Label oal = UI.Lbl(g, "quando a RAM em uso passar de", 12, 148, Xp.Ui, Xp.GroupText); oal.AutoSize = false; oal.SetBounds(12, 148, 170, 15);
+            Label oal = UI.Lbl(g, "quando a RAM em uso passar de", 32, 148, Xp.Ui, Xp.GroupText); oal.AutoSize = false; oal.SetBounds(32, 148, 180, 15);
             oal.Click += delegate { oa.Checked = !oa.Checked; };
             rtip.SetToolTip(oa, "Confere a memória a cada 5 segundos e limpa sozinho quando passar do limite (no máximo uma vez por minuto).");
             rtip.SetToolTip(oal, "Confere a memória a cada 5 segundos e limpa sozinho quando passar do limite (no máximo uma vez por minuto).");
-            cbMcPct = new ComboBox(); cbMcPct.DropDownStyle = ComboBoxStyle.DropDownList; cbMcPct.Font = Xp.Ui; cbMcPct.SetBounds(190, 131, 62, 22);
+            cbMcPct = new ComboBox(); cbMcPct.DropDownStyle = ComboBoxStyle.DropDownList; cbMcPct.Font = Xp.Ui; cbMcPct.SetBounds(232, 136, 76, 22);
             int pct = 85; int.TryParse(Settings.Get("mc_autopct", "85"), out pct);
             for (int v = 60; v <= 95; v += 5) { cbMcPct.Items.Add(v + " %"); if (v == pct) cbMcPct.SelectedIndex = cbMcPct.Items.Count - 1; }
             if (cbMcPct.SelectedIndex < 0) cbMcPct.SelectedIndex = 5;
             cbMcPct.SelectedIndexChanged += delegate { Settings.Set("mc_autopct", (60 + cbMcPct.SelectedIndex * 5).ToString()); };
             g.Controls.Add(cbMcPct);
 
-            Head(g, "O que limpar", 13, 165, 279);
+            Head(g, "O que limpar", 13, 172, 296);
             string[][] ops = {
                 new string[] { "mc_ws", "1", "Esvaziar o working set dos processos", "Pede ao Windows para devolver a RAM que os programas abertos não estão usando de verdade. Os programas voltam a pedir o que precisam." },
                 new string[] { "mc_cache", "0", "Limpar o cache de arquivos do sistema", "Esvazia o cache de arquivos do próprio Windows." },
@@ -17447,7 +17498,7 @@ namespace BunoTunner
             for (int i = 0; i < 4; i++)
             {
                 string key = ops[i][0];
-                XpOption o = UI.Opt(g, ops[i][2], 14, new int[] { 190, 212, 235, 257 }[i], 272, false);
+                XpOption o = UI.Opt(g, ops[i][2], 14, new int[] { 198, 220, 242, 264 }[i], 296, false);
                 o.Checked = MemClean.Opt(key, ops[i][1] == "1");
                 o.CheckedChanged += delegate { Settings.Set(key, o.Checked ? "1" : "0"); };
                 rtip.SetToolTip(o, ops[i][3]);
@@ -17464,7 +17515,7 @@ namespace BunoTunner
                 }
                 catch (Exception) { }
             };
-            mcTm = new Timer(); mcTm.Interval = 1000; mcTm.Tick += delegate { if (Visible) { UpdateMc(); UpdateTr(); } }; mcTm.Start();
+            mcTm = new Timer(); mcTm.Interval = 1000; mcTm.Tick += delegate { if (Visible) { UpdateMc(); UpdateTr(); UpdateVolt(); } }; mcTm.Start();
             UpdateMc();
             ShowHk();
         }
@@ -17508,29 +17559,30 @@ namespace BunoTunner
 
         void BuildTimerRes()
         {
-            XpGroup g = new XpGroup(); g.Title = ""; g.SetBounds(334, 0, 312, 124);
-            Head(g, "Resolução do timer", 15, 0, 252);
-            lblTrState = UI.Lbl(g, "", 150, 11, Xp.UiBold, Xp.Dim); lblTrState.AutoSize = false; lblTrState.SetBounds(130, 1, 137, 16); lblTrState.TextAlign = ContentAlignment.MiddleRight;
+            XpGroup g = new XpGroup(); g.Title = ""; g.SetBounds(334, 0, 322, 132);
+            Head(g, "Resolução do timer", 15, 0, 292);
+            lblTrState = UI.Lbl(g, "", 150, 11, Xp.UiBold, Xp.Dim); lblTrState.AutoSize = false; lblTrState.SetBounds(150, 1, 155, 16); lblTrState.TextAlign = ContentAlignment.MiddleRight;
             UI.Lbl(g, "Pedir:", 15, 35);
             cbTr = new ComboBox(); cbTr.DropDownStyle = ComboBoxStyle.DropDownList; cbTr.Font = Xp.Ui; cbTr.SetBounds(60, 30, 102, 22); cbTr.DropDownWidth = 210;
             foreach (string n in TimerRes.Names) cbTr.Items.Add(n);
             cbTr.SelectedIndex = TimerRes.Selected;
             cbTr.SelectedIndexChanged += delegate { Settings.Set("tr_idx", cbTr.SelectedIndex.ToString()); if (TimerRes.Active) TrStart(); UpdateTr(); };
             g.Controls.Add(cbTr);
-            XpButton bi = UI.Btn(g, "Iniciar", 196, 29, 94, delegate { TrStart(); });
-            XpButton bp = UI.Btn(g, "Parar", 196, 57, 94, delegate { TimerRes.Stop(); lblTrState.ForeColor = Xp.Dim; UpdateTr(); });
+            XpButton bi = UI.Btn(g, "Iniciar", 206, 29, 100, delegate { TrStart(); });
+            XpButton bp = UI.Btn(g, "Parar", 206, 57, 100, delegate { TimerRes.Stop(); lblTrState.ForeColor = Xp.Dim; UpdateTr(); });
             bi.Height = 23; bp.Height = 23;
             rtip.SetToolTip(bi, "Pede ao Windows essa resolução de timer. Vale enquanto o BunoTunner estiver aberto ou até clicar em Parar. Resoluções menores deixam o Windows mais responsivo (jogos, áudio), mas gastam um pouco mais de energia. No Windows 11 pode valer só para o próprio BunoTunner.");
             rtip.SetToolTip(bp, "Volta ao padrão do Windows (15,625 ms).");
-            chkTrAuto = UI.Opt(g, "", 13, 62, 18, false);
+            chkTrAuto = UI.Opt(g, "", 13, 66, 18, false);
             chkTrAuto.Checked = Settings.Get("tr_auto", "0") == "1";
             chkTrAuto.CheckedChanged += delegate { Settings.Set("tr_auto", chkTrAuto.Checked ? "1" : "0"); };
-            Label la = UI.Lbl(g, "Aplicar automaticamente ao abrir o BunoTunner", 32, 70, Xp.Ui, Xp.GroupText); la.AutoSize = false; la.SetBounds(31, 58, 134, 28);
+            Label la = UI.Lbl(g, "Aplicar automaticamente ao abrir o BunoTunner", 32, 70, Xp.Ui, Xp.GroupText); la.AutoSize = false; la.SetBounds(33, 64, 168, 30);
             la.Click += delegate { chkTrAuto.Checked = !chkTrAuto.Checked; };
             foreach (Control c in g.Controls) c.Top += 20;
             Controls.Add(g); g.BringToFront();
-            PipeBar pv = new PipeBar(); pv.SetBounds(318, 4, 10, 276); Controls.Add(pv); pv.BringToFront();
-            PipeBar ph = new PipeBar(); ph.Horiz = true; ph.SetBounds(322, 126, 334, 10); Controls.Add(ph); ph.BringToFront();
+            // canos decorativos no vao entre os blocos (nao passam por cima de nenhum texto)
+            PipeBar pv = new PipeBar(); pv.SetBounds(323, 4, 10, 288); Controls.Add(pv); pv.BringToFront();
+            PipeBar ph = new PipeBar(); ph.Horiz = true; ph.SetBounds(328, 133, 328, 9); Controls.Add(ph); ph.BringToFront();
             UpdateTr();
         }
 
@@ -17601,17 +17653,17 @@ namespace BunoTunner
 
         void BuildLatency()
         {
-            XpGroup g = new XpGroup(); g.Title = ""; g.SetBounds(334, 138, 312, 142);
-            Head(g, "Latência da memória (ns)", 15, 3, 252).ForeColor = Xp.GroupText;
+            XpGroup g = new XpGroup(); g.Title = ""; g.SetBounds(334, 143, 322, 153);
+            Head(g, "Latência da memória (ns)", 15, 3, 292).ForeColor = Xp.GroupText;
             lblLatBig = UI.Lbl(g, "- ns", 24, 34, Xp.Big, Xp.GroupText);
             lblLatBig.Font = new Font(Xp.Big.FontFamily, 22f, FontStyle.Bold);
             lblLatSub = UI.Lbl(g, "Latência da RAM (bloco de 256 MB)", 19, 76, Xp.Ui, Xp.Dim);
-            lblLatSub.AutoSize = false; lblLatSub.SetBounds(19, 76, 168, 16);
-            bLat = UI.Btn(g, "Medir latência", 205, 32, 82, delegate { ToggleLat(); });
+            lblLatSub.AutoSize = false; lblLatSub.AutoEllipsis = true; lblLatSub.SetBounds(19, 96, 290, 16);
+            bLat = UI.Btn(g, "Medir latência", 196, 32, 110, delegate { ToggleLat(); });
             bLat.Height = 28;
-            pbLat = new XpProgress(); pbLat.SetBounds(198, 72, 100, 14); g.Controls.Add(pbLat);
+            pbLat = new XpProgress(); pbLat.SetBounds(196, 68, 110, 14); g.Controls.Add(pbLat);
             // o grafico (ns x tamanho do bloco) saiu da tela (os dados medidos continuam sendo guardados)
-            lblLatSteps = UI.Lbl(g, "", 222, 108, Xp.Ui, Xp.Dim); lblLatSteps.Visible = false;
+            lblLatSteps = UI.Lbl(g, "", 19, 114, Xp.Ui, Xp.Dim); lblLatSteps.Visible = false;
             foreach (Control c in g.Controls) c.Top += 20;
             Controls.Add(g); g.BringToFront();
         }
@@ -17721,20 +17773,22 @@ namespace BunoTunner
 
         void BuildSummary()
         {
-            XpGroup g = new XpGroup(); g.Title = "Resumo da memória"; g.SetBounds(0, 358, 656, 114);
+            XpGroup g = new XpGroup(); g.Title = "Resumo da memória"; g.SetBounds(0, 380, 656, 124); grpSum = g;
             lblType = Val(g, "Tipo:", 14, 24, 190); lblCap = Val(g, "Capacidade total:", 14, 46, 190); lblSpeed = Val(g, "Velocidade:", 14, 68, 190);
-            lblChan = Val(g, "Canais:", 350, 24, 180); lblVolt = Val(g, "Voltagem:", 350, 46, 180); lblRank = Val(g, "Ranks / ECC:", 350, 68, 180);
-            lblBw = UI.Lbl(g, "", 14, 92, Xp.Ui, Xp.Dim);
-            lblBw.AutoSize = false; lblBw.AutoEllipsis = true; lblBw.SetBounds(14, 92, 630, 20);
+            lblChan = Val(g, "Canais:", 336, 24, 182); lblVolt = Val(g, "Voltagem:", 336, 46, 182); lblRank = Val(g, "Ranks / ECC:", 336, 68, 182);
+            lblBw = UI.Lbl(g, "", 14, 94, Xp.Ui, Xp.Dim);
+            lblBw.AutoSize = false; lblBw.AutoEllipsis = true; lblBw.SetBounds(14, 94, 630, 20);
             Controls.Add(g);
         }
 
         void BuildMods()
         {
-            ((XpList)lvMod).AutoFit = true; lvMod.SetBounds(0, 286, 656, 61); lvMod.View = View.Details; lvMod.FullRowSelect = true; lvMod.GridLines = true;
+            // a lista cresce/encolhe sozinha para mostrar TODOS os modulos (sem barra de rolagem) e o resto da pagina desce/sobe junto
+            ((XpList)lvMod).AutoFit = true; ((XpList)lvMod).SelfLayout = true; ((XpList)lvMod).Fitted += delegate { Relayout(); };
+            lvMod.SetBounds(0, 306, 656, 640); lvMod.View = View.Details; lvMod.FullRowSelect = true; lvMod.GridLines = true;
             lvMod.BackColor = Xp.EditBg; lvMod.Font = Xp.Ui;
-            lvMod.Columns.Add("Slot", 140); lvMod.Columns.Add("Cap.", 55); lvMod.Columns.Add("Fabricante", 90); lvMod.Columns.Add("Part number", 150);
-            lvMod.Columns.Add("MT/s", 50); lvMod.Columns.Add("Volt", 55); lvMod.Columns.Add("Tipo", 50); lvMod.Columns.Add("Ranks", 50);
+            lvMod.Columns.Add("Slot", 130); lvMod.Columns.Add("Cap.", 50); lvMod.Columns.Add("Fabricante", 90); lvMod.Columns.Add("Part number", 148);
+            lvMod.Columns.Add("MT/s", 48); lvMod.Columns.Add("Volt (SPD)", 70); lvMod.Columns.Add("Tipo", 48); lvMod.Columns.Add("Ranks", 48);
             lvMod.Items.Add(new ListViewItem(new string[] { "Lendo módulos...", "", "", "", "", "", "", "" }));
             Controls.Add(lvMod);
         }
@@ -17780,8 +17834,17 @@ namespace BunoTunner
                 });
             });
             UI.Btn(g, "XFast RAM...", 236, by, 130, delegate { new XFastRamForm().ShowDialog(FindForm()); });
-            g.SetBounds(0, 472, 656, by + 44);
+            g.SetBounds(0, 520, 656, by + 44);
             Controls.Add(g);
+            Relayout();
+        }
+        XpGroup grpSum;
+        // empilha: lista de modulos -> resumo -> timings (respeita a rolagem da pagina)
+        void Relayout()
+        {
+            if (grpSum == null) return;
+            grpSum.Top = lvMod.Bottom + 10;
+            if (grpTim != null) grpTim.Top = grpSum.Bottom + 10;
         }
 
         public void ReadAsync()
@@ -17832,6 +17895,38 @@ namespace BunoTunner
             });
         }
 
+        // tensao REAL da memoria: sensor da placa-mae (DRAM/DIMM/VDDQ) ou o PMIC dos pentes DDR5. O valor do Windows/SPD (ex.: 1,200 V) e so o nominal JEDEC.
+        int spdVolt;
+        static Sn DramVoltSensor()
+        {
+            Sn best = null;
+            foreach (Sn s in SensorHub.PcSensors)
+            {
+                if (s.Type != "Voltage" || !s.Last.HasValue) continue;
+                float v = s.Last.Value; if (v < 0.9f || v > 2.1f) continue;
+                string n = s.Name.ToUpperInvariant();
+                if (n.Contains("VTT") || n.Contains("VPP") || n.Contains("VREF")) continue;
+                bool mem = n.Contains("DRAM") || n.Contains("DIMM") || n.Contains("VDDQ") || n.Contains("MEMORY") || n.Contains("MEM VDD") || n.Contains("VDDIO_MEM")
+                           || (s.Group.StartsWith("Memória RAM") && (n == "VDD" || n.StartsWith("VDD ")));
+                if (!mem) continue;
+                if (best == null || n.Contains("DRAM") || n.Contains("DIMM")) best = s;
+                if (n.Contains("DRAM") || n.Contains("DIMM")) break;
+            }
+            return best;
+        }
+        void UpdateVolt()
+        {
+            if (lblVolt == null) return;
+            string spd = spdVolt > 0 ? (spdVolt / 1000.0).ToString("0.000") + " V" : "";
+            Sn vs = null; try { vs = DramVoltSensor(); } catch (Exception) { }
+            string t;
+            if (vs != null) t = vs.Last.Value.ToString("0.000") + " V" + (spd.Length > 0 ? "  (SPD " + spd + ")" : "");
+            else t = spd.Length > 0 ? spd + "  (SPD, nominal)" : "não informado pela BIOS";
+            if (lblVolt.Text != t) lblVolt.Text = t;
+            rtip.SetToolTip(lblVolt, vs != null ? Lang.T("Tensão real lida do sensor") + " \"" + vs.Name + "\" (" + vs.Group + "). " + Lang.T("O valor SPD é só o nominal gravado no pente.")
+                                               : Lang.T("A placa-mãe não expôs um sensor de tensão da memória; este é o valor nominal (SPD/JEDEC) informado pelo Windows, não a tensão real aplicada pela BIOS."));
+        }
+
         void ShowMods(List<RamMod> mods)
         {
             lvMod.Items.Clear();
@@ -17853,7 +17948,7 @@ namespace BunoTunner
             lblCap.Text = (total >> 30) + " GB";
             lblSpeed.Text = speed + " MT/s" + (maxSpd > 0 && maxSpd != speed ? "  (nominal " + maxSpd + ")" : "") + "  =  " + (speed / 2) + " MHz reais";
             lblChan.Text = RamInfo.ChannelText(channels) + (est ? "  (estimado)" : "");
-            lblVolt.Text = volt > 0 ? (volt / 1000.0).ToString("0.000") + " V" : "não informado pela BIOS";
+            spdVolt = volt; UpdateVolt();
             lblRank.Text = (ranks > 0 ? ranks + " rank(s) no total" : "ranks ?") + "  /  ECC: " + (ecc ? "sim" : "não");
             lblBw.Text = "Banda teórica: " + (speed * 8.0 * channels / 1000.0).ToString("0.0") + " GB/s  (MT/s x 8 bytes x " + channels + " canal(ais)).  " +
                          (type == "DDR5" ? "DDR5: cada módulo tem 2 subcanais de 32 bits." : "");
