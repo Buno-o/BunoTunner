@@ -754,3 +754,6 @@ v1.49.70 (TESTE)
 - Vulkan e DirectX 12 abrem na placa escolhida no BunoTunner (pelo nome). No EXTREMO o DirectX 12 consulta o orcamento real de VRAM do Windows; o Vulkan usa o tamanho da memoria da placa. Os filamentos ficam na memoria de video (copiados de um buffer de envio).
 - Nessas duas APIs o HUD (FPS, temperatura, tempo, carga, placa e versao da API) fica numa faixa embaixo do render. O overlay em jogos mede o FPS do processo de render e mostra a API certa.
 - O render em Vulkan foi testado aqui num driver Vulkan por software (com as camadas de validacao, sem erros) e gerou a mesma imagem do OpenGL. O DirectX 12 nao pode ser executado aqui: as estruturas e a ordem das funcoes foram conferidas com os cabecalhos oficiais.
+
+v1.49.71 (TESTE)
+- Otimizacoes (seguranca): novo item "Desativar VBS e o hypervisor do Windows (Device Guard / LSA)". Executa "bcdedit /set hypervisorlaunchtype off" e grava 0 em EnableVirtualizationBasedSecurity, RequirePlatformSecurityFeatures, HypervisorEnforcedCodeIntegrity, KernelShadowStacks, CredentialGuard, LsaCfgFlags, RunAsPPL e RunAsPPLBoot. "Padrao do Windows" volta o hypervisor para automatico e remove esses valores. Pede confirmacao (reduz a seguranca e para WSL 2, Hyper-V, Docker e a Sandbox). Mostra o estado atual. Reinicie o PC.

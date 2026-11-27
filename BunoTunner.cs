@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.70.0")]
-[assembly: AssemblyFileVersion("1.49.70.0")]
-[assembly: AssemblyInformationalVersion("1.49.70")]
+[assembly: AssemblyVersion("1.49.71.0")]
+[assembly: AssemblyFileVersion("1.49.71.0")]
+[assembly: AssemblyInformationalVersion("1.49.71")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -2036,7 +2036,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.70";
+        public const string Version = "v1.49.71";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -22239,6 +22239,45 @@ float4 PF(FO i) : SV_Target { return i.c; }
                 "Ativar", delegate { Sub(true, HvKey, "Enabled", 1); return "Isolamento de núcleo ATIVADO. Reinicie o PC."; },
                 delegate { object v = Get(true, HvKey, "Enabled"); return v != null && Convert.ToInt32(v) == 1 ? "Estado: ATIVADO" : "Estado: desativado"; },
                 "Desativar o Isolamento de núcleo reduz a proteção contra malware que ataca o núcleo do Windows. Desativar mesmo assim?");
+            // VBS completo: hypervisor do Windows + Device Guard (VBS, HVCI, pilhas de sombra do kernel, Credential Guard) + protecoes do LSA
+            const string DgKey = @"SYSTEM\CurrentControlSet\Control\DeviceGuard", LsaKey = @"SYSTEM\CurrentControlSet\Control\Lsa";
+            string[][] vbsVals = {
+                new string[] { DgKey, "EnableVirtualizationBasedSecurity" }, new string[] { DgKey, "RequirePlatformSecurityFeatures" },
+                new string[] { DgKey + @"\Scenarios\HypervisorEnforcedCodeIntegrity", "Enabled" }, new string[] { DgKey + @"\Scenarios\KernelShadowStacks", "Enabled" },
+                new string[] { DgKey + @"\Scenarios\CredentialGuard", "Enabled" },
+                new string[] { LsaKey, "LsaCfgFlags" }, new string[] { LsaKey, "RunAsPPL" }, new string[] { LsaKey, "RunAsPPLBoot" } };
+            Func<string, string> bcd = delegate(string args)
+            {
+                string exe = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), Environment.Is64BitProcess || !Environment.Is64BitOperatingSystem ? "System32" : "Sysnative", "bcdedit.exe");
+                int c; string o = Proc.Run(exe, args, 20000, out c); return c == 0 ? null : o.Trim();
+            };
+            Add("Desativar VBS e o hypervisor do Windows (Device Guard / LSA)", "Desliga o hypervisor do Windows (bcdedit hypervisorlaunchtype off) e zera VBS, Integridade de memória (HVCI), pilhas de sombra do kernel, Credential Guard e a proteção do LSA (RunAsPPL). Pode dar mais FPS e menos latência. Para de funcionar: WSL 2, Hyper-V, Docker, Sandbox do Windows e emuladores que usam o hypervisor. Reinicie o PC.",
+                "Desativar", delegate
+                {
+                    string e = bcd("/set hypervisorlaunchtype off");
+                    foreach (string[] v in vbsVals) Sub(true, v[0], v[1], 0);
+                    return e == null ? "VBS, hypervisor e proteções do LSA DESATIVADOS. Reinicie o PC." : "Concluído com avisos: registro gravado, mas o bcdedit falhou (" + e + "). Reinicie o PC.";
+                },
+                "Padrão do Windows", delegate
+                {
+                    string e = bcd("/set hypervisorlaunchtype auto");
+                    foreach (string[] v in vbsVals) Del(true, v[0], v[1]);
+                    return e == null ? "Hypervisor em automático e valores do VBS/LSA removidos (o Windows volta ao padrão dele). Reinicie o PC." : "Concluído com avisos: registro restaurado, mas o bcdedit falhou (" + e + "). Reinicie o PC.";
+                },
+                delegate
+                {
+                    int z = 0; foreach (string[] v in vbsVals) { object o = Get(true, v[0], v[1]); if (o != null && Convert.ToInt32(o) == 0) z++; }
+                    string hv = "";
+                    try
+                    {
+                        int c; string o = Proc.Run(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), Environment.Is64BitProcess || !Environment.Is64BitOperatingSystem ? "System32" : "Sysnative", "bcdedit.exe"), "/enum {current}", 20000, out c);
+                        foreach (string ln in o.Split('\n')) if (ln.TrimStart().StartsWith("hypervisorlaunchtype", StringComparison.OrdinalIgnoreCase)) hv = ln.Trim().Substring(20).Trim();
+                    }
+                    catch (Exception) { }
+                    string hvs = hv.Length == 0 ? "hypervisor: padrão" : "hypervisor: " + hv;
+                    return z == vbsVals.Length && hv.Equals("Off", StringComparison.OrdinalIgnoreCase) ? "Estado: DESATIVADO (" + hvs + ")" : "Estado: " + (z == 0 ? "padrão do Windows" : "parcial (" + z + "/" + vbsVals.Length + " valores em 0)") + " - " + hvs;
+                },
+                "Desativar o VBS e o hypervisor reduz a segurança do Windows (Credential Guard, Integridade de memória e proteção do LSA ficam desligados) e faz parar WSL 2, Hyper-V, Docker e a Sandbox do Windows.\n\nDesativar mesmo assim?");
             const string MmKey = @"SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management";
             Add("Mitigações do Windows (Spectre / Meltdown)", "Desativa as mitigações de execução especulativa (FeatureSettingsOverride=3) para ganhar desempenho. REDUZ A SEGURANÇA do PC; use só em máquina de jogos sem dados sensíveis. Reinicie o PC.",
                 "Desativar", delegate { Sub(true, MmKey, "FeatureSettingsOverride", 3); Sub(true, MmKey, "FeatureSettingsOverrideMask", 3); return "Mitigações DESATIVADAS. Reinicie o PC."; },
