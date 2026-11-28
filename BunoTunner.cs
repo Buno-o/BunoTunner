@@ -30,9 +30,9 @@ using Th = System.Threading;
 [assembly: AssemblyCompany("Buno")]
 [assembly: AssemblyProduct("BunoTunner")]
 [assembly: AssemblyCopyright("Copyright (c) Buno - código aberto: github.com/Buno-o/BunoTunner")]
-[assembly: AssemblyVersion("1.49.72.0")]
-[assembly: AssemblyFileVersion("1.49.72.0")]
-[assembly: AssemblyInformationalVersion("1.49.72")]
+[assembly: AssemblyVersion("1.49.73.0")]
+[assembly: AssemblyFileVersion("1.49.73.0")]
+[assembly: AssemblyInformationalVersion("1.49.73")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
@@ -2036,7 +2036,7 @@ namespace BunoTunner
         }
 
         // Logo: esfera dourada 3D em pixel art (grade 20x20, ampliada sem suavizar)
-        public const string Version = "v1.49.72";
+        public const string Version = "v1.49.73";
         public const int LogoGrid = 20;
         public static Bitmap Logo(int scale)
         {
@@ -6957,9 +6957,192 @@ namespace BunoTunner
         }
     }
 
+    // ------------------------------------------------------------------
+    //  Sensores GENERICOS de GPU pelo proprio Windows (os mesmos do Gerenciador de Tarefas): servem para qualquer marca
+    //  (Moore Threads, Lisuan, Zhaoxin, Loongson...) e so entram quando o leitor padrao (NVML / LibreHardwareMonitor) nao le aquele tipo.
+    //  Uso por motor e VRAM em uso: contadores "GPU Engine" e "GPU Adapter Memory". Temperatura, ventoinha, potencia e clocks: D3DKMT (WDDM 2.4+),
+    //  quando o driver informa.
+    // ------------------------------------------------------------------
+    static class WinGpu
+    {
+        public class Ad
+        {
+            public string Name = "", Luid = ""; public uint Lo; public int Hi; public uint H; public long DedMB;
+            public volatile object Util, U3D, UCopy, UDec, UEnc, UComp, VramMB, SharedMB, TempC, FanRpm, PowerPct, CoreMHz, MemMHz;   // float em caixa (null = sem leitura)
+        }
+        public static readonly List<Ad> All = new List<Ad>();
+        [StructLayout(LayoutKind.Sequential)] struct OpenLuid { public uint Lo; public int Hi; public uint hAdapter; }
+        [StructLayout(LayoutKind.Sequential)] struct Qai { public uint hAdapter; public int Type; public IntPtr pData; public uint Size; }
+        [DllImport("gdi32.dll")] static extern int D3DKMTOpenAdapterFromLuid(ref OpenLuid p);
+        [DllImport("gdi32.dll")] static extern int D3DKMTQueryAdapterInfo(ref Qai p);
+        [DllImport("dxgi.dll")] static extern int CreateDXGIFactory1(ref Guid riid, out IntPtr f);
+        delegate int DEnum(IntPtr s, uint i, out IntPtr a);
+        delegate int DDesc(IntPtr s, IntPtr d);
+        delegate uint DRel(IntPtr s);
+        static T F<T>(IntPtr o, int i) where T : class { return Marshal.GetDelegateForFunctionPointer(Marshal.ReadIntPtr(Marshal.ReadIntPtr(o), i * IntPtr.Size), typeof(T)) as T; }
+        static string Key(int hi, uint lo) { return "0x" + ((uint)hi).ToString("X8") + "_0x" + lo.ToString("X8"); }
+
+        // lista as placas pelo DXGI (nome, LUID e VRAM dedicada) e abre cada uma no D3DKMT
+        public static void Init()
+        {
+            try
+            {
+                Guid g = new Guid("770aae78-f26f-4dba-a829-253c83d1b387"); IntPtr f;
+                if (CreateDXGIFactory1(ref g, out f) < 0) return;
+                IntPtr d = Marshal.AllocHGlobal(512);
+                try
+                {
+                    for (uint i = 0; i < 16; i++)
+                    {
+                        IntPtr a; if (F<DEnum>(f, 12)(f, i, out a) < 0) break;
+                        try
+                        {
+                            if (F<DDesc>(a, 10)(a, d) < 0) continue;
+                            if ((Marshal.ReadInt32(d, 304) & 2) != 0) continue;   // adaptador de software (Basic Render)
+                            Ad x = new Ad(); x.Name = (Marshal.PtrToStringUni(d) ?? "").Trim(); x.DedMB = Marshal.ReadIntPtr(d, 272).ToInt64() >> 20;
+                            x.Lo = (uint)Marshal.ReadInt32(d, 296); x.Hi = Marshal.ReadInt32(d, 300); x.Luid = Key(x.Hi, x.Lo);
+                            OpenLuid o = new OpenLuid(); o.Lo = x.Lo; o.Hi = x.Hi;
+                            try { if (D3DKMTOpenAdapterFromLuid(ref o) >= 0) x.H = o.hAdapter; } catch (Exception) { }
+                            bool dup = false; foreach (Ad y in All) if (y.Luid == x.Luid) dup = true;
+                            if (!dup) All.Add(x);
+                        }
+                        finally { F<DRel>(a, 2)(a); }
+                    }
+                }
+                finally { Marshal.FreeHGlobal(d); F<DRel>(f, 2)(f); }
+            }
+            catch (Exception) { }
+        }
+        public static Ad Find(string name)
+        {
+            foreach (Ad a in All) if (string.Equals(a.Name, name, StringComparison.OrdinalIgnoreCase)) return a;
+            foreach (Ad a in All) if (Bench.GpuNameMatch(a.Name, name)) return a;
+            return null;
+        }
+
+        static bool Kmt(uint h, int type, IntPtr buf, int size)
+        {
+            Qai q = new Qai(); q.hAdapter = h; q.Type = type; q.pData = buf; q.Size = (uint)size;
+            try { return D3DKMTQueryAdapterInfo(ref q) >= 0; } catch (Exception) { return false; }
+        }
+
+        static DateTime last = DateTime.MinValue; static bool pdhOff;
+        static PerformanceCounterCategory catEng, catMem;
+        static Dictionary<string, CounterSample> prev = new Dictionary<string, CounterSample>();
+        static readonly Regex rxEng = new Regex(@"luid_0x([0-9A-Fa-f]+)_0x([0-9A-Fa-f]+)_phys_(\d+)_eng_(\d+)_engtype_([A-Za-z0-9_]+)", RegexOptions.Compiled);
+        static readonly Regex rxMem = new Regex(@"luid_0x([0-9A-Fa-f]+)_0x([0-9A-Fa-f]+)", RegexOptions.Compiled);
+        static string KeyOf(Match m) { return Key((int)Convert.ToUInt32(m.Groups[1].Value, 16), Convert.ToUInt32(m.Groups[2].Value, 16)); }
+
+        // chamado pela thread dos sensores; no maximo 1 vez por segundo e so quando alguma placa precisa da leitura generica
+        public static void Poll(List<Gpu> gpus)
+        {
+            if (All.Count == 0 || (DateTime.UtcNow - last).TotalMilliseconds < 900) return;
+            last = DateTime.UtcNow;
+            bool needUse = false, needKmt = false;
+            foreach (Gpu g in gpus)
+            {
+                if (g.Win == null) continue;
+                if (!g.HasNative("Load") || !g.HasNative("SmallData")) needUse = true;
+                if (!g.HasNative("Temperature") || !g.HasNative("Fan") || !g.HasNative("Clock")) needKmt = true;
+            }
+            if (needKmt)
+            {
+                IntPtr b = Marshal.AllocHGlobal(64);
+                try
+                {
+                    foreach (Ad a in All)
+                    {
+                        if (a.H == 0) continue;
+                        Marshal.Copy(new byte[64], 0, b, 64);
+                        if (Kmt(a.H, 62, b, 64))   // KMTQAITYPE_ADAPTERPERFDATA
+                        {
+                            long mf = Marshal.ReadInt64(b, 8); int fan = Marshal.ReadInt32(b, 48), pw = Marshal.ReadInt32(b, 52), tp = Marshal.ReadInt32(b, 56);
+                            a.TempC = tp > 0 && tp < 1500 ? (object)(tp / 10f) : null;
+                            a.FanRpm = fan > 0 && fan < 20000 ? (object)(float)fan : null;
+                            a.PowerPct = pw > 0 && pw <= 2000 ? (object)(pw / 10f) : null;
+                            a.MemMHz = mf > 0 ? (object)(float)(mf / 1e6) : null;
+                        }
+                        Marshal.Copy(new byte[64], 0, b, 64);
+                        if (Kmt(a.H, 61, b, 56))   // KMTQAITYPE_NODEPERFDATA (no 0 = motor 3D)
+                        {
+                            long cf = Marshal.ReadInt64(b, 8);
+                            a.CoreMHz = cf > 0 ? (object)(float)(cf / 1e6) : null;
+                        }
+                    }
+                }
+                finally { Marshal.FreeHGlobal(b); }
+            }
+            if (needUse && !pdhOff)
+            {
+                try
+                {
+                    if (catEng == null)
+                    {
+                        if (!PerformanceCounterCategory.Exists("GPU Engine")) { pdhOff = true; return; }
+                        catEng = new PerformanceCounterCategory("GPU Engine");
+                        if (PerformanceCounterCategory.Exists("GPU Adapter Memory")) catMem = new PerformanceCounterCategory("GPU Adapter Memory");
+                    }
+                    // soma de todos os processos por motor; uso total = o motor mais ocupado (como no Gerenciador de Tarefas)
+                    Dictionary<string, Dictionary<string, double>> eng = new Dictionary<string, Dictionary<string, double>>();
+                    Dictionary<string, CounterSample> cur = new Dictionary<string, CounterSample>();
+                    InstanceDataCollection util = catEng.ReadCategory()["Utilization Percentage"];
+                    if (util != null)
+                        foreach (InstanceData id in util.Values)
+                        {
+                            CounterSample s = id.Sample; cur[id.InstanceName] = s;
+                            CounterSample p; if (!prev.TryGetValue(id.InstanceName, out p)) continue;
+                            float v = CounterSample.Calculate(p, s); if (float.IsNaN(v) || v <= 0) continue;
+                            Match m = rxEng.Match(id.InstanceName); if (!m.Success) continue;
+                            string k = KeyOf(m), e = m.Groups[3].Value + "|" + m.Groups[4].Value + "|" + m.Groups[5].Value;
+                            Dictionary<string, double> de; if (!eng.TryGetValue(k, out de)) { de = new Dictionary<string, double>(); eng[k] = de; }
+                            double o; de.TryGetValue(e, out o); de[e] = o + v;
+                        }
+                    prev = cur;
+                    Dictionary<string, double> ded = new Dictionary<string, double>(), sha = new Dictionary<string, double>();
+                    if (catMem != null)
+                    {
+                        InstanceDataCollectionCollection mc = catMem.ReadCategory();
+                        foreach (string[] cn in new string[][] { new string[] { "Dedicated Usage", "d" }, new string[] { "Shared Usage", "s" } })
+                        {
+                            InstanceDataCollection c = mc[cn[0]]; if (c == null) continue;
+                            foreach (InstanceData id in c.Values)
+                            {
+                                Match m = rxMem.Match(id.InstanceName); if (!m.Success) continue;
+                                Dictionary<string, double> t = cn[1] == "d" ? ded : sha; string k = KeyOf(m);
+                                double o; t.TryGetValue(k, out o); t[k] = o + id.RawValue;
+                            }
+                        }
+                    }
+                    foreach (Ad a in All)
+                    {
+                        Dictionary<string, double> de; eng.TryGetValue(a.Luid, out de);
+                        double all = 0, d3 = 0, cp = 0, dec = 0, enc = 0, cmp = 0;
+                        if (de != null)
+                            foreach (KeyValuePair<string, double> kv in de)
+                            {
+                                string ty = kv.Key.Substring(kv.Key.LastIndexOf('|') + 1).ToUpperInvariant(); double v = Math.Min(100, kv.Value);
+                                all = Math.Max(all, v);
+                                if (ty == "3D" || ty.StartsWith("GRAPHICS")) d3 = Math.Max(d3, v);
+                                else if (ty == "COPY") cp = Math.Max(cp, v);
+                                else if (ty.StartsWith("VIDEODECODE")) dec = Math.Max(dec, v);
+                                else if (ty.StartsWith("VIDEOENCODE")) enc = Math.Max(enc, v);
+                                else if (ty.StartsWith("COMPUTE") || ty.StartsWith("CUDA")) cmp = Math.Max(cmp, v);
+                            }
+                        a.Util = (float)all; a.U3D = (float)d3; a.UCopy = (float)cp; a.UDec = (float)dec; a.UEnc = (float)enc; a.UComp = (float)cmp;
+                        double dv; a.VramMB = ded.TryGetValue(a.Luid, out dv) ? (object)(float)(dv / 1048576.0) : null;
+                        a.SharedMB = sha.TryGetValue(a.Luid, out dv) ? (object)(float)(dv / 1048576.0) : null;
+                    }
+                }
+                catch (Exception) { pdhOff = catEng == null; }
+            }
+        }
+        public static float? V(object o) { return o == null ? null : (float?)(float)o; }
+    }
+
     class Gpu
     {
         public string Name, Vendor;
+        public WinGpu.Ad Win;   // leitura generica do Windows (reserva quando o leitor padrao nao le)
         public LHM.IHardware Hw;
         public IntPtr H;
         public bool Nv;
@@ -7010,11 +7193,20 @@ namespace BunoTunner
         }
         static float? F(uint? v) { return v.HasValue ? (float?)v.Value : null; }
 
+        // o leitor padrao (NVML ou LibreHardwareMonitor) le este tipo de sensor nesta placa?
+        public bool HasNative(string type)
+        {
+            if (Nv) return true;   // NVML cobre temperatura, uso, VRAM, clocks, potencia e ventoinha
+            if (Hw != null) foreach (LHM.ISensor s in Hw.Sensors) if (s.SensorType.ToString() == type && s.Value.HasValue) return true;
+            return false;
+        }
+
         public int? Temp()
         {
             if (Nv) { uint? t = Nvml.Temp(H); if (t.HasValue) return (int)t.Value; }
             float? f = Lhm("Temperature", "Core");
             if (!f.HasValue) f = Lhm("Temperature");
+            if (!f.HasValue && Win != null) f = WinGpu.V(Win.TempC);   // reserva: Windows (D3DKMT)
             return f.HasValue ? (int?)Math.Round(f.Value) : null;
         }
         public int? FanPct()
@@ -7029,7 +7221,9 @@ namespace BunoTunner
             if (Nv) { uint? v = Nvml.FanRpm(H, 0); if (v.HasValue) return (int)v.Value; }
             float? f = Lhm("Fan");
             if (f.HasValue) return (int?)Math.Round(f.Value);
-            return Oc != null ? Oc.FanRpm() : null;
+            int? o = Oc != null ? Oc.FanRpm() : null;
+            if (!o.HasValue && Win != null) { float? w = WinGpu.V(Win.FanRpm); if (w.HasValue) o = (int)w.Value; }
+            return o;
         }
         public int FanCount()
         {
@@ -7046,7 +7240,9 @@ namespace BunoTunner
         public float? Clk(int type, string lhmName)
         {
             if (Nv) { uint? c = Nvml.Clock(H, type); if (c.HasValue) return c.Value; }
-            return Lhm("Clock", lhmName);
+            float? v = Lhm("Clock", lhmName);
+            if (!v.HasValue && Win != null) v = type == 0 ? WinGpu.V(Win.CoreMHz) : (type == 2 ? WinGpu.V(Win.MemMHz) : null);
+            return v;
         }
 
         public bool SetFan(int pct, out string msg)
@@ -7131,6 +7327,25 @@ namespace BunoTunner
         public List<Sn> Virtual()
         {
             List<Sn> l = new List<Sn>();
+            if (Win != null)
+            {
+                // sensores genericos do Windows: so aparecem (tem leitura) quando o leitor padrao nao le aquele tipo
+                WinGpu.Ad w = Win; Gpu me = this; string gw = "Windows - " + Name;
+                l.Add(Mk(gw, "Uso da GPU", "Load", delegate { return me.HasNative("Load") ? null : WinGpu.V(w.Util); }));
+                l.Add(Mk(gw, "Uso 3D", "Load", delegate { return me.HasNative("Load") ? null : WinGpu.V(w.U3D); }));
+                l.Add(Mk(gw, "Uso de cópia", "Load", delegate { return me.HasNative("Load") ? null : WinGpu.V(w.UCopy); }));
+                l.Add(Mk(gw, "Decodificação de vídeo", "Load", delegate { return me.HasNative("Load") ? null : WinGpu.V(w.UDec); }));
+                l.Add(Mk(gw, "Codificação de vídeo", "Load", delegate { return me.HasNative("Load") ? null : WinGpu.V(w.UEnc); }));
+                l.Add(Mk(gw, "Uso de compute", "Load", delegate { return me.HasNative("Load") ? null : WinGpu.V(w.UComp); }));
+                l.Add(Mk(gw, "VRAM usada", "SmallData", delegate { return me.HasNative("SmallData") ? null : WinGpu.V(w.VramMB); }));
+                l.Add(Mk(gw, "Memória compartilhada usada", "SmallData", delegate { return me.HasNative("SmallData") ? null : WinGpu.V(w.SharedMB); }));
+                l.Add(Mk(gw, "VRAM em uso (%)", "Load", delegate { float? u = WinGpu.V(w.VramMB); return me.HasNative("SmallData") || !u.HasValue || w.DedMB <= 0 ? null : (float?)(100.0 * u.Value / w.DedMB); }));
+                l.Add(Mk(gw, "Temperatura", "Temperature", delegate { return me.HasNative("Temperature") ? null : WinGpu.V(w.TempC); }));
+                l.Add(Mk(gw, "Ventoinha (RPM)", "Fan", delegate { return me.HasNative("Fan") ? null : WinGpu.V(w.FanRpm); }));
+                l.Add(Mk(gw, "Potência (% do limite)", "Load", delegate { return me.HasNative("Power") ? null : WinGpu.V(w.PowerPct); }));
+                l.Add(Mk(gw, "Clock do núcleo", "Clock", delegate { return me.HasNative("Clock") ? null : WinGpu.V(w.CoreMHz); }));
+                l.Add(Mk(gw, "Clock da memória", "Clock", delegate { return me.HasNative("Clock") ? null : WinGpu.V(w.MemMHz); }));
+            }
             if (!Nv) return l;
             IntPtr h = H;
             string g = "NVML - " + Name;
@@ -7238,6 +7453,13 @@ namespace BunoTunner
                 add("Sensores expostos (LHM)", Hw.Sensors.Length.ToString());
             }
 
+            if (Win != null)
+            {
+                List<string> wl = new List<string>();
+                if (!HasNative("Load")) wl.Add("uso"); if (!HasNative("SmallData")) wl.Add("VRAM em uso");
+                if (!HasNative("Temperature")) wl.Add("temperatura"); if (!HasNative("Clock")) wl.Add("clocks"); if (!HasNative("Fan")) wl.Add("ventoinha");
+                add("Leitura genérica do Windows", wl.Count == 0 ? "não precisa (o leitor padrão lê tudo)" : "reserva ativa para: " + string.Join(", ", wl.ToArray()) + " (quando o driver informar)");
+            }
             add("--- Recursos (ligado / desligado) ---", " ");
             ulong bt, bu;
             if (Nv && Nvml.Bar1(H, out bt, out bu))
@@ -7621,6 +7843,8 @@ namespace BunoTunner
             Startup.Mark("GPUs listadas");
             foreach (Gpu g in Gpus) g.AttachOc();
             Startup.Mark("OC das GPUs (NVML/ADL/IGCL)");
+            try { WinGpu.Init(); foreach (Gpu g in Gpus) g.Win = WinGpu.Find(g.Name); } catch (Exception) { }
+            Startup.Mark("GPUs no Windows (leitura genérica de reserva)");
             foreach (Gpu g in Gpus) GpuSensors.AddRange(g.Virtual());
 
             foreach (Sn gs in GpuSensors) gs.IsGpu = true;
@@ -7748,6 +7972,7 @@ namespace BunoTunner
                 if (!slow && (t == "Storage" || t == "Network")) continue;
                 try { UpdateRec(h); } catch (Exception) { }
             }
+            try { WinGpu.Poll(Gpus); } catch (Exception) { }   // leitura generica do Windows (so quando alguma placa precisa)
             foreach (Sn s in all) s.Poll();
 
             // alertas (tocam som a cada 15 s enquanto o limite estiver estourado)
